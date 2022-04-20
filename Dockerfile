@@ -4,5 +4,5 @@ COPY jsdos-bmp/_site .
 COPY jsdos-bmp/package.json .
 RUN npm install
 
-ENTRYPOINT npm run start
-
+ENV PORT 8080
+ENTRYPOINT npm run start -- -p $PORT
