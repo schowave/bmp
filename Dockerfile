@@ -1,6 +1,4 @@
-FROM node:17-alpine
-
-WORKDIR site
+FROM node:16-alpine
 
 COPY jsdos-bmp/_site .
 COPY jsdos-bmp/package.json .

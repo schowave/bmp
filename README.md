@@ -8,7 +8,7 @@ Bundesliga Manager Professional as js-dos
 # Docker Container
 
 ````bash
-docker build -t schowave:bmp
+docker build -t schowave:bmp .
 ````
 
 ````bash
