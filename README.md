@@ -12,7 +12,7 @@ docker build -t schowave:bmp .
 ````
 
 ````bash
-docker run --rm -p 127.0.0.1:8080:3000 --env PORT=3000 schowave:bmp 
+docker run --rm -p 127.0.0.1:8080:3000 --env PORT=3000 --name bmp schowave:bmp 
 ````
 
 # Export Docker Container
