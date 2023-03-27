@@ -1,2 +1,0 @@
-# bmp
-Bundesliga Manager Professional

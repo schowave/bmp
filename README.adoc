@@ -1,0 +1,21 @@
+== Bundesliga Manager Professional
+
+- Replace the COPY bmp /dos/bmp with your game.
+- You can also change the default password, or override it with a -e parameter when you run the image.
+- Now, with Docker, build the image. I’m assuming you already have Docker installed and are familiar with it to some extent. CD to the directory in a console and run the command…
+
+[source]
+----
+docker build -t mydosbox .
+----
+
+- Run the image.
+
+[source]
+----
+docker run -p 6080:80 mydosbox
+----
+
+- Open a browser and point it to http://localhost:6080/vnc.html
+- You should see a prompt for the password. Type it in, and you should be able to connect to your container with DosBox running. The game is started automatically.
+- Once your image is built, you can push it to your image repository with docker push, but you’ll need to tag it appropriately.
