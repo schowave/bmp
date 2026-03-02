@@ -16,25 +16,19 @@ RUN printf 'path-exclude /usr/share/doc/*\npath-exclude /usr/share/man/*\npath-e
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Layer 2: VNC + Ratpoison + DOSBox konfigurieren (ändert sich gelegentlich)
-RUN mkdir -p /root/.vnc \
+# Layer 2: VNC + Ratpoison + DOSBox konfigurieren
+RUN mkdir -p /root/.vnc /root/.dosbox \
     && touch /root/.Xauthority \
     && printf '#!/bin/sh\nexec ratpoison\n' > /root/.vnc/xstartup \
     && chmod +x /root/.vnc/xstartup \
-    && printf 'set border 0\nset padding 0 0 0 0\nexec dosbox -conf ~/.dosbox/dosbox.conf -c "MOUNT C: /dos" -c "MOUNT D: /savegame" -c "C:" -c "cd bmp" -c "bmmain.exe"\n' > /root/.ratpoisonrc \
-    && export DOSCONF=$(dosbox -printconf) \
-    && cp "$DOSCONF" /root/.dosbox/dosbox.conf \
-    && sed -i 's/usescancodes=true/usescancodes=false/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^fullscreen=false/fullscreen=true/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^fullresolution=original/fullresolution=1920x1080/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^output=surface/output=overlay/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^aspect=false/aspect=true/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^autolock=true/autolock=false/' /root/.dosbox/dosbox.conf \
+    && printf 'set border 0\nset padding 0 0 0 0\nexec dosbox -conf /root/.dosbox/dosbox.conf -c "MOUNT C: /dos" -c "MOUNT D: /savegame" -c "C:" -c "cd bmp" -c "bmmain.exe"\n' > /root/.ratpoisonrc \
     && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale"></head></html>' > /usr/share/novnc/index.html
 
-# Layer 3: Spieldaten kopieren (ändert sich selten, aber unabhängig von Config)
+COPY dosbox.conf /root/.dosbox/dosbox.conf
+
+# Layer 3: Spieldaten kopieren
 COPY bmp /dos/bmp
 
 EXPOSE 80
 
-CMD ["sh", "-c", "vncserver :1 -geometry 1920x1080 -depth 24 -SecurityTypes None -xstartup /root/.vnc/xstartup && websockify -D --web=/usr/share/novnc/ 80 localhost:5901 && tail -f /dev/null"]
+CMD ["sh", "-c", "vncserver :1 -geometry 640x480 -depth 16 -SecurityTypes None -xstartup /root/.vnc/xstartup && websockify -D --web=/usr/share/novnc/ 80 localhost:5901 && tail -f /dev/null"]
