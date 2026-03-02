@@ -3,7 +3,7 @@ services:
     image: schowave/bmp:latest
     container_name: bmp
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
       - ./savegame:/savegame
     restart: unless-stopped

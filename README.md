@@ -23,7 +23,7 @@ The classic 90s DOS football management game — containerized and playable in t
 ```bash
 docker run -d \
   -v ./savegame:/savegame \
-  -p 8080:80 \
+  -p 8080:8080 \
   schowave/bmp:latest
 ```
 
@@ -74,7 +74,7 @@ services:
   bmp:
     image: schowave/bmp:latest
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
       - ./savegame:/savegame
     restart: unless-stopped
