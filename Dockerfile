@@ -25,10 +25,10 @@ RUN mkdir -p /root/.vnc \
     && export DOSCONF=$(dosbox -printconf) \
     && cp "$DOSCONF" /root/.dosbox/dosbox.conf \
     && sed -i 's/usescancodes=true/usescancodes=false/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^windowresolution=original/windowresolution=1024x768/' /root/.dosbox/dosbox.conf \
+    && sed -i 's/^fullscreen=false/fullscreen=true/' /root/.dosbox/dosbox.conf \
+    && sed -i 's/^fullresolution=original/fullresolution=1920x1080/' /root/.dosbox/dosbox.conf \
     && sed -i 's/^output=surface/output=overlay/' /root/.dosbox/dosbox.conf \
     && sed -i 's/^aspect=false/aspect=true/' /root/.dosbox/dosbox.conf \
-    && sed -i 's/^scaler=normal2x/scaler=normal3x/' /root/.dosbox/dosbox.conf \
     && sed -i 's/^autolock=true/autolock=false/' /root/.dosbox/dosbox.conf \
     && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale"></head></html>' > /usr/share/novnc/index.html
 
@@ -37,4 +37,4 @@ COPY bmp /dos/bmp
 
 EXPOSE 80
 
-CMD ["sh", "-c", "vncserver :1 -geometry 1024x768 -depth 24 -SecurityTypes None -xstartup /root/.vnc/xstartup && websockify -D --web=/usr/share/novnc/ 80 localhost:5901 && tail -f /dev/null"]
+CMD ["sh", "-c", "vncserver :1 -geometry 1920x1080 -depth 24 -SecurityTypes None -xstartup /root/.vnc/xstartup && websockify -D --web=/usr/share/novnc/ 80 localhost:5901 && tail -f /dev/null"]
