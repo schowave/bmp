@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bundesliga Manager Professional</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; background-color: #1a1a1a; height: 100%; display: flex; flex-direction: column; }
+        html { height: 100%; }
+        #jsdos { flex: 1; overflow: hidden; }
+        #version { position: fixed; bottom: 4px; right: 8px; color: rgba(255,255,255,0.3); font: 11px monospace; z-index: 10; pointer-events: none; }
+    </style>
+    <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
+    <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+</head>
+
+<body>
+    <div id="jsdos"></div>
+    <div id="version"></div>
+    <script>
+        Dos(document.getElementById("jsdos"), {
+            url: "bmp.jsdos?" + Date.now(),
+            autoStart: true,
+            theme: "dark",
+        });
+        fetch('version.txt').then(r => r.text()).then(v => document.getElementById('version').textContent = 'v' + v.trim());
+    </script>
+</body>
+</html>

@@ -7,3 +7,7 @@ Thumbs.db
 
 # Runtime
 savegame/
+
+# Generated WASM files
+wasm/*.jsdos
+wasm/version.txt
