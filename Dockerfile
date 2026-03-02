@@ -34,8 +34,8 @@ RUN set -ex \
     && cp $DOSCONF /root/.dosbox/dosbox.conf \
     && sed -i 's/usescancodes=true/usescancodes=false/' /root/.dosbox/dosbox.conf \
     && openssl req -x509 -nodes -newkey rsa:2048 -keyout /root/novnc.pem -out /root/novnc.pem -days 3650 -subj "/C=DE/ST=B/L=B/O=B/OU=B/CN=B emailAddress=email@example.com" \
-    && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale&password=bmp123"></head></html>' > /usr/share/novnc/index.html
+    && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale"></head></html>' > /usr/share/novnc/index.html
 
 EXPOSE 80
 
-CMD ["sh", "-c", "vncserver :1 -geometry 1024x768 -depth 24 && websockify -D --web=/usr/share/novnc/ --cert=/root/novnc.pem 80 localhost:5901 && tail -f /dev/null"]
+CMD ["sh", "-c", "vncserver :1 -geometry 1024x768 -depth 24 -SecurityTypes None && websockify -D --web=/usr/share/novnc/ --cert=/root/novnc.pem 80 localhost:5901 && tail -f /dev/null"]
