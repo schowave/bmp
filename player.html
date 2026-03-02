@@ -8,6 +8,7 @@
         body { margin: 0; background-color: #1a1a1a; height: 100%; display: flex; flex-direction: column; }
         html { height: 100%; }
         #screen { flex: 1; overflow: hidden; }
+        #version { position: fixed; bottom: 4px; right: 8px; color: rgba(255,255,255,0.3); font: 11px monospace; z-index: 10; pointer-events: none; }
     </style>
 
     <script type="module" crossorigin="anonymous">
@@ -31,5 +32,7 @@
 
 <body>
     <div id="screen"></div>
+    <div id="version"></div>
+    <script>fetch('version.txt').then(r=>r.text()).then(v=>document.getElementById('version').textContent='v'+v.trim())</script>
 </body>
 </html>

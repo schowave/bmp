@@ -67,7 +67,7 @@ The container is labeled for [Watchtower](https://containrrr.dev/watchtower/) â€
 
 ### Other Platforms
 
-The Docker image `schowave/bmp` is built for `linux/amd64` and `linux/arm64`.
+The Docker image `schowave/bmp` is built for `linux/amd64`.
 
 ```yaml
 services:

@@ -24,13 +24,14 @@ RUN mkdir -p /root/.vnc /root/.dosbox \
     && printf 'set border 0\nset padding 0 0 0 0\nexec sh -c "while true; do dosbox -conf /root/.dosbox/dosbox.conf -c \\"MOUNT C: /dos\\" -c \\"MOUNT D: /savegame\\" -c \\"C:\\" -c \\"cd bmp\\" -c \\"bmmain.exe\\" -c \\"exit\\"; done"\n' > /root/.ratpoisonrc \
     && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=player.html"></head></html>' > /usr/share/novnc/index.html
 
+# Layer 3: Spieldaten kopieren (ändert sich selten)
+COPY bmp /dos/bmp
+
+# Layer 4: Konfiguration (ändert sich gelegentlich)
+COPY dosbox.conf /root/.dosbox/dosbox.conf
 COPY player.html /usr/share/novnc/player.html
 COPY images/favicon.png /usr/share/novnc/favicon.png
-
-COPY dosbox.conf /root/.dosbox/dosbox.conf
-
-# Layer 3: Spieldaten kopieren
-COPY bmp /dos/bmp
+COPY VERSION /usr/share/novnc/version.txt
 
 EXPOSE 80
 
