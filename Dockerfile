@@ -21,8 +21,11 @@ RUN mkdir -p /root/.vnc /root/.dosbox \
     && touch /root/.Xauthority \
     && printf '#!/bin/sh\nexec ratpoison\n' > /root/.vnc/xstartup \
     && chmod +x /root/.vnc/xstartup \
-    && printf 'set border 0\nset padding 0 0 0 0\nexec dosbox -conf /root/.dosbox/dosbox.conf -c "MOUNT C: /dos" -c "MOUNT D: /savegame" -c "C:" -c "cd bmp" -c "bmmain.exe"\n' > /root/.ratpoisonrc \
-    && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale"></head></html>' > /usr/share/novnc/index.html
+    && printf 'set border 0\nset padding 0 0 0 0\nexec sh -c "while true; do dosbox -conf /root/.dosbox/dosbox.conf -c \\"MOUNT C: /dos\\" -c \\"MOUNT D: /savegame\\" -c \\"C:\\" -c \\"cd bmp\\" -c \\"bmmain.exe\\"; done"\n' > /root/.ratpoisonrc \
+    && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale"></head></html>' > /usr/share/novnc/index.html \
+    && sed -i 's|<title>noVNC</title>|<title>Bundesliga Manager Professional</title><link rel="icon" type="image/png" href="favicon.png">|' /usr/share/novnc/vnc_lite.html
+
+COPY images/favicon.png /usr/share/novnc/favicon.png
 
 COPY dosbox.conf /root/.dosbox/dosbox.conf
 
