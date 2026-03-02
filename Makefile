@@ -1,4 +1,4 @@
-.PHONY: build run stop
+.PHONY: build run stop push
 
 IMAGE_NAME := bmp
 CONTAINER_NAME := bmp
@@ -13,3 +13,6 @@ run: build
 stop:
 	podman stop $(CONTAINER_NAME) 2>/dev/null || true
 	podman rm $(CONTAINER_NAME) 2>/dev/null || true
+
+push:
+	./build-and-push-docker-image.sh

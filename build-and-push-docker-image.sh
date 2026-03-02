@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -e
+
+IMAGE=schowave/bmp
+
+# Read version from VERSION file (single source of truth)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CURRENT=$(cat "${SCRIPT_DIR}/VERSION" | tr -d '[:space:]')
+NEXT=$(python3 -c "v='${CURRENT}'.split('.'); v[-1]=str(int(v[-1])+1); print('.'.join(v))")
+
+echo "Aktuelle Version: ${CURRENT}"
+read -r -p "Welche Version deployen? [${NEXT}]: " answer
+
+VERSION="${answer:-$NEXT}"
+
+if [ "$VERSION" != "$CURRENT" ]; then
+    echo "$VERSION" > "${SCRIPT_DIR}/VERSION"
+    echo "VERSION auf ${VERSION} aktualisiert."
+fi
+
+# Detect container engine: prefer podman, fall back to docker
+if command -v podman &> /dev/null; then
+    ENGINE=podman
+elif command -v docker &> /dev/null; then
+    ENGINE=docker
+else
+    echo "Error: Neither podman nor docker found. Please install one of them."
+    exit 1
+fi
+
+# Ensure we're logged in to Docker Hub
+if ! $ENGINE login --get-login docker.io &> /dev/null; then
+    echo "Not logged in to Docker Hub. Please log in:"
+    $ENGINE login docker.io
+fi
+
+echo "Using $ENGINE to build and push multi-architecture image..."
+
+if [ "$ENGINE" = "podman" ]; then
+    podman build --platform linux/amd64 -t ${IMAGE}:${VERSION}-amd64 .
+    podman build --platform linux/arm64 -t ${IMAGE}:${VERSION}-arm64 .
+
+    podman manifest rm ${IMAGE}:${VERSION} 2>/dev/null || true
+    podman manifest create ${IMAGE}:${VERSION}
+    podman manifest add ${IMAGE}:${VERSION} ${IMAGE}:${VERSION}-amd64
+    podman manifest add ${IMAGE}:${VERSION} ${IMAGE}:${VERSION}-arm64
+    podman manifest push ${IMAGE}:${VERSION} docker://docker.io/${IMAGE}:${VERSION}
+
+    podman manifest rm ${IMAGE}:latest 2>/dev/null || true
+    podman manifest create ${IMAGE}:latest
+    podman manifest add ${IMAGE}:latest ${IMAGE}:${VERSION}-amd64
+    podman manifest add ${IMAGE}:latest ${IMAGE}:${VERSION}-arm64
+    podman manifest push ${IMAGE}:latest docker://docker.io/${IMAGE}:latest
+else
+    docker buildx create --use --name multi-platform-builder || true
+    docker buildx build --platform linux/amd64,linux/arm64 \
+        --tag ${IMAGE}:${VERSION} --tag ${IMAGE}:latest --push .
+fi
+
+echo "${IMAGE}:${VERSION} and ${IMAGE}:latest built and pushed successfully."
