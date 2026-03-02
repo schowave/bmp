@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 ENV USER=root \
     DEBIAN_FRONTEND=noninteractive \
