@@ -1,21 +1,73 @@
-== Bundesliga Manager Professional
+= Bundesliga Manager Professional
 
-- Replace the COPY bmp /dos/bmp with your game.
-- You can also change the default password, or override it with a -e parameter when you run the image.
-- Now, with Docker, build the image. I’m assuming you already have Docker installed and are familiar with it to some extent. CD to the directory in a console and run the command…
+Containerized DOS classic — playable in the browser via noVNC.
 
-[source]
+== Development
+
+=== Prerequisites
+
+* https://podman.io[Podman] (or Docker)
+
+=== Run locally
+
+[source,bash]
 ----
-docker build -t mydosbox .
+make run
 ----
 
-- Run the image.
+Opens at http://localhost:8080. Savegames persist in `./savegame/`.
 
-[source]
+[source,bash]
 ----
-docker run -p 6080:80 mydosbox
+make stop
 ----
 
-- Open a browser and point it to http://localhost:6080/vnc.html
-- You should see a prompt for the password. Type it in, and you should be able to connect to your container with DosBox running. The game is started automatically.
-- Once your image is built, you can push it to your image repository with docker push, but you’ll need to tag it appropriately.
+=== Makefile targets
+
+[cols="1,3"]
+|===
+| `make build` | Build the container image
+| `make run`   | Stop, build, and start in detached mode
+| `make stop`  | Stop and remove the container
+| `make push`  | Build and push multi-arch image to Docker Hub
+|===
+
+== Release
+
+=== Via GitHub Actions (recommended)
+
+1. Go to **Actions** → **Release** → **Run workflow**
+2. Leave version empty for auto-increment (e.g. `0.1.0` → `0.1.1`), or enter a specific version
+3. The workflow will:
+   - Update the `VERSION` file and commit
+   - Create a git tag `v0.1.1`
+   - Build a multi-arch image (amd64 + arm64)
+   - Push `schowave/bmp:0.1.1` and `schowave/bmp:latest` to Docker Hub
+   - Create a GitHub Release with auto-generated notes
+
+Required GitHub secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
+
+=== Manual push
+
+[source,bash]
+----
+make push
+----
+
+Prompts for version, builds multi-arch, and pushes to Docker Hub.
+
+== Deployment (Synology NAS)
+
+Copy `docker-compose.yml` to the NAS and start:
+
+[source,bash]
+----
+docker compose up -d
+----
+
+This starts two services:
+
+* **bmp** — the game container on port 8080
+* **watchtower** — checks Docker Hub every 5 minutes for new images and auto-updates the container
+
+Savegames are stored in `./savegame/` on the host.
