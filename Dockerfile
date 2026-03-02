@@ -4,38 +4,32 @@ ENV USER=root \
     DEBIAN_FRONTEND=noninteractive \
     DEBCONF_NONINTERACTIVE_SEEN=true
 
-COPY bmp /dos/bmp
-
 RUN set -ex \
+    && printf 'path-exclude /usr/share/doc/*\npath-exclude /usr/share/man/*\npath-exclude /usr/share/info/*\n' > /etc/dpkg/dpkg.cfg.d/excludes \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        openssl \
         tightvncserver \
         xfonts-base \
-        xfonts-75dpi \
-        xfonts-100dpi \
         ratpoison \
         dosbox \
         novnc \
         websockify \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "tzdata tzdata/Areas select Europe" > /tmp/debconf.txt \
-    && echo "tzdata tzdata/Zones/Europe select Berlin" >> /tmp/debconf.txt \
-    && debconf-set-selections /tmp/debconf.txt \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && mkdir -p /root/.vnc \
     && touch /root/.Xauthority \
-    && echo "#!/bin/sh\nxsetroot -solid grey\nx-terminal-emulator -geometry 80x24+10+10 -ls -title \"\$VNCDESKTOP Desktop\" &\nratpoison &\nx-window-manager &" > /root/.vnc/xstartup \
-    && echo "xset +fp /usr/share/fonts/X11/misc" >> /root/.vnc/xstartup \
-    && echo "xset +fp /usr/share/fonts/X11/75dpi" >> /root/.vnc/xstartup \
-    && echo "xset +fp /usr/share/fonts/X11/100dpi" >> /root/.vnc/xstartup \
+    && printf '#!/bin/sh\nxsetroot -solid black\nratpoison &\n' > /root/.vnc/xstartup \
     && chmod +x /root/.vnc/xstartup \
-    && echo "exec dosbox -conf ~/.dosbox/dosbox.conf -fullscreen -c 'MOUNT C: /dos' -c 'MOUNT D: /savegame' -c 'C:' -c 'cd bmp' -c 'bmmain.exe'" >> /root/.ratpoisonrc \
+    && printf 'set border 0\nset padding 0 0 0 0\nexec dosbox -conf ~/.dosbox/dosbox.conf -fullscreen -c "MOUNT C: /dos" -c "MOUNT D: /savegame" -c "C:" -c "cd bmp" -c "bmmain.exe"\n' > /root/.ratpoisonrc \
     && export DOSCONF=$(dosbox -printconf) \
-    && cp $DOSCONF /root/.dosbox/dosbox.conf \
+    && cp "$DOSCONF" /root/.dosbox/dosbox.conf \
     && sed -i 's/usescancodes=true/usescancodes=false/' /root/.dosbox/dosbox.conf \
-    && openssl req -x509 -nodes -newkey rsa:2048 -keyout /root/novnc.pem -out /root/novnc.pem -days 3650 -subj "/C=DE/ST=B/L=B/O=B/OU=B/CN=B emailAddress=email@example.com" \
+    && sed -i 's/output=surface/output=opengl/' /root/.dosbox/dosbox.conf \
+    && sed -i 's/aspect=true/aspect=false/' /root/.dosbox/dosbox.conf \
     && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale"></head></html>' > /usr/share/novnc/index.html
+
+COPY bmp /dos/bmp
 
 EXPOSE 80
 
-CMD ["sh", "-c", "vncserver :1 -geometry 1024x768 -depth 24 -SecurityTypes None && websockify -D --web=/usr/share/novnc/ --cert=/root/novnc.pem 80 localhost:5901 && tail -f /dev/null"]
+CMD ["sh", "-c", "vncserver :1 -geometry 1920x1080 -depth 24 -SecurityTypes None && websockify -D --web=/usr/share/novnc/ 80 localhost:5901 && tail -f /dev/null"]
