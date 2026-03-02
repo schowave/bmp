@@ -7,11 +7,5 @@ services:
     volumes:
       - ./savegame:/savegame
     restart: unless-stopped
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower-bmp
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 300 --cleanup bmp
-    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
