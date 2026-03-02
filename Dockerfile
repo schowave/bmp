@@ -21,7 +21,7 @@ RUN mkdir -p /root/.vnc /root/.dosbox \
     && touch /root/.Xauthority \
     && printf '#!/bin/sh\nexec ratpoison\n' > /root/.vnc/xstartup \
     && chmod +x /root/.vnc/xstartup \
-    && printf 'set border 0\nset padding 0 0 0 0\nexec sh -c "while true; do dosbox -conf /root/.dosbox/dosbox.conf -c \\"MOUNT C: /dos\\" -c \\"MOUNT D: /savegame\\" -c \\"C:\\" -c \\"cd bmp\\" -c \\"bmmain.exe\\"; done"\n' > /root/.ratpoisonrc \
+    && printf 'set border 0\nset padding 0 0 0 0\nexec sh -c "while true; do dosbox -conf /root/.dosbox/dosbox.conf -c \\"MOUNT C: /dos\\" -c \\"MOUNT D: /savegame\\" -c \\"C:\\" -c \\"cd bmp\\" -c \\"bmmain.exe\\" -c \\"exit\\"; done"\n' > /root/.ratpoisonrc \
     && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=player.html"></head></html>' > /usr/share/novnc/index.html
 
 COPY player.html /usr/share/novnc/player.html
