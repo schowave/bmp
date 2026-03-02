@@ -22,6 +22,7 @@
             url: "bmp.jsdos?" + Date.now(),
             autoStart: true,
             theme: "dark",
+            autoSave: true,
         });
         fetch('version.txt').then(r => r.text()).then(v => document.getElementById('version').textContent = 'v' + v.trim());
     </script>
