@@ -2,8 +2,7 @@ FROM debian:bookworm-slim
 
 ENV USER=root \
     DEBIAN_FRONTEND=noninteractive \
-    DEBCONF_NONINTERACTIVE_SEEN=true \
-    VNC_PASSWORD=bmp123
+    DEBCONF_NONINTERACTIVE_SEEN=true
 
 COPY bmp /dos/bmp
 
@@ -25,8 +24,6 @@ RUN set -ex \
     && debconf-set-selections /tmp/debconf.txt \
     && mkdir -p /root/.vnc \
     && touch /root/.Xauthority \
-    && echo "$VNC_PASSWORD" | vncpasswd -f > /root/.vnc/passwd \
-    && chmod 0600 /root/.vnc/passwd \
     && echo "#!/bin/sh\nxsetroot -solid grey\nx-terminal-emulator -geometry 80x24+10+10 -ls -title \"\$VNCDESKTOP Desktop\" &\nratpoison &\nx-window-manager &" > /root/.vnc/xstartup \
     && echo "xset +fp /usr/share/fonts/X11/misc" >> /root/.vnc/xstartup \
     && echo "xset +fp /usr/share/fonts/X11/75dpi" >> /root/.vnc/xstartup \
@@ -36,7 +33,8 @@ RUN set -ex \
     && export DOSCONF=$(dosbox -printconf) \
     && cp $DOSCONF /root/.dosbox/dosbox.conf \
     && sed -i 's/usescancodes=true/usescancodes=false/' /root/.dosbox/dosbox.conf \
-    && openssl req -x509 -nodes -newkey rsa:2048 -keyout /root/novnc.pem -out /root/novnc.pem -days 3650 -subj "/C=DE/ST=B/L=B/O=B/OU=B/CN=B emailAddress=email@example.com"
+    && openssl req -x509 -nodes -newkey rsa:2048 -keyout /root/novnc.pem -out /root/novnc.pem -days 3650 -subj "/C=DE/ST=B/L=B/O=B/OU=B/CN=B emailAddress=email@example.com" \
+    && echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc_lite.html?autoconnect=true&resize=scale&password=bmp123"></head></html>' > /usr/share/novnc/index.html
 
 EXPOSE 80
 
