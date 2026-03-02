@@ -1,7 +1,7 @@
 # Bundesliga Manager Professional
 
+[![Release](https://github.com/schowave/bmp/actions/workflows/release.yml/badge.svg)](https://github.com/schowave/bmp/actions/workflows/release.yml)
 [![Docker Image](https://img.shields.io/docker/v/schowave/bmp?sort=semver&label=Docker%20Hub)](https://hub.docker.com/r/schowave/bmp)
-[![License](https://img.shields.io/github/license/schowave/bmp)](LICENSE)
 
 The classic 90s DOS football management game — containerized and playable in the browser via [noVNC](https://novnc.com).
 
@@ -13,7 +13,7 @@ The classic 90s DOS football management game — containerized and playable in t
 
 - **Browser-based** — play directly in any browser, no client installation needed
 - **Persistent savegames** — game saves are stored on the host via Docker volume (`D:` drive in-game)
-- **Auto-updates** — [Watchtower](https://containrrr.dev/watchtower/) pulls new images automatically
+- **Auto-updates** — [Watchtower](https://containrrr.dev/watchtower/)-compatible via container labels
 - **Optimized for streaming** — tuned DOSBox config for low-latency VNC (640x480, 16-bit, frameskip)
 
 ## Quick Start
@@ -63,7 +63,7 @@ Browser (noVNC) ──WebSocket──▸ websockify :80 ──▸ TigerVNC :5901
    | `Upgrade` | `$http_upgrade` |
    | `Connection` | `$connection_upgrade` |
 
-Watchtower monitors Docker Hub and automatically updates the container when a new release is published.
+The container is labeled for [Watchtower](https://containrrr.dev/watchtower/) — if a Watchtower instance is running on the NAS, it will automatically pull new images on release.
 
 ### Other Platforms
 
