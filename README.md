@@ -1,6 +1,7 @@
 # Bundesliga Manager Professional
 
 [![Release](https://github.com/schowave/bmp/actions/workflows/release.yml/badge.svg)](https://github.com/schowave/bmp/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/schowave/bmp)](https://github.com/schowave/bmp/releases/latest)
 [![Docker Image](https://img.shields.io/docker/v/schowave/bmp?sort=semver&label=Docker%20Hub)](https://hub.docker.com/r/schowave/bmp)
 
 The classic 90s DOS football management game — containerized and playable in the browser via [noVNC](https://novnc.com).
