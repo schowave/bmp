@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bundesliga Manager Professional</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; background-color: #1a1a1a; height: 100%; display: flex; flex-direction: column; }
+        html { height: 100%; }
+        #screen { flex: 1; overflow: hidden; }
+    </style>
+
+    <script type="module" crossorigin="anonymous">
+        import RFB from './core/rfb.js';
+
+        const host = window.location.hostname;
+        const port = window.location.port;
+        const url = (window.location.protocol === 'https:' ? 'wss' : 'ws')
+            + '://' + host + (port ? ':' + port : '') + '/websockify';
+
+        const rfb = new RFB(document.getElementById('screen'), url);
+
+        rfb.scaleViewport = true;
+        rfb.clipViewport = true;
+        rfb.compressionLevel = 5;
+        rfb.qualityLevel = 4;
+        rfb.resizeSession = false;
+        rfb.background = '#1a1a1a';
+    </script>
+</head>
+
+<body>
+    <div id="screen"></div>
+</body>
+</html>
