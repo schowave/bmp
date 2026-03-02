@@ -58,18 +58,29 @@ make push
 
 Prompts for version, builds multi-arch, and pushes to Docker Hub.
 
-== Deployment (Synology NAS)
+== Deployment
 
-Copy `docker-compose.yml` to the NAS and start:
+=== Synology NAS
 
-[source,bash]
+1. Create a project folder on your NAS (e.g. `/volume1/docker/bmp/`)
+2. Add the `docker-compose.yml` from this repository
+3. In **Container Manager** → **Project** → **Create**, point to the folder and start
+
+The included https://containrrr.dev/watchtower/[Watchtower] service monitors Docker Hub and automatically updates the container when a new release is published.
+
+=== Other Platforms
+
+The Docker image `schowave/bmp` is built for `linux/amd64` and `linux/arm64`. It works on any platform that supports Docker or Podman.
+
+[source,yaml]
 ----
-docker compose up -d
+# docker-compose.yml
+services:
+  bmp:
+    image: schowave/bmp:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./savegame:/savegame
+    restart: unless-stopped
 ----
-
-This starts two services:
-
-* **bmp** — the game container on port 8080
-* **watchtower** — checks Docker Hub every 5 minutes for new images and auto-updates the container
-
-Savegames are stored in `./savegame/` on the host.
