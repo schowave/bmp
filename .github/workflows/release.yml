@@ -20,29 +20,35 @@ jobs:
 
     - name: Determine version
       id: version
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
       run: |
         CURRENT=$(cat VERSION | tr -d '[:space:]')
-        if [ -n "${{ github.event.inputs.version }}" ]; then
-          VERSION="${{ github.event.inputs.version }}"
+        if [ -n "$INPUT_VERSION" ]; then
+          VERSION="$INPUT_VERSION"
         else
-          VERSION=$(python3 -c "v='$CURRENT'.split('.'); v[-1]=str(int(v[-1])+1); print('.'.join(v))")
+          VERSION=$(python3 -c "import sys; v=sys.argv[1].split('.'); v[-1]=str(int(v[-1])+1); print('.'.join(v))" "$CURRENT")
         fi
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Release version: $CURRENT → $VERSION"
 
     - name: Update VERSION file
+      env:
+        VERSION: ${{ steps.version.outputs.VERSION }}
       run: |
-        echo "${{ steps.version.outputs.VERSION }}" > VERSION
-        echo "Updated VERSION to ${{ steps.version.outputs.VERSION }}"
+        echo "$VERSION" > VERSION
+        echo "Updated VERSION to $VERSION"
 
     - name: Create git tag
+      env:
+        VERSION: ${{ steps.version.outputs.VERSION }}
       run: |
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
         git add VERSION
-        git commit -m "Release v${{ steps.version.outputs.VERSION }}" || echo "No version change needed"
-        git tag "v${{ steps.version.outputs.VERSION }}"
-        git push origin main "v${{ steps.version.outputs.VERSION }}"
+        git commit -m "Release v${VERSION}" || echo "No version change needed"
+        git tag "v${VERSION}"
+        git push origin main "v${VERSION}"
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
