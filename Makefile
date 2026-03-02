@@ -7,8 +7,13 @@ PORT := 8080
 build:
 	podman build -t $(IMAGE_NAME) .
 
-run: build
-	./run_local.sh
+run: stop build
+	podman run -d \
+		--name $(CONTAINER_NAME) \
+		-p $(PORT):80 \
+		-v $(PWD)/savegame:/savegame \
+		$(IMAGE_NAME)
+	@echo "Running — open http://localhost:$(PORT)"
 
 stop:
 	podman stop $(CONTAINER_NAME) 2>/dev/null || true
