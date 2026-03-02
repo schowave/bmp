@@ -65,6 +65,13 @@ Prompts for version, builds multi-arch, and pushes to Docker Hub.
 1. Create a project folder on your NAS (e.g. `/volume1/docker/bmp/`)
 2. Add the `docker-compose.yml` from this repository
 3. In **Container Manager** → **Project** → **Create**, point to the folder and start
+4. If using a reverse proxy: add WebSocket headers in **Reverse Proxy** → **Benutzerdefinierte Kopfzeile**:
++
+[cols="1,1"]
+|===
+| `Upgrade` | `$http_upgrade`
+| `Connection` | `$connection_upgrade`
+|===
 
 The included https://containrrr.dev/watchtower/[Watchtower] service monitors Docker Hub and automatically updates the container when a new release is published.
 
