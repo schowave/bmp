@@ -1,0 +1,9 @@
+services:
+  bmp:
+    image: schowave/bmp:wasm
+    container_name: bmp
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    volumes:
+      - /volume1/docker/bmp-saves:/data

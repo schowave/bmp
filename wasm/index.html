@@ -19,10 +19,20 @@
     <div id="version"></div>
     <script>
         Dos(document.getElementById("jsdos"), {
-            url: "bmp.jsdos?" + Date.now(),
+            url: "bmp.jsdos",
             autoStart: true,
             theme: "dark",
             autoSave: true,
+            fsChanges: {
+                local: false,
+                pull: async (key) => {
+                    const r = await fetch("/api/saves/bmp");
+                    return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
+                },
+                push: async (key, data) => {
+                    await fetch("/api/saves/bmp", { method: "PUT", body: data });
+                },
+            },
         });
         fetch('version.txt').then(r => r.text()).then(v => document.getElementById('version').textContent = 'v' + v.trim());
     </script>
