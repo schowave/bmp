@@ -86,7 +86,7 @@ services:
 Releases are managed via GitHub Actions:
 
 1. Go to **Actions** → **Release** → **Run workflow**
-2. Either enter a version number or leave empty to auto-increment the patch version (e.g. `0.1.0` → `0.1.1`)
+2. Either enter a version number (e.g. `4.1.0`) or leave empty to auto-increment the patch version (e.g. `4.0.1` → `4.0.2`)
 3. The workflow updates `VERSION`, creates a git tag, builds a multi-arch Docker image, and pushes to Docker Hub
 4. Watchtower picks up the new image automatically on connected hosts
 
