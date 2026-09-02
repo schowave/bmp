@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <title>Bundesliga Manager Professional</title>
     <link rel="icon" type="image/png" href="favicon.png">
@@ -9,6 +9,28 @@
         html { height: 100%; }
         #jsdos { flex: 1; overflow: hidden; }
         #version { position: fixed; bottom: 4px; right: 8px; color: rgba(255,255,255,0.3); font: 11px monospace; z-index: 10; pointer-events: none; }
+
+        #loader { position: fixed; inset: 0; z-index: 20; background: #1a1a1a; color: #e8e8e8;
+                  display: flex; flex-direction: column; align-items: center; justify-content: center;
+                  gap: 26px; font: 14px/1.7 system-ui, -apple-system, sans-serif; transition: opacity .3s ease; }
+        #loader.done { opacity: 0; pointer-events: none; }
+        #loader-spinner { width: 38px; height: 38px; border-radius: 50%;
+                          border: 3px solid rgba(255,255,255,.15); border-top-color: #e8e8e8;
+                          animation: loader-spin 1s linear infinite; }
+        @keyframes loader-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { #loader-spinner { animation: none; } }
+        #loader-title { font-size: 17px; letter-spacing: .04em; }
+        #loader-phases { list-style: none; margin: 0; padding: 0; min-width: 14em; }
+        #loader-phases li { color: rgba(255,255,255,.3); }
+        #loader-phases li::before { content: "\25CC  "; }
+        #loader-phases li.active { color: #e8e8e8; }
+        #loader-phases li.done { color: rgba(255,255,255,.5); }
+        #loader-phases li.done::before { content: "\25CF  "; }
+        #loader-hint { font-size: 12px; color: rgba(255,255,255,.28); }
+        #loader.failed #loader-spinner { animation: none; border-top-color: #f87171; }
+        #loader-error { display: none; color: #f87171; max-width: 26em; text-align: center; }
+        #loader.failed #loader-error { display: block; }
+        #loader.failed #loader-phases { display: none; }
     </style>
     <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
     <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
@@ -17,12 +39,117 @@
 <body>
     <div id="jsdos"></div>
     <div id="version"></div>
+
+    <div id="loader">
+        <div id="loader-spinner"></div>
+        <div id="loader-title">Bundesliga Manager Professional</div>
+        <ol id="loader-phases" role="status" aria-live="polite">
+            <li></li><li></li><li></li>
+        </ol>
+        <div id="loader-error"></div>
+        <div id="loader-hint">Der erste Start dauert einen Moment.</div>
+    </div>
+
     <script>
+        // Der Ladebildschirm verdeckt den Bootvorgang von DOSBox, bis das Spiel sein
+        // erstes Bild zeichnet. Ohne ihn sieht man fast eine Minute lang nur die
+        // DOS-Startmeldungen und haelt die Seite fuer kaputt.
+        const loader = (() => {
+            const el = document.getElementById("loader");
+            const items = Array.from(document.querySelectorAll("#loader-phases li"));
+            const labels = [
+                ["Spieldaten laden …", "Spieldaten geladen"],
+                ["Emulator starten …", "Emulator gestartet"],
+                ["Spiel startet …", "Spiel gestartet"],
+            ];
+            let hidden = false;
+
+            const phase = (index) => {
+                items.forEach((li, i) => {
+                    li.textContent = labels[i][i < index ? 1 : 0];
+                    li.classList.toggle("done", i < index);
+                    li.classList.toggle("active", i === index);
+                });
+            };
+
+            const hide = () => {
+                if (hidden) return;
+                hidden = true;
+                el.classList.add("done");
+                setTimeout(() => el.remove(), 400);
+            };
+
+            const fail = (message) => {
+                if (hidden) return;
+                el.classList.add("failed");
+                document.getElementById("loader-error").textContent = message;
+                document.getElementById("loader-hint").textContent = "Klicken, um Details zu sehen.";
+            };
+
+            el.addEventListener("click", hide);   // Notausgang, falls doch etwas haengt
+            phase(0);
+            return { phase, hide, fail };
+        })();
+
+        // Blendet den Ladebildschirm aus, sobald das laufende DOS-Programm den
+        // Videomodus umschaltet. js-dos setzt dabei width und height direkt am
+        // Canvas. Diese Attribute zu beobachten ist der einzige nicht-invasive Weg:
+        // ci.events().onFrameSize() ist ein Setter und kein Listener, wer sich dort
+        // eintraegt, ersetzt den Renderer von js-dos.
+        function hideOnVideoModeChange() {
+            const root = document.getElementById("jsdos");
+
+            const watch = (canvas) => {
+                const size = () => canvas.width + "x" + canvas.height;
+                // Ein frisches Canvas steht auf der Browser-Vorgabe 300x150. Erst die
+                // erste echte Groesse ist der DOS-Textmodus, die naechste das Spiel.
+                const isReal = () => canvas.width > 0 && size() !== "300x150";
+                let baseline = isReal() ? size() : null;
+
+                new MutationObserver((_, obs) => {
+                    if (!isReal()) return;
+                    if (baseline === null) { baseline = size(); return; }
+                    if (size() !== baseline) { obs.disconnect(); loader.hide(); }
+                }).observe(canvas, { attributes: true, attributeFilter: ["width", "height"] });
+            };
+
+            const canvas = root.querySelector("canvas");
+            if (canvas) { watch(canvas); return; }
+
+            new MutationObserver((_, obs) => {
+                const late = root.querySelector("canvas");
+                if (late) { obs.disconnect(); watch(late); }
+            }).observe(root, { childList: true, subtree: true });
+        }
+
+        // js-dos liefert an onEvent nur bnd-play, ci-ready, emu-ready und
+        // fullscreen-change. Ein Fehler-Event gibt es nicht: bnd-error und emu-error
+        // sind bloss interne Zustaende. Ein fehlendes Bundle wuerde den Ladebildschirm
+        // also endlos stehen lassen, darum diese beiden Absicherungen.
+        const BUNDLE = "bmp.jsdos";
+
+        fetch(BUNDLE, { method: "HEAD" })
+            .then((r) => { if (!r.ok) loader.fail("Spieldaten sind nicht erreichbar (HTTP " + r.status + ")."); })
+            .catch(() => loader.fail("Spieldaten konnten nicht geladen werden."));
+
+        // Kommt der Emulator gar nicht hoch, macht der Ladebildschirm nach dieser Zeit
+        // den Weg frei auf das, was js-dos selbst anzeigt.
+        setTimeout(() => loader.hide(), 25000);
+
         Dos(document.getElementById("jsdos"), {
-            url: "bmp.jsdos",
+            url: BUNDLE,
             autoStart: true,
             theme: "dark",
             autoSave: true,
+            onEvent: (event) => {
+                if (event === "bnd-play") loader.phase(1);
+                if (event === "ci-ready") {
+                    loader.phase(2);
+                    hideOnVideoModeChange();
+                    // Notausgang, falls das Spiel den Videomodus nie wechselt.
+                    setTimeout(loader.hide, 30000);
+                }
+            },
             fsChanges: {
                 local: false,
                 pull: async (key) => {
