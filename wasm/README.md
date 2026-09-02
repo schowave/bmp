@@ -18,7 +18,7 @@ Then open http://localhost:8090.
 |---------------|--------------------------------------------------|
 | `build`       | Build `bmp.jsdos` bundle and copy assets         |
 | `docker`      | Build the container image (`bmp-wasm`)           |
-| `run-docker`  | Run the container locally (port 8090, saves in `/tmp/bmp-saves`) |
+| `run-docker`  | Run the container locally (port 8090, saves in `wasm/savegame`)  |
 | `push`        | Build and push image to Docker Hub               |
 | `run`         | Local dev server (python, no save persistence)   |
 | `clean`       | Remove generated files                           |
@@ -57,7 +57,7 @@ If you prefer the Synology GUI over `docker compose`:
 1. **Registry** — search `schowave/bmp`, download the `wasm` tag
 2. **Container → Create**
    - Image: `schowave/bmp:wasm`
-   - Container name: `bmp`
+   - Container name: `bmp-wasm`
    - Auto-restart: enabled
 3. **Port Settings**
    - Local port: `8090` → Container port: `8080` (TCP)
@@ -69,7 +69,7 @@ If you prefer the Synology GUI over `docker compose`:
 
 ```bash
 docker run -d --restart=unless-stopped \
-  --name bmp \
+  --name bmp-wasm \
   -p 8090:8080 \
   -v /volume1/docker/bmp-saves:/data \
   schowave/bmp:wasm

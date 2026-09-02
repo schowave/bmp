@@ -1,7 +1,7 @@
 services:
   bmp:
     image: schowave/bmp:wasm
-    container_name: bmp
+    container_name: bmp-wasm
     restart: unless-stopped
     ports:
       - "8090:8080"
