@@ -32,8 +32,12 @@
         #loader.failed #loader-error { display: block; }
         #loader.failed #loader-phases { display: none; }
     </style>
-    <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
-    <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+    <!-- Auf eine feste js-dos-Version gepinnt. Der offizielle CDN bietet nur
+         /latest/, das sich unter dem Projekt weg bewegt; jsDelivr liefert dieselben
+         Dateien byte-identisch aus dem npm-Paket. Beim Hochziehen daran denken, dass
+         der Schutz in patchFrameLines() eine Interna von js-dos umhuellt. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/js-dos.css">
+    <script src="https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/js-dos.js"></script>
 </head>
 
 <body>
@@ -144,14 +148,47 @@
         // DOS-Bildschirm frei, den er verdecken soll.
         const bootTimeout = setTimeout(() => loader.hide(), 25000);
 
+        // js-dos 8.4.1 stuerzt bei einem Videomodus-Wechsel gelegentlich ab. In
+        // emulators.js legt onFrameSize() den Bildpuffer kleiner neu an, waehrend
+        // onFrameLines() ihn ohne Pruefung beschreibt:
+        //
+        //   onFrameSize(w, h)  { this.rgb = new Uint8Array(w * h * 3); }
+        //   onFrameLines(lines){ for (const l of lines) this.rgb.set(l.heapu8, l.start * this.frameWidth * 3); }
+        //
+        // Zeilen, die der Worker noch fuer den alten, groesseren Modus erzeugt hat,
+        // schreiben dann hinter das Pufferende: "RangeError: offset is out of bounds",
+        // was js-dos als "Backend crashed" anzeigt und das Spiel beendet. BMP wechselt
+        // den Modus haeufig, entsprechend trifft es einen mitten im Spiel.
+        //
+        // Ein solches Paket ist ohnehin veraltet, also verwerfen wir es und warten auf
+        // das naechste Bild. Der Feature-Check sorgt dafuer, dass eine kuenftige
+        // js-dos-Version den Schutz hoechstens still abschaltet, statt zu brechen.
+        function patchFrameLines(ci) {
+            if (!ci || typeof ci.onFrameLines !== "function") return;
+            const original = ci.onFrameLines.bind(ci);
+            ci.onFrameLines = (lines, rgba) => {
+                try {
+                    return original(lines, rgba);
+                } catch (e) {
+                    if (e instanceof RangeError) return;   // Bild aus dem alten Videomodus
+                    throw e;
+                }
+            };
+        }
+
         Dos(document.getElementById("jsdos"), {
             url: BUNDLE,
+            // Ohne pathPrefix laedt js-dos den Emulator weiter aus /latest/, womit
+            // emulators.js und wdosbox.wasm ungepinnt blieben - also gerade die Datei
+            // mit dem Fehler oben. Muss zur Version im script-Tag passen.
+            pathPrefix: "https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/emulators/",
             autoStart: true,
             theme: "dark",
             autoSave: true,
-            onEvent: (event) => {
+            onEvent: (event, ci) => {
                 if (event === "bnd-play") loader.phase(1);
                 if (event === "ci-ready") {
+                    patchFrameLines(ci);
                     clearTimeout(bootTimeout);
                     loader.phase(2);
                     hideOnVideoModeChange();
