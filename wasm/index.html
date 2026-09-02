@@ -87,6 +87,12 @@
             };
 
             el.addEventListener("click", hide);   // Notausgang, falls doch etwas haengt
+            setTimeout(() => {
+                if (!hidden && !el.classList.contains("failed")) {
+                    document.getElementById("loader-hint").textContent =
+                        "Das dauert laenger als gewoehnlich. Klicken, um trotzdem zuzusehen.";
+                }
+            }, 20000);
             phase(0);
             return { phase, hide, fail };
         })();
@@ -132,9 +138,11 @@
             .then((r) => { if (!r.ok) loader.fail("Spieldaten sind nicht erreichbar (HTTP " + r.status + ")."); })
             .catch(() => loader.fail("Spieldaten konnten nicht geladen werden."));
 
-        // Kommt der Emulator gar nicht hoch, macht der Ladebildschirm nach dieser Zeit
-        // den Weg frei auf das, was js-dos selbst anzeigt.
-        setTimeout(() => loader.hide(), 25000);
+        // Kommt der Emulator gar nicht hoch, macht der Ladebildschirm den Weg frei auf
+        // das, was js-dos selbst anzeigt. Sobald ci-ready gemeldet ist, laeuft er, und
+        // dieser Notausgang wird geloescht: sonst legt er bei langsamem Start genau den
+        // DOS-Bildschirm frei, den er verdecken soll.
+        const bootTimeout = setTimeout(() => loader.hide(), 25000);
 
         Dos(document.getElementById("jsdos"), {
             url: BUNDLE,
@@ -144,10 +152,13 @@
             onEvent: (event) => {
                 if (event === "bnd-play") loader.phase(1);
                 if (event === "ci-ready") {
+                    clearTimeout(bootTimeout);
                     loader.phase(2);
                     hideOnVideoModeChange();
-                    // Notausgang, falls das Spiel den Videomodus nie wechselt.
-                    setTimeout(loader.hide, 30000);
+                    // Grosszuegig bemessen: ein Ladebildschirm, der zu lange steht, ist
+                    // harmloser als einer, der den DOS-Bootvorgang freilegt. Wer nicht
+                    // warten will, klickt ihn weg.
+                    setTimeout(loader.hide, 120000);
                 }
             },
             fsChanges: {
