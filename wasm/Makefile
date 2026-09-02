@@ -2,7 +2,7 @@
 
 build: bmp.jsdos favicon.png
 
-bmp.jsdos: build-bundle.sh dosbox.conf ../bmp/*
+bmp.jsdos: build-bundle.sh dosbox.conf ../VERSION ../bmp/*
 	./build-bundle.sh
 
 favicon.png: ../images/favicon.png
@@ -12,10 +12,10 @@ docker: build
 	podman build -t bmp-wasm .
 
 run-docker: docker
-	@mkdir -p /tmp/bmp-saves
+	@mkdir -p $(PWD)/savegame
 	@echo "Opening http://localhost:8090"
 	@open http://localhost:8090 || true
-	podman run --rm -p 8090:8080 -v /tmp/bmp-saves:/data bmp-wasm
+	podman run --rm -p 8090:8080 -v $(PWD)/savegame:/data bmp-wasm
 
 push: build
 	./build-and-push-docker-image.sh
