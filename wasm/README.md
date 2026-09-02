@@ -77,6 +77,10 @@ docker run -d --restart=unless-stopped \
 
 ## Save Files
 
-Saves are stored as `/data/bmp.sav`. They are written whenever js-dos triggers an auto-save (on exit fullscreen, tab blur, or periodic interval).
+Saves are stored as `/data/bmp.sav` on the host, so they survive a browser restart and follow the player to another browser or device. Note that this is one shared slot: everyone visiting the page uses the same save.
+
+The page saves every 60 seconds while the game runs, and again as soon as it goes into the background, so switching tabs or away from the browser keeps the progress. Saving on close is not possible: building the archive is asynchronous and the request no longer goes out, which was confirmed by measurement. js-dos itself only saves on leaving fullscreen, on releasing the pointer lock, and on `visibilitychange` — it has no periodic save, and nothing on close, which is why the page adds both.
+
+What gets stored is the emulator's filesystem, not the running game state. A game saved from inside BMP is preserved; an unsaved session is not.
 
 To back up or restore, simply copy the `.sav` file.

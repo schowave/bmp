@@ -176,6 +176,37 @@
             };
         }
 
+        // js-dos speichert von sich aus nur beim Verlassen des Vollbilds, beim
+        // Freigeben des Pointer-Locks und bei visibilitychange. Beim Schliessen der
+        // Seite passiert nichts, und ein periodisches Speichern gibt es entgegen
+        // frueherer Annahme nicht. Wer also spielt und den Tab zumacht, verliert den
+        // Fortschritt. Eine oeffentliche Speicher-API bietet js-dos 8.4.1 nicht, wohl
+        // aber der Seitenleiste die Klasse .save-button - ein echter CSS-Name, keine
+        // minifizierte Interna. Der Feature-Check laesst ein kuenftiges Umbenennen
+        // still ausfallen, statt die Seite zu brechen.
+        //
+        // Gespeichert wird immer der Dateistand im Emulator, nicht der laufende
+        // Spielzustand: im Spiel selbst gespeicherte Staende bleiben erhalten, eine
+        // ungesicherte Partie nicht.
+        const SAVE_INTERVALL_MS = 60000;
+
+        function speichern() {
+            const button = document.querySelector(".save-button");
+            if (button) button.click();
+        }
+
+        function speichernEinrichten() {
+            setInterval(speichern, SAVE_INTERVALL_MS);
+            // Zusaetzlich, sobald die Seite in den Hintergrund geht - Tab gewechselt,
+            // Fenster minimiert, Browser weggeklickt. Hier lebt die Seite noch, das
+            // Archiv wird also fertig gebaut und der PUT geht durch. Bei pagehide ist
+            // es dafuer zu spaet: gemessen kam dort kein Request mehr raus, deshalb
+            // haengt hier nichts an diesem Ereignis.
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) speichern();
+            });
+        }
+
         Dos(document.getElementById("jsdos"), {
             url: BUNDLE,
             // Ohne pathPrefix laedt js-dos den Emulator weiter aus /latest/, womit
@@ -189,6 +220,7 @@
                 if (event === "bnd-play") loader.phase(1);
                 if (event === "ci-ready") {
                     patchFrameLines(ci);
+                    speichernEinrichten();
                     clearTimeout(bootTimeout);
                     loader.phase(2);
                     hideOnVideoModeChange();
@@ -205,7 +237,11 @@
                     return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
                 },
                 push: async (key, data) => {
-                    await fetch("/api/saves/bmp", { method: "PUT", body: data });
+                    // keepalive laesst einen noch laufenden PUT zu Ende gehen, wenn
+                    // der Tab in diesem Moment geschlossen wird - etwa wenn kurz vorher
+                    // der Wechsel in den Hintergrund ein Speichern angestossen hat.
+                    // Gilt nur bis 64 KB Rumpf, ist also Beiwerk und keine Zusicherung.
+                    await fetch("/api/saves/bmp", { method: "PUT", body: data, keepalive: true });
                 },
             },
         });
