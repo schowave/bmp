@@ -153,47 +153,83 @@
         const SLOT_MUSTER = /^[A-Za-z0-9_-]{1,64}$/;   // wie validName in server.go
 
         // Lesbare Kennungen statt einer UUID: man kann sie vorlesen, abtippen und
-        // wiedererkennen, was bei ?slot= der eigentliche Zweck ist. Ohne Umlaute, damit
+        // wiedererkennen, was bei ?slot= der eigentliche Zweck ist.
+        //
+        // Nur Substantive, damit keine Adjektivendungen falsch werden koennen - eine
+        // fruehere Fassung erzeugte Namen wie "stolze-doppelpass". Ohne Umlaute, damit
         // sie durch das Muster oben passen.
         //
-        // Der Preis: 24 mal 24 mal 10000 sind rund 5,8 Millionen Kombinationen, deutlich
-        // weniger als bei einer UUID. Wer die Schnittstelle durchprobiert, findet fremde
-        // Spielstaende. Fuer diese Seite ist das vertretbar, eine Anmeldung war es
+        // Vier aus fuenfzig ohne Wiederholung sind 50*49*48*47, also rund 5,5 Millionen
+        // Kombinationen. Damit braucht es keine angehaengte Zahl mehr: vier Woerter aus
+        // einer kurzen Liste kaemen nicht hin, denn vier Ziffern allein tragen den
+        // Faktor 10000. Deutlich weniger als eine UUID bleibt es trotzdem, wer die
+        // Schnittstelle durchprobiert findet fremde Spielstaende. Eine Anmeldung war es
         // ohnehin nie.
-        const WORT_A = ["flinke", "starke", "kuehne", "ruhige", "zaehe", "wendige",
-                        "kluge", "freche", "helle", "kalte", "warme", "wilde",
-                        "weise", "treue", "junge", "harte", "sanfte", "kecke",
-                        "stolze", "rasche", "schlaue", "mutige", "stille", "frische"];
-        const WORT_B = ["libero", "stuermer", "torwart", "spielmacher", "verteidiger",
-                        "kapitaen", "elfmeter", "freistoss", "flanke", "kopfball",
-                        "doppelpass", "konter", "abseits", "nachspielzeit", "rasen",
-                        "tribuene", "pokal", "derby", "meister", "aufsteiger",
-                        "kabine", "anstoss", "auswaertssieg", "eckball"];
+        const WOERTER = [
+            "libero", "stuermer", "torwart", "spielmacher", "verteidiger",
+            "kapitaen", "elfmeter", "freistoss", "flanke", "kopfball",
+            "doppelpass", "konter", "abseits", "rasen", "tribuene",
+            "pokal", "derby", "meister", "aufsteiger", "kabine",
+            "anstoss", "eckball", "halbzeit", "mittelfeld", "torlinie",
+            "strafraum", "mittelkreis", "seitenlinie", "hattrick", "eigentor",
+            "abstoss", "einwurf", "wechselbank", "trainerbank", "flutlicht",
+            "stadion", "nordkurve", "suedkurve", "fangesang", "trikot",
+            "stollen", "torjaeger", "spielfuehrer", "torschuetze", "vorlage",
+            "zuspiel", "graetsche", "dreierkette", "viererkette", "pressing",
+        ];
 
         function neueKennung() {
             const zufall = (grenze) => crypto.getRandomValues(new Uint32Array(1))[0] % grenze;
-            const nummer = String(zufall(10000)).padStart(4, "0");
-            return WORT_A[zufall(WORT_A.length)] + "-" + WORT_B[zufall(WORT_B.length)] + "-" + nummer;
+            const uebrig = WOERTER.slice();
+            const teile = [];
+            for (let i = 0; i < 4; i++) teile.push(uebrig.splice(zufall(uebrig.length), 1)[0]);
+            return teile.join("-");
         }
 
-        const slot = (() => {
+        // Beim Erstbesuch wird geprueft, ob die gezogene Kennung schon belegt ist: der
+        // Server antwortet auf einen freien Platz mit 404 und auf einen belegten mit 200.
+        // Das deckt den Fall ab, der wehtut, denn durch das Autospeichern wird jeder
+        // benutzte Platz binnen einer Minute sichtbar.
+        //
+        // Zwei Grenzen bleiben: eine vergebene, aber nie gespeicherte Kennung ist
+        // unsichtbar, und Pruefen und Belegen sind zwei Schritte, zwei Besucher in
+        // derselben Millisekunde koennen also dieselbe ziehen. Bei 5,5 Millionen
+        // Kombinationen ist beides unwahrscheinlich genug, um es nicht mit einem
+        // zusaetzlichen Endpunkt im Server zu erkaufen.
+        const SLOT_VERSUCHE = 5;
+
+        let slot = null;
+        let SAVE_URL = null;
+
+        async function istBelegt(kennung) {
+            try {
+                return (await fetch("/api/saves/" + kennung)).ok;
+            } catch {
+                return false;   // Server nicht erreichbar: Kennung trotzdem nehmen
+            }
+        }
+
+        async function slotErmitteln() {
             const lesen = () => { try { return localStorage.getItem("bmp-slot"); } catch { return null; } };
             const gueltig = (wert) => !!wert && SLOT_MUSTER.test(wert);
 
             const gewuenscht = new URLSearchParams(location.search).get("slot");
             const gemerkt = lesen();
-            // Wer schon einen Platz hat, behaelt ihn, auch die alten UUID-Kennungen.
-            const gewaehlt = gueltig(gewuenscht) ? gewuenscht
-                           : gueltig(gemerkt) ? gemerkt
-                           : neueKennung();
 
-            // Im privaten Modus kann der Speicher fehlen. Dann bleibt der Platz nur fuer
-            // diese Sitzung bestehen, deshalb wird die Kennung unten angezeigt.
+            // Wer schon einen Platz hat, behaelt ihn und wird nicht geprueft: dass er
+            // belegt ist, ist dort ja genau der Sinn.
+            let gewaehlt = gueltig(gewuenscht) ? gewuenscht : gueltig(gemerkt) ? gemerkt : null;
+
+            if (gewaehlt === null) {
+                for (let versuch = 0; versuch < SLOT_VERSUCHE; versuch++) {
+                    gewaehlt = neueKennung();
+                    if (!await istBelegt(gewaehlt)) break;
+                }
+            }
+
             try { localStorage.setItem("bmp-slot", gewaehlt); } catch { /* nicht verfuegbar */ }
             return gewaehlt;
-        })();
-
-        const SAVE_URL = "/api/saves/" + slot;
+        }
 
         fetch(BUNDLE, { method: "HEAD" })
             .then((r) => { if (!r.ok) loader.fail("Spieldaten sind nicht erreichbar (HTTP " + r.status + ")."); })
@@ -264,44 +300,48 @@
             });
         }
 
-        Dos(document.getElementById("jsdos"), {
-            url: BUNDLE,
-            // Ohne pathPrefix laedt js-dos den Emulator weiter aus /latest/, womit
-            // emulators.js und wdosbox.wasm ungepinnt blieben - also gerade die Datei
-            // mit dem Fehler oben. Muss zur Version im script-Tag passen.
-            pathPrefix: "https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/emulators/",
-            autoStart: true,
-            theme: "dark",
-            autoSave: true,
-            onEvent: (event, ci) => {
-                if (event === "bnd-play") loader.phase(1);
-                if (event === "ci-ready") {
-                    patchFrameLines(ci);
-                    speichernEinrichten();
-                    clearTimeout(bootTimeout);
-                    loader.phase(2);
-                    hideOnVideoModeChange();
-                    // Grosszuegig bemessen: ein Ladebildschirm, der zu lange steht, ist
-                    // harmloser als einer, der den DOS-Bootvorgang freilegt. Wer nicht
-                    // warten will, klickt ihn weg.
-                    setTimeout(loader.hide, 120000);
-                }
-            },
-            fsChanges: {
-                local: false,
-                pull: async (key) => {
-                    const r = await fetch(SAVE_URL);
-                    return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
+        function spielStarten() {
+            Dos(document.getElementById("jsdos"), {
+                url: BUNDLE,
+                // Ohne pathPrefix laedt js-dos den Emulator weiter aus /latest/, womit
+                // emulators.js und wdosbox.wasm ungepinnt blieben - also gerade die Datei
+                // mit dem Fehler oben. Muss zur Version im script-Tag passen.
+                pathPrefix: "https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/emulators/",
+                autoStart: true,
+                theme: "dark",
+                autoSave: true,
+                onEvent: (event, ci) => {
+                    if (event === "bnd-play") loader.phase(1);
+                    if (event === "ci-ready") {
+                        patchFrameLines(ci);
+                        speichernEinrichten();
+                        clearTimeout(bootTimeout);
+                        loader.phase(2);
+                        hideOnVideoModeChange();
+                        // Grosszuegig bemessen: ein Ladebildschirm, der zu lange steht, ist
+                        // harmloser als einer, der den DOS-Bootvorgang freilegt. Wer nicht
+                        // warten will, klickt ihn weg.
+                        setTimeout(loader.hide, 120000);
+                    }
                 },
-                push: async (key, data) => {
-                    // keepalive laesst einen noch laufenden PUT zu Ende gehen, wenn
-                    // der Tab in diesem Moment geschlossen wird - etwa wenn kurz vorher
-                    // der Wechsel in den Hintergrund ein Speichern angestossen hat.
-                    // Gilt nur bis 64 KB Rumpf, ist also Beiwerk und keine Zusicherung.
-                    await fetch(SAVE_URL, { method: "PUT", body: data, keepalive: true });
+                fsChanges: {
+                    local: false,
+                    pull: async (key) => {
+                        const r = await fetch(SAVE_URL);
+                        return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
+                    },
+                    push: async (key, data) => {
+                        // keepalive laesst einen noch laufenden PUT zu Ende gehen, wenn
+                        // der Tab in diesem Moment geschlossen wird - etwa wenn kurz vorher
+                        // der Wechsel in den Hintergrund ein Speichern angestossen hat.
+                        // Gilt nur bis 64 KB Rumpf, ist also Beiwerk und keine Zusicherung.
+                        await fetch(SAVE_URL, { method: "PUT", body: data, keepalive: true });
+                    },
                 },
-            },
-        });
+            });
+        }
+
+        function versionAnzeigen() {
         fetch('version.txt')
             .then(r => r.text())
             .then(v => {
@@ -315,6 +355,16 @@
                 kennung.title = 'Speicherplatz. Mit ?slot=' + slot + ' auf einem anderen Geraet fortsetzen.';
                 el.appendChild(kennung);
             });
+        }
+
+        // Der Slot muss vor Dos() feststehen, weil pull und push seine Adresse brauchen.
+        // Der Ladebildschirm steht schon im HTML und ist waehrenddessen sichtbar.
+        (async () => {
+            slot = await slotErmitteln();
+            SAVE_URL = "/api/saves/" + slot;
+            versionAnzeigen();
+            spielStarten();
+        })();
     </script>
 </body>
 </html>

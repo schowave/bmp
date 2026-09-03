@@ -77,7 +77,11 @@ docker run -d --restart=unless-stopped \
 
 ## Save Files
 
-Each visitor gets their own save. On the first visit the page draws a readable slot name such as `stolze-doppelpass-2907`, keeps it in `localStorage`, and stores the save as `/data/<slot>.sav` on the host, so it survives a browser restart. Names are meant to be read out, typed and recognised, which is what makes `?slot=` useful; the trade-off is about 5.8 million combinations instead of a UUID's, so someone working through the API could find another player's save.
+Each visitor gets their own save. On the first visit the page draws a slot name from four football terms, such as `konter-flanke-pokal-derby`, keeps it in `localStorage`, and stores the save as `/data/<slot>.sav` on the host, so it survives a browser restart.
+
+Names are meant to be read out, typed and recognised, which is what makes `?slot=` useful. Only nouns are used, so no German adjective ending can come out wrong. Four out of fifty without repetition is about 5.5 million combinations, so no trailing number is needed — but it is far short of a UUID, and someone working through the API could find another player's save.
+
+A drawn name is checked against the server before it is kept, and redrawn up to five times if it is taken. That covers the case that hurts, since the periodic save makes a slot in use visible within a minute. Two gaps remain: a name handed out but never saved is invisible, and checking and claiming are two steps, so two visitors in the same millisecond could draw the same name.
 
 `?slot=<name>` picks a slot and remembers it. Use it to carry a save to another browser or device, to recover one after clearing site data, or to keep playing an older save — `?slot=bmp` reaches the shared save from before slots existed. The id is shown next to the version at the bottom right; one click selects it. A slot id is not a login: anyone who knows it can read and overwrite that save, which matters little for the random ids and a lot for a name someone could guess.
 
