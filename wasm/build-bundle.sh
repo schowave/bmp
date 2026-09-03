@@ -28,6 +28,13 @@ cp -r "$GAME_DIR/"* "$TMPDIR_BUILD/"
 mkdir -p "$TMPDIR_BUILD/SAVES"
 echo "Spielstaende gehoeren hierher, gemountet als Laufwerk D:." > "$TMPDIR_BUILD/SAVES/LIESMICH.TXT"
 
+# Startskript mit Neustart-Schleife. Beendet der Spieler BMP, landete er vorher auf
+# dem DOS-Prompt; jetzt startet das Spiel neu. Die Marker-Zeile geht ueber die
+# DOS-Konsole an die Seite, die daraufhin sofort speichert, statt auf ihr Intervall zu
+# warten - beim Beenden ist der Spielstand ja gerade frisch geschrieben.
+# CRLF, weil es eine DOS-Batchdatei ist.
+printf '@ECHO OFF\r\n:TOP\r\nBMMAIN.EXE\r\nECHO ---BMP-BEENDET---\r\nGOTO TOP\r\n' > "$TMPDIR_BUILD/START.BAT"
+
 # Create .jsdos config directory and copy dosbox.conf
 mkdir -p "$TMPDIR_BUILD/.jsdos"
 cp "$SCRIPT_DIR/dosbox.conf" "$TMPDIR_BUILD/.jsdos/dosbox.conf"

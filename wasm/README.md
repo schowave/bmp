@@ -89,7 +89,9 @@ The slot is written into the address bar, so the URL can be bookmarked or shared
 
 Old slots are never cleaned up, so the directory grows by one small file per visitor.
 
-The page saves every 60 seconds while the game runs, and again as soon as it goes into the background, so switching tabs or away from the browser keeps the progress. Saving on close is not possible: building the archive is asynchronous and the request no longer goes out, which was confirmed by measurement. js-dos itself only saves on leaving fullscreen, on releasing the pointer lock, and on `visibilitychange` — it has no periodic save, and nothing on close, which is why the page adds both.
+Quitting the game inside BMP restarts it instead of dropping to the DOS prompt, and the save is uploaded right then: `START.BAT` in the bundle loops on the game and echoes a marker on exit, which the page picks up from the DOS console and saves immediately. Since that is the moment BMP has just written the savegame, this is the path that matters.
+
+Beyond that the page saves every 60 seconds while the game runs, and again as soon as it goes into the background, so switching tabs or away from the browser keeps the progress. The interval is not the main path any more but the insurance against a crash: saved in-game, kept playing, backend panics — without it that savegame would be lost although BMP had already written it. Saving on close is not possible: building the archive is asynchronous and the request no longer goes out, which was confirmed by measurement. js-dos itself only saves on leaving fullscreen, on releasing the pointer lock, and on `visibilitychange` — it has no periodic save, and nothing on close, which is why the page adds both.
 
 What gets stored is the emulator's filesystem, not the running game state. A game saved from inside BMP is preserved; an unsaved session is not.
 

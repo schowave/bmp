@@ -287,11 +287,31 @@
         // Gespeichert wird immer der Dateistand im Emulator, nicht der laufende
         // Spielzustand: im Spiel selbst gespeicherte Staende bleiben erhalten, eine
         // ungesicherte Partie nicht.
+        // Das Intervall ist nach dem Marker oben nicht mehr der Hauptweg, sondern die
+        // Absturzversicherung: im Spiel gespeichert, weitergespielt, Backend stuerzt ab.
+        // Ohne es waere dieser Stand verloren, obwohl BMP ihn schon geschrieben hatte.
         const SAVE_INTERVALL_MS = 60000;
 
         function speichern() {
             const button = document.querySelector(".save-button");
             if (button) button.click();
+        }
+
+        // START.BAT im Bundle meldet das Ende des Spiels ueber die DOS-Konsole. Dann
+        // sofort speichern, statt bis zu eine Minute auf das Intervall zu warten: genau
+        // in diesem Moment hat BMP seinen Spielstand frisch geschrieben.
+        const EXIT_MARKER = "---BMP-BEENDET---";
+
+        function beendenErkennen(ci) {
+            try {
+                const ereignisse = ci?.events?.();
+                if (typeof ereignisse?.onStdout !== "function") return;
+                // Der bisherige Handler laesst sich nicht auslesen, wird also ersetzt.
+                // js-dos nutzt ihn nur fuer sein Benchmark-Fenster, das hier niemand oeffnet.
+                ereignisse.onStdout((text) => {
+                    if (typeof text === "string" && text.includes(EXIT_MARKER)) speichern();
+                });
+            } catch { /* nicht kritisch, Intervall und Hintergrundwechsel greifen weiter */ }
         }
 
         function speichernEinrichten() {
@@ -323,6 +343,7 @@
                 }
                     if (event === "ci-ready") {
                         patchFrameLines(ci);
+                        beendenErkennen(ci);
                         speichernEinrichten();
                         clearTimeout(bootTimeout);
                         loader.phase(2);
