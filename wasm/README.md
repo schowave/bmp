@@ -83,6 +83,8 @@ Names are meant to be read out, typed and recognised, which is what makes `?slot
 
 A drawn name is checked against the server before it is kept, and redrawn up to five times if it is taken. That covers the case that hurts, since the periodic save makes a slot in use visible within a minute. Two gaps remain: a name handed out but never saved is invisible, and checking and claiming are two steps, so two visitors in the same millisecond could draw the same name.
 
+The slot is written into the address bar, so the URL can be bookmarked or shared. Opening it restores that slot's files automatically — there is nothing to import. Sharing it means playing on the same save, not watching: whoever opens the link continues there and overwrites it on the next save.
+
 `?slot=<name>` picks a slot and remembers it. Use it to carry a save to another browser or device, to recover one after clearing site data, or to keep playing an older save — `?slot=bmp` reaches the shared save from before slots existed. The id is shown next to the version at the bottom right; one click selects it. A slot id is not a login: anyone who knows it can read and overwrite that save, which matters little for the random ids and a lot for a name someone could guess.
 
 Old slots are never cleaned up, so the directory grows by one small file per visitor.

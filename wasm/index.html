@@ -239,7 +239,13 @@
         // das, was js-dos selbst anzeigt. Sobald ci-ready gemeldet ist, laeuft er, und
         // dieser Notausgang wird geloescht: sonst legt er bei langsamem Start genau den
         // DOS-Bildschirm frei, den er verdecken soll.
-        const bootTimeout = setTimeout(() => loader.hide(), 25000);
+        // Grosszuegig bemessen und beim ersten Lebenszeichen geloescht. 25 Sekunden waren
+        // zu knapp: ein Kaltstart ueber das Netz laedt 1,2 MB Bundle und 2,5 MB Emulator,
+        // ci-ready kam danach erst nach ueber 25 Sekunden, der Notausgang feuerte also
+        // vorher und legte einen schwarzen Bildschirm frei, waehrend das Spiel noch
+        // hochkam. Das eigentliche Netz gegen ein fehlendes Bundle ist die HEAD-Anfrage
+        // oben, die sofort greift.
+        const bootTimeout = setTimeout(() => loader.hide(), 90000);
 
         // js-dos 8.4.1 stuerzt bei einem Videomodus-Wechsel gelegentlich ab. In
         // emulators.js legt onFrameSize() den Bildpuffer kleiner neu an, waehrend
@@ -311,7 +317,10 @@
                 theme: "dark",
                 autoSave: true,
                 onEvent: (event, ci) => {
-                    if (event === "bnd-play") loader.phase(1);
+                    if (event === "bnd-play") {
+                    clearTimeout(bootTimeout);   // laeuft, der Notausgang ist erledigt
+                    loader.phase(1);
+                }
                     if (event === "ci-ready") {
                         patchFrameLines(ci);
                         speichernEinrichten();
@@ -342,7 +351,9 @@
         }
 
         function versionAnzeigen() {
-        fetch('version.txt')
+        // cache: no-store, sonst zeigt die Seite nach einem Update noch die alte
+        // Version aus dem Disk-Cache an, wie es nach 5.0.7 passiert ist.
+        fetch('version.txt', { cache: 'no-store' })
             .then(r => r.text())
             .then(v => {
                 const el = document.getElementById('version');
@@ -357,11 +368,28 @@
             });
         }
 
+        // Die Kennung in die Adressleiste schreiben, damit die URL teilbar ist und sich
+        // als Lesezeichen setzen laesst. replaceState statt pushState: kein Neuladen und
+        // kein zusaetzlicher Eintrag im Verlauf, der Zurueck-Knopf bleibt unberuehrt.
+        //
+        // Wer den Link bekommt, spielt auf demselben Platz weiter und ueberschreibt beim
+        // Speichern den Stand. Zum Zuschauen taugt er also nicht, zum gemeinsamen
+        // Weiterspielen schon.
+        function slotInUrlSchreiben() {
+            try {
+                const adresse = new URL(location.href);
+                if (adresse.searchParams.get("slot") === slot) return;
+                adresse.searchParams.set("slot", slot);
+                history.replaceState(null, "", adresse);
+            } catch { /* nicht kritisch, die Kennung steht auch unten rechts */ }
+        }
+
         // Der Slot muss vor Dos() feststehen, weil pull und push seine Adresse brauchen.
         // Der Ladebildschirm steht schon im HTML und ist waehrenddessen sichtbar.
         (async () => {
             slot = await slotErmitteln();
             SAVE_URL = "/api/saves/" + slot;
+            slotInUrlSchreiben();
             versionAnzeigen();
             spielStarten();
         })();
