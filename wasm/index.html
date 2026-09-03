@@ -152,15 +152,40 @@
         // bei einem selbst gewaehlten Namen schon.
         const SLOT_MUSTER = /^[A-Za-z0-9_-]{1,64}$/;   // wie validName in server.go
 
+        // Lesbare Kennungen statt einer UUID: man kann sie vorlesen, abtippen und
+        // wiedererkennen, was bei ?slot= der eigentliche Zweck ist. Ohne Umlaute, damit
+        // sie durch das Muster oben passen.
+        //
+        // Der Preis: 24 mal 24 mal 10000 sind rund 5,8 Millionen Kombinationen, deutlich
+        // weniger als bei einer UUID. Wer die Schnittstelle durchprobiert, findet fremde
+        // Spielstaende. Fuer diese Seite ist das vertretbar, eine Anmeldung war es
+        // ohnehin nie.
+        const WORT_A = ["flinke", "starke", "kuehne", "ruhige", "zaehe", "wendige",
+                        "kluge", "freche", "helle", "kalte", "warme", "wilde",
+                        "weise", "treue", "junge", "harte", "sanfte", "kecke",
+                        "stolze", "rasche", "schlaue", "mutige", "stille", "frische"];
+        const WORT_B = ["libero", "stuermer", "torwart", "spielmacher", "verteidiger",
+                        "kapitaen", "elfmeter", "freistoss", "flanke", "kopfball",
+                        "doppelpass", "konter", "abseits", "nachspielzeit", "rasen",
+                        "tribuene", "pokal", "derby", "meister", "aufsteiger",
+                        "kabine", "anstoss", "auswaertssieg", "eckball"];
+
+        function neueKennung() {
+            const zufall = (grenze) => crypto.getRandomValues(new Uint32Array(1))[0] % grenze;
+            const nummer = String(zufall(10000)).padStart(4, "0");
+            return WORT_A[zufall(WORT_A.length)] + "-" + WORT_B[zufall(WORT_B.length)] + "-" + nummer;
+        }
+
         const slot = (() => {
             const lesen = () => { try { return localStorage.getItem("bmp-slot"); } catch { return null; } };
             const gueltig = (wert) => !!wert && SLOT_MUSTER.test(wert);
 
             const gewuenscht = new URLSearchParams(location.search).get("slot");
             const gemerkt = lesen();
+            // Wer schon einen Platz hat, behaelt ihn, auch die alten UUID-Kennungen.
             const gewaehlt = gueltig(gewuenscht) ? gewuenscht
                            : gueltig(gemerkt) ? gemerkt
-                           : "s-" + crypto.randomUUID();
+                           : neueKennung();
 
             // Im privaten Modus kann der Speicher fehlen. Dann bleibt der Platz nur fuer
             // diese Sitzung bestehen, deshalb wird die Kennung unten angezeigt.

@@ -6,6 +6,14 @@ services:
       - "8080:8080"
     volumes:
       - ./savegame:/savegame
+    # Das Spiel legt seine Spielstaende auf Laufwerk D: ab, also in diesem Mount.
+    # Er gehoert dem Host-Nutzer, und auf einer Synology entscheidet zusaetzlich eine
+    # ACL: der unprivilegierte Spielprozess durfte dort nicht schreiben, obwohl die
+    # Mode-Bits auf drwxrwxrwx standen. Die ACL erlaubt es der Gruppe, darum laeuft der
+    # Prozess in dieser mit. 100 ist auf Synology die Gruppe users; auf einem anderen
+    # Host ist es die Gruppe, der das Verzeichnis gehoert.
+    group_add:
+      - "100"
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"

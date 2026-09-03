@@ -77,7 +77,7 @@ docker run -d --restart=unless-stopped \
 
 ## Save Files
 
-Each visitor gets their own save. On the first visit the page draws a random slot id, keeps it in `localStorage`, and stores the save as `/data/<slot>.sav` on the host, so it survives a browser restart.
+Each visitor gets their own save. On the first visit the page draws a readable slot name such as `stolze-doppelpass-2907`, keeps it in `localStorage`, and stores the save as `/data/<slot>.sav` on the host, so it survives a browser restart. Names are meant to be read out, typed and recognised, which is what makes `?slot=` useful; the trade-off is about 5.8 million combinations instead of a UUID's, so someone working through the API could find another player's save.
 
 `?slot=<name>` picks a slot and remembers it. Use it to carry a save to another browser or device, to recover one after clearing site data, or to keep playing an older save — `?slot=bmp` reaches the shared save from before slots existed. The id is shown next to the version at the bottom right; one click selects it. A slot id is not a login: anyone who knows it can read and overwrite that save, which matters little for the random ids and a lot for a name someone could guess.
 

@@ -51,13 +51,7 @@ COPY player.html /usr/share/novnc/player.html
 COPY images/favicon.png /usr/share/novnc/favicon.png
 COPY VERSION /usr/share/novnc/version.txt
 
-COPY entrypoint.sh /entrypoint.sh
-
 EXPOSE 8080
 
-# Ohne USER bmp startet der Container als root, damit entrypoint.sh die Rechte auf
-# /savegame richten kann; es wechselt danach selbst auf bmp. HOME muss dabei gesetzt
-# sein, sonst landet die vncserver-Konfiguration unter /root statt /home/bmp.
-ENV HOME=/home/bmp
-ENTRYPOINT ["/entrypoint.sh"]
+USER bmp
 CMD ["sh", "-c", "vncserver :1 -geometry 640x480 -depth 16 -SecurityTypes None -xstartup /home/bmp/.config/tigervnc/xstartup && websockify -D --web=/usr/share/novnc/ 8080 localhost:5901 && tail -f /dev/null"]
