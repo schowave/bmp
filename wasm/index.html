@@ -9,6 +9,7 @@
         html { height: 100%; }
         #jsdos { flex: 1; overflow: hidden; }
         #version { position: fixed; bottom: 4px; right: 8px; color: rgba(255,255,255,0.3); font: 11px monospace; z-index: 10; pointer-events: none; }
+        #slot { pointer-events: auto; user-select: all; cursor: text; }
 
         #loader { position: fixed; inset: 0; z-index: 20; background: #1a1a1a; color: #e8e8e8;
                   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -138,6 +139,37 @@
         // also endlos stehen lassen, darum diese beiden Absicherungen.
         const BUNDLE = "bmp.jsdos";
 
+        // Jeder Besucher bekommt seinen eigenen Speicherplatz. Vorher lag ein einziger
+        // Slot fuer alle unter /api/saves/bmp: wer die Seite oeffnete, lud den Stand des
+        // letzten Spielers und ueberschrieb ihn beim naechsten Speichern.
+        //
+        // ?slot=<name> setzt den Platz und merkt ihn sich. Das deckt drei Faelle ab: den
+        // alten gemeinsamen Stand weiterspielen (?slot=bmp), einen verlorenen Platz
+        // zurueckholen, und denselben Stand auf einem zweiten Geraet fortsetzen.
+        //
+        // Eine Kennung ist keine Anmeldung. Wer sie kennt, kann diesen Stand lesen und
+        // ueberschreiben; bei den zufaelligen Kennungen faellt das nicht ins Gewicht,
+        // bei einem selbst gewaehlten Namen schon.
+        const SLOT_MUSTER = /^[A-Za-z0-9_-]{1,64}$/;   // wie validName in server.go
+
+        const slot = (() => {
+            const lesen = () => { try { return localStorage.getItem("bmp-slot"); } catch { return null; } };
+            const gueltig = (wert) => !!wert && SLOT_MUSTER.test(wert);
+
+            const gewuenscht = new URLSearchParams(location.search).get("slot");
+            const gemerkt = lesen();
+            const gewaehlt = gueltig(gewuenscht) ? gewuenscht
+                           : gueltig(gemerkt) ? gemerkt
+                           : "s-" + crypto.randomUUID();
+
+            // Im privaten Modus kann der Speicher fehlen. Dann bleibt der Platz nur fuer
+            // diese Sitzung bestehen, deshalb wird die Kennung unten angezeigt.
+            try { localStorage.setItem("bmp-slot", gewaehlt); } catch { /* nicht verfuegbar */ }
+            return gewaehlt;
+        })();
+
+        const SAVE_URL = "/api/saves/" + slot;
+
         fetch(BUNDLE, { method: "HEAD" })
             .then((r) => { if (!r.ok) loader.fail("Spieldaten sind nicht erreichbar (HTTP " + r.status + ")."); })
             .catch(() => loader.fail("Spieldaten konnten nicht geladen werden."));
@@ -233,7 +265,7 @@
             fsChanges: {
                 local: false,
                 pull: async (key) => {
-                    const r = await fetch("/api/saves/bmp");
+                    const r = await fetch(SAVE_URL);
                     return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
                 },
                 push: async (key, data) => {
@@ -241,11 +273,23 @@
                     // der Tab in diesem Moment geschlossen wird - etwa wenn kurz vorher
                     // der Wechsel in den Hintergrund ein Speichern angestossen hat.
                     // Gilt nur bis 64 KB Rumpf, ist also Beiwerk und keine Zusicherung.
-                    await fetch("/api/saves/bmp", { method: "PUT", body: data, keepalive: true });
+                    await fetch(SAVE_URL, { method: "PUT", body: data, keepalive: true });
                 },
             },
         });
-        fetch('version.txt').then(r => r.text()).then(v => document.getElementById('version').textContent = 'v' + v.trim());
+        fetch('version.txt')
+            .then(r => r.text())
+            .then(v => {
+                const el = document.getElementById('version');
+                el.textContent = 'v' + v.trim() + ' \u00b7 ';
+                // Nur die Kennung ist anklickbar, damit ein Klick daneben weiter im Spiel
+                // landet. user-select: all waehlt sie mit einem Klick komplett aus.
+                const kennung = document.createElement('span');
+                kennung.id = 'slot';
+                kennung.textContent = slot;
+                kennung.title = 'Speicherplatz. Mit ?slot=' + slot + ' auf einem anderen Geraet fortsetzen.';
+                el.appendChild(kennung);
+            });
     </script>
 </body>
 </html>

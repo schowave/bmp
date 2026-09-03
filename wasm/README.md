@@ -77,7 +77,11 @@ docker run -d --restart=unless-stopped \
 
 ## Save Files
 
-Saves are stored as `/data/bmp.sav` on the host, so they survive a browser restart and follow the player to another browser or device. Note that this is one shared slot: everyone visiting the page uses the same save.
+Each visitor gets their own save. On the first visit the page draws a random slot id, keeps it in `localStorage`, and stores the save as `/data/<slot>.sav` on the host, so it survives a browser restart.
+
+`?slot=<name>` picks a slot and remembers it. Use it to carry a save to another browser or device, to recover one after clearing site data, or to keep playing an older save — `?slot=bmp` reaches the shared save from before slots existed. The id is shown next to the version at the bottom right; one click selects it. A slot id is not a login: anyone who knows it can read and overwrite that save, which matters little for the random ids and a lot for a name someone could guess.
+
+Old slots are never cleaned up, so the directory grows by one small file per visitor.
 
 The page saves every 60 seconds while the game runs, and again as soon as it goes into the background, so switching tabs or away from the browser keeps the progress. Saving on close is not possible: building the archive is asynchronous and the request no longer goes out, which was confirmed by measurement. js-dos itself only saves on leaving fullscreen, on releasing the pointer lock, and on `visibilitychange` — it has no periodic save, and nothing on close, which is why the page adds both.
 
