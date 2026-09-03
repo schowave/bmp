@@ -362,11 +362,17 @@
                         return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
                     },
                     push: async (key, data) => {
-                        // keepalive laesst einen noch laufenden PUT zu Ende gehen, wenn
-                        // der Tab in diesem Moment geschlossen wird - etwa wenn kurz vorher
-                        // der Wechsel in den Hintergrund ein Speichern angestossen hat.
-                        // Gilt nur bis 64 KB Rumpf, ist also Beiwerk und keine Zusicherung.
-                        await fetch(SAVE_URL, { method: "PUT", body: data, keepalive: true });
+                        // keepalive laesst einen laufenden PUT das Entladen der Seite
+                        // ueberleben, ist aber auf 64 KB Rumpf begrenzt: darueber lehnt der
+                        // Browser die Anfrage komplett ab. Genau das trat ein, sobald ein
+                        // echter Spielstand im Archiv lag - eine .MAN ist rund 34 KB - und
+                        // der Fehler blieb unsichtbar, der Stand war einfach nicht da.
+                        // Also nur fuer kleine Archive, darueber ein gewoehnlicher PUT.
+                        const klein = data.byteLength < 60000;
+                        const antwort = await fetch(SAVE_URL, { method: "PUT", body: data, keepalive: klein });
+                        if (!antwort.ok) {
+                            throw new Error("Speichern fehlgeschlagen: HTTP " + antwort.status);
+                        }
                     },
                 },
             });
