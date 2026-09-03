@@ -41,7 +41,7 @@ make run
 ## Architecture
 
 ```
-Browser (noVNC) ──WebSocket──▸ websockify :80 ──▸ TigerVNC :5901
+Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :5901
                                                        │
                                                   Ratpoison WM
                                                        │
@@ -78,6 +78,10 @@ services:
       - "8080:8080"
     volumes:
       - ./savegame:/savegame
+    # The group that owns ./savegame on the host, so the game may write there.
+    # See Savegames below.
+    group_add:
+      - "100"
     restart: unless-stopped
 ```
 
@@ -87,7 +91,7 @@ Releases are managed via GitHub Actions:
 
 1. Go to **Actions** → **Release** → **Run workflow**
 2. Either enter a version number (e.g. `4.1.0`) or leave empty to auto-increment the patch version (e.g. `4.0.1` → `4.0.2`)
-3. The workflow updates `VERSION`, creates a git tag, builds a multi-arch Docker image, and pushes to Docker Hub
+3. The workflow updates `VERSION`, creates a git tag, builds the Docker image for `linux/amd64`, and pushes to Docker Hub
 4. Watchtower picks up the new image automatically on connected hosts
 
 > Requires GitHub Secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
@@ -99,7 +103,7 @@ Releases are managed via GitHub Actions:
 | `make build` | Build the container image |
 | `make run` | Stop, build, and start in detached mode |
 | `make stop` | Stop and remove the container |
-| `make push` | Build and push multi-arch image to Docker Hub |
+| `make push` | Build and push the `linux/amd64` image to Docker Hub |
 
 ## Savegames
 
@@ -108,6 +112,30 @@ The game mounts two DOS drives:
 | Drive | Mount | Purpose |
 |---|---|---|
 | `C:` | `/dos/bmp` | Game files (inside container) |
-| `D:` | `/savegame` | Persistent saves (Docker volume on host) |
+| `D:` | `/savegame` | Persistent saves (host directory) |
 
-Save your games to `D:` in-game to persist them across container restarts and updates.
+Save to `D:` in-game. A save placed on `C:` lives inside the container and is gone with the next image, so it does not survive an update. To rescue one from a running container before rebuilding it:
+
+```bash
+docker exec bmp find /dos -iname '*.MAN' -exec ls -la {} \;
+docker cp bmp:/dos/bmp/YOURSAVE.MAN ./savegame/YOURSAVE.MAN
+```
+
+`AUTOSAVE.MAN`, `BMP/AUTOSAVE.MAN` and `BMP/MICHEL1.MAN` ship with the image, so go by the modification date rather than the name to tell your own save apart — the game overwrites `AUTOSAVE.MAN` as you play, which makes a recent date on it yours.
+
+### The mount has to be writable
+
+The game runs unprivileged as user `bmp` (uid 1000), while the mounted directory belongs to whoever created it on the host. If that is somebody else, saving to `D:` simply fails and the game gives no useful hint. Check it directly:
+
+```bash
+docker exec bmp sh -c 'touch /savegame/PROBE && echo writable || echo denied; rm -f /savegame/PROBE'
+```
+
+`docker-compose.yml` therefore runs the container in group `100`, which on a Synology is `users`, the group owning the shared folders, and whose ACL grants write access:
+
+```yaml
+    group_add:
+      - "100"
+```
+
+Note that on a Synology the POSIX mode can read `drwxrwxrwx` while writing is still refused, because the ACL decides — `chmod` does not help there. On another host, either use the group that owns the directory or `chown -R 1000:1000 ./savegame` instead.
