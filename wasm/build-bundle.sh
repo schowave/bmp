@@ -22,6 +22,12 @@ echo "Building .jsdos bundle..."
 # Copy game files
 cp -r "$GAME_DIR/"* "$TMPDIR_BUILD/"
 
+# Zielverzeichnis fuer Spielstaende, das die dosbox.conf als D: mountet. Muss im
+# Bundle liegen, sonst schlaegt der Mount fehl. Zip verwirft leere Verzeichnisse
+# nicht, ein .keep ist also nicht noetig, aber es macht den Zweck sichtbar.
+mkdir -p "$TMPDIR_BUILD/SAVES"
+echo "Spielstaende gehoeren hierher, gemountet als Laufwerk D:." > "$TMPDIR_BUILD/SAVES/LIESMICH.TXT"
+
 # Create .jsdos config directory and copy dosbox.conf
 mkdir -p "$TMPDIR_BUILD/.jsdos"
 cp "$SCRIPT_DIR/dosbox.conf" "$TMPDIR_BUILD/.jsdos/dosbox.conf"

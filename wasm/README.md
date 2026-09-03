@@ -93,4 +93,6 @@ The page saves every 60 seconds while the game runs, and again as soon as it goe
 
 What gets stored is the emulator's filesystem, not the running game state. A game saved from inside BMP is preserved; an unsaved session is not.
 
+Save to drive `D:` in-game. It is mounted from a `SAVES` directory inside the bundle and, like `C:`, is covered by the slot, so either drive would persist here — but the VNC variant only persists `D:`, so using `D:` in both means one instruction rather than two. Saves made on `C:` before this are still there and still work.
+
 To back up or restore, simply copy the `.sav` file.
