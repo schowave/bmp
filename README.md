@@ -105,6 +105,17 @@ Releases are managed via GitHub Actions:
 | `make stop` | Stop and remove the container |
 | `make push` | Build and push the `linux/amd64` image to Docker Hub |
 
+## Help page
+
+Both images ship a German quick reference for the game at `/hilfe.html`, linked from the
+bottom right of the game page. The WASM variant also answers the shorter `/hilfe`; the VNC
+one does not, because websockify serves files literally, which is why both pages link to
+`hilfe.html`.
+
+The page lives at `hilfe.html` in the repository root since both images serve it. The WASM
+Docker build only has `wasm/` as its context, so `build-bundle.sh` copies it in; the copy
+at `wasm/hilfe.html` is generated and ignored by git.
+
 ## Savegames
 
 The game mounts two DOS drives:

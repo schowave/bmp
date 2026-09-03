@@ -48,6 +48,7 @@ COPY --chown=bmp:bmp bmp /dos/bmp
 # Layer 4: Konfiguration (ändert sich gelegentlich)
 COPY --chown=bmp:bmp dosbox.conf /home/bmp/.dosbox/dosbox.conf
 COPY player.html /usr/share/novnc/player.html
+COPY hilfe.html /usr/share/novnc/hilfe.html
 COPY images/favicon.png /usr/share/novnc/favicon.png
 COPY VERSION /usr/share/novnc/version.txt
 

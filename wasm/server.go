@@ -68,11 +68,18 @@ var immerNachfragen = map[string]bool{
 	"/index.html":  true,
 	"/bmp.jsdos":   true,
 	"/version.txt": true,
+	"/hilfe.html":  true,
 }
 
 func staticHandler() http.Handler {
 	dateien := http.FileServer(http.Dir(publicDir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// /hilfe ist die schoenere Adresse, ausgeliefert wird dieselbe Datei. In der
+		// VNC-Variante gibt es diese Abkuerzung nicht, weil dort websockify die Dateien
+		// ausliefert; deshalb verlinken beide Seiten auf hilfe.html, was ueberall geht.
+		if r.URL.Path == "/hilfe" {
+			r.URL.Path = "/hilfe.html"
+		}
 		if immerNachfragen[r.URL.Path] {
 			w.Header().Set("Cache-Control", "no-cache")
 		}

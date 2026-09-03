@@ -45,4 +45,8 @@ cp "$SCRIPT_DIR/dosbox.conf" "$TMPDIR_BUILD/.jsdos/dosbox.conf"
 # Copy VERSION file for the web UI
 cp "$PROJECT_ROOT/VERSION" "$SCRIPT_DIR/version.txt"
 
+# Die Hilfeseite liegt im Projektwurzelverzeichnis, weil beide Images sie ausliefern.
+# Der Docker-Build der WASM-Variante hat aber nur wasm/ als Kontext, deshalb hier kopieren.
+cp "$PROJECT_ROOT/hilfe.html" "$SCRIPT_DIR/hilfe.html"
+
 echo "Created $OUTPUT ($(du -h "$OUTPUT" | cut -f1))"

@@ -1,12 +1,15 @@
 .PHONY: run build clean docker run-docker push
 
-build: bmp.jsdos favicon.png
+build: bmp.jsdos favicon.png hilfe.html
 
 bmp.jsdos: build-bundle.sh dosbox.conf ../VERSION ../bmp/*
 	./build-bundle.sh
 
 favicon.png: ../images/favicon.png
 	cp ../images/favicon.png .
+
+hilfe.html: ../hilfe.html
+	cp ../hilfe.html .
 
 docker: build
 	podman build -t bmp-wasm .
@@ -26,4 +29,4 @@ run: build
 	python3 -m http.server 8000
 
 clean:
-	rm -f bmp.jsdos version.txt favicon.png
+	rm -f bmp.jsdos version.txt favicon.png hilfe.html

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bundesliga Manager Professional — Kompaktreferenz</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+    :root {
+        --grund: #17181a; --flaeche: #1f2124; --linie: #32353a;
+        --text: #e6e7e9; --leise: #9a9ea6; --akzent: #7fb3ff; --warn: #f0a860; --gut: #7ec98a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--grund); color: var(--text);
+           font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    a { color: var(--akzent); }
+    .huelle { max-width: 1180px; margin: 0 auto; padding: 0 24px 80px; display: grid;
+              grid-template-columns: 260px 1fr; gap: 48px; align-items: start; }
+
+    header { grid-column: 1 / -1; padding: 48px 0 28px; border-bottom: 1px solid var(--linie); }
+    h1 { margin: 0 0 6px; font-size: 27px; letter-spacing: -.01em; }
+    header p { margin: 0; color: var(--leise); font-size: 14px; max-width: 70ch; }
+
+    nav { position: sticky; top: 24px; font-size: 14px; }
+    nav ol { list-style: none; margin: 0; padding: 0; counter-reset: n; }
+    nav li { counter-increment: n; margin: 0 0 2px; }
+    nav a { display: block; padding: 5px 10px; border-radius: 5px; color: var(--leise); text-decoration: none; }
+    nav a::before { content: counter(n) ". "; color: #63666d; }
+    nav a:hover { background: var(--flaeche); color: var(--text); }
+
+    main { min-width: 0; }
+    section { padding: 34px 0; border-bottom: 1px solid var(--linie); }
+    section:last-child { border-bottom: 0; }
+    h2 { font-size: 20px; margin: 0 0 14px; scroll-margin-top: 20px; }
+    h3 { font-size: 16px; margin: 26px 0 8px; color: #cfd2d7; }
+    p, ul, ol { max-width: 78ch; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 3px 0; }
+    code { background: var(--flaeche); border: 1px solid var(--linie); border-radius: 4px;
+           padding: 1px 5px; font: 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    strong { color: #fff; }
+
+    .tabelle { overflow-x: auto; margin: 14px 0; }
+    table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+    th { color: var(--leise); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+    tbody tr:hover { background: #1c1e21; }
+
+    blockquote { margin: 14px 0; padding: 12px 16px; background: var(--flaeche);
+                 border-left: 3px solid var(--linie); border-radius: 0 5px 5px 0;
+                 color: #cfd2d7; max-width: 78ch; }
+    blockquote p { margin: 0; }
+    blockquote cite { display: block; margin-top: 6px; color: var(--leise); font-size: 13px; font-style: normal; }
+
+    .hinweis { margin: 14px 0; padding: 12px 16px; border-radius: 6px; max-width: 78ch;
+               border: 1px solid var(--linie); background: var(--flaeche); }
+    .hinweis p { margin: 0; }
+    .hinweis > strong:first-child { display: block; margin-bottom: 4px; font-size: 13px;
+               text-transform: uppercase; letter-spacing: .04em; }
+    .community { border-color: #5a4526; background: #241d13; }
+    .community > strong:first-child { color: var(--warn); }
+    .handbuch { border-color: #2c4a33; background: #16211a; }
+    .handbuch > strong:first-child { color: var(--gut); }
+
+    .legende { grid-column: 1 / -1; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; }
+    .legende span { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--linie); color: var(--leise); }
+    .legende .l-hb { border-color: #2c4a33; color: var(--gut); }
+    .legende .l-co { border-color: #5a4526; color: var(--warn); }
+
+    footer { grid-column: 1 / -1; padding-top: 28px; color: var(--leise); font-size: 13px; }
+
+    @media (max-width: 860px) {
+        .huelle { grid-template-columns: 1fr; gap: 20px; padding: 0 18px 60px; }
+        nav { position: static; border-bottom: 1px solid var(--linie); padding-bottom: 14px; }
+        nav ol { columns: 2; column-gap: 18px; }
+    }
+    @media print {
+        body { background: #fff; color: #000; }
+        nav, .legende { display: none; }
+        .huelle { display: block; max-width: none; }
+    }
+</style>
+</head>
+<body>
+<div class="huelle">
+
+<header>
+    <h1>Bundesliga Manager Professional — Kompaktreferenz</h1>
+    <p>Zusammengestellt aus dem Originalhandbuch (Software 2000, Stand Oktober 1991) sowie
+       Community-Quellen. Angaben aus dem Handbuch sind belastbar; Community-Angaben sind
+       als solche markiert, weil sie sich teils widersprechen und teils versionsabhängig sind.</p>
+</header>
+
+<div class="legende">
+    <span class="l-hb">Grün = Handbuch, belastbar</span>
+    <span class="l-co">Orange = Community, unbestätigt</span>
+    <span>Es gibt kein offizielles Tipps-Kapitel für BMP — alles über die Bedienungsanleitung hinaus stammt aus Foren.</span>
+</div>
+
+<nav>
+    <ol>
+        <li><a href="#grenzwerte">Die harten Grenzwerte</a></li>
+        <li><a href="#finanzen">Finanzen</a></li>
+        <li><a href="#stadion">Stadion und Eintrittspreis</a></li>
+        <li><a href="#werbung">Werbeverträge</a></li>
+        <li><a href="#kader">Kader und Verträge</a></li>
+        <li><a href="#training">Training</a></li>
+        <li><a href="#lager">Trainingslager</a></li>
+        <li><a href="#aufstellung">Aufstellung und Einsatz</a></li>
+        <li><a href="#pokale">Pokale als Einnahmequelle</a></li>
+        <li><a href="#modi">Spielmodi und Spinnweben</a></li>
+        <li><a href="#v20">Speziell Version 2.0</a></li>
+        <li><a href="#start">Startcheckliste</a></li>
+        <li><a href="#kontrolle">Laufende Kontrollpunkte</a></li>
+    </ol>
+</nav>
+
+<main>
+
+<section id="grenzwerte">
+    <h2>1. Die harten Grenzwerte</h2>
+    <p>Diese Zahlen entscheiden über Erfolg und Scheitern. Alle aus dem Handbuch.</p>
+    <div class="tabelle"><table>
+        <thead><tr><th>Größe</th><th>Wert</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Lizenzverlust</strong></td><td>Kontostand schlechter als <strong>−2.000.000 DM</strong> (Prüfung am Saisonende)</td></tr>
+        <tr><td>Folge des Lizenzverlusts</td><td>Neustart mit 500.000 DM Startkapital</td></tr>
+        <tr><td>Sollzinsen (Konto im Minus)</td><td>10 %, <strong>monatlich</strong> abgezogen</td></tr>
+        <tr><td>Habenzinsen (Konto im Plus)</td><td>1,5 %</td></tr>
+        <tr><td>Kredit maximal (Bank)</td><td>4 Mio. DM</td></tr>
+        <tr><td>Kredit maximal (Mitspieler)</td><td>1 Mio. DM, Zinssatz 3–13 %</td></tr>
+        <tr><td>Eintrittspreis</td><td>5 bis 25 DM</td></tr>
+        <tr><td>Stadionkapazität maximal</td><td>130.000 Plätze</td></tr>
+        <tr><td>Kader maximal</td><td>24 Spieler (inkl. der auf dem Transfermarkt)</td></tr>
+        <tr><td>Gleichzeitig auf dem Transfermarkt</td><td>max. 3 eigene Spieler</td></tr>
+        <tr><td>Vertragsdauer</td><td>1 bis 4 Jahre</td></tr>
+        <tr><td>Werbeflächen</td><td>6 Banden + Trikot, aus 10 Firmen</td></tr>
+        <tr><td>Werbeausgaben</td><td>2.500 bis 50.000 DM, in 2.500er-Schritten</td></tr>
+        <tr><td>Trainingsbälle links (Kondition/Spiel/Schuss/Taktik)</td><td><strong>20</strong></td></tr>
+        <tr><td>Trainingsbälle rechts (Tor/Abwehr/Mittelfeld/Angriff)</td><td><strong>10</strong></td></tr>
+        <tr><td>Trainingsintensität</td><td>1 Ball (schlaff) bis 10 Bälle (10 Stunden/Tag)</td></tr>
+        <tr><td>Trainingslager</td><td>8 Orte, saisonbedingt nicht immer alle offen</td></tr>
+        <tr><td>Auswechslungen</td><td>1 Torwart + 2 Feldspieler</td></tr>
+        <tr><td>Saisonende</td><td>Bundesliga 34. Spieltag, 2. Liga + Amateur-Oberliga 38. Spieltag</td></tr>
+        <tr><td>Winterpause</td><td>ab 2. Dezember bis 21. Februar</td></tr>
+        </tbody>
+    </table></div>
+    <p>Gefeuert werden kann man in BMP nicht — die einzige echte Gefahr ist die
+       −2-Millionen-Grenze.</p>
+</section>
+
+<section id="finanzen">
+    <h2>2. Finanzen</h2>
+    <h3>Wie das Geld fließt</h3>
+    <p>Einnahmen und Ausgaben werden <strong>am letzten Tag des Monats</strong> verbucht. Während des
+       Monats steigt der Kontostand durch Zuschauereinnahmen — dieser hohe Stand ist
+       trügerisch und wird zum Monatsende durch die Ausgaben relativiert.</p>
+    <p>Fixer, nur indirekt beeinflussbarer Teil: Reisekosten, Spenden, TV-Übertragungsrechte.
+       Indirekt, weil Mannschaftsstärke und Tabellenplatz in die Berechnung einfließen.</p>
+    <p>Variabler, von dir bestimmter Teil: Spielergehälter, Jugendarbeit, Werbeausgaben,
+       Sponsoreinnahmen, Kredite.</p>
+    <blockquote>
+        <p>„Die Ausgaben liegen in der Regel immer weit über den Einnahmen. Der restliche
+           Deckungsbetrag muss über die Eintrittsgelder der Spiele aufgebracht werden."</p>
+        <cite>Handbuch</cite>
+    </blockquote>
+    <p>Das ist die zentrale Spielmechanik: <strong>Zuschauereinnahmen sind strukturell der
+       Ausgleichsposten</strong>, nicht ein Extra.</p>
+
+    <h3>Der „benötigte Zuschauerschnitt"</h3>
+    <p>Steht in Manager → Statistik. Die Zahl ist zuverlässig berechnet: alle Ein- und
+       Ausgaben inklusive Soll- und Habenzinsen auf ein Jahr hochgerechnet. Sie erscheint
+       hoch, weil Winter- und Sommerpause mitgerechnet sind, in denen Gehälter und
+       Kreditzinsen weiterlaufen, aber keine Zuschauer kommen.</p>
+    <div class="hinweis handbuch"><strong>Wichtig</strong>
+        <p>Der benötigte Schnitt ist keine feste Hürde, sondern hängt am Eintrittspreis.
+           Höherer Preis → niedrigerer benötigter Schnitt. Niedrigerer Preis → höherer
+           benötigter Schnitt.</p></div>
+</section>
+
+<section id="stadion">
+    <h2>3. Stadion und Eintrittspreis</h2>
+    <p>Im Menüpunkt Stadion möglich:</p>
+    <ul>
+        <li>Kapazität ausbauen (Sitz- oder Stehplätze), in 1000er-Schritten bis 130.000</li>
+        <li>vorhandene Plätze überdachen</li>
+        <li>Flutlichtmasten und Anzeigetafel errichten (klein / mittel / groß)</li>
+        <li>Zustand und Komfort verbessern (mangelhaft bis sehr gut)</li>
+        <li>durchschnittlichen Eintrittspreis festlegen</li>
+    </ul>
+    <p>Die Ausstattung wirkt sich auf Zuschauerzahlen <strong>und Werbepartner</strong> aus, auch wenn
+       das nicht immer direkt auffällt.</p>
+    <div class="hinweis handbuch"><strong>Achtung bei Bauaufträgen</strong>
+        <p>Stornierst du einen bereits erteilten Auftrag, kannst du für unbestimmte Zeit
+           keinen weiteren Bau derselben Art durchführen. Laufende Aufträge erkennst du an
+           hellblauer Schrift unter „Nach Ausbau"; der Fertigstellungstermin wird nicht
+           angegeben.</p></div>
+
+    <h3>Eintrittspreis — die wichtigste Einzelentscheidung</h3>
+    <p>Der Preis ist ein Mittelwert über Steh-, Sitz- und überdachte Plätze, einstellbar
+       von 5 bis 25 DM.</p>
+    <blockquote>
+        <p>„Leichte Schwankungen können jedoch schon fatale Folgen auf die Zuschauerzahl haben."</p>
+        <cite>Handbuch</cite>
+    </blockquote>
+    <p>Faustregel aus dem Handbuch: Je stärker der nächste Heimgegner und je besser die
+       eigene Mannschaft, desto höher die Akzeptanz des Publikums für einen höheren Preis.
+       Beim Aufstieg in eine höhere Liga muss der Preis neu überdacht werden, weil gestiegene
+       Fixkosten höhere Zuschauereinnahmen erfordern.</p>
+    <div class="hinweis community"><strong>Community, unbestätigt</strong>
+        <p>Formel <code>690.000 ÷ Anzahl der Plätze = anzusetzender Preis</code>. Dahinter steht
+           die Behauptung, die Zuschauereinnahmen seien bei etwa 700.000 DM gedeckelt,
+           unabhängig von der Stadiongröße. Ebenfalls berichtet: der Preis begrenzt die
+           Zuschauerzahl nach oben, bei Preis 15 bei etwa 46.500. Beides steht <strong>nicht</strong>
+           im Handbuch — behandle es als Hypothese und teste es.</p></div>
+</section>
+
+<section id="werbung">
+    <h2>4. Werbeverträge</h2>
+    <p>Neben den Zuschauereinnahmen die zweite tragende Säule. Laut Handbuch muss ein
+       Großteil des Etats darüber finanziert werden.</p>
+    <ul>
+        <li>Die angezeigte Zahl ist die <strong>monatliche Zahlung</strong> (nicht die Gesamtsumme über
+            die Laufzeit). Damit ist eine lange in Foren offene Frage geklärt.</li>
+        <li>Neue Angebote kommen etwa <strong>alle 4 Wochen</strong>.</li>
+        <li>Ein geschlossener Vertrag ist in der Laufzeit nicht mehr rückgängig zu machen.</li>
+        <li>Restlaufzeit abfragen: die jeweilige Bande bzw. das Trikot anklicken.</li>
+        <li><strong>Läuft ein Vertrag ab, bekommst du für die freie Fläche nur noch ein Zehntel</strong>
+            des vorigen Betrages. Lass keine Fläche dauerhaft leer.</li>
+        <li>TV-Übertragungsrechte sind nicht direkt beeinflussbar; sie richten sich nach dem
+            öffentlichen Interesse an deinem Verein.</li>
+        <li>Werbeausgaben erhöhen das öffentliche Ansehen des Clubs.</li>
+    </ul>
+    <p><strong>Strategie:</strong> Handbuch und Community sind hier einig — Verträge zeitnah nach großen
+       Erfolgen abschließen, weil die Angebote dann am besten sind. Das Handbuch ergänzt:
+       „Manchmal lohnt es sich also, etwas länger auf ein besseres Angebot zu warten." Aber
+       zu schlechte Verträge beeinträchtigen die Finanzlage langfristig, und jeder Monat
+       ohne Vertrag ist verlorenes Geld.</p>
+    <div class="hinweis community"><strong>Community, unbestätigt</strong>
+        <p>Werbeausgaben konstant auf 50.000 DM, das zahlt sich durch bessere Verträge aus.</p></div>
+</section>
+
+<section id="kader">
+    <h2>5. Kader und Verträge</h2>
+    <h3>Spielerstärke</h3>
+    <p>Die Stärke besteht aus drei Werten: <strong>Kondition, Technik, Form</strong>, dazu der
+       Durchschnitt in Klammern. In den Stärke-Tabellen (Menü Vereine) lässt sich nach
+       Gesamt-, Abwehr-, Mittelfeld- oder Sturmstärke sortieren — so findest du deine
+       Schwachstellen.</p>
+
+    <h3>Vertragsmechanik</h3>
+    <ul>
+        <li>Die Vertragsdauer wird <strong>nach jeder Saison</strong> um ein Jahr verringert, nicht ein
+            Jahr nach Abschluss.</li>
+        <li>Bei längerer Vertragsdauer steigt das geforderte Monatsgehalt <strong>progressiv</strong>,
+            nicht proportional — weil das Spiel mit einer Leistungssteigerung rechnet.</li>
+        <li><strong>Der große Haken langer Verträge:</strong> Willst du den Spieler verkaufen, musst du
+            ihm eine Ablösesumme zahlen, um ihn freizukaufen. Das schmälert den Verkaufserlös
+            erheblich. Lange Verträge sind also günstig im Halten, teuer im Trennen.</li>
+        <li>Gibst du eine Vertragsdauer ein, schlägt der Computer ein angemessenes Gehalt vor
+            (großzügig bemessene Orientierungshilfe, der Spieler kann anderer Meinung sein).</li>
+        <li>Lehnt ein Spieler ab, verhandelt er einige Wochen nicht mehr.</li>
+        <li>Zum Saisonende wird mit jedem Spieler, dessen Vertrag ausgelaufen ist, automatisch
+            noch einmal verhandelt. Scheitert das, geht er für eine bescheidene Ablösesumme.</li>
+        <li>Handbuch-Empfehlung: sich möglichst früh um Verlängerungen bemühen und Spieler, die
+            man unbedingt halten will, großzügiger ausstatten.</li>
+    </ul>
+
+    <h3>Die Farbcodes in der Vertragsliste</h3>
+    <p>Diese ersparen dir jedes Ratespiel:</p>
+    <div class="tabelle"><table>
+        <thead><tr><th>Markierung</th><th>Bedeutung</th></tr></thead>
+        <tbody>
+        <tr><td><strong>rote Zeile</strong></td><td>Spieler setzt sich mit Vertragsende zur Ruhe — danach nicht mehr verfügbar</td></tr>
+        <tr><td><strong>blaue Zeile</strong></td><td>momentan nicht verhandlungsbereit (hat zuvor abgelehnt)</td></tr>
+        <tr><td><strong>weißer Spielername</strong></td><td>Spieler bietet dir von sich aus eine Verlängerung an</td></tr>
+        </tbody>
+    </table></div>
+    <p>In der Aufstellungsliste zusätzlich:</p>
+    <div class="tabelle"><table>
+        <thead><tr><th>Markierung</th><th>Bedeutung</th></tr></thead>
+        <tbody>
+        <tr><td>Formtendenz rot</td><td>Spieler ist ziemlich erschöpft</td></tr>
+        <tr><td>Nummer blau</td><td>Reservespieler</td></tr>
+        <tr><td>Status rot</td><td>Verletzung oder Rote-Karten-Sperre</td></tr>
+        <tr><td>weißer Name (Transfermarkt)</td><td>Angebot eines anderen Vereins liegt vor</td></tr>
+        </tbody>
+    </table></div>
+    <p>Formtendenz: <code>+</code> = physisches Hoch, <code>−</code> = kommendes Formtief,
+       <code>o</code> = normal.</p>
+
+    <h3>Transfermarkt</h3>
+    <ul>
+        <li>Der angezeigte Preis ist <strong>nur eine Einschätzung, kein festes Angebot</strong>. Wer
+            sicher gehen will, bietet etwas mehr als gefordert.</li>
+        <li>Ein gescheitertes Angebot sperrt dich für einige Spieltage bei diesem Verein.</li>
+        <li><strong>Ausleihen:</strong> Kaufpreis wird durch 3 geteilt, der Spieler geht nach der Saison
+            zurück, es gibt keine Vertragsverhandlung — das Gehalt setzt der Computer nach
+            Stärke. Günstigste Variante für Lückenfüller bei knapper Kasse.</li>
+        <li>Der Spielerwert berechnet sich aus Kondition, Technik, Form, Alter, erzielten Toren,
+            absolvierten Spielen sowie Gelben und Roten Karten.</li>
+    </ul>
+
+    <div class="hinweis community"><strong>Community, unbestätigt</strong>
+        <p>Gehalt pro Spieler sollte 50.000 DM nicht übersteigen. Kadergröße 15–17 Spieler
+           reicht; eine andere Quelle sagt 14–15 und empfiehlt, den Rest gleich zu Beginn zu
+           verkaufen. Zu Spielbeginn alle Verträge auf 4 Jahre verlängern: die Spieler werden
+           durch Trainingslager schnell stärker, das Gehalt bleibt aber erst einmal gleich —
+           bei ein oder zwei Aufstiegen spielen sie praktisch zum Nulltarif. In der Bundesliga
+           junge Spieler mit Stärke um 70 kaufen, ebenfalls mit 4-Jahres-Vertrag. Auf eine
+           Mischung aus Topverdienern und jungen preiswerten Talenten achten. Berichtete
+           Altersgrenzen: Feldspieler hören mit 33 auf, Torhüter mit 36. Das Handbuch bestätigt
+           nur, dass Spieler aus Altersgründen gehen und dass die rote Zeile das ankündigt,
+           nennt aber keine Zahlen.</p></div>
+
+    <div class="hinweis handbuch"><strong>Wichtig</strong>
+        <p>Ein kleinerer Kader spart doppelt — Gehalt <em>und</em> Trainingslagerkosten, denn die
+           richten sich nach der Kadergröße.</p></div>
+</section>
+
+<section id="training">
+    <h2>6. Training</h2>
+    <h3>Aufteilung</h3>
+    <p>Links 20 Bälle auf <strong>Kondition, Spiel, Schuss, Taktik</strong> — was trainiert wird.
+       Rechts 10 Bälle auf <strong>Tor, Abwehr, Mittelfeld, Angriff</strong> — wer trainiert.
+       Die Intensität ist separat und verbraucht keine Bälle aus diesen Pools.</p>
+    <p>Die Voreinstellung ist relativ ausgewogen und wirkt auf Kondition, Technik und Form
+       etwa gleich. Das Handbuch sagt ausdrücklich, dass die vier Trainingsarten
+       unterschiedlichen Einfluss auf die Stärkewerte haben, verrät aber <strong>nicht welchen</strong> —
+       das muss man ausprobieren.</p>
+    <div class="hinweis community"><strong>Community, unbestätigt</strong>
+        <p>Aus alten Amiga-Sammlungen: Kondition 4, Schuss 6, Taktik 4, Intensität 5 — Tor 1,
+           Abwehr 3, Mittelfeld 3, Angriff 3. Auffällig: „Spiel" fehlt in dieser Liste komplett,
+           sie verteilt links also nur 14 der 20 Bälle. Die restlichen 6 würde ich auf Kondition
+           und Spiel geben.</p></div>
+
+    <h3>Die drei grünen Balken (K / T / E) — das wichtigste Instrument</h3>
+    <p><strong>K und T</strong> zeigen das Verhältnis von Kondition zu Technik in der Mannschaft. Das
+       Verhältnis sollte etwa ausgeglichen sein, leichte Vorteile in der Technik sind unter
+       Umständen wünschenswert.</p>
+    <blockquote>
+        <p>„Ragt der Konditions-Balken über den Technik-Balken, wird die Verletzungsgefahr sowie
+           die Spiel-Härte rapide steigen."</p>
+        <cite>Handbuch, dort eigens hervorgehoben</cite>
+    </blockquote>
+    <p>Hält das länger an, besteht das Team bald nur noch aus einem Lazarett.
+       <strong>Das ist die eigentliche Verletzungsursache im Spiel</strong> — nicht primär die Intensität.
+       Prüfe diesen Balken bei jeder Trainingsänderung.</p>
+    <p><strong>E</strong> ist die Erschöpfung der Gesamtmannschaft als Absolutwert. Sollte nicht in große
+       Höhen vordringen; senken durch geringere Intensität oder Spielpausen.</p>
+
+    <h3>Intensität — die offene Streitfrage</h3>
+    <p>Handbuch: Je intensiver das Training, desto größer Erschöpfung und
+       Verletzungsanfälligkeit. „Auf der anderen Seite kann es für die Stärke der Mannschaft
+       (<strong>zumindest kurzfristig!</strong>) vorteilhaft sein."</p>
+    <p>Die Klammer ist entscheidend und wird in den Foren gern übergangen. Dort heißt es:
+       Intensität auf volle Pulle, die Spieler bauen schneller auf, die Verletzungsgefahr
+       steigt „nur unwesentlich". Die alte Zahlenempfehlung nennt dagegen 5.</p>
+    <p><strong>Praktischer Kompromiss:</strong> hohe Intensität in Sommer- und Winterpause und in
+       Aufbauphasen, moderate Intensität bei Doppelbelastung durch Pokalwettbewerbe — und in
+       jedem Fall den K-Balken im Auge behalten.</p>
+
+    <h3>Erschöpfung senken</h3>
+    <p>Zwei Wege: den Spieler pausieren lassen oder das Training entsprechend einstellen.
+       Starke Erschöpfung begünstigt Verletzungen. Den genauen Grad zeigt das Spieler-Info
+       (rechte Maustaste auf den Spieler in Verträge oder Transfermarkt).</p>
+
+    <h3>Jugendarbeit</h3>
+    <p>Solide Jugendarbeit kann sich nach einigen Jahren auszahlen, indem Spieler aus der
+       Jugendmannschaft in den Kader aufsteigen — junge, preiswerte Talente. Der „Aufstieg
+       eines Spielers aus dem Jugendkader" ist ein ausdrückliches Saisonende-Ereignis.</p>
+    <div class="hinweis community"><strong>Community, widersprüchlich</strong>
+        <p>Es gibt Berichte, die Option sei je nach Version verbuggt und es steige nie ein
+           Spieler auf, egal wie viel Geld man investiert. Andere Spieler berichten das
+           Gegenteil. Prüfe über zwei oder drei Saisons, ob es bei dir funktioniert, und
+           streiche den Posten, wenn nicht.</p></div>
+</section>
+
+<section id="lager">
+    <h2>7. Trainingslager</h2>
+    <p>Acht Orte, bewertet mit ein bis fünf Bällen in den Kategorien <strong>Erholungswert,
+       Fitnessausrüstung, Platzqualität, Raumausstattung, Verpflegung</strong>. Der Einfluss auf die
+       Mannschaft (Stärken, Erschöpfung) richtet sich nach der Ausstattung.</p>
+    <ul>
+        <li>Nicht immer sind alle Lager geöffnet (saisonbedingt).</li>
+        <li>Zu kurze Intervalle sind nicht erlaubt — der Menüpunkt ist dann gesperrt und mit
+            einem Spinnennetz markiert.</li>
+        <li><strong>Die Kosten richten sich nach Kadergröße und Art des Lagers.</strong> Spieler auf dem
+            Transfermarkt fahren nicht mit und kosten also nichts.</li>
+        <li>Das Handbuch nennt es eine wirkungsvolle Methode, die Teamstärke zu erhöhen; der
+            Effekt ist direkt in der Stärke-Tabelle ablesbar.</li>
+        <li>Aber: ein Lager kann die Spieler auch Kraft kosten, abhängig von der Art.</li>
+    </ul>
+    <div class="hinweis community"><strong>Community-Warnung</strong>
+        <p>„Alle 2 Wochen Luxushotel" gilt als klarer Fehler — das ruiniert die Finanzen.
+           Zusammen mit dem 4-Jahres-Vertragstrick sind Trainingslager aber der eigentliche
+           Entwicklungsmotor des Spiels: billiger Spieler, langer Vertrag, Lager → starker
+           Spieler zum alten Gehalt.</p></div>
+</section>
+
+<section id="aufstellung">
+    <h2>8. Aufstellung und Einsatz</h2>
+    <p>Zu Spielbeginn ist die automatische Aufstellung (AA) aktiv, mit drei Varianten:</p>
+    <ul>
+        <li>2-4-4 — defensiv</li>
+        <li>2-5-3 — normal</li>
+        <li>3-4-3 — offensiv</li>
+    </ul>
+    <p>Die AA setzt die stärksten Spieler ein, kümmert sich aber nicht um die Positionierung.
+       Im Anfängerlevel ist das egal, im Normal-Level nicht.
+       <strong>Diese Regeln beachtet die Automatik nicht zuverlässig:</strong></p>
+    <ul>
+        <li>Linksfüßler links, Rechtsfüßler rechts aufstellen (<code>L</code>, <code>R</code>,
+            <code>L+R</code> steht in der Statuszeile)</li>
+        <li>vertikale Reihen der Aufstellung möglichst nicht frei lassen</li>
+        <li>den Torwart immer in der Mitte der untersten Zeile platzieren, sonst steht das Tor offen</li>
+        <li>mindestens je zwei Spieler in Abwehr, Mittelfeld und Angriff</li>
+    </ul>
+    <p>AA ausschalten: ein Ball-Symbol auf dem Spielfeld oder den Marmorhintergrund anklicken.
+       Positionieren: erst das Ball-Symbol anklicken, dann die Zielposition; belegte Positionen
+       werden getauscht.</p>
+    <p><strong>Einsatz-Balken:</strong> höherer Einsatz = höhere Wahrscheinlichkeit von Verletzungen und
+       Karten, Erschöpfung steigt. Lässt sich auch während des Spiels verstellen — sinnvoll,
+       wenn man kurz vor Schluss knapp zurückliegt oder eine Führung verteidigen will.</p>
+    <p>11 Feldspieler plus maximal 4 nominierte Ersatzspieler; ausgewechselt werden dürfen
+       1 Torwart und 2 Feldspieler.</p>
+    <p><strong>Zeitungsnoten:</strong> Nach jedem Spiel stehen in Klammern hinter den Spielernamen
+       Schulnoten (1 = sehr gut, 6 = ungenügend). Der Text wird aus dem tatsächlichen
+       Spielverlauf generiert, ist also echtes Feedback und nicht Dekoration.</p>
+</section>
+
+<section id="pokale">
+    <h2>9. Pokale als Einnahmequelle</h2>
+    <p>Das Handbuch nennt DFB-Pokal und Europapokal wegen des starken Zuschauerinteresses
+       ausdrücklich eine willkommene Einnahmequelle mit positiver Wirkung auf die Finanzen.
+       Die Einnahmen aus DFB-Pokalspielen werden zwischen beiden Gegnern gleichmäßig geteilt.</p>
+    <p>Wichtige Regeldetails:</p>
+    <ul>
+        <li>DFB-Pokal: 32 statt 64 Teams in Runde 1; bei Bundesligist gegen Amateurligist hat
+            der niedrigklassige Verein Heimrecht. Unentschieden → 2×15 min Verlängerung →
+            Elfmeterschießen.</li>
+        <li>Europapokal: Hin- und Rückspiel. Bei gleicher Tordifferenz entscheiden die auswärts
+            erzielten Tore.</li>
+        <li>Die Stärken der europäischen Gegner orientieren sich an den realen Vorbildern.</li>
+        <li>Serien und Rekorde in der Statistik beziehen sich <strong>nur auf Ligaspiele</strong>, nicht
+            auf Pokale — ebenso die Zuschauerstatistik.</li>
+    </ul>
+    <div class="hinweis community"><strong>Community</strong>
+        <p>Pokalwettbewerbe müssen weit gespielt werden, und daran sollte man seine
+           Spielergehälter ausrichten.</p></div>
+</section>
+
+<section id="modi">
+    <h2>10. Spielmodi und Spinnweben</h2>
+    <p>Beim Start einstellbar:</p>
+    <ul>
+        <li><strong>Anfängerlevel</strong> — höheres Startkapital, gutmütige Mannschaftsverwaltung,
+            Aufstellungsfehler bleiben folgenlos</li>
+        <li><strong>Ewigspiel</strong> — Start in der Amateur-Oberliga, keine Zeitbegrenzung</li>
+        <li><strong>3-Jahres-Spiel</strong> — Start in der Bundesliga, drei Saisons, relativ schwache Teams</li>
+        <li><strong>1-Jahres-Spiel</strong> (beide obigen aus) — Start in der Bundesliga mit deutlich
+            besseren Mannschaften, Ziel Meisterschaft, UEFA-Cup-Teilnahme</li>
+        <li><strong>Historischer Start</strong> — erste Saison 1963 oder 1991</li>
+    </ul>
+    <p>Highscore-Liste nur im 1- und 3-Jahres-Modus. Werbeverträge sind im 1-Jahres-Spiel
+       gesperrt (Partner werden automatisch zugewiesen).</p>
+
+    <h3>Was Spinnweben bedeuten</h3>
+    <p>Drei verschiedene Dinge, und das ist wichtig zu unterscheiden:</p>
+    <ol>
+        <li>ein <strong>leeres Untermenüfeld</strong> — dauerhaft, nicht freischaltbar</li>
+        <li>ein normalerweise gefüllter Punkt, der <strong>momentan nicht anwählbar</strong> ist, z. B.
+            nach einem Trainingslager</li>
+        <li>ein Punkt, der im <strong>aktuellen Spielmodus gesperrt</strong> ist, z. B. die Highscore-Liste
+            im Endlosspiel-Modus</li>
+    </ol>
+    <p>Fall 2 und 3 lösen sich also von selbst bzw. hängen an der Modus-Wahl beim Start.
+       Fall 1 lässt sich durch keinen Cheat und keine Einstellung öffnen — in der
+       Retro-Community wird vermutet, dass Krahe und Onnen die Ideen dafür für den Nachfolger
+       Hattrick aufgespart haben.</p>
+</section>
+
+<section id="v20">
+    <h2>11. Speziell Version 2.0</h2>
+    <p>v2.0 ist die aktuellste Version. Was hier abweicht:</p>
+    <h3>Funktioniert in v2.0</h3>
+    <ul>
+        <li>Einstellungen-Fenster öffnen, Mauszeiger genau in die Mitte des Pfeils im Kästchen
+            „Hauptmenü", dann <code>A</code> → Stärke 99 für alle Spieler und 99.999.999 DM</li>
+        <li>dasselbe mit <code>S</code> → Müdigkeit aller Spieler auf null, beste Form</li>
+        <li>dasselbe mit <code>G</code> → <strong>nur</strong> Geld, ohne die Spielerstärken zu verändern</li>
+    </ul>
+    <p>Der <code>S</code>-Cheat und der <code>G</code>-Cheat sind die brauchbaren: <code>S</code> frischt
+       die Mannschaft auf, <code>G</code> hilft aus einer Finanzklemme, ohne das Spiel komplett zu
+       entwerten. <code>A</code> macht das Spiel kaputt.</p>
+    <h3>Funktioniert in v2.0 NICHT</h3>
+    <ul>
+        <li>der Bank-Zettel-Trick (Klick auf das kleine Schild neben der Tür für 100.000 DM)</li>
+        <li>der 14-Spieler-Trick über doppelte Rückennummern — nur bis Version 1.3</li>
+    </ul>
+    <p>Außerdem unterbindet v2.0 Spielstandsmanipulation über einen eingebauten „Mogel-Guru":
+       Kopieren von Spielstandsdisketten, Bearbeiten mit Disk-Editoren und das Neuladen eines
+       gerade gespeicherten Spiels nach schlechten Leistungen werden erkannt.</p>
+    <div class="hinweis community"><strong>Mods, Community, aktiv gepflegt</strong>
+        <p>Für v2.0 existieren gemoddete Fassungen mit 3-Punkte-Regel, mit 4 statt 2
+           Auswechselspielern und mit aktuellen Datensätzen bis Saison 2026/27. Fundort: das
+           BMP-Unterforum auf wasserlasser.com (Registrierung erforderlich, ca. 290 Themen und
+           2.000 Beiträge — das größte BMP-Archiv im Netz).</p></div>
+    <div class="hinweis handbuch"><strong>Hinweis zur Quelle</strong>
+        <p>Das gelesene Handbuch ist die Fassung von Oktober 1991, also für v1.x. Zum
+           Retail-Paket gehörte ein separates <strong>Addendum</strong>, das die Änderungen nachträgt —
+           das ist hier nicht eingearbeitet. Einzelne Zahlen können in v2.0 abweichen.</p></div>
+</section>
+
+<section id="start">
+    <h2>12. Startcheckliste für eine neue Karriere</h2>
+    <ol>
+        <li>Modus wählen — die Spinnweben-Sperren hängen daran und sind später nicht änderbar</li>
+        <li>Kader auf 15–17 Spieler reduzieren, den Rest sofort verkaufen (bringt Startkapital)</li>
+        <li>Verträge der Behaltenen auf 4 Jahre — solange das Gehalt noch niedrig ist</li>
+        <li>Alle 6 Banden und das Trikot mit Werbepartnern belegen, keine Fläche leer lassen</li>
+        <li>Werbeausgaben auf 50.000 DM</li>
+        <li>Eintrittspreis passend zur Kapazität setzen und nach jedem Aufstieg neu prüfen</li>
+        <li>Training einstellen, dann <strong>K-gegen-T-Balken kontrollieren</strong></li>
+        <li>Stadion schrittweise ausbauen, Aufträge nicht stornieren</li>
+        <li>Trainingslager gezielt in den Pausen, nicht im Zweiwochenrhythmus</li>
+    </ol>
+</section>
+
+<section id="kontrolle">
+    <h2>13. Laufende Kontrollpunkte</h2>
+    <ul>
+        <li><strong>Jeden Monatswechsel:</strong> Kontostand gegen die −2-Mio-Grenze prüfen</li>
+        <li><strong>Bei jeder Trainingsänderung:</strong> ragt K über T?</li>
+        <li><strong>Alle 4 Wochen:</strong> neue Werbeangebote da?</li>
+        <li><strong>Vor jedem Heimspiel:</strong> Eintrittspreis gegen die Gegnerstärke abwägen</li>
+        <li><strong>Vertragsliste:</strong> rote Zeilen sind Abschiedskandidaten, weiße Namen sind
+            Geschenke — sofort verlängern</li>
+        <li><strong>Nach großen Erfolgen:</strong> Werbeverträge neu verhandeln, Spielerwerte sind
+            jetzt hoch</li>
+        <li><strong>Saisonende:</strong> Verträge laufen automatisch zur Verhandlung an; Lizenzprüfung</li>
+    </ul>
+</section>
+
+</main>
+
+<footer>
+    <a href="/">Zurück zum Spiel</a> ·
+    Kein offizielles Material von Software 2000. Handbuchzitate zur Erläuterung.
+</footer>
+
+</div>
+</body>
+</html>

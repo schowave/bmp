@@ -10,6 +10,7 @@
         #jsdos { flex: 1; overflow: hidden; }
         #version { position: fixed; bottom: 4px; right: 8px; color: rgba(255,255,255,0.3); font: 11px monospace; z-index: 10; pointer-events: none; }
         #slot { pointer-events: auto; user-select: all; cursor: text; }
+        #hilfe { pointer-events: auto; color: rgba(255,255,255,0.45); }
 
         #loader { position: fixed; inset: 0; z-index: 20; background: #1a1a1a; color: #e8e8e8;
                   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -386,6 +387,14 @@
                 kennung.textContent = slot;
                 kennung.title = 'Speicherplatz. Mit ?slot=' + slot + ' auf einem anderen Geraet fortsetzen.';
                 el.appendChild(kennung);
+                el.append(' \u00b7 ');
+                const hilfe = document.createElement('a');
+                hilfe.href = 'hilfe.html';
+                hilfe.target = '_blank';
+                hilfe.rel = 'noopener';
+                hilfe.id = 'hilfe';
+                hilfe.textContent = 'Hilfe';
+                el.appendChild(hilfe);
             });
         }
 
