@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	dataDir    = "/data"
-	publicDir  = "/public"
+	dataDir     = "/data"
+	publicDir   = "/public"
 	maxSaveSize = 4 << 20 // 4 MB
 )
 
@@ -57,8 +57,31 @@ func handleSaves(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Diese Dateien aendern sich mit jedem Release und muessen deshalb bei jedem Aufruf
+// nachgefragt werden. Ohne das cacht der Browser sie heuristisch weiter: die alte
+// bmp.jsdos blieb liegen, und weil die autoexec IM Bundle steckt, lief eine veraltete
+// Laufwerkskonfiguration ohne D:, obwohl die Seite selbst schon aktuell war. Ein
+// no-cache verbietet nicht das Speichern, sondern verlangt nur die Rueckfrage; bei
+// unveraenderter Datei antwortet der FileServer mit 304 und es wird nichts uebertragen.
+var immerNachfragen = map[string]bool{
+	"/":            true,
+	"/index.html":  true,
+	"/bmp.jsdos":   true,
+	"/version.txt": true,
+}
+
+func staticHandler() http.Handler {
+	dateien := http.FileServer(http.Dir(publicDir))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if immerNachfragen[r.URL.Path] {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
+		dateien.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	http.Handle("/", http.FileServer(http.Dir(publicDir)))
+	http.Handle("/", staticHandler())
 	http.HandleFunc("/api/saves/{name}", handleSaves)
 
 	log.Println("listening on :8080")
