@@ -50,6 +50,7 @@ COPY --chown=bmp:bmp bmp /dos/bmp
 
 # Layer 4: Konfiguration (ändert sich gelegentlich)
 COPY --chown=bmp:bmp vnc/dosbox.conf /home/bmp/.dosbox/dosbox.conf
+COPY --chmod=755 vnc/start.sh /usr/local/bin/bmp-start
 COPY vnc/player.html /usr/share/novnc/player.html
 COPY web/hilfe.html /usr/share/novnc/hilfe.html
 COPY web/favicon.png /usr/share/novnc/favicon.png
@@ -58,4 +59,4 @@ COPY VERSION /usr/share/novnc/version.txt
 EXPOSE 8080
 
 USER bmp
-CMD ["sh", "-c", "vncserver :1 -geometry 640x480 -depth 16 -SecurityTypes None -xstartup /home/bmp/.config/tigervnc/xstartup && websockify -D --web=/usr/share/novnc/ 8080 localhost:5901 && tail -f /dev/null"]
+CMD ["/usr/local/bin/bmp-start"]

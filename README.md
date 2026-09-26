@@ -16,6 +16,7 @@ The classic 90s DOS football management game — containerized and playable in t
 - **Persistent savegames** — game saves are stored on the host via Docker volume (`D:` drive in-game)
 - **Auto-updates** — [Watchtower](https://containrrr.dev/watchtower/)-compatible via container labels
 - **Optimized for streaming** — tuned DOSBox config for low-latency VNC (640x480, 16-bit, frameskip)
+- **Idle when unused** — DOSBox is paused while no browser is connected, so the container uses next to no CPU between sessions
 
 ## Quick Start
 
