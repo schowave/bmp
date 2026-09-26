@@ -6,15 +6,15 @@ services:
     ports:
       - "8090:8080"
     volumes:
-      # Anders als vnc/docker-compose.yml (./savegame) ein fester Pfad auf der Synology,
-      # weil dort die bestehenden Spielstaende liegen. Auf einem anderen Host anpassen,
-      # z. B. ./savegame:/data. Wer den Pfad aendert, muss die .sav-Dateien mitnehmen,
-      # sonst startet jeder Slot leer.
+      # Unlike vnc/docker-compose.yml (./savegame), a fixed path on the Synology,
+      # because the existing saves live there. Adjust it on another host, e.g.
+      # ./savegame:/data. Whoever changes the path must move the .sav files along,
+      # otherwise every slot starts empty.
       - /volume1/docker/bmp-saves:/data
-    # Der Server laeuft unprivilegiert als uid 1000 und muss in /data schreiben. Wie in
-    # vnc/docker-compose.yml laeuft er deshalb in der Gruppe 100 (users auf Synology),
-    # der die ACL des Ordners Schreibrechte gibt. Auf einem anderen Host die Gruppe
-    # nehmen, der das Verzeichnis gehoert, oder chown -R 1000:1000 darauf ausfuehren.
+    # The server runs unprivileged as uid 1000 and has to write to /data. As in
+    # vnc/docker-compose.yml it therefore runs in group 100 (users on Synology),
+    # which the folder's ACL grants write access. On another host, use the group
+    # that owns the directory, or run chown -R 1000:1000 on it.
     group_add:
       - "100"
     labels:

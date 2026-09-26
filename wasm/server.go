@@ -59,17 +59,16 @@ func handleSaves(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Schreibt erst in eine temporaere Datei im selben Verzeichnis und benennt sie dann
-// um. Bricht der Vorgang ab - Container gestoppt, Platte voll -, bleibt der alte
-// Spielstand heil, statt halb ueberschrieben liegen zu bleiben. Fuer das Umbenennen
-// reicht Schreibrecht auf das Verzeichnis, auch wenn die alte Datei jemand anderem
-// gehoert.
+// Writes to a temporary file in the same directory first and then renames it. If
+// the operation is interrupted - container stopped, disk full -, the old save stays
+// intact instead of being left half overwritten. Renaming only needs write
+// permission on the directory, even if the old file belongs to someone else.
 func writeAtomic(path string, data []byte) error {
 	tmp, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".*.tmp")
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmp.Name()) // nach dem Rename ein No-op
+	defer os.Remove(tmp.Name()) // a no-op after the rename
 	if _, err := tmp.Write(data); err != nil {
 		tmp.Close()
 		return err
@@ -87,12 +86,12 @@ func writeAtomic(path string, data []byte) error {
 	return os.Rename(tmp.Name(), path)
 }
 
-// Diese Dateien aendern sich mit jedem Release und muessen deshalb bei jedem Aufruf
-// nachgefragt werden. Ohne das cacht der Browser sie heuristisch weiter: die alte
-// bmp.jsdos blieb liegen, und weil die autoexec IM Bundle steckt, lief eine veraltete
-// Laufwerkskonfiguration ohne D:, obwohl die Seite selbst schon aktuell war. Ein
-// no-cache verbietet nicht das Speichern, sondern verlangt nur die Rueckfrage; bei
-// unveraenderter Datei antwortet der FileServer mit 304 und es wird nichts uebertragen.
+// These files change with every release and must therefore be revalidated on every
+// request. Without that, the browser keeps caching them heuristically: the old
+// bmp.jsdos stayed around, and because the autoexec sits IN the bundle, an outdated
+// drive configuration without D: ran, even though the page itself was already
+// current. no-cache does not forbid storing, it only requires revalidation; if the
+// file is unchanged, the FileServer answers with 304 and nothing is transferred.
 var immerNachfragen = map[string]bool{
 	"/":            true,
 	"/index.html":  true,
@@ -104,9 +103,9 @@ var immerNachfragen = map[string]bool{
 func staticHandler() http.Handler {
 	dateien := http.FileServer(http.Dir(publicDir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// /hilfe ist die schoenere Adresse, ausgeliefert wird dieselbe Datei. In der
-		// VNC-Variante gibt es diese Abkuerzung nicht, weil dort websockify die Dateien
-		// ausliefert; deshalb verlinken beide Seiten auf hilfe.html, was ueberall geht.
+		// /hilfe is the nicer address; the same file is served. The VNC variant has no
+		// such shortcut because websockify serves the files there; that is why both pages
+		// link to hilfe.html, which works everywhere.
 		if r.URL.Path == "/hilfe" {
 			r.URL.Path = "/hilfe.html"
 		}
@@ -121,9 +120,9 @@ func main() {
 	http.Handle("/", staticHandler())
 	http.HandleFunc("/api/saves/{name}", handleSaves)
 
-	// Ohne Timeouts haelt eine Verbindung, die nie fertig sendet, ihre Goroutine
-	// beliebig lange. Die Grenzen sind grosszuegig, weil ein Spielstand bis 4 MB gross
-	// sein kann und bmp.jsdos auch ueber eine langsame Leitung durchkommen soll.
+	// Without timeouts, a connection that never finishes sending holds its goroutine
+	// for as long as it likes. The limits are generous because a save can be up to
+	// 4 MB and bmp.jsdos should get through over a slow line as well.
 	srv := &http.Server{
 		Addr:              ":8080",
 		ReadHeaderTimeout: 10 * time.Second,

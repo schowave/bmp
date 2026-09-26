@@ -34,10 +34,10 @@
         #loader.failed #loader-error { display: block; }
         #loader.failed #loader-phases { display: none; }
     </style>
-    <!-- Auf eine feste js-dos-Version gepinnt. Der offizielle CDN bietet nur
-         /latest/, das sich unter dem Projekt weg bewegt; jsDelivr liefert dieselben
-         Dateien byte-identisch aus dem npm-Paket. Beim Hochziehen daran denken, dass
-         der Schutz in patchFrameLines() eine Interna von js-dos umhuellt. -->
+    <!-- Pinned to a fixed js-dos version. The official CDN only offers /latest/,
+         which moves out from under the project; jsDelivr serves the same files
+         byte for byte from the npm package. When upgrading, keep in mind that the
+         guard in patchFrameLines() wraps a js-dos internal. -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/js-dos.css">
     <script src="https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/js-dos.js"></script>
 </head>
@@ -57,9 +57,9 @@
     </div>
 
     <script>
-        // Der Ladebildschirm verdeckt den Bootvorgang von DOSBox, bis das Spiel sein
-        // erstes Bild zeichnet. Ohne ihn sieht man fast eine Minute lang nur die
-        // DOS-Startmeldungen und haelt die Seite fuer kaputt.
+        // The loading screen covers the DOSBox boot until the game draws its first
+        // frame. Without it, you see nothing but the DOS startup messages for almost a
+        // minute and take the page for broken.
         const loader = (() => {
             const el = document.getElementById("loader");
             const items = Array.from(document.querySelectorAll("#loader-phases li"));
@@ -92,7 +92,7 @@
                 document.getElementById("loader-hint").textContent = "Klicken, um Details zu sehen.";
             };
 
-            el.addEventListener("click", hide);   // Notausgang, falls doch etwas haengt
+            el.addEventListener("click", hide);   // escape hatch in case something hangs after all
             setTimeout(() => {
                 if (!hidden && !el.classList.contains("failed")) {
                     document.getElementById("loader-hint").textContent =
@@ -103,18 +103,18 @@
             return { phase, hide, fail };
         })();
 
-        // Blendet den Ladebildschirm aus, sobald das laufende DOS-Programm den
-        // Videomodus umschaltet. js-dos setzt dabei width und height direkt am
-        // Canvas. Diese Attribute zu beobachten ist der einzige nicht-invasive Weg:
-        // ci.events().onFrameSize() ist ein Setter und kein Listener, wer sich dort
-        // eintraegt, ersetzt den Renderer von js-dos.
+        // Hides the loading screen as soon as the running DOS program switches the
+        // video mode. js-dos sets width and height directly on the canvas. Watching
+        // these attributes is the only non-invasive way: ci.events().onFrameSize() is
+        // a setter, not a listener; whoever registers there replaces the renderer of
+        // js-dos.
         function hideOnVideoModeChange() {
             const root = document.getElementById("jsdos");
 
             const watch = (canvas) => {
                 const size = () => canvas.width + "x" + canvas.height;
-                // Ein frisches Canvas steht auf der Browser-Vorgabe 300x150. Erst die
-                // erste echte Groesse ist der DOS-Textmodus, die naechste das Spiel.
+                // A fresh canvas is at the browser default of 300x150. Only the first
+                // real size is the DOS text mode, the next one is the game.
                 const isReal = () => canvas.width > 0 && size() !== "300x150";
                 let baseline = isReal() ? size() : null;
 
@@ -134,38 +134,37 @@
             }).observe(root, { childList: true, subtree: true });
         }
 
-        // js-dos liefert an onEvent nur bnd-play, ci-ready, emu-ready und
-        // fullscreen-change. Ein Fehler-Event gibt es nicht: bnd-error und emu-error
-        // sind bloss interne Zustaende. Ein fehlendes Bundle wuerde den Ladebildschirm
-        // also endlos stehen lassen, darum diese beiden Absicherungen.
+        // js-dos delivers only bnd-play, ci-ready, emu-ready and fullscreen-change
+        // to onEvent. There is no error event: bnd-error and emu-error are merely
+        // internal states. A missing bundle would thus leave the loading screen up
+        // forever, hence these two safeguards.
         const BUNDLE = "bmp.jsdos";
 
-        // Jeder Besucher bekommt seinen eigenen Speicherplatz. Vorher lag ein einziger
-        // Slot fuer alle unter /api/saves/bmp: wer die Seite oeffnete, lud den Stand des
-        // letzten Spielers und ueberschrieb ihn beim naechsten Speichern.
+        // Every visitor gets their own save slot. Before, a single slot for everyone
+        // lived under /api/saves/bmp: whoever opened the page loaded the last player's
+        // state and overwrote it on the next save.
         //
-        // ?slot=<name> setzt den Platz und merkt ihn sich. Das deckt drei Faelle ab: den
-        // alten gemeinsamen Stand weiterspielen (?slot=bmp), einen verlorenen Platz
-        // zurueckholen, und denselben Stand auf einem zweiten Geraet fortsetzen.
+        // ?slot=<name> sets the slot and remembers it. That covers three cases:
+        // continuing the old shared state (?slot=bmp), recovering a lost slot, and
+        // continuing the same state on a second device.
         //
-        // Eine Kennung ist keine Anmeldung. Wer sie kennt, kann diesen Stand lesen und
-        // ueberschreiben; bei den zufaelligen Kennungen faellt das nicht ins Gewicht,
-        // bei einem selbst gewaehlten Namen schon.
-        const SLOT_MUSTER = /^[A-Za-z0-9_-]{1,64}$/;   // wie validName in server.go
+        // An identifier is not a login. Whoever knows it can read and overwrite this
+        // state; with the random identifiers that hardly matters, with a self-chosen
+        // name it does.
+        const SLOT_MUSTER = /^[A-Za-z0-9_-]{1,64}$/;   // like validName in server.go
 
-        // Lesbare Kennungen statt einer UUID: man kann sie vorlesen, abtippen und
-        // wiedererkennen, was bei ?slot= der eigentliche Zweck ist.
+        // Readable identifiers instead of a UUID: you can read them out, type them
+        // and recognize them, which is the actual purpose with ?slot=.
         //
-        // Nur Substantive, damit keine Adjektivendungen falsch werden koennen - eine
-        // fruehere Fassung erzeugte Namen wie "stolze-doppelpass". Ohne Umlaute, damit
-        // sie durch das Muster oben passen.
+        // Only nouns, so no adjective endings can go wrong - an earlier version
+        // produced names like "stolze-doppelpass". No umlauts, so they pass the
+        // pattern above.
         //
-        // Vier aus fuenfzig ohne Wiederholung sind 50*49*48*47, also rund 5,5 Millionen
-        // Kombinationen. Damit braucht es keine angehaengte Zahl mehr: vier Woerter aus
-        // einer kurzen Liste kaemen nicht hin, denn vier Ziffern allein tragen den
-        // Faktor 10000. Deutlich weniger als eine UUID bleibt es trotzdem, wer die
-        // Schnittstelle durchprobiert findet fremde Spielstaende. Eine Anmeldung war es
-        // ohnehin nie.
+        // Four out of fifty without repetition is 50*49*48*47, so about 5.5 million
+        // combinations. That means no appended number is needed any more: four words
+        // from a short list would not get there, because four digits alone carry the
+        // factor 10000. It still stays well below a UUID; whoever probes the
+        // interface finds other people's saves. It was never a login anyway.
         const WOERTER = [
             "libero", "stuermer", "torwart", "spielmacher", "verteidiger",
             "kapitaen", "elfmeter", "freistoss", "flanke", "kopfball",
@@ -187,16 +186,16 @@
             return teile.join("-");
         }
 
-        // Beim Erstbesuch wird geprueft, ob die gezogene Kennung schon belegt ist: der
-        // Server antwortet auf einen freien Platz mit 404 und auf einen belegten mit 200.
-        // Das deckt den Fall ab, der wehtut, denn durch das Autospeichern wird jeder
-        // benutzte Platz binnen einer Minute sichtbar.
+        // On a first visit, it is checked whether the drawn identifier is already
+        // taken: the server answers 404 for a free slot and 200 for a taken one.
+        // That covers the case that hurts, because with autosave every used slot
+        // becomes visible within a minute.
         //
-        // Zwei Grenzen bleiben: eine vergebene, aber nie gespeicherte Kennung ist
-        // unsichtbar, und Pruefen und Belegen sind zwei Schritte, zwei Besucher in
-        // derselben Millisekunde koennen also dieselbe ziehen. Bei 5,5 Millionen
-        // Kombinationen ist beides unwahrscheinlich genug, um es nicht mit einem
-        // zusaetzlichen Endpunkt im Server zu erkaufen.
+        // Two limits remain: an identifier that was handed out but never saved is
+        // invisible, and checking and claiming are two steps, so two visitors in
+        // the same millisecond can draw the same one. With 5.5 million
+        // combinations both are unlikely enough not to pay for them with an
+        // additional endpoint in the server.
         const SLOT_VERSUCHE = 5;
 
         let slot = null;
@@ -206,7 +205,7 @@
             try {
                 return (await fetch("/api/saves/" + kennung)).ok;
             } catch {
-                return false;   // Server nicht erreichbar: Kennung trotzdem nehmen
+                return false;   // server unreachable: take the identifier anyway
             }
         }
 
@@ -217,8 +216,8 @@
             const gewuenscht = new URLSearchParams(location.search).get("slot");
             const gemerkt = lesen();
 
-            // Wer schon einen Platz hat, behaelt ihn und wird nicht geprueft: dass er
-            // belegt ist, ist dort ja genau der Sinn.
+            // Whoever already has a slot keeps it and is not checked: that it is
+            // taken is exactly the point there.
             let gewaehlt = gueltig(gewuenscht) ? gewuenscht : gueltig(gemerkt) ? gemerkt : null;
 
             if (gewaehlt === null) {
@@ -228,7 +227,7 @@
                 }
             }
 
-            try { localStorage.setItem("bmp-slot", gewaehlt); } catch { /* nicht verfuegbar */ }
+            try { localStorage.setItem("bmp-slot", gewaehlt); } catch { /* not available */ }
             return gewaehlt;
         }
 
@@ -236,33 +235,34 @@
             .then((r) => { if (!r.ok) loader.fail("Spieldaten sind nicht erreichbar (HTTP " + r.status + ")."); })
             .catch(() => loader.fail("Spieldaten konnten nicht geladen werden."));
 
-        // Kommt der Emulator gar nicht hoch, macht der Ladebildschirm den Weg frei auf
-        // das, was js-dos selbst anzeigt. Sobald ci-ready gemeldet ist, laeuft er, und
-        // dieser Notausgang wird geloescht: sonst legt er bei langsamem Start genau den
-        // DOS-Bildschirm frei, den er verdecken soll.
-        // Grosszuegig bemessen und beim ersten Lebenszeichen geloescht. 25 Sekunden waren
-        // zu knapp: ein Kaltstart ueber das Netz laedt 1,2 MB Bundle und 2,5 MB Emulator,
-        // ci-ready kam danach erst nach ueber 25 Sekunden, der Notausgang feuerte also
-        // vorher und legte einen schwarzen Bildschirm frei, waehrend das Spiel noch
-        // hochkam. Das eigentliche Netz gegen ein fehlendes Bundle ist die HEAD-Anfrage
-        // oben, die sofort greift.
+        // If the emulator does not come up at all, the loading screen clears the way
+        // to whatever js-dos itself shows. As soon as bnd-play is reported, it is
+        // running, and this escape hatch is cleared: otherwise, on a slow start, it
+        // would uncover exactly the DOS screen it is meant to hide.
+        //
+        // Generously sized and cleared at the first sign of life. 25 seconds were
+        // too short: a cold start over the network loads a 1.2 MB bundle and a 2.5 MB
+        // emulator, ci-ready only came after more than 25 seconds, so the escape hatch
+        // fired before that and uncovered a black screen while the game was still
+        // coming up. The actual safety net against a missing bundle is the HEAD
+        // request above, which kicks in immediately.
         const bootTimeout = setTimeout(() => loader.hide(), 90000);
 
-        // js-dos 8.4.1 stuerzt bei einem Videomodus-Wechsel gelegentlich ab. In
-        // emulators.js legt onFrameSize() den Bildpuffer kleiner neu an, waehrend
-        // onFrameLines() ihn ohne Pruefung beschreibt:
+        // js-dos 8.4.1 occasionally crashes on a video mode change. In emulators.js,
+        // onFrameSize() reallocates the frame buffer smaller, while onFrameLines()
+        // writes to it without checking:
         //
         //   onFrameSize(w, h)  { this.rgb = new Uint8Array(w * h * 3); }
         //   onFrameLines(lines){ for (const l of lines) this.rgb.set(l.heapu8, l.start * this.frameWidth * 3); }
         //
-        // Zeilen, die der Worker noch fuer den alten, groesseren Modus erzeugt hat,
-        // schreiben dann hinter das Pufferende: "RangeError: offset is out of bounds",
-        // was js-dos als "Backend crashed" anzeigt und das Spiel beendet. BMP wechselt
-        // den Modus haeufig, entsprechend trifft es einen mitten im Spiel.
+        // Lines the worker still produced for the old, larger mode then write past
+        // the end of the buffer: "RangeError: offset is out of bounds", which js-dos
+        // shows as "Backend crashed" and which ends the game. BMP switches modes
+        // often, so it hits you in the middle of a game.
         //
-        // Ein solches Paket ist ohnehin veraltet, also verwerfen wir es und warten auf
-        // das naechste Bild. Der Feature-Check sorgt dafuer, dass eine kuenftige
-        // js-dos-Version den Schutz hoechstens still abschaltet, statt zu brechen.
+        // Such a packet is stale anyway, so we discard it and wait for the next
+        // frame. The feature check ensures that a future js-dos version at most
+        // silently disables the guard instead of breaking.
         function patchFrameLines(ci) {
             if (!ci || typeof ci.onFrameLines !== "function") return;
             const original = ci.onFrameLines.bind(ci);
@@ -270,27 +270,26 @@
                 try {
                     return original(lines, rgba);
                 } catch (e) {
-                    if (e instanceof RangeError) return;   // Bild aus dem alten Videomodus
+                    if (e instanceof RangeError) return;   // frame from the old video mode
                     throw e;
                 }
             };
         }
 
-        // js-dos speichert von sich aus nur beim Verlassen des Vollbilds, beim
-        // Freigeben des Pointer-Locks und bei visibilitychange. Beim Schliessen der
-        // Seite passiert nichts, und ein periodisches Speichern gibt es entgegen
-        // frueherer Annahme nicht. Wer also spielt und den Tab zumacht, verliert den
-        // Fortschritt. Eine oeffentliche Speicher-API bietet js-dos 8.4.1 nicht, wohl
-        // aber der Seitenleiste die Klasse .save-button - ein echter CSS-Name, keine
-        // minifizierte Interna. Der Feature-Check laesst ein kuenftiges Umbenennen
-        // still ausfallen, statt die Seite zu brechen.
+        // On its own, js-dos only saves when leaving fullscreen, when releasing the
+        // pointer lock and on visibilitychange. Closing the page does nothing, and
+        // contrary to an earlier assumption there is no periodic save. So whoever
+        // plays and closes the tab loses their progress. js-dos 8.4.1 offers no
+        // public save API, but the sidebar does have the class .save-button - a real
+        // CSS name, not a minified internal. The feature check lets a future rename
+        // fail silently instead of breaking the page.
         //
-        // Gespeichert wird immer der Dateistand im Emulator, nicht der laufende
-        // Spielzustand: im Spiel selbst gespeicherte Staende bleiben erhalten, eine
-        // ungesicherte Partie nicht.
-        // Das Intervall ist nach dem Marker oben nicht mehr der Hauptweg, sondern die
-        // Absturzversicherung: im Spiel gespeichert, weitergespielt, Backend stuerzt ab.
-        // Ohne es waere dieser Stand verloren, obwohl BMP ihn schon geschrieben hatte.
+        // What gets saved is always the file state in the emulator, not the running
+        // game state: saves made in the game itself are kept, an unsaved match is
+        // not.
+        // Since the marker above, the interval is no longer the main path but the
+        // crash insurance: saved in the game, kept playing, backend crashes.
+        // Without it that state would be lost, even though BMP had already written it.
         const SAVE_INTERVALL_MS = 60000;
 
         function speichern() {
@@ -298,30 +297,30 @@
             if (button) button.click();
         }
 
-        // START.BAT im Bundle meldet das Ende des Spiels ueber die DOS-Konsole. Dann
-        // sofort speichern, statt bis zu eine Minute auf das Intervall zu warten: genau
-        // in diesem Moment hat BMP seinen Spielstand frisch geschrieben.
+        // START.BAT in the bundle reports the end of the game over the DOS console.
+        // Then save right away instead of waiting up to a minute for the interval:
+        // at exactly this moment BMP has freshly written its game state.
         const EXIT_MARKER = "---BMP-BEENDET---";
 
         function beendenErkennen(ci) {
             try {
                 const ereignisse = ci?.events?.();
                 if (typeof ereignisse?.onStdout !== "function") return;
-                // Der bisherige Handler laesst sich nicht auslesen, wird also ersetzt.
-                // js-dos nutzt ihn nur fuer sein Benchmark-Fenster, das hier niemand oeffnet.
+                // The previous handler cannot be read out, so it gets replaced.
+                // js-dos only uses it for its benchmark window, which nobody opens here.
                 ereignisse.onStdout((text) => {
                     if (typeof text === "string" && text.includes(EXIT_MARKER)) speichern();
                 });
-            } catch { /* nicht kritisch, Intervall und Hintergrundwechsel greifen weiter */ }
+            } catch { /* not critical, the interval and the background switch still apply */ }
         }
 
         function speichernEinrichten() {
             setInterval(speichern, SAVE_INTERVALL_MS);
-            // Zusaetzlich, sobald die Seite in den Hintergrund geht - Tab gewechselt,
-            // Fenster minimiert, Browser weggeklickt. Hier lebt die Seite noch, das
-            // Archiv wird also fertig gebaut und der PUT geht durch. Bei pagehide ist
-            // es dafuer zu spaet: gemessen kam dort kein Request mehr raus, deshalb
-            // haengt hier nichts an diesem Ereignis.
+            // In addition, as soon as the page goes to the background - tab switched,
+            // window minimized, browser clicked away. The page is still alive here, so
+            // the archive gets built completely and the PUT goes through. At pagehide it
+            // is too late for that: measured, no request got out there any more, so
+            // nothing here hangs off that event.
             document.addEventListener("visibilitychange", () => {
                 if (document.hidden) speichern();
             });
@@ -330,28 +329,28 @@
         function spielStarten() {
             Dos(document.getElementById("jsdos"), {
                 url: BUNDLE,
-                // Ohne pathPrefix laedt js-dos den Emulator weiter aus /latest/, womit
-                // emulators.js und wdosbox.wasm ungepinnt blieben - also gerade die Datei
-                // mit dem Fehler oben. Muss zur Version im script-Tag passen.
+                // Without pathPrefix, js-dos keeps loading the emulator from /latest/,
+                // which would leave emulators.js and wdosbox.wasm unpinned - that is,
+                // exactly the file with the bug above. Must match the version in the
+                // script tag.
                 pathPrefix: "https://cdn.jsdelivr.net/npm/js-dos@8.4.1/dist/emulators/",
                 autoStart: true,
                 theme: "dark",
                 autoSave: true,
                 onEvent: (event, ci) => {
                     if (event === "bnd-play") {
-                    clearTimeout(bootTimeout);   // laeuft, der Notausgang ist erledigt
-                    loader.phase(1);
-                }
+                        clearTimeout(bootTimeout);   // running, the escape hatch is done
+                        loader.phase(1);
+                    }
                     if (event === "ci-ready") {
                         patchFrameLines(ci);
                         beendenErkennen(ci);
                         speichernEinrichten();
-                        clearTimeout(bootTimeout);
                         loader.phase(2);
                         hideOnVideoModeChange();
-                        // Grosszuegig bemessen: ein Ladebildschirm, der zu lange steht, ist
-                        // harmloser als einer, der den DOS-Bootvorgang freilegt. Wer nicht
-                        // warten will, klickt ihn weg.
+                        // Generously sized: a loading screen that stays up too long is more
+                        // harmless than one that uncovers the DOS boot. Whoever does not want
+                        // to wait clicks it away.
                         setTimeout(loader.hide, 120000);
                     }
                 },
@@ -362,12 +361,12 @@
                         return r.ok ? new Uint8Array(await r.arrayBuffer()) : null;
                     },
                     push: async (key, data) => {
-                        // keepalive laesst einen laufenden PUT das Entladen der Seite
-                        // ueberleben, ist aber auf 64 KB Rumpf begrenzt: darueber lehnt der
-                        // Browser die Anfrage komplett ab. Genau das trat ein, sobald ein
-                        // echter Spielstand im Archiv lag - eine .MAN ist rund 34 KB - und
-                        // der Fehler blieb unsichtbar, der Stand war einfach nicht da.
-                        // Also nur fuer kleine Archive, darueber ein gewoehnlicher PUT.
+                        // keepalive lets a running PUT survive the page unloading, but is
+                        // limited to a 64 KB body: above that, the browser rejects the request
+                        // outright. Exactly that happened as soon as a real save was in the
+                        // archive - a .MAN is about 34 KB - and the error stayed invisible, the
+                        // save simply was not there. So only for small archives; above that,
+                        // an ordinary PUT.
                         const klein = data.byteLength < 60000;
                         const antwort = await fetch(SAVE_URL, { method: "PUT", body: data, keepalive: klein });
                         if (!antwort.ok) {
@@ -379,49 +378,49 @@
         }
 
         function versionAnzeigen() {
-        // cache: no-store, sonst zeigt die Seite nach einem Update noch die alte
-        // Version aus dem Disk-Cache an, wie es nach 5.0.7 passiert ist.
-        fetch('version.txt', { cache: 'no-store' })
-            .then(r => r.text())
-            .then(v => {
-                const el = document.getElementById('version');
-                el.textContent = 'v' + v.trim() + ' \u00b7 ';
-                // Nur die Kennung ist anklickbar, damit ein Klick daneben weiter im Spiel
-                // landet. user-select: all waehlt sie mit einem Klick komplett aus.
-                const kennung = document.createElement('span');
-                kennung.id = 'slot';
-                kennung.textContent = slot;
-                kennung.title = 'Speicherplatz. Mit ?slot=' + slot + ' auf einem anderen Geraet fortsetzen.';
-                el.appendChild(kennung);
-                el.append(' \u00b7 ');
-                const hilfe = document.createElement('a');
-                hilfe.href = 'hilfe.html';
-                hilfe.target = '_blank';
-                hilfe.rel = 'noopener';
-                hilfe.id = 'hilfe';
-                hilfe.textContent = 'Hilfe';
-                el.appendChild(hilfe);
-            });
+            // cache: no-store, otherwise after an update the page still shows the old
+            // version from the disk cache, as happened after 5.0.7.
+            fetch('version.txt', { cache: 'no-store' })
+                .then(r => r.text())
+                .then(v => {
+                    const el = document.getElementById('version');
+                    el.textContent = 'v' + v.trim() + ' \u00b7 ';
+                    // Only the identifier is clickable, so a click next to it still lands in
+                    // the game. user-select: all selects it completely with one click.
+                    const kennung = document.createElement('span');
+                    kennung.id = 'slot';
+                    kennung.textContent = slot;
+                    kennung.title = 'Speicherplatz. Mit ?slot=' + slot + ' auf einem anderen Geraet fortsetzen.';
+                    el.appendChild(kennung);
+                    el.append(' \u00b7 ');
+                    const hilfe = document.createElement('a');
+                    hilfe.href = 'hilfe.html';
+                    hilfe.target = '_blank';
+                    hilfe.rel = 'noopener';
+                    hilfe.id = 'hilfe';
+                    hilfe.textContent = 'Hilfe';
+                    el.appendChild(hilfe);
+                });
         }
 
-        // Die Kennung in die Adressleiste schreiben, damit die URL teilbar ist und sich
-        // als Lesezeichen setzen laesst. replaceState statt pushState: kein Neuladen und
-        // kein zusaetzlicher Eintrag im Verlauf, der Zurueck-Knopf bleibt unberuehrt.
+        // Write the identifier into the address bar so the URL can be shared and
+        // bookmarked. replaceState instead of pushState: no reload and no extra
+        // entry in the history, the back button stays untouched.
         //
-        // Wer den Link bekommt, spielt auf demselben Platz weiter und ueberschreibt beim
-        // Speichern den Stand. Zum Zuschauen taugt er also nicht, zum gemeinsamen
-        // Weiterspielen schon.
+        // Whoever gets the link keeps playing on the same slot and overwrites the
+        // state when saving. So it is no good for watching, but it is for playing
+        // on together.
         function slotInUrlSchreiben() {
             try {
                 const adresse = new URL(location.href);
                 if (adresse.searchParams.get("slot") === slot) return;
                 adresse.searchParams.set("slot", slot);
                 history.replaceState(null, "", adresse);
-            } catch { /* nicht kritisch, die Kennung steht auch unten rechts */ }
+            } catch { /* not critical, the identifier is also shown at the bottom right */ }
         }
 
-        // Der Slot muss vor Dos() feststehen, weil pull und push seine Adresse brauchen.
-        // Der Ladebildschirm steht schon im HTML und ist waehrenddessen sichtbar.
+        // The slot has to be settled before Dos(), because pull and push need its
+        // address. The loading screen is already in the HTML and visible meanwhile.
         (async () => {
             slot = await slotErmitteln();
             SAVE_URL = "/api/saves/" + slot;

@@ -1,6 +1,6 @@
-# Build-Kontext ist das Repository-Wurzelverzeichnis:
+# The build context is the repository root:
 #   docker build -f wasm/Dockerfile .
-# Das Bundle entsteht hier im Build, damit lokal und in CI derselbe Weg laeuft.
+# The bundle is built here in the image build, so local and CI take the same path.
 
 FROM golang:1.27-alpine AS server
 WORKDIR /src
@@ -17,8 +17,8 @@ COPY wasm/build-bundle.sh wasm/dosbox.conf wasm/index.html wasm/
 RUN wasm/build-bundle.sh /public
 
 FROM alpine:3
-# Unprivilegiert wie das VNC-Image, mit derselben uid 1000. /data muss fuer ihn
-# beschreibbar sein, siehe wasm/docker-compose.yml.
+# Unprivileged like the VNC image, with the same uid 1000. /data must be writable
+# for it, see wasm/docker-compose.yml.
 RUN adduser -D -H -u 1000 bmp \
     && mkdir /data \
     && chown bmp:bmp /data

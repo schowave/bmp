@@ -1,4 +1,4 @@
-# Beide Images bauen mit dem Repository-Wurzelverzeichnis als Kontext.
+# Both images build with the repository root as the context.
 .git
 .github
 .idea

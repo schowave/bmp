@@ -35,9 +35,9 @@
     <div id="screen"></div>
     <div id="version"></div>
     <script>
-        // Hilfeseite verlinken, damit sie ohne Kenntnis der Adresse zu finden ist. Nur der
-        // Link nimmt Klicks an, ein Klick daneben landet weiter im Spiel. no-store, weil
-        // version.txt sich mit jedem Release aendert und sonst aus dem Cache kaeme.
+        // Link the help page so it can be found without knowing the address. Only the
+        // link takes clicks; a click next to it still lands in the game. no-store, because
+        // version.txt changes with every release and would otherwise come from the cache.
         fetch('version.txt', { cache: 'no-store' })
             .then(r => r.text())
             .then(v => {

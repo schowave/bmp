@@ -6,12 +6,12 @@ services:
       - "8080:8080"
     volumes:
       - ./savegame:/savegame
-    # Das Spiel legt seine Spielstaende auf Laufwerk D: ab, also in diesem Mount.
-    # Er gehoert dem Host-Nutzer, und auf einer Synology entscheidet zusaetzlich eine
-    # ACL: der unprivilegierte Spielprozess durfte dort nicht schreiben, obwohl die
-    # Mode-Bits auf drwxrwxrwx standen. Die ACL erlaubt es der Gruppe, darum laeuft der
-    # Prozess in dieser mit. 100 ist auf Synology die Gruppe users; auf einem anderen
-    # Host ist es die Gruppe, der das Verzeichnis gehoert.
+    # The game stores its saves on drive D:, that is, in this mount. It belongs to
+    # the host user, and on a Synology an ACL decides as well: the unprivileged game
+    # process was not allowed to write there, even though the mode bits were set to
+    # drwxrwxrwx. The ACL allows it for the group, so the process runs in that group
+    # too. On Synology, 100 is the group users; on another host it is the group that
+    # owns the directory.
     group_add:
       - "100"
     restart: unless-stopped

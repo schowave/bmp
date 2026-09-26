@@ -28,17 +28,17 @@ echo "Building .jsdos bundle..."
 # Copy game files
 cp -r "$GAME_DIR/"* "$TMPDIR_BUILD/"
 
-# Zielverzeichnis fuer Spielstaende, das die dosbox.conf als D: mountet. Muss im
-# Bundle liegen, sonst schlaegt der Mount fehl. Zip verwirft leere Verzeichnisse
-# nicht, ein .keep ist also nicht noetig, aber es macht den Zweck sichtbar.
+# Target directory for saves, which dosbox.conf mounts as D:. It has to be in the
+# bundle, otherwise the mount fails. Zip does not drop empty directories, so a
+# .keep is not needed, but it makes the purpose visible.
 mkdir -p "$TMPDIR_BUILD/SAVES"
 echo "Spielstaende gehoeren hierher, gemountet als Laufwerk D:." > "$TMPDIR_BUILD/SAVES/LIESMICH.TXT"
 
-# Startskript mit Neustart-Schleife. Beendet der Spieler BMP, landete er vorher auf
-# dem DOS-Prompt; jetzt startet das Spiel neu. Die Marker-Zeile geht ueber die
-# DOS-Konsole an die Seite, die daraufhin sofort speichert, statt auf ihr Intervall zu
-# warten - beim Beenden ist der Spielstand ja gerade frisch geschrieben.
-# CRLF, weil es eine DOS-Batchdatei ist.
+# Start script with a restart loop. When the player quit BMP, they used to land at
+# the DOS prompt; now the game restarts. The marker line goes over the DOS console
+# to the page, which then saves right away instead of waiting for its interval -
+# on exit the game state has just been written, after all.
+# CRLF because it is a DOS batch file.
 printf '@ECHO OFF\r\n:TOP\r\nBMMAIN.EXE\r\nECHO ---BMP-BEENDET---\r\nGOTO TOP\r\n' > "$TMPDIR_BUILD/START.BAT"
 
 # Create .jsdos config directory and copy dosbox.conf
@@ -48,8 +48,8 @@ cp "$SCRIPT_DIR/dosbox.conf" "$TMPDIR_BUILD/.jsdos/dosbox.conf"
 # Create ZIP with .jsdos extension
 (cd "$TMPDIR_BUILD" && zip -q -r -9 "$OUTPUT" .)
 
-# Die Seite und was sie neben dem Bundle ausliefert. Hilfeseite und Favicon liegen
-# in web/, weil beide Images sie ausliefern.
+# The page and what it serves next to the bundle. The help page and favicon live
+# in web/ because both images serve them.
 cp "$SCRIPT_DIR/index.html" "$OUT_DIR/index.html"
 cp "$PROJECT_ROOT/VERSION" "$OUT_DIR/version.txt"
 cp "$PROJECT_ROOT/web/hilfe.html" "$OUT_DIR/hilfe.html"
