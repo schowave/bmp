@@ -4,3 +4,17 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Playwright for the VNC benchmark that CI runs on every push.
+  - package-ecosystem: "npm"
+    directory: "/vnc/bench"
+    schedule:
+      interval: "weekly"
+
+  # Base images of both Dockerfiles.
+  - package-ecosystem: "docker"
+    directories:
+      - "/vnc"
+      - "/wasm"
+    schedule:
+      interval: "weekly"
