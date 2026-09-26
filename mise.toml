@@ -29,6 +29,18 @@ run = [
   "echo \"Running — open http://localhost:$PORT\"",
 ]
 
+[tasks."vnc:bench"]
+description = "Build the image and measure CPU, traffic and click latency (vnc/bench)"
+depends = ["vnc:build"]
+dir = "{{config_root}}/vnc/bench"
+usage = 'arg "[label]" help="Name of the run in results.jsonl" default="local"'
+run = [
+  "npm ci --silent",
+  "npx playwright install chromium",
+  "node bench.mjs --image $IMAGE_NAME --label ${usage_label} --check",
+  "node report.mjs",
+]
+
 # --- WASM image --------------------------------------------------------------
 
 [tasks."wasm:build"]

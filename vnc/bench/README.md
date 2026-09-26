@@ -6,11 +6,15 @@ changed picture on the noVNC canvas. The browser is a headless Chromium driven b
 Playwright.
 
 ```bash
-cd vnc/bench
-npm install && npx playwright install chromium
-podman build -f ../Dockerfile -t bmp-bench:base ../..   # image under test
+mise run vnc:bench [label]
+```
 
-node bench.mjs --label base
+builds the image as `bmp`, runs the benchmark against it with `--check` and prints
+all runs so far. For variants, call the script directly:
+
+```bash
+cd vnc/bench
+npm ci && npx playwright install chromium
 node bench.mjs --label cycles10k --conf variants/cycles10k.conf
 node bench.mjs --label no-pause --cmd "$(cat variants/no-pause.sh)"
 node report.mjs
@@ -22,11 +26,15 @@ screenshot to `shots/<label>.png`.
 
 | Option | Meaning |
 |---|---|
-| `--image` | Image to run, default `bmp-bench:base` |
+| `--image` | Image to run, default `bmp` (what `mise run vnc:build` builds) |
 | `--conf` | DOSBox config mounted over the one in the image |
 | `--cmd` | Container command instead of the image's `CMD` |
 | `--secs` | Length of each CPU measurement, default 20 |
 | `--clicks` | Number of latency probes, default 20 |
+| `--check` | Exit with 1 if the run looks broken, see below |
+| `--keep` | Leave the container running afterwards |
+
+The container is run with `podman`; set `CONTAINER_CLI=docker` to use Docker.
 
 `variants/` holds the alternatives measured so far: two DOSBox configs with fixed
 cycles, and `no-pause.sh`, the container command from before `vnc/start.sh` stopped
@@ -50,6 +58,14 @@ helps to find coordinates: `node shot.mjs out.png click:627,135 wait:1000 Enter`
 6. **After disconnect**: closes the browser and measures CPU again.
 
 CPU is given in percent of one core, from `utime + stime` in `/proc/<pid>/stat`.
+
+## Checks
+
+With `--check` the run fails if the picture does not fill the 640x480 screen, a
+click did not change the picture, DOSBox is not running while a client is
+connected, or the container uses more than 5 percent of a core without a client.
+CI runs this on every push, see `.github/workflows/ci.yml`. The `no-pause` variant
+fails the last check by design.
 
 ## Caveats
 

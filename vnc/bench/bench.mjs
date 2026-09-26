@@ -1,11 +1,13 @@
 // Measures one configuration of the VNC image: CPU per process with and without a
 // client, WebSocket traffic, and the time from a mouse click to the changed picture.
 //
-//   node bench.mjs --label base [--image bmp-bench:base] [--conf dosbox.conf]
-//                  [--cmd "container command"] [--secs 20] [--clicks 20]
+//   node bench.mjs --label base [--image bmp] [--conf dosbox.conf]
+//                  [--cmd "container command"] [--secs 20] [--clicks 20] [--check]
 //
 // Starts its own container (bmp-bench on port 18080), appends one JSON line to
-// results.jsonl and saves a screenshot as <label>.png.
+// results.jsonl and saves a screenshot as shots/<label>.png. Runs podman, or the
+// command in CONTAINER_CLI (CI sets docker). --check exits with 1 if the run looks
+// broken, see checks() below.
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, mkdirSync } from 'node:fs';
@@ -15,12 +17,13 @@ import { parseArgs } from 'node:util';
 const { values: opt } = parseArgs({
     options: {
         label: { type: 'string', default: 'base' },
-        image: { type: 'string', default: 'bmp-bench:base' },
+        image: { type: 'string', default: 'bmp' },
         conf: { type: 'string' },
         cmd: { type: 'string' },
         secs: { type: 'string', default: '20' },
         clicks: { type: 'string', default: '20' },
         keep: { type: 'boolean', default: false },
+        check: { type: 'boolean', default: false },
     },
 });
 const SECS = Number(opt.secs);
@@ -28,7 +31,8 @@ const NAME = 'bmp-bench';
 const PORT = 18080;
 const URL = `http://localhost:${PORT}/`;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const podman = (...args) => execFileSync('podman', args, { encoding: 'utf8' });
+const CLI = process.env.CONTAINER_CLI ?? 'podman';
+const podman = (...args) => execFileSync(CLI, args, { encoding: 'utf8' });
 
 // --- container -----------------------------------------------------------------
 
@@ -194,3 +198,22 @@ if (!opt.keep) podman('rm', '-f', NAME);
 
 appendFileSync('results.jsonl', JSON.stringify(result) + '\n');
 console.log(JSON.stringify(result, null, 2));
+
+// What must hold for any image we ship. The thresholds are loose on purpose: they
+// catch a broken image, not a slower one.
+function checks(r) {
+    const failed = [];
+    if (r.picture.picture !== r.picture.screen) failed.push(`picture is ${r.picture.picture}, not the full ${r.picture.screen}`);
+    if (r.clickLatencyMs.missed > 0) failed.push(`${r.clickLatencyMs.missed} clicks did not change the picture`);
+    if (r.cpuClientIdle.dosbox < 5) failed.push(`DOSBox at ${r.cpuClientIdle.dosbox}% with a client, is it running?`);
+    if (r.cpuNoClient.total > 5) failed.push(`${r.cpuNoClient.total}% CPU without a client, the idle pause does not work`);
+    if (r.cpuAfterDisconnect.total > 5) failed.push(`${r.cpuAfterDisconnect.total}% CPU after the client left`);
+    return failed;
+}
+
+if (opt.check) {
+    const failed = checks(result);
+    for (const f of failed) console.error(`FAILED: ${f}`);
+    if (failed.length) process.exit(1);
+    console.error('All checks passed');
+}

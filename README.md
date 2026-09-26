@@ -119,6 +119,7 @@ Both Dockerfiles build with the repository root as context, e.g. `docker build -
 | `mise run vnc:build` | Build the container image |
 | `mise run vnc:run` | Stop, build, and start in detached mode |
 | `mise run vnc:stop` | Stop and remove the container |
+| `mise run vnc:bench [label]` | Build and benchmark the image with checks, see [vnc/bench/README.md](vnc/bench/README.md) |
 | `mise run release` | Start the release workflow, see [Releases](#releases) |
 
 ## Help page
