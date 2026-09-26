@@ -35,7 +35,7 @@ Open [http://localhost:8080](http://localhost:8080)
 ```bash
 git clone https://github.com/schowave/bmp.git
 cd bmp
-make run
+mise run run
 ```
 
 ## Architecture
@@ -98,12 +98,14 @@ Releases are managed via GitHub Actions:
 
 ## Development
 
+Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mise tasks` lists them all, including the `wasm:*` tasks for the WASM image.
+
 | Command | Description |
 |---|---|
-| `make build` | Build the container image |
-| `make run` | Stop, build, and start in detached mode |
-| `make stop` | Stop and remove the container |
-| `make push` | Build and push the `linux/amd64` image to Docker Hub |
+| `mise run build` | Build the container image |
+| `mise run run` | Stop, build, and start in detached mode |
+| `mise run stop` | Stop and remove the container |
+| `mise run push` | Build and push the `linux/amd64` image to Docker Hub |
 
 ## Help page
 

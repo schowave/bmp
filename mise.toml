@@ -1,0 +1,88 @@
+# Tasks for both images. Run `mise tasks` for an overview.
+# The VNC image lives in the repository root, the WASM image in wasm/ (tasks wasm:*).
+
+[env]
+IMAGE_NAME = "bmp"
+CONTAINER_NAME = "bmp"
+PORT = "8080"
+
+# --- VNC image ---------------------------------------------------------------
+
+[tasks.build]
+description = "Build the container image"
+run = "podman build -t $IMAGE_NAME ."
+
+[tasks.stop]
+description = "Stop and remove the container"
+run = [
+  "podman stop $CONTAINER_NAME 2>/dev/null || true",
+  "podman rm $CONTAINER_NAME 2>/dev/null || true",
+]
+
+[tasks.run]
+description = "Stop, build, and start in detached mode"
+depends = ["stop", "build"]
+run = [
+  "podman run -d --name $CONTAINER_NAME -p $PORT:8080 -v \"$PWD/savegame:/savegame\" $IMAGE_NAME",
+  "echo \"Running — open http://localhost:$PORT\"",
+]
+
+[tasks.push]
+description = "Build and push the linux/amd64 image to Docker Hub"
+run = "./build-and-push-docker-image.sh"
+
+# --- WASM image --------------------------------------------------------------
+
+[tasks."wasm:bundle"]
+description = "Build the bmp.jsdos bundle"
+dir = "{{config_root}}/wasm"
+# Relative to dir, so the bundle is only rebuilt when one of these changed.
+sources = ["build-bundle.sh", "dosbox.conf", "../VERSION", "../bmp/**/*"]
+outputs = ["bmp.jsdos"]
+run = "./build-bundle.sh"
+
+[tasks."wasm:build"]
+description = "Build bmp.jsdos and copy favicon and help page"
+dir = "{{config_root}}/wasm"
+depends = ["wasm:bundle"]
+run = [
+  "cp ../images/favicon.png .",
+  "cp ../hilfe.html .",
+]
+
+[tasks."wasm:docker"]
+description = "Build the container image (bmp-wasm)"
+dir = "{{config_root}}/wasm"
+depends = ["wasm:build"]
+run = "podman build -t bmp-wasm ."
+
+[tasks."wasm:run-docker"]
+description = "Run the container locally (port 8090, saves in wasm/savegame)"
+dir = "{{config_root}}/wasm"
+depends = ["wasm:docker"]
+run = [
+  "mkdir -p savegame",
+  "echo 'Opening http://localhost:8090'",
+  "open http://localhost:8090 || true",
+  "podman run --rm -p 8090:8080 -v \"$PWD/savegame:/data\" bmp-wasm",
+]
+
+[tasks."wasm:push"]
+description = "Build and push the WASM image to Docker Hub"
+dir = "{{config_root}}/wasm"
+run = "./build-and-push-docker-image.sh"
+
+[tasks."wasm:run"]
+description = "Local dev server (python, no save persistence)"
+dir = "{{config_root}}/wasm"
+depends = ["wasm:build"]
+run = [
+  "echo 'Opening http://localhost:8000 (no save persistence)'",
+  "open http://localhost:8000 || true",
+  "python3 -m http.server 8000",
+]
+
+[tasks."wasm:clean"]
+description = "Remove generated files"
+dir = "{{config_root}}/wasm"
+run = "rm -f bmp.jsdos version.txt favicon.png hilfe.html"

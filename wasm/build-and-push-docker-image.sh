@@ -21,7 +21,7 @@ else
 fi
 
 # Build the bundle first
-cd "$SCRIPT_DIR" && make build
+cd "$SCRIPT_DIR" && mise run wasm:build
 
 # Ensure we're logged in to Docker Hub
 if ! $ENGINE login --get-login docker.io &> /dev/null; then

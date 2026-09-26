@@ -5,23 +5,25 @@ Runs Bundesliga Manager Professional in the browser via [js-dos](https://js-dos.
 ## Quick Start
 
 ```bash
-make build     # build the .jsdos bundle
-make docker    # build the container image
-make run-docker  # run locally with save persistence
+mise run wasm:build       # build the .jsdos bundle
+mise run wasm:docker      # build the container image
+mise run wasm:run-docker  # run locally with save persistence
 ```
 
 Then open http://localhost:8090.
 
-## Makefile Targets
+## mise Tasks
 
-| Target        | Description                                      |
-|---------------|--------------------------------------------------|
-| `build`       | Build `bmp.jsdos` bundle and copy assets         |
-| `docker`      | Build the container image (`bmp-wasm`)           |
-| `run-docker`  | Run the container locally (port 8090, saves in `wasm/savegame`)  |
-| `push`        | Build and push image to Docker Hub               |
-| `run`         | Local dev server (python, no save persistence)   |
-| `clean`       | Remove generated files                           |
+Defined in the repository root's `mise.toml`; they work from the root and from `wasm/`.
+
+| Task               | Description                                                     |
+|--------------------|-----------------------------------------------------------------|
+| `wasm:build`       | Build `bmp.jsdos` bundle and copy assets                        |
+| `wasm:docker`      | Build the container image (`bmp-wasm`)                          |
+| `wasm:run-docker`  | Run the container locally (port 8090, saves in `wasm/savegame`) |
+| `wasm:push`        | Build and push image to Docker Hub                              |
+| `wasm:run`         | Local dev server (python, no save persistence)                  |
+| `wasm:clean`       | Remove generated files                                          |
 
 ## Architecture
 
