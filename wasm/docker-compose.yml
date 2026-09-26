@@ -11,5 +11,11 @@ services:
       # z. B. ./savegame:/data. Wer den Pfad aendert, muss die .sav-Dateien mitnehmen,
       # sonst startet jeder Slot leer.
       - /volume1/docker/bmp-saves:/data
+    # Der Server laeuft unprivilegiert als uid 1000 und muss in /data schreiben. Wie in
+    # vnc/docker-compose.yml laeuft er deshalb in der Gruppe 100 (users auf Synology),
+    # der die ACL des Ordners Schreibrechte gibt. Auf einem anderen Host die Gruppe
+    # nehmen, der das Verzeichnis gehoert, oder chown -R 1000:1000 darauf ausfuehren.
+    group_add:
+      - "100"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"

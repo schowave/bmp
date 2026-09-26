@@ -67,6 +67,8 @@ If you prefer the Synology GUI over `docker compose`:
    - Host path: `/volume1/docker/bmp-saves` → Mount path: `/data` (read/write)
 5. **Done** — access at `http://<nas-ip>:8090`
 
+The server runs unprivileged as uid 1000 and has to write to `/data`. The single-container dialog cannot add a group, so either create a **Project** from `wasm/docker-compose.yml` instead, which runs the container in group `100` (`users`, which the shared folder's ACL lets write), or give the folder to uid 1000. Without either, loading works but every save fails. The same applies to the VNC image, see [Savegames](../README.md#the-mount-has-to-be-writable).
+
 ### docker run
 
 ```bash
@@ -74,6 +76,7 @@ docker run -d --restart=unless-stopped \
   --name bmp-wasm \
   -p 8090:8080 \
   -v /volume1/docker/bmp-saves:/data \
+  --group-add 100 \
   schowave/bmp:wasm
 ```
 
