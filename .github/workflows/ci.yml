@@ -1,8 +1,8 @@
 name: CI
 
-# Builds both images and runs the VNC benchmark against the VNC image, so a broken
-# image shows up on the push instead of after the release. The release workflow
-# calls this as its first job.
+# Builds both images, runs the VNC benchmark against the VNC image and a smoke test
+# against the WASM image, so a broken image shows up on the push instead of after the
+# release. The release workflow calls this as its first job.
 
 on:
   push:
@@ -81,6 +81,13 @@ jobs:
         context: .
         file: wasm/Dockerfile
         platforms: linux/amd64
-        push: false
+        load: true
+        tags: bmp-wasm:ci
         cache-from: type=gha,scope=wasm
         cache-to: ${{ github.event_name == 'push' && 'type=gha,mode=max,scope=wasm' || '' }}
+
+    # Page, bundle and the save API, without a browser.
+    - name: Smoke test
+      env:
+        CONTAINER_CLI: docker
+      run: wasm/smoke.sh bmp-wasm:ci

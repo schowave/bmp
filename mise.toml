@@ -55,6 +55,11 @@ run = "wasm/build-bundle.sh wasm/dist"
 description = "Build the container image (bmp-wasm)"
 run = "podman build --format docker -f wasm/Dockerfile -t bmp-wasm ."
 
+[tasks."wasm:smoke"]
+description = "Build the container image and smoke test it (page, bundle, save API)"
+depends = ["wasm:docker"]
+run = "wasm/smoke.sh bmp-wasm"
+
 [tasks."wasm:run-docker"]
 description = "Run the container locally (port 8090, saves in wasm/savegame)"
 depends = ["wasm:docker"]

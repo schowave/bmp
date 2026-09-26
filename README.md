@@ -104,6 +104,8 @@ A run that fails or is cancelled before step 4 leaves no git tag behind and does
 
 Every push to `main` and every pull request builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
 
+The WASM image gets a smoke test without a browser, `wasm/smoke.sh`: page and bundle are served, a save comes back byte for byte, invalid names and oversized saves are refused, and the server does not run as root. Locally: `mise run wasm:smoke`.
+
 ## Development
 
 Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mise tasks` lists them all, including the `wasm:*` tasks for the WASM image.

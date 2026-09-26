@@ -21,6 +21,7 @@ The Docker build makes the bundle itself (`wasm/Dockerfile`, context is the repo
 |--------------------|-----------------------------------------------------------------|
 | `wasm:build`       | Build the web root with `bmp.jsdos` into `wasm/dist`            |
 | `wasm:docker`      | Build the container image (`bmp-wasm`)                          |
+| `wasm:smoke`       | Build the image and smoke test it with `wasm/smoke.sh`          |
 | `wasm:run-docker`  | Run the container locally (port 8090, saves in `wasm/savegame`) |
 | `wasm:run`         | Local dev server for `wasm/dist` (python, no save persistence)  |
 | `wasm:clean`       | Remove `wasm/dist`                                              |
