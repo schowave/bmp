@@ -11,7 +11,8 @@ PORT = "8080"
 
 [tasks."vnc:build"]
 description = "Build the container image"
-run = "podman build -f vnc/Dockerfile -t $IMAGE_NAME ."
+# --format docker: in the default OCI format podman drops HEALTHCHECK.
+run = "podman build --format docker -f vnc/Dockerfile -t $IMAGE_NAME ."
 
 [tasks."vnc:stop"]
 description = "Stop and remove the container"
@@ -52,7 +53,7 @@ run = "wasm/build-bundle.sh wasm/dist"
 
 [tasks."wasm:docker"]
 description = "Build the container image (bmp-wasm)"
-run = "podman build -f wasm/Dockerfile -t bmp-wasm ."
+run = "podman build --format docker -f wasm/Dockerfile -t bmp-wasm ."
 
 [tasks."wasm:run-docker"]
 description = "Run the container locally (port 8090, saves in wasm/savegame)"

@@ -7,7 +7,8 @@
 # Browser verbunden ist. Gibt es dort eine ESTABLISHED-Verbindung, laeuft DOSBox
 # weiter (SIGCONT), sonst wird es angehalten (SIGSTOP). Der Spielstand im Speicher
 # bleibt dabei erhalten. Die PID wird jede Sekunde neu gesucht, weil ratpoison
-# DOSBox nach dem Beenden des Spiels neu startet.
+# DOSBox nach dem Beenden des Spiels neu startet. In derselben Runde wird geprueft,
+# ob Xvnc und websockify noch laufen; fehlt einer, beendet sich das Skript.
 
 vncserver :1 -geometry 640x480 -depth 16 -SecurityTypes None \
     -xstartup /home/bmp/.config/tigervnc/xstartup || exit 1
@@ -22,7 +23,19 @@ while sleep 1; do
     else
         sig=STOP
     fi
+    xvnc= ws=
     for p in /proc/[0-9]*; do
-        [ "$(cat "$p/comm" 2>/dev/null)" = dosbox ] && kill -$sig "${p#/proc/}" 2>/dev/null
+        case "$(cat "$p/comm" 2>/dev/null)" in
+            dosbox) kill -$sig "${p#/proc/}" 2>/dev/null ;;
+            Xtigervnc) xvnc=1 ;;
+            websockify) ws=1 ;;
+        esac
     done
+    # Ohne Xvnc oder websockify kommt kein Browser mehr ins Spiel, der Container liefe
+    # aber still weiter. Also beenden, damit die Restart-Policy ihn neu startet.
+    if [ -z "$xvnc" ] || [ -z "$ws" ]; then
+        [ -z "$xvnc" ] && echo "bmp-start: Xtigervnc laeuft nicht mehr" >&2
+        [ -z "$ws" ] && echo "bmp-start: websockify laeuft nicht mehr" >&2
+        exit 1
+    fi
 done

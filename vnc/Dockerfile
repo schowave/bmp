@@ -58,5 +58,10 @@ COPY VERSION /usr/share/novnc/version.txt
 
 EXPOSE 8080
 
+# websockify liefert auch die Seite aus; antwortet es nicht, kommt niemand ins Spiel.
+# python3 ist ohnehin da, weil websockify es braucht, curl und wget dagegen nicht.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/version.txt', timeout=4)"
+
 USER bmp
 CMD ["/usr/local/bin/bmp-start"]
