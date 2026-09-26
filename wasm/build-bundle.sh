@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
-# Build a .jsdos bundle for BMP (Bundesliga Manager Professional)
+# Build the web root of the WASM image for BMP (Bundesliga Manager Professional):
+# the .jsdos bundle plus the files the page serves next to it.
 #
 # The .jsdos format is a ZIP archive containing:
 #   .jsdos/dosbox.conf  — DOSBox configuration
 #   <game files>        — everything from bmp/
 #
-# Usage: cd wasm && ./build-bundle.sh
+# Usage: wasm/build-bundle.sh <output dir>
+# The Docker build writes to /public, `mise run wasm:build` to wasm/dist.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 GAME_DIR="$PROJECT_ROOT/bmp"
-OUTPUT="$SCRIPT_DIR/bmp.jsdos"
+OUT_DIR="${1:?Usage: $0 <output dir>}"
+mkdir -p "$OUT_DIR"
+OUT_DIR="$(cd "$OUT_DIR" && pwd)"
+OUTPUT="$OUT_DIR/bmp.jsdos"
+rm -f "$OUTPUT"
 TMPDIR_BUILD="$(mktemp -d)"
 
 trap 'rm -rf "$TMPDIR_BUILD"' EXIT
@@ -40,13 +46,13 @@ mkdir -p "$TMPDIR_BUILD/.jsdos"
 cp "$SCRIPT_DIR/dosbox.conf" "$TMPDIR_BUILD/.jsdos/dosbox.conf"
 
 # Create ZIP with .jsdos extension
-(cd "$TMPDIR_BUILD" && zip -r -9 "$OUTPUT" .)
+(cd "$TMPDIR_BUILD" && zip -q -r -9 "$OUTPUT" .)
 
-# Copy VERSION file for the web UI
-cp "$PROJECT_ROOT/VERSION" "$SCRIPT_DIR/version.txt"
-
-# Die Hilfeseite liegt im Projektwurzelverzeichnis, weil beide Images sie ausliefern.
-# Der Docker-Build der WASM-Variante hat aber nur wasm/ als Kontext, deshalb hier kopieren.
-cp "$PROJECT_ROOT/hilfe.html" "$SCRIPT_DIR/hilfe.html"
+# Die Seite und was sie neben dem Bundle ausliefert. Hilfeseite und Favicon liegen
+# in web/, weil beide Images sie ausliefern.
+cp "$SCRIPT_DIR/index.html" "$OUT_DIR/index.html"
+cp "$PROJECT_ROOT/VERSION" "$OUT_DIR/version.txt"
+cp "$PROJECT_ROOT/web/hilfe.html" "$OUT_DIR/hilfe.html"
+cp "$PROJECT_ROOT/web/favicon.png" "$OUT_DIR/favicon.png"
 
 echo "Created $OUTPUT ($(du -h "$OUTPUT" | cut -f1))"

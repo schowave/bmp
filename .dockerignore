@@ -1,0 +1,8 @@
+# Beide Images bauen mit dem Repository-Wurzelverzeichnis als Kontext.
+.git
+.github
+.idea
+docs
+savegame
+wasm/dist
+wasm/savegame

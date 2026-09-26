@@ -8,8 +8,5 @@ Thumbs.db
 # Runtime
 savegame/
 
-# Generated WASM files
-wasm/*.jsdos
-wasm/version.txt
-wasm/favicon.png
-wasm/hilfe.html
+# Generated WASM web root (mise run wasm:build)
+wasm/dist/

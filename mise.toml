@@ -1,5 +1,6 @@
 # Tasks for both images. Run `mise tasks` for an overview.
-# The VNC image lives in the repository root, the WASM image in wasm/ (tasks wasm:*).
+# Both images build with the repository root as context: vnc/Dockerfile for the
+# VNC variant (tasks vnc:*), wasm/Dockerfile for the WASM variant (tasks wasm:*).
 
 [env]
 IMAGE_NAME = "bmp"
@@ -8,76 +9,61 @@ PORT = "8080"
 
 # --- VNC image ---------------------------------------------------------------
 
-[tasks.build]
+[tasks."vnc:build"]
 description = "Build the container image"
-run = "podman build -t $IMAGE_NAME ."
+run = "podman build -f vnc/Dockerfile -t $IMAGE_NAME ."
 
-[tasks.stop]
+[tasks."vnc:stop"]
 description = "Stop and remove the container"
 run = [
   "podman stop $CONTAINER_NAME 2>/dev/null || true",
   "podman rm $CONTAINER_NAME 2>/dev/null || true",
 ]
 
-[tasks.run]
-description = "Stop, build, and start in detached mode"
-depends = ["stop", "build"]
+[tasks."vnc:run"]
+description = "Stop, build, and start in detached mode (saves in savegame/)"
+depends = ["vnc:stop", "vnc:build"]
 run = [
+  "mkdir -p savegame",
   "podman run -d --name $CONTAINER_NAME -p $PORT:8080 -v \"$PWD/savegame:/savegame\" $IMAGE_NAME",
   "echo \"Running — open http://localhost:$PORT\"",
 ]
 
-
 # --- WASM image --------------------------------------------------------------
 
-[tasks."wasm:bundle"]
-description = "Build the bmp.jsdos bundle"
-dir = "{{config_root}}/wasm"
-# Relative to dir, so the bundle is only rebuilt when one of these changed.
-sources = ["build-bundle.sh", "dosbox.conf", "../VERSION", "../bmp/**/*"]
-outputs = ["bmp.jsdos"]
-run = "./build-bundle.sh"
-
 [tasks."wasm:build"]
-description = "Build bmp.jsdos and copy favicon and help page"
-dir = "{{config_root}}/wasm"
-depends = ["wasm:bundle"]
-run = [
-  "cp ../images/favicon.png .",
-  "cp ../hilfe.html .",
-]
+description = "Build the web root with bmp.jsdos into wasm/dist"
+# Only rebuilt when one of these changed.
+sources = ["wasm/build-bundle.sh", "wasm/dosbox.conf", "wasm/index.html", "VERSION", "web/*", "bmp/**/*"]
+outputs = ["wasm/dist/bmp.jsdos"]
+run = "wasm/build-bundle.sh wasm/dist"
 
 [tasks."wasm:docker"]
 description = "Build the container image (bmp-wasm)"
-dir = "{{config_root}}/wasm"
-depends = ["wasm:build"]
-run = "podman build -t bmp-wasm ."
+run = "podman build -f wasm/Dockerfile -t bmp-wasm ."
 
 [tasks."wasm:run-docker"]
 description = "Run the container locally (port 8090, saves in wasm/savegame)"
-dir = "{{config_root}}/wasm"
 depends = ["wasm:docker"]
 run = [
-  "mkdir -p savegame",
+  "mkdir -p wasm/savegame",
   "echo 'Opening http://localhost:8090'",
   "open http://localhost:8090 || true",
-  "podman run --rm -p 8090:8080 -v \"$PWD/savegame:/data\" bmp-wasm",
+  "podman run --rm -p 8090:8080 -v \"$PWD/wasm/savegame:/data\" bmp-wasm",
 ]
 
 [tasks."wasm:run"]
-description = "Local dev server (python, no save persistence)"
-dir = "{{config_root}}/wasm"
+description = "Local dev server for wasm/dist (python, no save persistence)"
 depends = ["wasm:build"]
 run = [
   "echo 'Opening http://localhost:8000 (no save persistence)'",
   "open http://localhost:8000 || true",
-  "python3 -m http.server 8000",
+  "python3 -m http.server 8000 -d wasm/dist",
 ]
 
 [tasks."wasm:clean"]
-description = "Remove generated files"
-dir = "{{config_root}}/wasm"
-run = "rm -f bmp.jsdos version.txt favicon.png hilfe.html"
+description = "Remove the generated web root"
+run = "rm -rf wasm/dist"
 
 # --- Release -----------------------------------------------------------------
 

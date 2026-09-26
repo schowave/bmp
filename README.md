@@ -7,7 +7,7 @@
 The classic 90s DOS football management game — containerized and playable in the browser via [noVNC](https://novnc.com).
 
 <p align="center">
-  <img src="images/bmp.png" alt="Bundesliga Manager Professional" width="700">
+  <img src="docs/bmp.png" alt="Bundesliga Manager Professional" width="700">
 </p>
 
 ## Features
@@ -35,7 +35,7 @@ Open [http://localhost:8080](http://localhost:8080)
 ```bash
 git clone https://github.com/schowave/bmp.git
 cd bmp
-mise run run
+mise run vnc:run
 ```
 
 ## Architecture
@@ -55,7 +55,7 @@ Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :59
 ### Synology NAS
 
 1. Create a project folder on your NAS (e.g. `/volume1/docker/bmp/`)
-2. Add the `docker-compose.yml` from this repository
+2. Add `vnc/docker-compose.yml` from this repository
 3. In **Container Manager** → **Project** → **Create**, point to the folder and start
 4. If using a reverse proxy, add WebSocket headers under **Custom Header**:
 
@@ -100,11 +100,23 @@ Releases are managed via GitHub Actions, and only there — there is no local pu
 
 Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mise tasks` lists them all, including the `wasm:*` tasks for the WASM image.
 
+### Layout
+
+| Path | Contents |
+|---|---|
+| `bmp/` | Game files, used by both images |
+| `web/` | Help page and favicon, served by both images |
+| `vnc/` | VNC image: `Dockerfile`, DOSBox config, noVNC player page, `docker-compose.yml` |
+| `wasm/` | WASM image, see [wasm/README.md](wasm/README.md) |
+| `docs/` | Images for this README |
+
+Both Dockerfiles build with the repository root as context, e.g. `docker build -f vnc/Dockerfile .`
+
 | Command | Description |
 |---|---|
-| `mise run build` | Build the container image |
-| `mise run run` | Stop, build, and start in detached mode |
-| `mise run stop` | Stop and remove the container |
+| `mise run vnc:build` | Build the container image |
+| `mise run vnc:run` | Stop, build, and start in detached mode |
+| `mise run vnc:stop` | Stop and remove the container |
 | `mise run release` | Start the release workflow, see [Releases](#releases) |
 
 ## Help page
@@ -114,9 +126,8 @@ bottom right of the game page. The WASM variant also answers the shorter `/hilfe
 one does not, because websockify serves files literally, which is why both pages link to
 `hilfe.html`.
 
-The page lives at `hilfe.html` in the repository root since both images serve it. The WASM
-Docker build only has `wasm/` as its context, so `build-bundle.sh` copies it in; the copy
-at `wasm/hilfe.html` is generated and ignored by git.
+The page lives at `web/hilfe.html` since both images serve it; both Docker builds take it
+from there.
 
 ## Savegames
 
@@ -144,7 +155,7 @@ The game runs unprivileged as user `bmp` (uid 1000), while the mounted directory
 docker exec bmp sh -c 'touch /savegame/PROBE && echo writable || echo denied; rm -f /savegame/PROBE'
 ```
 
-`docker-compose.yml` therefore runs the container in group `100`, which on a Synology is `users`, the group owning the shared folders, and whose ACL grants write access:
+`vnc/docker-compose.yml` therefore runs the container in group `100`, which on a Synology is `users`, the group owning the shared folders, and whose ACL grants write access:
 
 ```yaml
     group_add:

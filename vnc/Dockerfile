@@ -1,3 +1,7 @@
+# Build-Kontext ist das Repository-Wurzelverzeichnis:
+#   docker build -f vnc/Dockerfile .
+
+
 FROM debian:trixie-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -46,10 +50,10 @@ RUN mkdir -p /home/bmp/.config/tigervnc /home/bmp/.dosbox \
 COPY --chown=bmp:bmp bmp /dos/bmp
 
 # Layer 4: Konfiguration (ändert sich gelegentlich)
-COPY --chown=bmp:bmp dosbox.conf /home/bmp/.dosbox/dosbox.conf
-COPY player.html /usr/share/novnc/player.html
-COPY hilfe.html /usr/share/novnc/hilfe.html
-COPY images/favicon.png /usr/share/novnc/favicon.png
+COPY --chown=bmp:bmp vnc/dosbox.conf /home/bmp/.dosbox/dosbox.conf
+COPY vnc/player.html /usr/share/novnc/player.html
+COPY web/hilfe.html /usr/share/novnc/hilfe.html
+COPY web/favicon.png /usr/share/novnc/favicon.png
 COPY VERSION /usr/share/novnc/version.txt
 
 EXPOSE 8080
