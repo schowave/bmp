@@ -143,58 +143,75 @@ const stats = xs => {
 // --- run -----------------------------------------------------------------------
 
 start();
-await sleep(15000); // DOSBox boots and the game reaches the team selection
 
 const result = { label: opt.label, image: opt.image, conf: opt.conf ?? null, cmd: opt.cmd ?? null, at: new Date().toISOString() };
 
-result.cpuNoClient = await cpuDuring(() => sleep(SECS * 1000));
+// A run that throws halfway, e.g. a timeout while waiting for the picture, must not
+// leave the browser or the container behind, or the next run fails on the port.
+// Ctrl-C skips the finally below, so remove the container here as well.
+for (const sig of ['SIGINT', 'SIGTERM']) {
+    process.on(sig, () => {
+        if (!opt.keep) { try { podman('rm', '-f', NAME); } catch {} }
+        process.exit(130);
+    });
+}
+let browser = null;
+try {
+    await sleep(15000); // DOSBox boots and the game reaches the team selection
 
-const browser = await chromium.launch();
-const { page, ws } = await openClient(browser);
-await sleep(3000);
+    result.cpuNoClient = await cpuDuring(() => sleep(SECS * 1000));
 
-ws.frames = ws.bytes = 0;
-result.cpuClientIdle = await cpuDuring(() => sleep(SECS * 1000));
-result.wsIdle = { framesPerSec: +(ws.frames / SECS).toFixed(1), kbPerSec: +(ws.bytes / 1024 / SECS).toFixed(1) };
+    browser = await chromium.launch();
+    const { page, ws } = await openClient(browser);
+    await sleep(3000);
 
-ws.frames = ws.bytes = 0;
-let lat;
-const t0 = Date.now();
-result.cpuClicking = await cpuDuring(async () => { lat = await clickLatencies(page, Number(opt.clicks)); });
-const clickSecs = (Date.now() - t0) / 1000;
-result.wsClicking = { framesPerSec: +(ws.frames / clickSecs).toFixed(1), kbPerSec: +(ws.bytes / 1024 / clickSecs).toFixed(1) };
-result.clickLatencyMs = stats(lat);
+    ws.frames = ws.bytes = 0;
+    result.cpuClientIdle = await cpuDuring(() => sleep(SECS * 1000));
+    result.wsIdle = { framesPerSec: +(ws.frames / SECS).toFixed(1), kbPerSec: +(ws.bytes / 1024 / SECS).toFixed(1) };
 
-// Size of the game picture within the VNC screen, from the bounding box of the
-// non-black pixels. Should be the full 640x480; a smaller box means DOSBox stopped
-// scaling the game's 320x200 mode, as output=surface with scaler=none does.
-result.picture = await page.evaluate(() => {
-    const c = document.querySelector('#screen canvas');
-    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-    let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
-    for (let y = 0; y < c.height; y++) {
-        for (let x = 0; x < c.width; x++) {
-            const i = (y * c.width + x) * 4;
-            if (d[i] + d[i + 1] + d[i + 2] > 30) {
-                if (x < x0) x0 = x;
-                if (x > x1) x1 = x;
-                if (y < y0) y0 = y;
-                if (y > y1) y1 = y;
+    ws.frames = ws.bytes = 0;
+    let lat;
+    const t0 = Date.now();
+    result.cpuClicking = await cpuDuring(async () => { lat = await clickLatencies(page, Number(opt.clicks)); });
+    const clickSecs = (Date.now() - t0) / 1000;
+    result.wsClicking = { framesPerSec: +(ws.frames / clickSecs).toFixed(1), kbPerSec: +(ws.bytes / 1024 / clickSecs).toFixed(1) };
+    result.clickLatencyMs = stats(lat);
+
+    // Size of the game picture within the VNC screen, from the bounding box of the
+    // non-black pixels. Should be the full 640x480; a smaller box means DOSBox stopped
+    // scaling the game's 320x200 mode, as output=surface with scaler=none does.
+    result.picture = await page.evaluate(() => {
+        const c = document.querySelector('#screen canvas');
+        const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+        for (let y = 0; y < c.height; y++) {
+            for (let x = 0; x < c.width; x++) {
+                const i = (y * c.width + x) * 4;
+                if (d[i] + d[i + 1] + d[i + 2] > 30) {
+                    if (x < x0) x0 = x;
+                    if (x > x1) x1 = x;
+                    if (y < y0) y0 = y;
+                    if (y > y1) y1 = y;
+                }
             }
         }
+        return { screen: `${c.width}x${c.height}`, picture: `${x1 - x0 + 1}x${y1 - y0 + 1}` };
+    });
+
+    mkdirSync('shots', { recursive: true });
+    await page.screenshot({ path: `shots/${opt.label}.png` });
+    await browser.close();
+    browser = null;
+
+    // After the client left: does the container go back to idle?
+    await sleep(3000);
+    result.cpuAfterDisconnect = await cpuDuring(() => sleep(Math.min(SECS, 10) * 1000));
+} finally {
+    await browser?.close();
+    if (!opt.keep) {
+        try { podman('rm', '-f', NAME); } catch {}
     }
-    return { screen: `${c.width}x${c.height}`, picture: `${x1 - x0 + 1}x${y1 - y0 + 1}` };
-});
-
-mkdirSync('shots', { recursive: true });
-await page.screenshot({ path: `shots/${opt.label}.png` });
-await browser.close();
-
-// After the client left: does the container go back to idle?
-await sleep(3000);
-result.cpuAfterDisconnect = await cpuDuring(() => sleep(Math.min(SECS, 10) * 1000));
-
-if (!opt.keep) podman('rm', '-f', NAME);
+}
 
 appendFileSync('results.jsonl', JSON.stringify(result) + '\n');
 console.log(JSON.stringify(result, null, 2));
