@@ -67,6 +67,12 @@ Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :59
 
 The container is labeled for [Watchtower](https://containrrr.dev/watchtower/) — if a Watchtower instance is running on the NAS, it will automatically pull new images on release.
 
+### Access control
+
+Neither image asks for a password. The VNC server runs with `-SecurityTypes None`, so anyone who reaches its port is in the running game, with mouse and keyboard, and can overwrite the saves on `D:`. There is only one game, so whoever connects plays it alongside you. The WASM image gives each browser its own save, but anyone who knows or guesses a slot name can read and overwrite it through the API, see [wasm/README.md](wasm/README.md#save-files).
+
+That is fine on a home network. Do not forward the port to the internet as it is. To play from outside, reach the NAS through a VPN such as WireGuard or Tailscale, or put a reverse proxy with its own login in front, for example nginx with basic auth or Authelia. The reverse proxy built into DSM forwards requests but does not ask for a login by itself.
+
 ### Other Platforms
 
 The Docker image `schowave/bmp` is built for `linux/amd64`.
