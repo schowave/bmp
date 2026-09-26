@@ -107,7 +107,8 @@ Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mi
 |---|---|
 | `bmp/` | Game files, used by both images |
 | `web/` | Help page and favicon, served by both images |
-| `vnc/` | VNC image: `Dockerfile`, DOSBox config, noVNC player page, `docker-compose.yml` |
+| `vnc/` | VNC image: `Dockerfile`, start script, DOSBox config, noVNC player page, `docker-compose.yml` |
+| `vnc/bench/` | Benchmark for the VNC image with Playwright, see [vnc/bench/README.md](vnc/bench/README.md) |
 | `wasm/` | WASM image, see [wasm/README.md](wasm/README.md) |
 | `docs/` | Images for this README |
 

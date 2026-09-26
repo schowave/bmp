@@ -1,0 +1,13 @@
+{
+  "name": "bmp-vnc-bench",
+  "private": true,
+  "description": "Measures CPU, traffic and click latency of the VNC image",
+  "type": "module",
+  "scripts": {
+    "bench": "node bench.mjs",
+    "report": "node report.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
