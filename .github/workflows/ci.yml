@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+# Only pushes to main write the build cache. Pull requests and the release, which
+# calls this workflow and writes the cache itself, only read it, so a PR cannot
+# fill the cache with layers main never builds.
+
 jobs:
   vnc:
     runs-on: ubuntu-latest
@@ -31,6 +35,7 @@ jobs:
         load: true
         tags: bmp:ci
         cache-from: type=gha,scope=vnc
+        cache-to: ${{ github.event_name == 'push' && 'type=gha,mode=max,scope=vnc' || '' }}
 
     - uses: actions/setup-node@v7
       with:
@@ -78,3 +83,4 @@ jobs:
         platforms: linux/amd64
         push: false
         cache-from: type=gha,scope=wasm
+        cache-to: ${{ github.event_name == 'push' && 'type=gha,mode=max,scope=wasm' || '' }}
