@@ -27,9 +27,6 @@ run = [
   "echo \"Running — open http://localhost:$PORT\"",
 ]
 
-[tasks.push]
-description = "Build and push the linux/amd64 image to Docker Hub"
-run = "./build-and-push-docker-image.sh"
 
 # --- WASM image --------------------------------------------------------------
 
@@ -67,11 +64,6 @@ run = [
   "podman run --rm -p 8090:8080 -v \"$PWD/savegame:/data\" bmp-wasm",
 ]
 
-[tasks."wasm:push"]
-description = "Build and push the WASM image to Docker Hub"
-dir = "{{config_root}}/wasm"
-run = "./build-and-push-docker-image.sh"
-
 [tasks."wasm:run"]
 description = "Local dev server (python, no save persistence)"
 dir = "{{config_root}}/wasm"
@@ -86,3 +78,13 @@ run = [
 description = "Remove generated files"
 dir = "{{config_root}}/wasm"
 run = "rm -f bmp.jsdos version.txt favicon.png hilfe.html"
+
+# --- Release -----------------------------------------------------------------
+
+# Releases only go through the GitHub workflow: it bumps VERSION, tags the commit
+# and pushes both images. Building and pushing locally would leave VERSION changed
+# without a commit or tag.
+[tasks.release]
+description = "Start the release workflow (optional version, default: next patch)"
+usage = 'arg "[version]" help="Release version, e.g. 5.2.0"'
+run = 'gh workflow run release.yml ${usage_version:+-f version=$usage_version}'

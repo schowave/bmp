@@ -87,9 +87,9 @@ services:
 
 ## Releases
 
-Releases are managed via GitHub Actions:
+Releases are managed via GitHub Actions, and only there — there is no local push:
 
-1. Go to **Actions** → **Release** → **Run workflow**
+1. Go to **Actions** → **Release** → **Run workflow**, or run `mise run release [version]` (needs the `gh` CLI)
 2. Either enter a version number (e.g. `4.1.0`) or leave empty to auto-increment the patch version (e.g. `4.0.1` → `4.0.2`)
 3. The workflow updates `VERSION`, creates a git tag, builds the Docker image for `linux/amd64`, and pushes to Docker Hub
 4. Watchtower picks up the new image automatically on connected hosts
@@ -105,7 +105,7 @@ Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mi
 | `mise run build` | Build the container image |
 | `mise run run` | Stop, build, and start in detached mode |
 | `mise run stop` | Stop and remove the container |
-| `mise run push` | Build and push the `linux/amd64` image to Docker Hub |
+| `mise run release` | Start the release workflow, see [Releases](#releases) |
 
 ## Help page
 

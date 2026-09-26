@@ -21,7 +21,6 @@ Defined in the repository root's `mise.toml`; they work from the root and from `
 | `wasm:build`       | Build `bmp.jsdos` bundle and copy assets                        |
 | `wasm:docker`      | Build the container image (`bmp-wasm`)                          |
 | `wasm:run-docker`  | Run the container locally (port 8090, saves in `wasm/savegame`) |
-| `wasm:push`        | Build and push image to Docker Hub                              |
 | `wasm:run`         | Local dev server (python, no save persistence)                  |
 | `wasm:clean`       | Remove generated files                                          |
 
