@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"time"
 )
 
 const (
@@ -46,7 +47,8 @@ func handleSaves(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "storage error", http.StatusInternalServerError)
 			return
 		}
-		if err := os.WriteFile(savePath(name), data, 0644); err != nil {
+		if err := writeAtomic(savePath(name), data); err != nil {
+			log.Printf("save %s: %v", name, err)
 			http.Error(w, "write error", http.StatusInternalServerError)
 			return
 		}
@@ -55,6 +57,34 @@ func handleSaves(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// Schreibt erst in eine temporaere Datei im selben Verzeichnis und benennt sie dann
+// um. Bricht der Vorgang ab - Container gestoppt, Platte voll -, bleibt der alte
+// Spielstand heil, statt halb ueberschrieben liegen zu bleiben. Fuer das Umbenennen
+// reicht Schreibrecht auf das Verzeichnis, auch wenn die alte Datei jemand anderem
+// gehoert.
+func writeAtomic(path string, data []byte) error {
+	tmp, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".*.tmp")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name()) // nach dem Rename ein No-op
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := os.Chmod(tmp.Name(), 0644); err != nil {
+		return err
+	}
+	return os.Rename(tmp.Name(), path)
 }
 
 // Diese Dateien aendern sich mit jedem Release und muessen deshalb bei jedem Aufruf
@@ -91,6 +121,17 @@ func main() {
 	http.Handle("/", staticHandler())
 	http.HandleFunc("/api/saves/{name}", handleSaves)
 
+	// Ohne Timeouts haelt eine Verbindung, die nie fertig sendet, ihre Goroutine
+	// beliebig lange. Die Grenzen sind grosszuegig, weil ein Spielstand bis 4 MB gross
+	// sein kann und bmp.jsdos auch ueber eine langsame Leitung durchkommen soll.
+	srv := &http.Server{
+		Addr:              ":8080",
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       2 * time.Minute,
+		WriteTimeout:      5 * time.Minute,
+		IdleTimeout:       2 * time.Minute,
+	}
+
 	log.Println("listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(srv.ListenAndServe())
 }
