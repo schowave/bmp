@@ -91,11 +91,18 @@ services:
 Releases are managed via GitHub Actions, and only there — there is no local push:
 
 1. Go to **Actions** → **Release** → **Run workflow**, or run `mise run release [version]` (needs the `gh` CLI)
-2. Either enter a version number (e.g. `4.1.0`) or leave empty to auto-increment the patch version (e.g. `4.0.1` → `4.0.2`)
-3. The workflow updates `VERSION`, creates a git tag, builds the Docker image for `linux/amd64`, and pushes to Docker Hub
-4. Watchtower picks up the new image automatically on connected hosts
+2. Either enter a version number (e.g. `4.1.0`) or leave empty to auto-increment the patch version (e.g. `4.0.1` → `4.0.2`). The version must be above the latest tag and not taken yet.
+3. The workflow runs CI first, then builds both images for `linux/amd64` and pushes them under the version tag alone
+4. Only once both images are on Docker Hub does it commit `VERSION`, push the git tag, and move `latest` and `wasm` to the new images
+5. Watchtower picks up the new image automatically on connected hosts
+
+A run that fails or is cancelled before step 4 leaves no git tag behind and does not change what Watchtower pulls. Only one release runs at a time.
 
 > Requires GitHub Secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
+
+### CI
+
+Every push to `main` and every pull request builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
 
 ## Development
 

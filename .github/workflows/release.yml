@@ -1,5 +1,11 @@
 name: Release
 
+# Order matters: the version is only checked at first, the images are built and
+# pushed under the version tag alone, and only once both images are there does the
+# publish job commit VERSION, push the git tag and move latest and wasm. A failed or
+# cancelled run therefore leaves no git tag behind and does not touch what Watchtower
+# pulls; at most it leaves a version tag on Docker Hub that the next run overwrites.
+
 on:
   workflow_dispatch:
     inputs:
@@ -11,6 +17,11 @@ on:
 permissions:
   contents: write
 
+# Two runs at once would pick the same version.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -19,7 +30,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
-    - name: Determine version
+    - name: Determine and check version
       id: version
       env:
         INPUT_VERSION: ${{ github.event.inputs.version }}
@@ -30,28 +41,32 @@ jobs:
         else
           VERSION=$(python3 -c "import sys; v=sys.argv[1].split('.'); v[-1]=str(int(v[-1])+1); print('.'.join(v))" "$CURRENT")
         fi
-        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Release version: $CURRENT → $VERSION"
+        if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "::error::$VERSION is not of the form X.Y.Z"; exit 1
+        fi
+        if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
+          echo "::error::Tag v$VERSION exists already"; exit 1
+        fi
+        LATEST=$(git ls-remote --tags --refs origin 'v*' | sed 's|.*refs/tags/v||' | sort -V | tail -1)
+        if [ -n "$LATEST" ] && [ "$(printf '%s\n%s\n' "$LATEST" "$VERSION" | sort -V | tail -1)" != "$VERSION" ]; then
+          echo "::error::$VERSION is not above the latest release $LATEST"; exit 1
+        fi
+        echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "Release version: $CURRENT → $VERSION (latest tag: ${LATEST:-none})"
 
-    - name: Update VERSION file and tag
-      env:
-        VERSION: ${{ steps.version.outputs.VERSION }}
-      run: |
-        echo "$VERSION" > VERSION
-        git config user.name "github-actions"
-        git config user.email "github-actions@github.com"
-        git add VERSION
-        git commit -m "Release v${VERSION}" || echo "No version change needed"
-        git tag "v${VERSION}"
-        git push origin main "v${VERSION}"
+  check:
+    uses: ./.github/workflows/ci.yml
 
   docker-vnc:
-    needs: version
+    needs: [version, check]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-      with:
-        ref: v${{ needs.version.outputs.version }}
+
+    # The image shows VERSION on the page, so it has to carry the new one although
+    # the commit that sets it only happens in the publish job.
+    - name: Set VERSION
+      run: echo "${{ needs.version.outputs.version }}" > VERSION
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
@@ -69,19 +84,18 @@ jobs:
         file: vnc/Dockerfile
         platforms: linux/amd64
         push: true
-        tags: |
-          schowave/bmp:${{ needs.version.outputs.version }}
-          schowave/bmp:latest
+        tags: schowave/bmp:${{ needs.version.outputs.version }}
         cache-from: type=gha,scope=vnc
         cache-to: type=gha,mode=max,scope=vnc
 
   docker-wasm:
-    needs: version
+    needs: [version, check]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-      with:
-        ref: v${{ needs.version.outputs.version }}
+
+    - name: Set VERSION
+      run: echo "${{ needs.version.outputs.version }}" > VERSION
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
@@ -99,18 +113,47 @@ jobs:
         file: wasm/Dockerfile
         platforms: linux/amd64
         push: true
-        tags: |
-          schowave/bmp:wasm-${{ needs.version.outputs.version }}
-          schowave/bmp:wasm
+        tags: schowave/bmp:wasm-${{ needs.version.outputs.version }}
         cache-from: type=gha,scope=wasm
         cache-to: type=gha,mode=max,scope=wasm
 
-  release:
+  publish:
     needs: [version, docker-vnc, docker-wasm]
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
+    - uses: actions/checkout@v7
+
+    # Atomic, so the commit and the tag land together or not at all. If main moved
+    # on since the run started, the push is refused instead of overwriting it.
+    - name: Commit VERSION and push tag
+      run: |
+        echo "$VERSION" > VERSION
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add VERSION
+        git commit -m "Release v${VERSION}" || echo "No version change needed"
+        git tag "v${VERSION}"
+        git push --atomic origin HEAD:main "v${VERSION}"
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v4
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Only now do Watchtower hosts see the new images.
+    - name: Move latest and wasm
+      run: |
+        docker buildx imagetools create -t schowave/bmp:latest "schowave/bmp:${VERSION}"
+        docker buildx imagetools create -t schowave/bmp:wasm "schowave/bmp:wasm-${VERSION}"
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3
       with:
-        tag_name: v${{ needs.version.outputs.version }}
+        tag_name: v${{ env.VERSION }}
         generate_release_notes: true
