@@ -1,7 +1,6 @@
 # Build-Kontext ist das Repository-Wurzelverzeichnis:
 #   docker build -f vnc/Dockerfile .
 
-
 FROM debian:trixie-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \

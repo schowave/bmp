@@ -6,6 +6,10 @@ services:
     ports:
       - "8090:8080"
     volumes:
+      # Anders als vnc/docker-compose.yml (./savegame) ein fester Pfad auf der Synology,
+      # weil dort die bestehenden Spielstaende liegen. Auf einem anderen Host anpassen,
+      # z. B. ./savegame:/data. Wer den Pfad aendert, muss die .sav-Dateien mitnehmen,
+      # sonst startet jeder Slot leer.
       - /volume1/docker/bmp-saves:/data
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
