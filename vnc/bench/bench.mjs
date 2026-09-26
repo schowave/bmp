@@ -161,6 +161,27 @@ const clickSecs = (Date.now() - t0) / 1000;
 result.wsClicking = { framesPerSec: +(ws.frames / clickSecs).toFixed(1), kbPerSec: +(ws.bytes / 1024 / clickSecs).toFixed(1) };
 result.clickLatencyMs = stats(lat);
 
+// Size of the game picture within the VNC screen, from the bounding box of the
+// non-black pixels. Should be the full 640x480; a smaller box means DOSBox stopped
+// scaling the game's 320x200 mode, as output=surface with scaler=none does.
+result.picture = await page.evaluate(() => {
+    const c = document.querySelector('#screen canvas');
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < c.height; y++) {
+        for (let x = 0; x < c.width; x++) {
+            const i = (y * c.width + x) * 4;
+            if (d[i] + d[i + 1] + d[i + 2] > 30) {
+                if (x < x0) x0 = x;
+                if (x > x1) x1 = x;
+                if (y < y0) y0 = y;
+                if (y > y1) y1 = y;
+            }
+        }
+    }
+    return { screen: `${c.width}x${c.height}`, picture: `${x1 - x0 + 1}x${y1 - y0 + 1}` };
+});
+
 mkdirSync('shots', { recursive: true });
 await page.screenshot({ path: `shots/${opt.label}.png` });
 await browser.close();

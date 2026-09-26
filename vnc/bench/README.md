@@ -44,7 +44,10 @@ helps to find coordinates: `node shot.mjs out.png click:627,135 wait:1000 Enter`
 4. **Clicking**: clicks the right arrow of the team strip `--clicks` times and
    measures, for each click, how long until the strip on the canvas changes. This
    covers the whole path: browser, websockify, Xvnc, DOSBox, the game, and back.
-5. **After disconnect**: closes the browser and measures CPU again.
+5. **Picture size**: the bounding box of the non-black pixels on the canvas. It must
+   be the full 640x480; anything smaller means DOSBox no longer scales the game's
+   320x200 mode. Also look at the screenshot in `shots/`.
+6. **After disconnect**: closes the browser and measures CPU again.
 
 CPU is given in percent of one core, from `utime + stime` in `/proc/<pid>/stat`.
 

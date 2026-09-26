@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const rows = readFileSync('results.jsonl', 'utf8').trim().split('\n').map(l => JSON.parse(l));
 const cols = [
     ['label', r => r.label],
+    ['picture', r => r.picture?.picture],
     ['no client %', r => r.cpuNoClient.total],
     ['client idle %', r => r.cpuClientIdle.total],
     ['clicking %', r => r.cpuClicking.total],
