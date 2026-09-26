@@ -134,7 +134,7 @@ docker exec bmp find /dos -iname '*.MAN' -exec ls -la {} \;
 docker cp bmp:/dos/bmp/YOURSAVE.MAN ./savegame/YOURSAVE.MAN
 ```
 
-`AUTOSAVE.MAN`, `BMP/AUTOSAVE.MAN` and `BMP/MICHEL1.MAN` ship with the image, so go by the modification date rather than the name to tell your own save apart — the game overwrites `AUTOSAVE.MAN` as you play, which makes a recent date on it yours.
+`AUTOSAVE.MAN` ships with the image, so go by the modification date rather than the name to tell your own save apart — the game overwrites `AUTOSAVE.MAN` as you play, which makes a recent date on it yours.
 
 ### The mount has to be writable
 
