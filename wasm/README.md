@@ -37,7 +37,7 @@ Browser (js-dos)
   └──  static files        ──→  GET /  (from /public/)
 ```
 
-The Go server (`server.go`) is ~65 lines, stdlib-only, zero dependencies:
+The Go server (`server.go`) is stdlib-only, with no dependencies:
 - Serves static files (index.html, bmp.jsdos, etc.) from `/public/`
 - `GET /api/saves/:name` — returns save data (404 if missing)
 - `PUT /api/saves/:name` — writes save data to `/data/:name.sav` (max 4 MB)
@@ -53,30 +53,26 @@ docker compose up -d
 
 Save files appear as plain files in the mounted directory, visible in File Station.
 
-### Synology Container Manager Settings
+### Synology Container Manager
 
-If you prefer the Synology GUI over `docker compose`:
+`wasm/docker-compose.yml` is the configuration the NAS runs: port `49160`, saves in `/volume1/docker/bmp-wasm/bmp-saves`. Use it as a **Project**:
 
-1. **Registry** — search `schowave/bmp`, download the `wasm` tag
-2. **Container → Create**
-   - Image: `schowave/bmp:wasm`
-   - Container name: `bmp-wasm`
-   - Auto-restart: enabled
-3. **Port Settings**
-   - Local port: `8090` → Container port: `8080` (TCP)
-4. **Volume Settings**
-   - Host path: `/volume1/docker/bmp-saves` → Mount path: `/data` (read/write)
-5. **Done** — access at `http://<nas-ip>:8090`
+1. Create the folder `/volume1/docker/bmp-wasm/bmp-saves`
+2. Copy `wasm/docker-compose.yml` to `/volume1/docker/bmp-wasm/`
+3. **Container Manager → Project → Create**, point to `/volume1/docker/bmp-wasm/` and start
+4. Access at `http://<nas-ip>:49160`
 
-The server runs unprivileged as uid 1000 and has to write to `/data`. The single-container dialog cannot add a group, so either create a **Project** from `wasm/docker-compose.yml` instead, which runs the container in group `100` (`users`, which the shared folder's ACL lets write), or give the folder to uid 1000. Without either, loading works but every save fails. The same applies to the VNC image, see [Savegames](../README.md#the-mount-has-to-be-writable).
+Watchtower only replaces the image. When `wasm/docker-compose.yml` changes in this repository, copy it again and **Build** the project, since a restart alone does not pick up the change.
+
+The server runs unprivileged as uid 1000 and has to write to `/data`. The compose file runs the container in group `100` (`users`, which the shared folder's ACL lets write). The single-container dialog cannot add a group, so do not create the container there, or give the folder to uid 1000 instead. Without either, loading works but every save fails with `permission denied` in the container log. The same applies to the VNC image, see [Savegames](../README.md#the-mount-has-to-be-writable).
 
 ### docker run
 
 ```bash
 docker run -d --restart=unless-stopped \
   --name bmp-wasm \
-  -p 8090:8080 \
-  -v /volume1/docker/bmp-saves:/data \
+  -p 49160:8080 \
+  -v /volume1/docker/bmp-wasm/bmp-saves:/data \
   --group-add 100 \
   schowave/bmp:wasm
 ```

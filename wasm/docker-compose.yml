@@ -4,13 +4,14 @@ services:
     container_name: bmp-wasm
     restart: unless-stopped
     ports:
-      - "8090:8080"
+      - "49160:8080"
     volumes:
-      # Unlike vnc/docker-compose.yml (./savegame), a fixed path on the Synology,
-      # because the existing saves live there. Adjust it on another host, e.g.
-      # ./savegame:/data. Whoever changes the path must move the .sav files along,
-      # otherwise every slot starts empty.
-      - /volume1/docker/bmp-saves:/data
+      # Port and path are those of the running Synology project, so this file can be
+      # used there as it is. Unlike vnc/docker-compose.yml (./savegame), the path is
+      # fixed because the existing saves live there. Adjust both on another host,
+      # e.g. ./savegame:/data. Whoever changes the path must move the .sav files
+      # along, otherwise every slot starts empty.
+      - /volume1/docker/bmp-wasm/bmp-saves:/data
     # The server runs unprivileged as uid 1000 and has to write to /data. As in
     # vnc/docker-compose.yml it therefore runs in group 100 (users on Synology),
     # which the folder's ACL grants write access. On another host, use the group
