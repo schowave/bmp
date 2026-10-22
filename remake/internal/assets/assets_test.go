@@ -1,0 +1,119 @@
+package assets
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+// gameDir returns the original game directory of the repository (../bmp), or
+// skips the test when it is not there.
+func gameDir(t *testing.T) *Dir {
+	t.Helper()
+	path := filepath.Join("..", "..", "..", "bmp")
+	if _, err := os.Stat(filepath.Join(path, "BMMAIN.EXE")); err != nil {
+		t.Skip("original game files not found in", path)
+	}
+	d, err := OpenDir(os.DirFS(path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d
+}
+
+func TestDecodePicRuns(t *testing.T) {
+	// 4x2 picture: literal of 3 bytes, run of 5 x 7, end marker.
+	data := []byte{4, 0, 2, 0, 0, 0, 0x02, 1, 2, 3, 0x84, 7, 0x80}
+	p, err := DecodePic(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []byte{1, 2, 3, 7, 7, 7, 7, 7}
+	if string(p.Pix) != string(want) {
+		t.Fatalf("got %v, want %v", p.Pix, want)
+	}
+}
+
+func TestAllPicturesDecodeToTheirSize(t *testing.T) {
+	d := gameDir(t)
+	n := 0
+	for upper := range d.names {
+		ext := filepath.Ext(upper)
+		if ext != ".VGA" && ext != ".CP" {
+			continue
+		}
+		data, err := d.ReadFile(upper)
+		if err != nil {
+			t.Fatal(err)
+		}
+		p, err := DecodePic(data)
+		if err != nil {
+			t.Fatalf("%s: %v", upper, err)
+		}
+		if len(p.Pix) != p.W*p.H || p.W == 0 || p.H == 0 {
+			t.Fatalf("%s: %dx%d with %d pixels", upper, p.W, p.H, len(p.Pix))
+		}
+		n++
+	}
+	if n < 150 {
+		t.Fatalf("only %d pictures found", n)
+	}
+}
+
+func TestFullScreenPictureIs320x240(t *testing.T) {
+	d := gameDir(t)
+	p, err := d.Pic(22, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.W != 320 || p.H != 240 {
+		t.Fatalf("got %dx%d", p.W, p.H)
+	}
+}
+
+func TestMana(t *testing.T) {
+	d := gameDir(t)
+	m, err := d.Mana()
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := m.Clubs[0]
+	if c.Name != "1.FC KAISERSLAUTERN" || c.Logo != 88 || len(c.Players) != 20 || c.Players[0] != "EHRMANN" {
+		t.Fatalf("club 0: %+v", c)
+	}
+	if c.Strength != [3]int{94, 94, 95} {
+		t.Fatalf("club 0 strength %v", c.Strength)
+	}
+	if m.Clubs[64].Name == "" || m.Clubs[199].Name == "" || m.Clubs[64].Players != nil {
+		t.Fatalf("foreign clubs: %+v %+v", m.Clubs[64], m.Clubs[199])
+	}
+}
+
+func TestFonts(t *testing.T) {
+	d := gameDir(t)
+	img, err := d.MainImage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if img.CS != 0x3a01 || img.IP != 0x16 {
+		t.Fatalf("entry %04x:%04x", img.CS, img.IP)
+	}
+	fonts, err := Fonts(img)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, h := range map[string]int{"flow.font": 8, "micro4.font": 6, "newbold.font": 16} {
+		f := fonts[name]
+		if f == nil || f.Height != h {
+			t.Fatalf("%s: %+v", name, f)
+		}
+	}
+	a := fonts["flow.font"].Glyph('A')
+	if a.W != 7 || !a.Rows[0][1] || a.Rows[0][0] {
+		t.Fatalf("flow A: %+v", a)
+	}
+	// CP437 Ä is drawn with the glyph of '['.
+	if fonts["flow.font"].Glyph(0x8e) != fonts["flow.font"].Glyph('[') {
+		t.Fatal("umlaut remap missing")
+	}
+}
