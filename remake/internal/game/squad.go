@@ -264,7 +264,8 @@ func (s *State) pickBest(m, k int) int {
 	mode := s.Managers[m].AutoLineup
 	pos := k
 	for {
-		best, bestV := -1, -1
+		best, bestV := -1, -2
+		gk := 0
 		for i := 0; i < SquadMax; i++ {
 			sl := &s.Squads[m][i]
 			if sl.Empty() || sl.Lineup != 0 || !s.available(sl) {
@@ -273,7 +274,17 @@ func (s *State) pickBest(m, k int) int {
 			if s.Persons[sl.Person].Position() != pos {
 				continue
 			}
-			if v := sl.Strength(); v >= bestV {
+			v := sl.Strength()
+			if k != PosKeeper && pos == PosKeeper {
+				// A goalkeeper offered for a field position: the last one
+				// found is taken.
+				v = -1
+				if gk > 0 {
+					v = 1
+				}
+				gk++
+			}
+			if v >= bestV {
 				best, bestV = i, v
 			}
 		}

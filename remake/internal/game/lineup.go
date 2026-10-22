@@ -5,6 +5,7 @@ var (
 	ErrAutoOff     = CreditError("Auto-Aufstellung ist deaktiviert !")
 	ErrTooMany     = CreditError("Nicht mehr als 11 Spieler einsetzen !")
 	ErrTooManyRes  = CreditError("Maximal 4 Reservespieler !")
+	ErrTooFew      = CreditError("Nicht weniger als 10 Spieler einsetzen !")
 	ErrUnavailable = CreditError("Dieser Spieler kann nicht spielen.")
 )
 
@@ -27,23 +28,41 @@ func (s *State) ToggleLineup(mi, i int) error {
 			if s.countLineup(mi, 2) >= MaxReserves {
 				return ErrTooMany
 			}
-			sl.Lineup = 12 + s.countLineup(mi, 2)
+			sl.Lineup = s.freeReserveNumber(mi)
 			break
 		}
 		sl.Lineup = 11
 		s.placeManually(mi, sl)
 	case sl.Lineup <= 11:
+		if s.countLineup(mi, 1) < 11 {
+			return ErrTooFew
+		}
 		if s.countLineup(mi, 2) >= MaxReserves {
 			sl.Lineup = 0
 			break
 		}
-		sl.Lineup = 12 + s.countLineup(mi, 2)
+		sl.Lineup = s.freeReserveNumber(mi)
 	default:
 		sl.Lineup = 0
 	}
 	s.renumber(mi)
 	s.LineupStrength(mi, false)
 	return warn
+}
+
+// freeReserveNumber returns the lowest reserve number not in use.
+func (s *State) freeReserveNumber(mi int) int {
+	for n := 12; ; n++ {
+		used := false
+		for i := 0; i < SquadMax; i++ {
+			if sl := &s.Squads[mi][i]; !sl.Empty() && sl.Lineup == n {
+				used = true
+			}
+		}
+		if !used {
+			return n
+		}
+	}
 }
 
 // placeManually puts a player on the tactics board by his position.

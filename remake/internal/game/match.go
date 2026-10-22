@@ -39,6 +39,10 @@ type Fixture struct {
 	Home, Away int
 	Chances    [2][8]int // minutes of the planned chances
 	Forfeit    int       // 1 home forfeits, 2 away forfeits
+	// Final keeps the score of a cup match: the cup code clears the
+	// results when the next round is drawn.
+	Final      [2]int
+	HasFinal   bool
 	Attendance int64
 	Watched    bool // a human team plays
 }
@@ -81,6 +85,9 @@ type MatchDay struct {
 
 func (md *MatchDay) score(f *Fixture) (int, int) {
 	s := md.s
+	if f.HasFinal {
+		return f.Final[0], f.Final[1]
+	}
 	if f.League >= 0 {
 		r := s.Results[f.League][f.MD-1][f.Pair]
 		return r.Home, r.Away
@@ -127,10 +134,6 @@ func (s *State) newMatchDay(leagueMask, cupMask int, replay bool) *MatchDay {
 	md.humans = make([]humanMatch, len(s.Managers))
 	md.periods = [][2]int{{1, 45}, {46, 90}}
 	s.CupDay = cupMask != 0
-	for mi := range s.Managers {
-		s.Managers[mi].Subs = 0
-		s.LineupStrength(mi, true)
-	}
 	if replay {
 		md.Title = "Nachholspiele"
 		for r := range s.Postponed {
@@ -199,22 +202,34 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 	exempt := d.Month == 5 && d.Day >= 10
 	var homeAtt int64
 	homePrice := 0
-	for mi, m := range s.Managers {
-		side := -1
-		switch m.Team {
-		case f.Home:
-			side = 0
-		case f.Away:
+	// The home team's manager first: the away manager of a DFB-Pokal tie
+	// shares his gate.
+	var order []int
+	for _, side := range []int{f.Home, f.Away} {
+		for mi, m := range s.Managers {
+			if m.Team == side {
+				order = append(order, mi)
+			}
+		}
+	}
+	for _, mi := range order {
+		m := s.Managers[mi]
+		side := 0
+		if m.Team == f.Away {
 			side = 1
 		}
-		if side < 0 {
-			continue
-		}
 		if m.Effort == ForfeitEffort && !exempt {
+			// f_1a58_2051: the match is not played at all.
 			s.notify(mi, "Ihr Spiel wird mit 0:2 gewertet. Sie zahlen 200.000 DM Strafe.")
 			m.Money -= 200000
 			f.Forfeit = side + 1
-			continue
+			f.Watched = false
+			for k := range md.humans {
+				if md.humans[k].plays && md.humans[k].fixture == fi {
+					md.humans[k].plays = false
+				}
+			}
+			return
 		}
 		f.Watched = true
 		hm := &md.humans[mi]
@@ -252,10 +267,6 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 			m.Money += att * int64(m.TicketPrice) / int64(split)
 			homeAtt, homePrice = att, m.TicketPrice
 			f.Attendance = att
-			x := clamp(int(int16(int16(m.Stadium[StStanding])-int16(m.Stadium[StSeats])))/1000, 0, 30)
-			if s.Rand.Between(0, (30-x)*4+15) == 0 {
-				m.RiotPending = true
-			}
 		} else if split == 2 {
 			if homeAtt == 0 {
 				price := AITicket[bucket(f.Home)] + s.Rand.Between(0, 1)
@@ -267,6 +278,13 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 			}
 		}
 		md.squadBeforeMatch(mi, comp)
+		if side == 0 {
+			// Crowd trouble (the original uses the low words of the longs).
+			x := clamp(int(int16(int16(m.Stadium[StStanding])-int16(m.Stadium[StSeats])))/1000, 0, 30)
+			if s.Rand.Between(0, (30-x)*4+15) == 0 {
+				m.RiotPending = true
+			}
+		}
 	}
 }
 
@@ -487,12 +505,6 @@ func (md *MatchDay) startPeriod(from, to int) {
 				continue
 			}
 		}
-		if from > 90 {
-			if h, _ := md.score(f); h < markExtraTime {
-				f.Chances = [2][8]int{}
-				continue
-			}
-		}
 		h, a := md.planChances(f, from, to)
 		md.assignMinutes(f, 0, h, from, to)
 		md.assignMinutes(f, 1, a, from, to)
@@ -509,7 +521,7 @@ func (md *MatchDay) playMinute(minute int) {
 		if f.Forfeit != 0 {
 			continue
 		}
-		if f.Watched {
+		if h, _ := md.score(f); f.Watched && (minute <= 90 || h >= markExtraTime) {
 			md.humanEvents(fi, f, minute)
 		}
 		for j := 0; j < 8; j++ {
@@ -598,11 +610,7 @@ func (md *MatchDay) chanceEvent(fi int, f *Fixture, side, minute int, goal, pena
 		if !hm.plays || md.Fixtures[hm.fixture] != f {
 			continue
 		}
-		if hm.side == side {
-			hm.played[0]++
-		} else {
-			hm.played[1]++
-		}
+		hm.played[side]++
 	}
 	if am := s.ManagerOf(att); am != nil && f.Watched {
 		mi := s.managerIndex(am)
@@ -712,6 +720,7 @@ func (md *MatchDay) humanEvents(fi int, f *Fixture, minute int) {
 	s := md.s
 	r := &s.Rand
 	g := s.Level
+	replan := -1
 	for mi := range md.humans {
 		hm := &md.humans[mi]
 		if !hm.plays || md.Fixtures[hm.fixture] != f {
@@ -722,12 +731,11 @@ func (md *MatchDay) humanEvents(fi int, f *Fixture, minute int) {
 		}
 		m := s.Managers[mi]
 		h := clamp(40-m.Effort, 0, 40)
-		replan := false
 		if hm.redPossible && r.Between(0, (g+5)*50+70*h) == 0 {
 			hm.redPossible = false
 			if p := s.pickVictim(mi); p >= 0 {
 				md.sendOff(fi, mi, p, minute, false)
-				replan = true
+				replan = mi
 			}
 		}
 		if hm.yellowBudget > 0 && r.Between(0, 5*g+2*h+37) == 0 {
@@ -767,12 +775,12 @@ func (md *MatchDay) humanEvents(fi int, f *Fixture, minute int) {
 				md.Events = append(md.Events, MatchEvent{Minute: minute, Fixture: fi, Kind: EvInjury,
 					Side: hm.side, Player: s.Persons[sl.Person].Name, Text: InjuryNames[sl.Injury], Manager: mi})
 				s.LineupStrength(mi, true)
-				replan = true
+				replan = mi
 			}
 		}
-		if replan {
-			md.replan(mi, minute)
-		}
+	}
+	if replan >= 0 {
+		md.replan(replan, minute)
 	}
 }
 
@@ -851,7 +859,7 @@ func (md *MatchDay) replan(mi, minute int) {
 func (md *MatchDay) Substitute(mi, out, in int) error {
 	s := md.s
 	hm := &md.humans[mi]
-	if !hm.plays {
+	if !hm.plays || md.Done {
 		return CreditError("Ihre Mannschaft spielt nicht.")
 	}
 	o, n := &s.Squads[mi][out], &s.Squads[mi][in]
@@ -862,7 +870,7 @@ func (md *MatchDay) Substitute(mi, out, in int) error {
 	if keeper && hm.keeperSubs == 0 || !keeper && hm.fieldSubs == 0 {
 		return CreditError("Keine Auswechslung mehr möglich")
 	}
-	if !s.available(n) || (n.Lineup >= 1 && n.Lineup <= 11) {
+	if n.Empty() || !s.available(n) || (n.Lineup >= 1 && n.Lineup <= 11) {
 		return CreditError("Spieler kann nicht eingewechselt werden")
 	}
 	if keeper {
@@ -932,7 +940,11 @@ func (md *MatchDay) applyLeague(f *Fixture, mdNum int) {
 	s.applyResults(pair, []Score{r}, true)
 	s.moodAfterMatch(f.Home, r.Home-r.Away)
 	s.moodAfterMatch(f.Away, r.Away-r.Home)
-	s.sortTable(f.League)
+	// The original plays replays as league 0: only that table is sorted
+	// now, the others at their next matchday.
+	s.sortTable(0)
+	s.aiScorersOf(f.Home, r.Home)
+	s.aiScorersOf(f.Away, r.Away)
 }
 
 // moodAfterMatch changes the mood of a club after a league match
@@ -1102,6 +1114,12 @@ func (md *MatchDay) finish() {
 	}
 	md.Done = true
 	s := md.s
+	for _, f := range md.Fixtures {
+		if f.League < 0 {
+			f.Final[0], f.Final[1] = md.score(f)
+			f.HasFinal = true
+		}
+	}
 	for c := 0; c < NumCups; c++ {
 		if md.cupMask&(1<<c) != 0 {
 			s.advanceCup(c)

@@ -2,6 +2,12 @@ package game
 
 import "strconv"
 
+// clublessStrength replaces the strength of the club for persons without a
+// club (team 0xff): the original reads a byte behind the TEAM table there.
+// The value is chosen so that the market looks like the one of the
+// reference game (Kondition about 22..44, Technik 20..51).
+const clublessStrength = 34
+
 // refreshMarket replaces AI players on the transfer market by free persons
 // (f_2277_1e38). Players listed by human managers stay.
 func (s *State) refreshMarket() {
@@ -57,12 +63,15 @@ func (s *State) refreshMarket() {
 					break
 				}
 			}
+			// Original quirk: the league search reuses the loop counter.
+			j = l
 		}
-		if t < 0 || t >= NumTeams {
-			t = r.Between(0, 57)
+		cur, base := clublessStrength, clublessStrength
+		if t >= 0 && t < NumTeams {
+			cur, base = s.Teams[t].Strength[1], s.Teams[t].Base[1]
 		}
-		ps.Skill[0] = clamp(r.Between(0, 14)+s.Teams[t].Strength[1]-10, 10, 99)
-		s2 := r.Between(0, 14) + s.Teams[t].Base[1] - 10
+		ps.Skill[0] = clamp(r.Between(0, 14)+cur-10, 10, 99)
+		s2 := r.Between(0, 14) + base - 10
 		if r.Between(0, 4) == 0 {
 			s2 += r.Between(12, 20)
 		}
@@ -293,12 +302,30 @@ func (s *State) takeBack(mi, i int) error {
 }
 
 // AnswerManagerBid is the answer of the owning human manager to a bid
-// (BidAskOtherManager).
-func (s *State) AnswerManagerBid(mi, i int, bid int64, loan, accept bool) error {
+// (BidAskOtherManager). A purchase (not a loan) still needs a contract:
+// then it returns BidNeedsContract and the purchase continues with
+// BeginPurchase like a purchase from the AI.
+func (s *State) AnswerManagerBid(mi, i int, bid int64, loan, accept bool) (BuyResult, error) {
+	ms := &s.Squads[MarketIndex][i]
 	if !accept {
-		return TransferError("Ihr Angebot wurde abgelehnt")
+		ms.Rejected |= 1<<mi | 0x80
+		return BidRejected, TransferError("Ihr Angebot wurde abgelehnt")
 	}
-	return s.completeTransfer(mi, i, bid, loan, true)
+	// The person takes over the current skills of the listed player.
+	s.Persons[ms.Person].Skill = ms.Skill
+	if loan {
+		return BidDone, s.completeTransfer(mi, i, bid, true, true)
+	}
+	return BidNeedsContract, nil
+}
+
+// subsidy offers a sponsor subsidy after a deal with the AI (f_0000_272d).
+func (s *State) subsidy(bid int64) {
+	if s.Rand.Between(0, 6) == 0 {
+		if z := (bid / 100) * int64(s.Rand.Between(20, 65)) / 10000 * 10000; z > 0 {
+			s.PendingSubsidy = z
+		}
+	}
 }
 
 // PendingPurchase is a Purchase from the AI waiting for the contract.
@@ -310,6 +337,7 @@ type PendingPurchase struct {
 	Person  int
 	OldTeam int
 	Slot    int
+	H2H     bool // bought from another human manager
 }
 
 // BeginPurchase puts the player of market slot i into the squad of manager
@@ -318,11 +346,12 @@ type PendingPurchase struct {
 func (s *State) BeginPurchase(mi, i int, bid int64) (int, error) {
 	p := s.Squads[MarketIndex][i].Person
 	old := s.Persons[p].Team
+	h2h := s.Persons[p].Owner != OwnerMarket && s.Persons[p].Owner != mi
 	ns, err := s.addPerson(mi, p, 1, 0, SquadMax)
 	if err != nil {
 		return -1, err
 	}
-	s.Purchase = PendingPurchase{true, mi, i, bid, p, old, ns}
+	s.Purchase = PendingPurchase{true, mi, i, bid, p, old, ns, h2h}
 	return ns, nil
 }
 
@@ -338,16 +367,24 @@ func (s *State) FinishPurchase(agreed bool) error {
 	if !agreed {
 		s.removeSlot(mi, pp.Slot, true, SquadMax)
 		s.Persons[pp.Person].Team = pp.OldTeam
-		s.Squads[MarketIndex][pp.Market].Rejected |= 1<<mi | 0x80
+		if !pp.H2H {
+			s.Squads[MarketIndex][pp.Market].Rejected |= 1<<mi | 0x80
+		}
 		return TransferError("Der Transfer findet nicht statt")
 	}
+	ps := &s.Persons[pp.Person]
+	if pp.H2H {
+		ms := &s.Squads[MarketIndex][pp.Market]
+		sl := &s.Squads[mi][pp.Slot]
+		sl.Status, sl.Injury, sl.Out, sl.Cards = ms.Status, ms.Injury, ms.Out, ms.Cards
+		s.Managers[ps.Owner].Money += pp.Bid
+		ps.Team = s.Managers[mi].Team
+	}
 	s.removeSlot(MarketIndex, pp.Market, true, MarketSlots)
-	s.Persons[pp.Person].Owner = mi
+	ps.Owner = mi
 	s.Managers[mi].Money -= pp.Bid
-	if s.Rand.Between(0, 6) == 0 {
-		if z := (pp.Bid / 100) * int64(s.Rand.Between(20, 65)) / 10000 * 10000; z > 0 {
-			s.PendingSubsidy = z
-		}
+	if !pp.H2H {
+		s.subsidy(pp.Bid)
 	}
 	s.AutoLineup(mi)
 	return nil
@@ -364,6 +401,9 @@ func (s *State) completeTransfer(mi, i int, bid int64, loan, h2h bool) error {
 	if loan {
 		loanVal = 0x63
 	}
+	if h2h {
+		ps.Skill = ms.Skill
+	}
 	ns, err := s.addPerson(mi, p, 1, loanVal, SquadMax)
 	if err != nil {
 		return err
@@ -373,7 +413,6 @@ func (s *State) completeTransfer(mi, i int, bid int64, loan, h2h bool) error {
 	if h2h {
 		sl.Status, sl.Injury, sl.Out = ms.Status, ms.Injury, ms.Out
 		sl.Cards = ms.Cards
-		ps.Skill = ms.Skill
 	}
 	if loan {
 		*sl = ms
@@ -392,6 +431,9 @@ func (s *State) completeTransfer(mi, i int, bid int64, loan, h2h bool) error {
 		ps.Owner = mi
 	}
 	s.Managers[mi].Money -= bid
+	if !h2h {
+		s.subsidy(bid)
+	}
 	s.AutoLineup(mi)
 	return nil
 }

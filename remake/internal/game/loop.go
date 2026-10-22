@@ -95,6 +95,7 @@ func (s *State) EndTurn() {
 	}
 	for mi := range s.Managers {
 		s.LineupStrength(mi, true)
+		s.Managers[mi].Subs = 0
 	}
 	s.Loop.Phase = PhaseMatches
 	s.Loop.MatchStep = 0
@@ -335,6 +336,7 @@ func (s *State) relegationDay() *MatchDay {
 	savedSlots := [2]int{c.Slots[1][0], c.Slots[1][1]}
 	savedFirst := [2]int{c.First[1][0], c.First[1][1]}
 	savedLeg := c.Leg[1]
+	savedResult := [2]int{c.Result[1][0], c.Result[1][1]}
 	c.Round[CupLandesmeister] = 5
 	c.PlayingRelegation = true
 	if !s.RelegationLeg2 {
@@ -360,6 +362,7 @@ func (s *State) relegationDay() *MatchDay {
 		c.Slots[1][0], c.Slots[1][1] = savedSlots[0], savedSlots[1]
 		c.First[1][0], c.First[1][1] = savedFirst[0], savedFirst[1]
 		c.Leg[1] = savedLeg
+		c.Result[1][0], c.Result[1][1] = savedResult[0], savedResult[1]
 		c.PlayingRelegation = false
 	}
 	return md

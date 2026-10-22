@@ -117,6 +117,10 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	for c := 1; c < NumCups; c++ {
 		s.drawCup(c)
 	}
+	// The original draws before the managers exist.
+	for _, m := range s.Managers {
+		m.CupStatus = [4]int{NotInCup, NotInCup, NotInCup, NotInCup}
+	}
 
 	// Options.
 	s.Level = 5 - clamp(opt.Level, 0, 5)
@@ -171,7 +175,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 		}
 		m.Training = [4]int{5, 4, 6, 5}
 		m.Intensity = 6
-		m.PosTraining = [4]int{0, 1, 3, 3}
+		m.PosTraining = [4]int{1, 3, 3, 3}
 		m.Einsatz = 16
 		for k := range m.PosAfter {
 			m.PosAfter[k] = 10
@@ -209,7 +213,7 @@ func (s *State) placeClub(mi, l0 int, short bool) {
 	r := &s.Rand
 	m := s.Managers[mi]
 	id := m.Team
-	pick := func(inCup bool) int {
+	pick := func(inUEFA bool) int {
 		for {
 			x := r.Between(FirstID[l0], FirstID[l0]+TeamsPerLeague[l0]-1)
 			taken := false
@@ -221,7 +225,7 @@ func (s *State) placeClub(mi, l0 int, short bool) {
 			if taken {
 				continue
 			}
-			if inCup != s.inEuropeDraw(x) {
+			if inUEFA && !s.inCupDraw(x, CupUEFA) || !inUEFA && s.inEuropeDraw(x) {
 				continue
 			}
 			return x
@@ -233,12 +237,22 @@ func (s *State) placeClub(mi, l0 int, short bool) {
 		s.Clubs[id], s.Clubs[x] = s.Clubs[x], s.Clubs[id]
 	}
 	if short {
-		m.CupStatus[2] = 1
+		m.CupStatus[CupUEFA] = 1
 		x := pick(true)
 		y := m.Team
 		s.swapIdentity(y, x, false)
 		s.Clubs[y], s.Clubs[x] = s.Clubs[x], s.Clubs[y]
 	}
+}
+
+// inCupDraw reports whether a club is drawn in cup c.
+func (s *State) inCupDraw(id, c int) bool {
+	for _, x := range s.Cups.Slots[c] {
+		if x == id {
+			return true
+		}
+	}
+	return false
 }
 
 // inEuropeDraw reports whether a club is drawn in a European cup
@@ -386,14 +400,18 @@ func (s *State) startSquad(mi, l0 int, short bool) {
 	if short {
 		lo += 12
 	}
-	for i := 0; i < s.countLineup(mi, 0); i++ {
-		sl := &s.Squads[mi][i]
-		for j := 0; j < 3; j++ {
-			v := r.Between(lo, lo+5)
-			sl.Skill[j] = v
-			f := r.Between(40, 60)
-			if j == 2 {
-				sl.Skill[2] = f
+	// Like the original the loop runs over the squad sizes of all managers
+	// but always writes this manager's squad.
+	for k := range s.Managers {
+		for i := 0; i < s.countLineup(k, 0); i++ {
+			sl := &s.Squads[mi][i]
+			for j := 0; j < 3; j++ {
+				v := r.Between(lo, lo+5)
+				sl.Skill[j] = v
+				f := r.Between(40, 60)
+				if j == 2 {
+					sl.Skill[2] = f
+				}
 			}
 		}
 	}
@@ -416,19 +434,29 @@ func (s *State) reshufflePersons() {
 		}
 	}
 	n := r.Between(5, 15)
+	foreignTeam := func(t int) bool { return t >= NumGerman && t != 0xff }
+	move := func(p int) {
+		ps := &s.Persons[p]
+		x := (ps.Skill[0] + ps.Skill[1]) / 2 * 58 / 100
+		ps.Team = s.chooseBuyer(x, false)
+	}
 	for i := 0; i < n; i++ {
-		for tries := 0; tries < 1000; tries++ {
+		for tries := 0; tries < 10000; tries++ {
 			p := r.Between(1, 150)
-			ps := &s.Persons[p]
-			if ps.Owner != OwnerFree || (ps.Team != 0xff && s.ManagerOf(ps.Team) != nil) {
-				continue
-			}
-			if foreign > 4 && ps.Team >= NumGerman && ps.Team != 0xff {
+			t0 := s.Persons[p].Team
+			done := false
+			if foreign > 4 && foreignTeam(t0) {
 				foreign--
+				move(p)
+				done = true
 			}
-			v := (ps.Skill[0] + ps.Skill[1]) / 2
-			ps.Team = s.chooseBuyer(v/2, false)
-			break
+			human := t0 != 0xff && t0 < NumTeams && s.ManagerOf(t0) != nil
+			if !human && (done || foreign <= 4) {
+				if !done {
+					move(p)
+				}
+				break
+			}
 		}
 	}
 }

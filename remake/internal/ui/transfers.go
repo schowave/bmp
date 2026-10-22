@@ -154,8 +154,14 @@ func (t *TransferScreen) clickMarket(app *App, i int) {
 				seller := s.Managers[p.Owner].Name
 				app.Push(NewQuestion(seller+":", "NEHMEN SIE DAS ANGEBOT ("+Money(bid)+") FÜR "+p.Name+" AN ?", "NA GUT.", "NEIN !",
 					func(app *App, yes bool) {
-						if err := s.AnswerManagerBid(mi, i, bid, t.loan, yes); err != nil {
+						res, err := s.AnswerManagerBid(mi, i, bid, t.loan, yes)
+						switch {
+						case err != nil:
 							app.Push(NewMessage(name, err.Error()))
+						case res == game.BidNeedsContract:
+							t.purchaseContract(app, i, bid)
+						default:
+							app.Push(NewMessage(name, "Ihr Angebot wurde angenommen !"))
 						}
 					}))
 			case game.BidNeedsContract:
