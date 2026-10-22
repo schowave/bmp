@@ -93,7 +93,8 @@ func TestSetupAndFirstTurns(t *testing.T) {
 			if ss.S.Event == 0 && i < 300 {
 				openAllMenus(t, app, sc)
 			}
-			step(t, app, click(menuRightX+10, menuRowsY[2]+10))
+			// the calendar sheet goes on to the next date
+			step(t, app, click(260, headerPanelY+30))
 		case *MatchScreen:
 			step(t, app, rclick())
 			step(t, app, Input{Enter: true})

@@ -48,8 +48,14 @@ type MainMenu struct {
 	Header func() Header
 	Left   [3]MenuGroup
 	Right  [3]MenuGroup
-	open   *MenuGroup
+	// Calendar runs when the calendar sheet is clicked: like in the
+	// original this ends the turn and goes on to the next date.
+	Calendar func(app *App)
+	open     *MenuGroup
 }
+
+// calendarRect is the calendar sheet of the header panel (PIC/23.VGA).
+func calendarRect() (x, y, w, h int) { return 240, headerPanelY, 68, 66 }
 
 func (m *MainMenu) Update(app *App) error {
 	in := &app.Input
@@ -57,6 +63,11 @@ func (m *MainMenu) Update(app *App) error {
 		if in.Right && m.open != nil {
 			m.open = nil
 		}
+		return nil
+	}
+	if x, y, w, h := calendarRect(); m.Calendar != nil && in.Clicked(x, y, w, h) {
+		m.open = nil
+		m.Calendar(app)
 		return nil
 	}
 	for i := range 3 {

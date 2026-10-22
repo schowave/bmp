@@ -47,10 +47,12 @@ func NewTurnMenu(ss *Session) *MainMenu {
 		{IconHighscore, push(func() Scene { return NewHighscoreScreen(ss) })},
 		{IconOptions, push(func() Scene { return NewOptionsScreen(ss) })},
 	}}
-	m.Right[2] = MenuGroup{Icon: IconContinue, Action: func(app *App) {
+	endTurn := func(app *App) {
 		ss.S.EndTurn()
 		app.Pop()
-	}}
+	}
+	m.Right[2] = MenuGroup{Icon: IconContinue, Action: endTurn}
+	m.Calendar = endTurn
 	return m
 }
 
