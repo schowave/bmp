@@ -10,6 +10,7 @@ usage:
   ctl.py type TEXT
   ctl.py key KEY
 """
+import os
 import sys
 import time
 
@@ -18,7 +19,7 @@ from vncdotool import api
 
 RED = (180, 0, 32)
 TIP = [(0, 0), (1, 1), (2, 2), (3, 5), (4, 6), (5, 9), (6, 12), (12, 12), (8, 14)]
-SHOTS = "/private/tmp/claude-501/-Users-dsh-repos-privat-bmp/13af71b9-569b-4ec7-92a4-d5a193df8943/scratchpad/shots/"
+SHOTS = os.environ.get("BMP_SHOTS", "shots") + "/"
 
 
 def find_cursor(im):
@@ -39,7 +40,7 @@ def find_cursor(im):
 
 class Ctl:
     def __init__(self):
-        self.c = api.connect("127.0.0.1::5991")
+        self.c = api.connect(os.environ.get("BMP_VNC", "127.0.0.1::5991"))
         self.hx, self.hy = 320, 240
         self.c.mouseMove(self.hx, self.hy)
 

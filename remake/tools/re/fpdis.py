@@ -1,8 +1,12 @@
+"""Disassemble a range of BMMAIN.bin with the 8087 emulator interrupts of
+the MS C runtime (INT 34h..3Dh) turned back into FPU instructions.
+
+usage: fpdis.py BMMAIN.bin SEG OFF END   (hex)
+"""
 import sys
-sys.path.insert(0,'/private/tmp/claude-501/-Users-dsh-repos-privat-bmp/13af71b9-569b-4ec7-92a4-d5a193df8943/scratchpad/pylib')
 from capstone import Cs, CS_ARCH_X86, CS_MODE_16
-img=open('/private/tmp/claude-501/-Users-dsh-repos-privat-bmp/13af71b9-569b-4ec7-92a4-d5a193df8943/scratchpad/re/BMMAIN.bin','rb').read()
-seg=int(sys.argv[1],16); off=int(sys.argv[2],16); end=int(sys.argv[3],16)
+img=open(sys.argv[1],'rb').read()
+seg=int(sys.argv[2],16); off=int(sys.argv[3],16); end=int(sys.argv[4],16)
 b=bytearray(img[seg*16+off:seg*16+end])
 i=0
 segpfx={0:0x26,1:0x2e,2:0x36,3:0x3e}
