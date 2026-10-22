@@ -197,6 +197,9 @@ func (s *State) TakeManagerCredit(mi, lender int, amount int64, months, rate int
 	if months > 24 {
 		return ErrMonths
 	}
+	if months <= 0 {
+		return CreditError("Abbruch.")
+	}
 	if rate > 13 {
 		return ErrUsury
 	}

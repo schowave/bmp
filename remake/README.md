@@ -66,4 +66,10 @@ ties). Deliberate differences:
 - The statistics screen has no series and records tables.
 - Prices of the training camps use the squad of the manager who asks.
 - Original bugs that read uninitialised or stale memory are replaced by the
-  intended behaviour.
+  intended behaviour. This includes the season-end return of listed
+  players, which in the original can remove the wrong squad slot.
+- Free players without a club get market skills from a fixed club strength
+  (the original reads a byte behind the club table), tuned to the market of
+  the reference game.
+- The rejection marks of market bids are a field of their own; in the
+  original they share a byte with the league goals of the player.

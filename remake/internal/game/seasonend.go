@@ -366,9 +366,6 @@ func (s *State) seasonEnd2() {
 	s.Day++
 	for {
 		d := s.Date()
-		if d.Day == 28 && d.Month == 6 {
-			break
-		}
 		for mi := range s.Managers {
 			s.daily(mi)
 			for i := 0; i < s.countLineup(mi, 0); i++ {
@@ -376,6 +373,9 @@ func (s *State) seasonEnd2() {
 			}
 		}
 		s.Day++
+		if d.Day == 28 && d.Month == 6 {
+			break
+		}
 	}
 	s.Event = 0
 	s.Day = 0

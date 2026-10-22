@@ -70,7 +70,13 @@ func randomActions(s *State, mi int, rnd *rand.Rand) {
 					}
 				}
 				if err == nil && res == BidAskOtherManager {
-					_ = s.AnswerManagerBid(mi, i, bid, false, rnd.Intn(2) == 0)
+					res, err = s.AnswerManagerBid(mi, i, bid, false, rnd.Intn(2) == 0)
+					if err == nil && res == BidNeedsContract {
+						if si, err := s.BeginPurchase(mi, i, bid); err == nil {
+							err = s.NegotiateContract(mi, si, 2, s.ContractHint(mi, si, 2)*11/10, 0)
+							_ = s.FinishPurchase(err == nil)
+						}
+					}
 				}
 				s.AcceptSubsidy(mi, true)
 			}
