@@ -40,11 +40,7 @@ func NewGfx(dir *assets.Dir) (*Gfx, error) {
 	if err != nil {
 		return nil, err
 	}
-	img, err := dir.MainImage()
-	if err != nil {
-		return nil, err
-	}
-	fonts, err := assets.Fonts(img)
+	fonts, err := dir.Fonts()
 	if err != nil {
 		return nil, err
 	}

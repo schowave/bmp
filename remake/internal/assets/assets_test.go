@@ -117,3 +117,48 @@ func TestFonts(t *testing.T) {
 		t.Fatal("umlaut remap missing")
 	}
 }
+
+func TestExtractWorksWithoutTheExecutable(t *testing.T) {
+	d := gameDir(t)
+	out := t.TempDir()
+	if err := Extract(d, out); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(out, "BMMAIN.EXE")); err == nil {
+		t.Fatal("extract contains the executable")
+	}
+	e, err := OpenDir(os.DirFS(out))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := d.Fonts()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := e.Fonts()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, f := range want {
+		g := got[name]
+		if g == nil || g.Height != f.Height || g.Glyph('A').W != f.Glyph('A').W || g.Glyph(0x8e) == g.Glyph(' ') {
+			t.Fatalf("font %s differs after the round trip", name)
+		}
+		for c := 0x20; c < 0x7f; c++ {
+			a, b := f.Glyph(byte(c)), g.Glyph(byte(c))
+			for y := range a.Rows {
+				for x := range a.Rows[y] {
+					if a.Rows[y][x] != b.Rows[y][x] {
+						t.Fatalf("font %s glyph %q differs", name, rune(c))
+					}
+				}
+			}
+		}
+	}
+	if _, err := e.Pic(22, true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.Mana(); err != nil {
+		t.Fatal(err)
+	}
+}

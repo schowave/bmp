@@ -13,3 +13,4 @@ wasm/dist/
 
 # Go re-implementation
 remake/bin/
+remake/internal/embedded/data/

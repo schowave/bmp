@@ -5,17 +5,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/embedded"
 	"github.com/schowave/bmp/remake/internal/ui"
 )
 
 func main() {
-	data := flag.String("data", "", "directory of the original game (default: $BMP_DATA, ./bmp or ../bmp)")
+	data := flag.String("data", "", "directory of the original game (default: $BMP_DATA, the files built into the binary, ./bmp or ../bmp)")
 	scale := flag.Int("scale", 3, "window scale factor")
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")
@@ -54,18 +56,30 @@ func main() {
 }
 
 func openGameDir(flagDir string) (*assets.Dir, error) {
-	candidates := []string{flagDir, os.Getenv("BMP_DATA"), "bmp", filepath.Join("..", "bmp")}
 	var firstErr error
-	for _, c := range candidates {
-		if c == "" {
-			continue
+	try := func(fsys fs.FS, name string) *assets.Dir {
+		d, err := assets.OpenDir(fsys)
+		if err != nil && firstErr == nil {
+			firstErr = fmt.Errorf("%s: %w", name, err)
 		}
-		d, err := assets.OpenDir(os.DirFS(c))
-		if err == nil {
+		return d
+	}
+	for _, c := range []string{flagDir, os.Getenv("BMP_DATA")} {
+		if c != "" {
+			if d := try(os.DirFS(c), c); d != nil {
+				return d, nil
+			}
+			return nil, firstErr
+		}
+	}
+	if fsys := embedded.FS(); fsys != nil {
+		if d := try(fsys, "embedded files"); d != nil {
 			return d, nil
 		}
-		if firstErr == nil {
-			firstErr = fmt.Errorf("%s: %w", c, err)
+	}
+	for _, c := range []string{"bmp", filepath.Join("..", "bmp")} {
+		if d := try(os.DirFS(c), c); d != nil {
+			return d, nil
 		}
 	}
 	if firstErr == nil {

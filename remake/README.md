@@ -3,20 +3,30 @@
 A re-implementation of the game in Go with [Ebitengine](https://ebitengine.org).
 The rules were reverse-engineered from the original `BMMAIN.EXE`
 (specifications in [`../docs/re`](../docs/re)); the pictures, fonts and the
-club database are read from the original files at runtime. None of them are
-part of this repository.
+club database come from the original files in `../bmp`, either built into
+the binary or read at runtime.
 
 ## Run
 
 ```sh
-cd remake
-go run ./cmd/bmp -data ../bmp
+mise run remake:build   # bin/bmp with the original files built in
+bin/bmp
 ```
 
-`-data` is the directory of the original game (the one with `BMMAIN.EXE`,
-`MANA.DAT` and `PIC/`). Without it the program looks at `$BMP_DATA`, `./bmp`
-and `../bmp`. Save games and high scores go to the user config directory
+The build extracts what the game needs from `../bmp` (pictures, `MANA.DAT`
+and the fonts of `BMMAIN.EXE`, about 1.4 MB) into
+`internal/embedded/data`, which git ignores, and embeds it with the build
+tag `embeddata`. The binary then runs without the game directory.
+
+Without the tag, for example with `go run ./cmd/bmp`, the program reads the
+files at runtime: `-data` names the directory of the original game, otherwise
+it looks at `$BMP_DATA`, `./bmp` and `../bmp`. `-data` also overrides the
+built-in files. Save games and high scores go to the user config directory
 (`-saves` to change it), `-scale` sets the window size.
+
+The original files are copyrighted by Software 2000. A binary built with
+`embeddata` contains them, so share it only where you would share the
+`bmp/` directory itself.
 
 ## Playing
 
@@ -43,6 +53,7 @@ mouse button confirms or goes back.
 | `internal/assets` | EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT` |
 | `internal/game` | The rules: calendar, fixtures, match engine, cups, finances, stadium, players, transfers, season end. Deterministic (the random generator of the MS C runtime), saved as JSON |
 | `internal/ui` | The screens on a 320×240 canvas like the original |
+| `internal/embedded`, `cmd/bmpextract` | The original files built into the binary (tag `embeddata`) |
 | `tools/re` | The reverse-engineering tools |
 
 ## Tests
