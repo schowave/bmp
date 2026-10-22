@@ -133,3 +133,10 @@ func FrameRect(dst *ebiten.Image, x, y, w, h int, c color.Color) {
 func (g *Gfx) PalColor(i int) color.RGBA {
 	return g.pals[0][i&0xff]
 }
+
+// SubFull returns part r of the full-screen picture n (N.CP).
+func (g *Gfx) SubFull(n int, r image.Rectangle) *ebiten.Image {
+	return g.Pic(n, true).SubImage(r).(*ebiten.Image)
+}
+
+func rectWH(x, y, w, h int) image.Rectangle { return image.Rect(x, y, x+w, y+h) }

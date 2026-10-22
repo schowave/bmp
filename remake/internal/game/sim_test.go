@@ -126,3 +126,40 @@ func TestOneYearGameEnds(t *testing.T) {
 		t.Fatalf("game not over: phase %d seasons %d", s.Loop.Phase, s.Seasons)
 	}
 }
+
+func TestSaveAndLoad(t *testing.T) {
+	m := mana(t)
+	s, _ := NewGame(m, Options{Managers: []NewManager{{Name: "TEST", Team: 3}}, Seed: 3})
+	s.Start()
+	autoplay(t, s, 1)
+	for s.Loop.Phase != PhaseTurn {
+		autoplayStep(s)
+	}
+	data, err := s.Save()
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := Load(data, m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Both copies must play on identically.
+	autoplay(t, s, 1)
+	autoplay(t, l, 1)
+	if s.Managers[0].Money != l.Managers[0].Money || s.Tables != l.Tables || s.Rand != l.Rand {
+		t.Fatalf("loaded game diverged: %d vs %d", s.Managers[0].Money, l.Managers[0].Money)
+	}
+}
+
+func autoplayStep(s *State) {
+	switch s.Loop.Phase {
+	case PhaseTurn:
+		s.EndTurn()
+	case PhaseMatches:
+		for md := s.NextMatchDay(); md != nil; md = s.NextMatchDay() {
+			md.Run()
+		}
+	case PhaseContracts:
+		s.ContractsDone()
+	}
+}

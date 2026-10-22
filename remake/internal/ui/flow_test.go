@@ -1,0 +1,145 @@
+package ui
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/hajimehoshi/ebiten/v2"
+
+	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/game"
+)
+
+// testApp creates an app with the original assets, or skips.
+func testApp(t *testing.T) (*App, *assets.Mana) {
+	t.Helper()
+	path := filepath.Join("..", "..", "..", "bmp")
+	if _, err := os.Stat(filepath.Join(path, "BMMAIN.EXE")); err != nil {
+		t.Skip("original game files not found")
+	}
+	dir, err := assets.OpenDir(os.DirFS(path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	gfx, err := NewGfx(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mana, err := dir.Mana()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &App{Gfx: gfx}, mana
+}
+
+// step runs one frame of the top scene with the given input.
+func step(t *testing.T, app *App, in Input) {
+	t.Helper()
+	app.Input = in
+	app.frame++
+	if len(app.stack) == 0 {
+		t.Fatal("empty scene stack")
+	}
+	if err := app.stack[len(app.stack)-1].Update(app); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func click(x, y int) Input { return Input{X: x, Y: y, Left: true} }
+func rclick() Input        { return Input{X: 160, Y: 120, Right: true} }
+
+func top(app *App) Scene { return app.stack[len(app.stack)-1] }
+
+func TestSetupAndFirstTurns(t *testing.T) {
+	app, mana := testApp(t)
+	setup := NewSetup(mana, t.TempDir())
+	app.Reset(setup)
+	// Name of manager 1.
+	step(t, app, click(30, slotY+120))
+	if _, ok := top(app).(*InputBox); !ok {
+		t.Fatalf("no name input: %T", top(app))
+	}
+	step(t, app, Input{Chars: []rune("TEST")})
+	step(t, app, Input{Enter: true})
+	if setup.names[0] != "TEST" {
+		t.Fatalf("name %q", setup.names[0])
+	}
+	// Put the club in the middle of the strip into slot 1.
+	step(t, app, click(30, slotY+20))
+	if setup.teams[0] != setup.center {
+		t.Fatalf("team %d", setup.teams[0])
+	}
+	step(t, app, rclick())
+	if _, ok := top(app).(*setupOptions); !ok {
+		t.Fatalf("no options: %T", top(app))
+	}
+	step(t, app, rclick())
+	d, ok := top(app).(*Driver)
+	if !ok {
+		t.Fatalf("game did not start: %T", top(app))
+	}
+	ss := d.ss
+	// Play a few events through the UI: close message boxes, end turns,
+	// run match days.
+	for i := 0; i < 400 && ss.S.Event < 12; i++ {
+		switch sc := top(app).(type) {
+		case *Driver:
+			step(t, app, Input{})
+		case *MessageBox:
+			step(t, app, Input{Enter: true})
+		case *MainMenu:
+			// open every submenu item once on the first turn
+			if ss.S.Event == 0 && i < 300 {
+				openAllMenus(t, app, sc)
+			}
+			step(t, app, click(menuRightX+10, menuRowsY[2]+10))
+		case *MatchScreen:
+			step(t, app, rclick())
+			step(t, app, Input{Enter: true})
+		case *SubstitutionScreen:
+			step(t, app, rclick())
+		default:
+			t.Fatalf("unexpected scene %T", sc)
+		}
+	}
+	if ss.S.Event < 12 {
+		t.Fatalf("stuck at event %d phase %d", ss.S.Event, ss.S.Loop.Phase)
+	}
+	t.Logf("event %d, games %d, money %d", ss.S.Event, ss.S.Clubs[ss.S.Managers[0].Team].TotalGames(), ss.S.Managers[0].Money)
+	if ss.S.Clubs[ss.S.Managers[0].Team].TotalGames() == 0 {
+		t.Fatal("no league games played")
+	}
+}
+
+// openAllMenus opens every submenu item and closes it again.
+func openAllMenus(t *testing.T, app *App, m *MainMenu) {
+	t.Helper()
+	groups := []struct {
+		x int
+		g *MenuGroup
+	}{{menuLeftX, &m.Left[0]}, {menuLeftX, &m.Left[1]}, {menuLeftX, &m.Left[2]}, {menuRightX, &m.Right[0]}, {menuRightX, &m.Right[1]}}
+	rows := []int{0, 1, 2, 0, 1}
+	for gi, gr := range groups {
+		step(t, app, click(gr.x+10, menuRowsY[rows[gi]]+10))
+		for k, it := range gr.g.Items {
+			if it.Open == nil {
+				continue
+			}
+			step(t, app, click(submenuCols[k/3]+10, menuRowsY[k%3]+10))
+			sc := top(app)
+			if sc == Scene(m) {
+				t.Fatalf("item %d of group %d did not open", k, gi)
+			}
+			img := newTestImage()
+			sc.Draw(app, img)
+			for top(app) != Scene(m) {
+				step(t, app, Input{Escape: true, Right: true})
+			}
+		}
+	}
+}
+
+var _ = game.PhaseTurn
+
+func newTestImage() *ebiten.Image { return ebiten.NewImage(ScreenW, ScreenH) }

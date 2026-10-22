@@ -21,10 +21,9 @@ type Loop struct {
 	Phase     Phase
 	Current   int  // manager whose turn it is
 	SeasonEnd bool // final turns of the season
-	queue     []int
-	matchStep int
-	before    []int64
-	scorer    []bool
+	MatchStep int
+	Before    []int64
+	Scorer    []bool
 }
 
 // Start begins the game after NewGame: the first event's turns.
@@ -98,7 +97,7 @@ func (s *State) EndTurn() {
 		s.LineupStrength(mi, true)
 	}
 	s.Loop.Phase = PhaseMatches
-	s.Loop.matchStep = 0
+	s.Loop.MatchStep = 0
 }
 
 // Match day kinds returned by NextMatchDay, in the order of the original.
@@ -117,9 +116,9 @@ func (s *State) NextMatchDay() *MatchDay {
 		return nil
 	}
 	ev := s.eventValue()
-	for s.Loop.matchStep < stepDone {
-		step := s.Loop.matchStep
-		s.Loop.matchStep++
+	for s.Loop.MatchStep < stepDone {
+		step := s.Loop.MatchStep
+		s.Loop.MatchStep++
 		switch step {
 		case stepLeague:
 			if ev&7 != 0 {
@@ -338,24 +337,24 @@ func (s *State) relegationDay() *MatchDay {
 	savedLeg := c.Leg[1]
 	c.Round[CupLandesmeister] = 5
 	c.PlayingRelegation = true
-	if !s.relegationLeg2 {
+	if !s.RelegationLeg2 {
 		c.Leg[1] = 0
 		c.First[1][0], c.First[1][1] = 0, 0
 		c.Slots[1][0], c.Slots[1][1] = s.Tables[1][2], s.Tables[0][15]
 	} else {
 		c.Leg[1] = 1
-		c.First[1][0], c.First[1][1] = c.relegationStash[0], c.relegationStash[1]
+		c.First[1][0], c.First[1][1] = c.RelegationStash[0], c.RelegationStash[1]
 		c.Slots[1][0], c.Slots[1][1] = s.Tables[0][15], s.Tables[1][2]
 	}
 	md := s.newMatchDay(0, 2, false)
 	md.Title = "Relegationsspiel"
 	md.onFinish = func() {
-		if !s.relegationLeg2 {
-			c.relegationStash = [2]int{c.First[1][0], c.First[1][1]}
-			s.relegationLeg2 = true
+		if !s.RelegationLeg2 {
+			c.RelegationStash = [2]int{c.First[1][0], c.First[1][1]}
+			s.RelegationLeg2 = true
 		} else {
 			c.RelegationOutcome = s.tieOut(1, 0)
-			s.relegationLeg2 = false
+			s.RelegationLeg2 = false
 		}
 		c.Round[CupLandesmeister] = savedRound
 		c.Slots[1][0], c.Slots[1][1] = savedSlots[0], savedSlots[1]

@@ -121,7 +121,7 @@ func drawHeader(app *App, dst *ebiten.Image, h Header) {
 	g.TextCentered(dst, FontNormal, 72, headerPanelY+14, 106, h.Matchday, black)
 	g.TextCentered(dst, FontNormal, 72, headerPanelY+50, 106, h.Manager, black)
 	for i, s := range h.Message {
-		g.TextCentered(dst, FontNormal, 64, headerPanelY+26+i*9, 116, s, light)
+		g.TextCentered(dst, FontSmall, 64, headerPanelY+27+i*8, 116, g.Fit(FontSmall, s, 114), light)
 	}
 	if h.Logo > 0 {
 		Draw(dst, g.Pic(h.Logo, false), 188, headerPanelY+22)

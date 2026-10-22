@@ -153,15 +153,15 @@ type State struct {
 
 	Cups Cups
 
-	cupDay bool // F:0x513e: league suspensions do not apply today
+	CupDay bool // F:0x513e: league suspensions do not apply today
 
-	// PendingSubsidy is a sponsor subsidy offered after a purchase.
+	// PendingSubsidy is a sponsor subsidy offered after a Purchase.
 	PendingSubsidy int64
-	purchase       pendingPurchase
+	Purchase       PendingPurchase
 
 	Loop           Loop
-	relegationLeg2 bool
-	mana           *assets.Mana
+	RelegationLeg2 bool
+	mana           *assets.Mana `json:"-"`
 }
 
 // PostponedGame is a league game moved to a later date (F:0x5714).

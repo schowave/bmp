@@ -125,7 +125,7 @@ func (s *State) newMatchDay(leagueMask, cupMask int, replay bool) *MatchDay {
 	md := &MatchDay{s: s, leagueMask: leagueMask, cupMask: cupMask, replay: replay}
 	md.humans = make([]humanMatch, len(s.Managers))
 	md.periods = [][2]int{{1, 45}, {46, 90}}
-	s.cupDay = cupMask != 0
+	s.CupDay = cupMask != 0
 	for mi := range s.Managers {
 		s.Managers[mi].Subs = 0
 		s.LineupStrength(mi, true)
@@ -1111,7 +1111,7 @@ func (md *MatchDay) finish() {
 	if md.onFinish != nil {
 		md.onFinish()
 	}
-	s.cupDay = false
+	s.CupDay = false
 }
 
 // EventText describes an event like the match screens of the original.
