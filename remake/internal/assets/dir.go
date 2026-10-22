@@ -17,7 +17,9 @@ type Dir struct {
 	pics map[string]*Pic
 }
 
-// OpenDir indexes the game directory fsys (the directory with BMMAIN.EXE).
+// OpenDir indexes the game directory fsys: the directory of the original
+// game, or the extract made by Extract (with FONTS.JSON instead of
+// BMMAIN.EXE).
 func OpenDir(fsys fs.FS) (*Dir, error) {
 	d := &Dir{fsys: fsys, names: map[string]string{}, pics: map[string]*Pic{}}
 	err := fs.WalkDir(fsys, ".", func(path string, e fs.DirEntry, err error) error {
@@ -32,10 +34,15 @@ func OpenDir(fsys fs.FS) (*Dir, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, need := range []string{"BMMAIN.EXE", "MANA.DAT", "PIC/1.PAL"} {
+	for _, need := range []string{"MANA.DAT", "PIC/1.PAL"} {
 		if _, ok := d.names[need]; !ok {
 			return nil, fmt.Errorf("%s not found: is this the game directory?", need)
 		}
+	}
+	_, exe := d.names["BMMAIN.EXE"]
+	_, fonts := d.names[fontFile]
+	if !exe && !fonts {
+		return nil, fmt.Errorf("BMMAIN.EXE not found: is this the game directory?")
 	}
 	return d, nil
 }
@@ -102,4 +109,17 @@ func (d *Dir) MainImage() (*Image, error) {
 		return nil, err
 	}
 	return Unexepack(data)
+}
+
+// Fonts returns the bitmap fonts: from FONTS.JSON of an extract, or
+// unpacked from BMMAIN.EXE.
+func (d *Dir) Fonts() (map[string]*Font, error) {
+	if data, err := d.ReadFile(fontFile); err == nil {
+		return DecodeFonts(data)
+	}
+	img, err := d.MainImage()
+	if err != nil {
+		return nil, err
+	}
+	return Fonts(img)
 }

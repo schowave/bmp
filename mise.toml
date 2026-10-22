@@ -96,9 +96,12 @@ dir = "{{config_root}}/remake"
 run = ["go vet ./...", "go test ./..."]
 
 [tasks."remake:build"]
-description = "Build the bmp binary into remake/bin"
+description = "Build remake/bin/bmp with the original files from bmp/ built in"
 dir = "{{config_root}}/remake"
-run = "go build -o bin/bmp ./cmd/bmp"
+run = [
+  "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data",
+  "go build -tags embeddata -o bin/bmp ./cmd/bmp",
+]
 
 # --- Release -----------------------------------------------------------------
 
