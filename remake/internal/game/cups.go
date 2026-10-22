@@ -43,10 +43,10 @@ type Cups struct {
 
 	// Qualified lists the German clubs for each European cup (F:0x57aa).
 	Qualified [NumCups][]int
-	used      []int // F:0x56fe
+	Used      []int // F:0x56fe
 
 	RelegationOutcome int // F:0x3060: 0 the Bundesliga club stayed up
-	relegationStash   [2]int
+	RelegationStash   [2]int
 	PlayingRelegation bool // F:0x57dc
 }
 
@@ -62,7 +62,7 @@ func ResultOf(x int) int {
 func (s *State) isManagerTeam(id int) bool { return s.ManagerOf(id) != nil }
 
 func (c *Cups) isUsed(id int) bool {
-	for _, u := range c.used {
+	for _, u := range c.Used {
 		if u == id {
 			return true
 		}
@@ -74,13 +74,13 @@ func (c *Cups) isUsed(id int) bool {
 // table and the cup holders (f_17c2_0ef2).
 func (s *State) qualifyEurope() {
 	c := &s.Cups
-	c.used = nil
+	c.Used = nil
 	for k := 1; k < NumCups; k++ {
 		c.Qualified[k] = nil
 	}
 	add := func(cup, id int) {
 		c.Qualified[cup] = append(c.Qualified[cup], id)
-		c.used = append(c.used, id)
+		c.Used = append(c.Used, id)
 	}
 	add(CupLandesmeister, s.Tables[0][0])
 	if c.Holder[CupLandesmeister] != 0 {

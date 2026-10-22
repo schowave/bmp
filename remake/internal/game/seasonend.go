@@ -67,18 +67,18 @@ func (s *State) topScorerInTeam(mi int) bool {
 // seasonEnd1 runs the season end up to the contract talks.
 func (s *State) seasonEnd1() {
 	n := len(s.Managers)
-	s.Loop.before = make([]int64, n)
-	s.Loop.scorer = make([]bool, n)
+	s.Loop.Before = make([]int64, n)
+	s.Loop.Scorer = make([]bool, n)
 	for mi, m := range s.Managers {
-		s.Loop.before[mi] = s.Clubs[m.Team].Eternal
+		s.Loop.Before[mi] = s.Clubs[m.Team].Eternal
 		m.GoalFlags = 0
-		s.Loop.scorer[mi] = s.topScorerInTeam(mi)
+		s.Loop.Scorer[mi] = s.topScorerInTeam(mi)
 	}
 	s.addEternalPoints()
 	k := min(s.Seasons+1, 5)
 	r := 0
 	for mi, m := range s.Managers {
-		delta := s.Clubs[m.Team].Eternal - s.Loop.before[mi]
+		delta := s.Clubs[m.Team].Eternal - s.Loop.Before[mi]
 		r = m.Popularity + int((uint32(delta*100)/108)/uint32(k)) - int(uint16(m.Popularity))/k
 		r = clamp(r, 0, 100)
 	}
@@ -154,7 +154,7 @@ func (s *State) seasonReport() {
 		if m.SeasonFlags&8 != 0 {
 			s.notify(mi, "Sie beginnen neu mit 500.000 DM.")
 		}
-		if s.Loop.scorer[mi] {
+		if s.Loop.Scorer[mi] {
 			m.Money += 250000
 			s.notify(mi, "Torschützenkönig aus Ihrem Team (250.000 DM).")
 		}

@@ -301,15 +301,15 @@ func (s *State) AnswerManagerBid(mi, i int, bid int64, loan, accept bool) error 
 	return s.completeTransfer(mi, i, bid, loan, true)
 }
 
-// pendingPurchase is a purchase from the AI waiting for the contract.
-type pendingPurchase struct {
-	active  bool
-	manager int
-	market  int
-	bid     int64
-	person  int
-	oldTeam int
-	slot    int
+// PendingPurchase is a Purchase from the AI waiting for the contract.
+type PendingPurchase struct {
+	Active  bool
+	Manager int
+	Market  int
+	Bid     int64
+	Person  int
+	OldTeam int
+	Slot    int
 }
 
 // BeginPurchase puts the player of market slot i into the squad of manager
@@ -322,30 +322,30 @@ func (s *State) BeginPurchase(mi, i int, bid int64) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	s.purchase = pendingPurchase{true, mi, i, bid, p, old, ns}
+	s.Purchase = PendingPurchase{true, mi, i, bid, p, old, ns}
 	return ns, nil
 }
 
-// FinishPurchase completes the purchase begun with BeginPurchase when the
+// FinishPurchase completes the Purchase begun with BeginPurchase when the
 // contract was agreed, or undoes it.
 func (s *State) FinishPurchase(agreed bool) error {
-	pp := s.purchase
-	s.purchase = pendingPurchase{}
-	if !pp.active {
+	pp := s.Purchase
+	s.Purchase = PendingPurchase{}
+	if !pp.Active {
 		return nil
 	}
-	mi := pp.manager
+	mi := pp.Manager
 	if !agreed {
-		s.removeSlot(mi, pp.slot, true, SquadMax)
-		s.Persons[pp.person].Team = pp.oldTeam
-		s.Squads[MarketIndex][pp.market].Rejected |= 1<<mi | 0x80
+		s.removeSlot(mi, pp.Slot, true, SquadMax)
+		s.Persons[pp.Person].Team = pp.OldTeam
+		s.Squads[MarketIndex][pp.Market].Rejected |= 1<<mi | 0x80
 		return TransferError("Der Transfer findet nicht statt")
 	}
-	s.removeSlot(MarketIndex, pp.market, true, MarketSlots)
-	s.Persons[pp.person].Owner = mi
-	s.Managers[mi].Money -= pp.bid
+	s.removeSlot(MarketIndex, pp.Market, true, MarketSlots)
+	s.Persons[pp.Person].Owner = mi
+	s.Managers[mi].Money -= pp.Bid
 	if s.Rand.Between(0, 6) == 0 {
-		if z := (pp.bid / 100) * int64(s.Rand.Between(20, 65)) / 10000 * 10000; z > 0 {
+		if z := (pp.Bid / 100) * int64(s.Rand.Between(20, 65)) / 10000 * 10000; z > 0 {
 			s.PendingSubsidy = z
 		}
 	}

@@ -20,6 +20,7 @@ func main() {
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")
 	demo := flag.String("demo", "", "show a development demo scene")
+	saves := flag.String("saves", defaultSaveDir(), "directory for save games and high scores")
 	flag.Parse()
 
 	dir, err := openGameDir(*data)
@@ -35,9 +36,14 @@ func main() {
 	ebiten.SetWindowSize(ui.ScreenW**scale, ui.ScreenH**scale)
 	ebiten.SetWindowTitle("Bundesliga Manager Professional")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	var first ui.Scene = ui.NewTitle()
+	mana, err := dir.Mana()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "bmp:", err)
+		os.Exit(1)
+	}
+	var first ui.Scene = ui.NewTitle().OnDone(func() ui.Scene { return ui.NewSetup(mana, *saves) })
 	if *demo != "" {
-		first = ui.Demo(*demo)
+		first = ui.Demo(*demo, mana, *saves)
 	}
 	app := ui.NewApp(gfx, first)
 	app.ShotPath, app.ShotFrame = *shot, *shotFrame
@@ -66,4 +72,11 @@ func openGameDir(flagDir string) (*assets.Dir, error) {
 		firstErr = fmt.Errorf("game directory not found, pass -data")
 	}
 	return nil, firstErr
+}
+
+func defaultSaveDir() string {
+	if d, err := os.UserConfigDir(); err == nil {
+		return filepath.Join(d, "bmp")
+	}
+	return "saves"
 }

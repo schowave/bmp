@@ -209,10 +209,10 @@ func (s *State) injure(slot *Slot) {
 	slot.Lineup = 0
 }
 
-// cupDay is F:0x513e: league suspensions do not apply on cup days.
+// CupDay is F:0x513e: league suspensions do not apply on cup days.
 func (s *State) available(slot *Slot) bool {
 	st := slot.Status & 3
-	return st == 0 || (st == 1 && s.cupDay)
+	return st == 0 || (st == 1 && s.CupDay)
 }
 
 // countLineup returns the number of slots with a player (mode 0), on the
