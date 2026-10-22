@@ -62,6 +62,13 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	if len(opt.Managers) == 0 || len(opt.Managers) > MaxManagers {
 		return nil, errors.New("1 bis 4 Manager")
 	}
+	used := map[int]bool{}
+	for _, nm := range opt.Managers {
+		if nm.Team < 0 || nm.Team >= NumGerman || used[nm.Team] {
+			return nil, errors.New("jeder Manager braucht einen eigenen deutschen Verein")
+		}
+		used[nm.Team] = true
+	}
 	s := &State{Rand: Rand{Seed: opt.Seed}}
 	s.mana = mana
 	r := &s.Rand
@@ -389,7 +396,6 @@ func (s *State) startSquad(mi, l0 int, short bool) {
 				sl.Skill[2] = f
 			}
 		}
-		sl.Years = 1
 	}
 	for i := 0; i < s.countLineup(mi, 0); i++ {
 		s.Squads[mi][i].Salary = s.PlayerValue(mi, i, ValueSalary)

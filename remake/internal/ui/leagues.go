@@ -53,9 +53,12 @@ func (l *ListScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Background(dst)
 	g.Panel(dst, 4, 3, 312, 17)
-	g.TextCentered(dst, FontNormal, 4, 7, 312, l.Title, g.C(ColBeige))
 	if l.Sub != "" {
-		g.TextRight(dst, FontSmall, 310, 8, l.Sub, g.C(ColLight))
+		g.Text(dst, FontNormal, 10, 7, l.Title, g.C(ColBeige))
+		w := 300 - g.TextWidth(FontNormal, l.Title) - 10
+		g.TextRight(dst, FontSmall, 310, 8, g.Fit(FontSmall, l.Sub, w), g.C(ColLight))
+	} else {
+		g.TextCentered(dst, FontNormal, 4, 7, 312, l.Title, g.C(ColBeige))
 	}
 	l.Table.Draw(g, dst)
 	if l.Prev != nil {

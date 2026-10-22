@@ -163,3 +163,28 @@ func autoplayStep(s *State) {
 		s.ContractsDone()
 	}
 }
+
+// TestGoalsPerGame guards the match engine: a season of every league must
+// produce a plausible number of goals (the original plays two halves with
+// planned chances each).
+func TestGoalsPerGame(t *testing.T) {
+	m := mana(t)
+	s, _ := NewGame(m, Options{Managers: []NewManager{{Name: "T", Team: 9}}, Seed: 11, Level: 2})
+	s.Start()
+	for s.Loop.Phase != PhaseTurn || !s.Loop.SeasonEnd {
+		autoplayStep(s)
+	}
+	for l := 0; l < NumLeagues; l++ {
+		g, n := 0, 0
+		for md := 0; md < MatchdaysPerLeague[l]; md++ {
+			for i := 0; i < TeamsPerLeague[l]/2; i++ {
+				r := s.Results[l][md][i]
+				g += r.Home + r.Away
+				n++
+			}
+		}
+		if avg := float64(g) / float64(n); avg < 1.8 || avg > 3.6 {
+			t.Errorf("league %d: %.2f goals per game", l, avg)
+		}
+	}
+}

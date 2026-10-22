@@ -41,12 +41,12 @@ func NewTrainingScreen(ss *Session) *TrainingScreen {
 }
 
 func (t *TrainingScreen) rowY(i int) int {
-	y := 30 + i*16
+	y := 26 + i*15
 	if i >= 4 {
-		y += 12
+		y += 6
 	}
 	if i >= 8 {
-		y += 12
+		y += 6
 	}
 	return y
 }
@@ -73,6 +73,7 @@ func (t *TrainingScreen) Draw(app *App, dst *ebiten.Image) {
 	s := t.ss.S
 	g.Background(dst)
 	g.Panel(dst, 10, 6, 300, 186)
+	g.Panel(dst, 10, 196, 250, 14)
 	g.Heading(dst, 16, 10, "TRAINING")
 	g.Text(dst, FontSmall, 100, 12, "PUNKTE: "+itoa(20-sumOf(t.ss.M().Training))+" / "+itoa(10-sumOf(t.ss.M().PosTraining)), g.C(ColLight))
 	for i, sl := range t.sliders {
@@ -84,7 +85,7 @@ func (t *TrainingScreen) Draw(app *App, dst *ebiten.Image) {
 		g.Text(dst, FontNormal, 292, y+2, "+", g.C(ColYellow))
 		g.TextRight(dst, FontSmall, 176, y+3, itoa(*sl.value), g.C(ColLight))
 	}
-	g.Text(dst, FontSmall, 20, 180, "JUGENDARBEIT KOSTET "+Money(int64((t.ss.M().Youth+1)*625))+" PRO MONAT", g.C(ColLight))
+	g.Text(dst, FontSmall, 16, 200, "JUGENDARBEIT KOSTET "+Money(int64((t.ss.M().Youth+1)*625))+" PRO MONAT", g.C(ColLight))
 	_ = s
 	g.DrawMenuButton(dst)
 }
