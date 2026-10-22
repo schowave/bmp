@@ -6,7 +6,7 @@ Your job as an analyst: read the decompiled code and write a precise spec (formu
 constants, data layouts, control flow) so that a programmer can re-implement the
 behaviour WITHOUT reading the original code. Cite function addresses for every claim.
 
-## Files (all in this directory: /private/tmp/claude-501/-Users-dsh-repos-privat-bmp/13af71b9-569b-4ec7-92a4-d5a193df8943/scratchpad/re/)
+## Files (all in the work directory created by tools/re/run.sh)
 
 - `BMMAIN.ann.c`  Ghidra decompilation of all functions (C-like), annotated: string
   pointer-table reads get a trailing comment `/* "TEXT" */` (exact slot) or `~"TEXT"`

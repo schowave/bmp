@@ -83,6 +83,23 @@ run = [
 description = "Remove the generated web root"
 run = "rm -rf wasm/dist"
 
+# --- Go re-implementation (remake/) ------------------------------------------
+
+[tasks."remake:run"]
+description = "Run the Go re-implementation with the original files in bmp/"
+dir = "{{config_root}}/remake"
+run = "go run ./cmd/bmp -data ../bmp"
+
+[tasks."remake:test"]
+description = "Test the Go re-implementation"
+dir = "{{config_root}}/remake"
+run = ["go vet ./...", "go test ./..."]
+
+[tasks."remake:build"]
+description = "Build the bmp binary into remake/bin"
+dir = "{{config_root}}/remake"
+run = "go build -o bin/bmp ./cmd/bmp"
+
 # --- Release -----------------------------------------------------------------
 
 # Releases only go through the GitHub workflow: it bumps VERSION, tags the commit
