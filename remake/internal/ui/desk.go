@@ -137,12 +137,12 @@ func NewEternalScreen(ss *Session) Scene {
 			g.TextCentered(dst, FontNormal, 158, 7, 158, "Ewige Bilanz", g.C(ColBeige))
 			titles := []string{"MEISTERSCHAFTEN", "DFB-POKALE", "LANDESMEISTER-POKALE", "POKALSIEGER-POKALE", "UEFA-POKALE"}
 			for i, tt := range titles {
-				g.Text(dst, FontSmall, 164, 22+i*12, tt, g.C(ColLight))
+				g.Text(dst, FontSmall, 164, 20+i*14, tt, g.C(ColLight))
 				v := itoa(m.Titles[i])
 				if m.Titles[i] == 0 {
 					v = "KOMMT VIELLEICHT NOCH..."
 				}
-				g.TextRight(dst, FontSmall, 312, 28+i*12, v, g.C(ColWhite))
+				g.TextRight(dst, FontSmall, 312, 27+i*14, v, g.C(ColWhite))
 			}
 			y := 92
 			g.Text(dst, FontSmall, 164, y, "        GESAMT   HEIM   AUSW.", g.C(ColBeige))

@@ -76,6 +76,7 @@ type MatchDay struct {
 	extra      bool
 	pens       bool
 	onFinish   func()
+	started    int // number of periods started
 }
 
 func (md *MatchDay) score(f *Fixture) (int, int) {
@@ -447,7 +448,8 @@ func (md *MatchDay) Step() bool {
 		return false
 	}
 	from, to := md.periods[md.period][0], md.periods[md.period][1]
-	if md.Minute < from {
+	if md.started <= md.period {
+		md.started = md.period + 1
 		md.startPeriod(from, to)
 		md.Minute = from
 	}
