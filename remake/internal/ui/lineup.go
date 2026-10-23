@@ -224,6 +224,13 @@ func (q *SquadScreen) Update(app *App) error {
 		if q.updateBoard(app) {
 			return nil
 		}
+		// A hidden key of the remake, not of the original.
+		for _, c := range in.Chars {
+			if c == 'o' && q.md == nil {
+				q.optimize(app)
+				return nil
+			}
+		}
 	}
 	if !in.Left && !in.Right {
 		return nil
@@ -296,6 +303,47 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 		q.picked = -1
 	}
 	return true
+}
+
+// optimize sets the best lineup (game.State.OptimizeLineup) and tells what
+// it is worth, as expected points per match: the new lineup and the
+// automatic lineups of the three formations, against the next opponent, who is named in a third line, or
+// else against the clubs of the league.
+func (q *SquadScreen) optimize(app *App) {
+	s := q.ss.S
+	res := s.OptimizeLineup(q.mi())
+	q.picked = -1
+	q.vac = game.BoardCell{}
+	toast := newLineupToast(game.LineupError{
+		"OPTIMAL " + pointsText(res.After),
+		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2]),
+	})
+	if res.Opponent >= 0 {
+		name := []rune(s.Teams[res.Opponent].Name)
+		l := "GEGEN " + string(name)
+		for len(name) > 0 && app.Gfx.TextWidth(FontNormal, l) > lnToastWidth {
+			name = name[:len(name)-1]
+			l = "GEGEN " + string(name)
+		}
+		toast.third = l
+	}
+	app.Push(toast)
+}
+
+// lnToastWidth is the width of a line in the message box (167..317).
+const lnToastWidth = 148
+
+// pointsText writes n hundredths of a point with a decimal comma, "1,35".
+func pointsText(n int) string {
+	pre := ""
+	if n < 0 {
+		pre, n = "-", -n
+	}
+	frac := itoa(n % 100)
+	if len(frac) < 2 {
+		frac = "0" + frac
+	}
+	return pre + itoa(n/100) + "," + frac
 }
 
 func (q *SquadScreen) setView(v int) {
@@ -612,12 +660,25 @@ func lnB2i(b bool) int {
 // as long. It takes no input.
 type lineupToast struct {
 	lines [2]string
+	// third is a line of the remake below the two of the original; it makes
+	// the box taller by lnToastLineH.
+	third string
 	auto  bool
 	frame int
 }
 
 func newLineupToast(e game.LineupError) *lineupToast {
 	return &lineupToast{lines: e, auto: e[0] == "Auto-Aufstellung"}
+}
+
+// lnToastLineH is the distance of the lines of the message box.
+const lnToastLineH = 13
+
+func (t *lineupToast) extraH() int {
+	if t.third == "" {
+		return 0
+	}
+	return lnToastLineH
 }
 
 const lnToastSteps = 16
@@ -651,16 +712,22 @@ func (t *lineupToast) Draw(app *App, dst *ebiten.Image) {
 		}
 	}
 	x, y := 0xb3-step, 0x1b-step
-	w, h := 7+10*step, 3+2*step
+	w, h := 7+10*step, 3+2*step+t.extraH()*step/(lnToastSteps-1)
 	if step < lnToastSteps-1 {
 		fillIncl(dst, x+1, y+1, x+w-1, y+h-1, g.PalColor(ColDarkRed))
 		return
 	}
-	fillIncl(dst, 165, 13, 319, 44, g.PalColor(ColOrange))
-	fillIncl(dst, 166, 14, 318, 43, g.PalColor(ColBlack))
-	fillIncl(dst, 167, 15, 317, 42, g.PalColor(ColDarkRed))
-	g.TextMid(dst, FontNormal, 0xb9, 0x12f, 0x1a, t.lines[0], ColWhite, ColBlack)
-	g.TextMid(dst, FontNormal, 0xb9, 0x12f, 0x27, t.lines[1], ColWhite, ColBlack)
+	e := t.extraH()
+	fillIncl(dst, 165, 13, 319, 44+e, g.PalColor(ColOrange))
+	fillIncl(dst, 166, 14, 318, 43+e, g.PalColor(ColBlack))
+	fillIncl(dst, 167, 15, 317, 42+e, g.PalColor(ColDarkRed))
+	// The texts of the original fit 0xb9..0x12f; the band is as wide as the
+	// box with the same middle, for the longer ones of the remake.
+	for i, l := range []string{t.lines[0], t.lines[1], t.third} {
+		if l != "" {
+			g.TextMid(dst, FontNormal, 169, 319, 0x1a+i*lnToastLineH, l, ColWhite, ColBlack)
+		}
+	}
 }
 
 // pressed is the icon shown pressed: the list one also while the board is
