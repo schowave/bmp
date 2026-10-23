@@ -1005,7 +1005,7 @@ func (s *State) aiScorers(l int, pairs []Pair, res []Score) {
 }
 
 func (s *State) aiScorersOf(team, goals int) {
-	if s.ManagerOf(team) != nil {
+	if goals == 0 || s.ManagerOf(team) != nil {
 		return
 	}
 	r := &s.Rand
@@ -1105,6 +1105,9 @@ func (md *MatchDay) shootout(c Cup, slot int) {
 	if f == nil {
 		return
 	}
+	// The original draws who shoots first before it looks at the teams, so
+	// AI shoot-outs use this draw too.
+	first := r.Between(0, 1)
 	if !f.Watched {
 		var h, a int
 		for {
@@ -1117,7 +1120,6 @@ func (md *MatchDay) shootout(c Cup, slot int) {
 		return
 	}
 	h, a := 0, 0
-	first := r.Between(0, 1)
 	side, rounds := first, 0
 	for rounds < 5 || h == a || side != first {
 		goal := min(r.Between(0, 2), 1) == 1
