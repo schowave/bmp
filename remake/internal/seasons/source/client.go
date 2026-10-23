@@ -27,8 +27,12 @@ const UserAgent = "bmp-remake-seasons/1.0 (https://github.com/schowave/bmp)"
 type Client struct {
 	Dir   string        // cache directory
 	Delay time.Duration // pause between two requests to the network
-	HTTP  *http.Client
-	Log   func(format string, args ...any)
+	// Refresh fetches pages again instead of reading the cache, and stores
+	// the new answers; for the running season, whose tables and squads
+	// change.
+	Refresh bool
+	HTTP    *http.Client
+	Log     func(format string, args ...any)
 
 	last time.Time
 }
@@ -40,7 +44,7 @@ var ErrNotFound = errors.New("not found")
 func (c *Client) get(u string) ([]byte, error) {
 	sum := sha256.Sum256([]byte(u))
 	file := filepath.Join(c.Dir, hex.EncodeToString(sum[:16]))
-	if b, err := os.ReadFile(file); err == nil {
+	if b, err := os.ReadFile(file); err == nil && !c.Refresh {
 		if string(b) == "\x00missing" {
 			return nil, ErrNotFound
 		}
