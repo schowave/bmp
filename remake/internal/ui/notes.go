@@ -23,10 +23,14 @@ func drawNote(g *Gfx, dst *ebiten.Image, font Font, x0, x1, y int, lines []strin
 	}
 }
 
-// opponentNote names the opponent a key worked for, or nothing.
-func opponentNote(name string, opponent int) []string {
+// opponentNote names the opponent a key worked for, or nothing: "GEGEN X"
+// for a home match, "BEI X" for an away match.
+func opponentNote(name string, opponent int, home bool) []string {
 	if opponent < 0 {
 		return nil
+	}
+	if !home {
+		return []string{"BEI " + name}
 	}
 	return []string{"GEGEN " + name}
 }

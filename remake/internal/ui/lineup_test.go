@@ -501,7 +501,7 @@ func TestLineupOptimalKey(t *testing.T) {
 	}
 	step(t, app, click(lnIconX+10, lnIconY[1]+10))
 	rating := s.LineupRating(0)
-	opp, _, ok := s.NextOpponent(0)
+	opp, home, ok := s.NextOpponent(0)
 	step(t, app, Input{Chars: []rune("o")})
 	if top(app) != Scene(q) {
 		t.Fatalf("a message on top: %T", top(app))
@@ -512,7 +512,11 @@ func TestLineupOptimalKey(t *testing.T) {
 	if len(q.note) < 2 || q.note[0] != "OPTIMAL "+pointsText(s.LineupRating(0)) || !strings.HasPrefix(q.note[1], "STAND. ") {
 		t.Errorf("note %q", q.note)
 	}
-	if ok && (len(q.note) != 3 || q.note[2] != "GEGEN "+s.Teams[opp].Name) {
+	want := "GEGEN "
+	if !home {
+		want = "BEI "
+	}
+	if ok && (len(q.note) != 3 || q.note[2] != want+s.Teams[opp].Name) {
 		t.Errorf("note %q does not name the opponent %s", q.note, s.Teams[opp].Name)
 	}
 	// The footer shows the parts that fit beside the board, whole.
@@ -536,5 +540,18 @@ func TestToastLayout(t *testing.T) {
 	lay := newLineupToast(game.ErrNoSubs).layout()
 	if lay.x0 != 0xb9 || lay.x1 != 0x12f || lay.bottom != 44 || len(lay.lines) != 2 || lay.ys[1] != 0x1a+lnToastLineH {
 		t.Errorf("layout %+v", lay)
+	}
+}
+
+// The note says GEGEN for a home match and BEI for an away match.
+func TestOpponentNote(t *testing.T) {
+	if got := opponentNote("X", 5, true); len(got) != 1 || got[0] != "GEGEN X" {
+		t.Errorf("home %q", got)
+	}
+	if got := opponentNote("X", 5, false); len(got) != 1 || got[0] != "BEI X" {
+		t.Errorf("away %q", got)
+	}
+	if got := opponentNote("X", -1, true); got != nil {
+		t.Errorf("no opponent %q", got)
 	}
 }
