@@ -25,6 +25,7 @@ type MatchScreen struct {
 	fast    bool             // left click: play the rest of the period at once
 	builder string           // author of the last goal scene (right click)
 	end     []func(app *App) // screens after a period, each opens the next
+	closed  bool             // matchDayEnd has queued the last screens
 
 	panels []matchPanel
 }
@@ -150,7 +151,7 @@ func (m *MatchScreen) Update(app *App) error {
 			m.fast = false
 			m.periodEnd(to)
 		}
-		if !more {
+		if !more && !m.closed {
 			m.matchDayEnd()
 		}
 		// Without a human match nothing is shown and nothing waits (spec
@@ -341,6 +342,7 @@ func (m *MatchScreen) periodEnd(to int) {
 // matchDayEnd queues the tables of the leagues (f_2a41_214c) and closes.
 func (m *MatchScreen) matchDayEnd() {
 	s := m.ss.S
+	m.closed = true
 	if m.md.Cups() == 0 && !m.md.Replays() {
 		for l := 0; l < game.NumLeagues; l++ {
 			if m.md.Leagues()&(1<<l) != 0 && s.Display.Table[l] && tableRound != nil {
@@ -370,6 +372,14 @@ var (
 // closes, in the same tick, so that the match screen is not drawn for a
 // frame between two of them.
 func (m *MatchScreen) next(app *App) {
+	if len(m.end) == 0 && m.md.Over() && !m.closed {
+		// After the last period the match day ends in this tick too: the
+		// tables and the newspaper follow the results without the match
+		// screen in between.
+		m.md.Step()
+		m.collect(app)
+		m.matchDayEnd()
+	}
 	if len(m.end) == 0 {
 		return
 	}

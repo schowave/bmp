@@ -24,3 +24,7 @@ func (md *MatchDay) Leagues() int { return md.leagueMask }
 
 // Replays reports a day of replays (Nachholspiele).
 func (md *MatchDay) Replays() bool { return md.replay }
+
+// Over reports whether every period is played, extra time included: the
+// next Step finishes the match day.
+func (md *MatchDay) Over() bool { return md.period >= len(md.periods) }

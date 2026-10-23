@@ -63,3 +63,41 @@ func TestCampShutAfterBooking(t *testing.T) {
 		t.Fatal("camp still open after booking")
 	}
 }
+
+// WEITER on the results after the final whistle goes straight on to the
+// table: the match screen does not come back in between.
+func TestNoMatchScreenAfterFinalResults(t *testing.T) {
+	app, s, _, _, m := matchApp(t)
+	s.Display = game.DefaultDisplay()
+	s.Display.GoalScenes = false
+	final := false
+	for range 20000 {
+		switch sc := top(app).(type) {
+		case *MatchScreen:
+			if final {
+				t.Fatal("match screen on top after the final results")
+			}
+			step(t, app, click(160, 120))
+		case *ResultsScreen:
+			final = final || sc.minute >= 90
+			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
+		case *TableScreen, *CupScreen:
+			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
+		case *SquadScreen:
+			step(t, app, click(lnIconX+10, lnIconY[3]+10))
+		default:
+			step(t, app, click(160, 120))
+		}
+		gone := true
+		for _, sc := range app.stack {
+			gone = gone && sc != Scene(m)
+		}
+		if gone {
+			if !final {
+				t.Fatal("no final results shown")
+			}
+			return
+		}
+	}
+	t.Fatalf("stuck on %T", top(app))
+}
