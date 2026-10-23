@@ -21,3 +21,6 @@ remake/testdata/original/*.png
 
 # Demo screens rendered by remake/tools/shots.sh
 remake/shots/
+
+# Python bytecode of the tools
+__pycache__/
