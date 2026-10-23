@@ -10,11 +10,11 @@ import (
 )
 
 func TestScriptNamedTargetAndDump(t *testing.T) {
-	steps, err := ParseScript(strings.NewReader("click menu.calendar\ndump x.MAN\n"))
+	steps, err := ParseScript(strings.NewReader("click menu.calendar\ndump x.MAN\nkey space\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(steps) != 3 || steps[0].Target != "menu.calendar" || !steps[0].In.Left ||
+	if len(steps) != 5 || string(steps[3].In.Chars) != " " || steps[0].Target != "menu.calendar" || !steps[0].In.Left ||
 		steps[1].Target != "menu.calendar" || steps[1].In.Left || steps[2].Dump != "x.MAN" {
 		t.Fatalf("steps %+v", steps)
 	}
