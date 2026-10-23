@@ -112,3 +112,29 @@ func TestSortTableWritesEveryManager(t *testing.T) {
 		t.Errorf("manager of another league: place %d, want 7", got)
 	}
 }
+
+// The best scorer of f_14a4_1ad5 needs two goals; of equal scorers the one
+// with fewer games wins, and the reserve clubs of the Oberliga do not count.
+func TestTopScorerInTeam(t *testing.T) {
+	s := &State{Managers: []*Manager{{Team: 40, League: 2}}}
+	for p := 1; p < NumPersons; p++ {
+		s.Persons[p].Team = 0xff
+	}
+	s.Persons[5] = Person{Team: 40, LeagueGoals: 1, LeagueGames: 3}
+	if s.topScorerInTeam(0) {
+		t.Error("one goal makes a top scorer")
+	}
+	s.Persons[5].LeagueGoals = 12
+	s.Persons[3] = Person{Team: 41, LeagueGoals: 12, LeagueGames: 20}
+	if !s.topScorerInTeam(0) {
+		t.Error("the scorer with fewer games loses")
+	}
+	s.Persons[2] = Person{Team: 60, LeagueGoals: 30, LeagueGames: 20}
+	if !s.topScorerInTeam(0) {
+		t.Error("a reserve club counts")
+	}
+	s.Persons[3].LeagueGames = 2
+	if s.topScorerInTeam(0) {
+		t.Error("the scorer of the other club with fewer games loses")
+	}
+}
