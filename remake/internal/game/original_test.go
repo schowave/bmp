@@ -118,3 +118,15 @@ func TestRandMatchesMSC(t *testing.T) {
 		}
 	}
 }
+
+// D:0x53d0 holds the days and D:0x53d4 the months of the special dates,
+// read with the same index.
+func TestSpecialDatesMatchOriginal(t *testing.T) {
+	o := original(t)
+	days, months := o.dBytes(0x53d0, 3), o.dBytes(0x53d4, 3)
+	for k, sd := range specialDates {
+		if sd[0] != int(days[k]) || sd[1] != int(months[k]) {
+			t.Errorf("date %d: %d.%d., want %d.%d.", k, sd[0], sd[1], days[k], months[k])
+		}
+	}
+}
