@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 )
-
-// fontFile holds the fonts of BMMAIN.EXE in an extract.
-const fontFile = "FONTS.JSON"
 
 type fontJSON struct {
 	Name    string
@@ -95,35 +94,86 @@ func DecodeFonts(data []byte) (map[string]*Font, error) {
 	return fonts, nil
 }
 
-// Extract copies what the re-implementation needs from the game directory
-// src into dst: the pictures, MANA.DAT and the fonts of BMMAIN.EXE as
-// FONTS.JSON.
-func Extract(src *Dir, dst string) error {
-	for upper, real := range src.names {
-		keep := upper == "MANA.DAT" || strings.HasPrefix(upper, "TORE/") || (strings.HasPrefix(upper, "PIC/") &&
-			(strings.HasSuffix(upper, ".VGA") || strings.HasSuffix(upper, ".CP") || strings.HasSuffix(upper, ".PAL")))
-		if !keep {
-			continue
-		}
-		data, err := src.ReadFile(real)
-		if err != nil {
-			return err
-		}
-		out := filepath.Join(dst, filepath.FromSlash(upper))
+// Extract writes what the re-implementation needs from the original game
+// src into dst, in open formats (see the files of Dir): the club database,
+// the pictures as indexed PNGs, the palettes, the goal scenes and the fonts
+// of BMMAIN.EXE.
+func Extract(src *Original, dst string) error {
+	write := func(name string, data []byte) error {
+		out := filepath.Join(dst, filepath.FromSlash(name))
 		if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
 			return err
 		}
-		if err := os.WriteFile(out, data, 0o644); err != nil {
+		return os.WriteFile(out, data, 0o644)
+	}
+	mana, err := src.Mana()
+	if err != nil {
+		return err
+	}
+	data, err := EncodeClubs(mana)
+	if err != nil {
+		return err
+	}
+	if err := write(clubsFile, data); err != nil {
+		return err
+	}
+	pals, err := src.Palettes()
+	if err != nil {
+		return err
+	}
+	if err := write(palettesFile, EncodePalettes(pals)); err != nil {
+		return err
+	}
+	for _, upper := range src.files("PIC", ".VGA", ".CP") {
+		base := strings.TrimPrefix(upper, "PIC/")
+		ext := filepath.Ext(base)
+		n, err := strconv.Atoi(strings.TrimSuffix(base, ext))
+		if err != nil {
+			return fmt.Errorf("%s: not a numbered picture", upper)
+		}
+		full := ext == ".CP"
+		p, err := src.Pic(n, full)
+		if err != nil {
 			return err
 		}
+		data, err := EncodePic(p, &pals[0])
+		if err != nil {
+			return err
+		}
+		if err := write(picPath(n, full), data); err != nil {
+			return err
+		}
+	}
+	for _, upper := range src.files("TORE", ".T", ".V", ".TE", ".VE", ".TJ", ".VJ") {
+		name := strings.TrimPrefix(upper, "TORE/")
+		sc, err := src.Scene(name)
+		if err != nil {
+			return err
+		}
+		data, err := EncodeScene(sc)
+		if err != nil {
+			return err
+		}
+		if err := write(path.Join(sceneDir, name+".json"), data); err != nil {
+			return err
+		}
+	}
+	counts, err := src.SceneCounts()
+	if err != nil {
+		return err
+	}
+	if data, err = EncodeSceneCounts(counts); err != nil {
+		return err
+	}
+	if err := write(path.Join(sceneDir, countsFile), data); err != nil {
+		return err
 	}
 	fonts, err := src.Fonts()
 	if err != nil {
 		return err
 	}
-	data, err := EncodeFonts(fonts)
-	if err != nil {
+	if data, err = EncodeFonts(fonts); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dst, fontFile), data, 0o644)
+	return write(fontFile, data)
 }

@@ -6,8 +6,8 @@ Manager Professional* in Go with [Ebitengine](https://ebitengine.org).
 The rules were reverse-engineered from the original `BMMAIN.EXE` (see the
 specifications in [`../docs/re`](../docs/re)). The pictures, fonts and the
 club database are not redrawn: they are extracted from the original files
-in [`../bmp`](../bmp) into [`internal/embedded/data`](internal/embedded/data)
-and built into every binary. Screens are drawn on a 320×240 canvas like the
+in [`../bmp`](../bmp) into open formats in
+[`internal/embedded/data`](internal/embedded/data) and built into every binary. Screens are drawn on a 320×240 canvas like the
 original.
 
 ## Contents
@@ -46,20 +46,33 @@ Or run it straight from the sources with `mise run remake:run` (`go run
 
 ### The original files
 
-`internal/embedded/data` holds what the game needs from `../bmp` (which
-files: `Extract` in `internal/assets/extract.go`). It is checked in and
-embedded by every build, so neither building nor running needs the game
+`internal/embedded/data` holds what the game needs from `../bmp`, converted
+into open formats (`Extract` in `internal/assets/extract.go`, decision in
+[ADR 0005](../docs/adr/0005-extract-into-open-formats.md)). It is checked in
+and embedded by every build, so neither building nor running needs the game
 directory.
 
+| File | From the original | Content |
+|---|---|---|
+| `clubs.json` | `MANA.DAT` | 200 clubs: name, three strength values; the 64 German ones also logo (picture number) and 20 player names by position (2 goalkeepers, 6 defenders, 7 midfielders, 5 forwards). Names in UTF-8, limited to code page 437 and 22 (clubs) or 25 (players) characters |
+| `pic/N.png`, `pic/full/N.png` | `PIC/N.VGA`, `PIC/N.CP` | Pictures as indexed PNGs: the pixels are palette indices, the colour table is palette 0 for viewing. The club logos are `pic/80.png` to `pic/143.png` |
+| `palettes.json` | `PIC/1.PAL` | The three palettes, 256 colours `#rrggbb` each |
+| `scenes/N.T.json` etc. | `TORE/N.T` etc. | Goal scenes, one frame per line: panorama scroll and 27 objects `[x, y, sprite]` |
+| `scenes/counts.json` | `TORE/ANZAHL` | Numbers of normal, penalty and joke scenes |
+| `fonts.json` | `BMMAIN.EXE` | The bitmap fonts |
+
 `mise run remake:extract` writes the directory anew from `../bmp`; a test
-fails when the two differ. `-data DIR` or `$BMP_DATA` makes the program read
-the files from a game directory instead.
+fails when the two differ, another that the conversion loses nothing.
+`-data DIR` or `$BMP_DATA` makes the program read an extract from another
+directory, for example one with edited clubs or logos (`go run
+./cmd/bmpextract -out DIR` writes one to start from). An edited picture must
+stay an indexed PNG.
 
 ## Command-line options
 
 | Flag | Default | Purpose |
 |---|---|---|
-| `-data DIR` | `$BMP_DATA`, else the built-in files | Directory of the original game |
+| `-data DIR` | `$BMP_DATA`, else the built-in files | Directory of an extract of the original (see [The original files](#the-original-files)) |
 | `-saves DIR` | user config directory | Save games and the high-score tables (`HIGH.xy` in the format of the original, so the tables of `../bmp` can be copied there) |
 | `-scale N` | `3` | Window size as a multiple of 320×240 |
 | `-demo NAME` | | Open a development demo screen |
@@ -107,9 +120,9 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
 | Path | Content |
 |---|---|
 | `cmd/bmp` | The game |
-| `cmd/bmpextract` | Extracts the original files into `internal/embedded/data` |
-| `cmd/scenepreview` | Plays a single goal scene of `TORE/` in a window, for development |
-| `internal/assets` | EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT` |
+| `cmd/bmpextract` | Extracts the original files into open formats in `internal/embedded/data` |
+| `cmd/scenepreview` | Plays a single goal scene in a window, for development |
+| `internal/assets` | Readers of the original files (EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT`, goal scenes) and of the extract |
 | `internal/game` | The rules: calendar, fixtures, match engine, cups, finances, stadium, players, transfers, season end. Deterministic (the random generator of the MS C runtime), saved as JSON |
 | `internal/ui` | The screens on the 320×240 canvas |
 | `internal/embedded` | The original files built into the binary |

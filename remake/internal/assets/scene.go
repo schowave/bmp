@@ -2,6 +2,7 @@ package assets
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -171,19 +172,6 @@ func (s *Scene) Prepared(mirrored bool) *Scene {
 	return out
 }
 
-// Scene reads and parses TORE\<name>, e.g. "10.T".
-func (d *Dir) Scene(name string) (*Scene, error) {
-	data, err := d.ReadFile("TORE/" + name)
-	if err != nil {
-		return nil, err
-	}
-	s, err := ParseScene(data)
-	if err != nil {
-		return nil, fmt.Errorf("TORE/%s: %w", name, err)
-	}
-	return s, nil
-}
-
 // SceneCounts are the highest numbers of the normal, penalty (E) and joke
 // (J) scenes, from TORE\ANZAHL ("MAXSZENE:43|5|2", f_14a4_0419). Numbers
 // start at 2.
@@ -216,15 +204,6 @@ func ParseSceneCounts(data []byte) (SceneCounts, error) {
 	return SceneCounts{v[0], v[1], v[2]}, nil
 }
 
-// SceneCounts reads TORE\ANZAHL.
-func (d *Dir) SceneCounts() (SceneCounts, error) {
-	data, err := d.ReadFile("TORE/ANZAHL")
-	if err != nil {
-		return SceneCounts{}, err
-	}
-	return ParseSceneCounts(data)
-}
-
 // SceneName is the file name f_14a4_05ec builds: N.T or N.V, plus E for a
 // penalty or J for a joke scene.
 func SceneName(n int, goal, penalty, joke bool) string {
@@ -241,4 +220,94 @@ func SceneName(n int, goal, penalty, joke bool) string {
 		s += "E"
 	}
 	return s
+}
+
+type sceneJSON struct {
+	Builder string            `json:"builder"`
+	Sounds  [4]int            `json:"sounds"`
+	Frames  []json.RawMessage `json:"frames"`
+}
+
+// frameJSON is a frame of a scene: the scroll position of the panorama and
+// the objects as [x, y, sprite].
+type frameJSON struct {
+	Scroll  [2]int               `json:"scroll"`
+	Objects [SceneObjects][3]int `json:"objects"`
+}
+
+// EncodeScene writes a scene as JSON, one frame to a line. The builder's
+// name stays in the font encoding of the game (']' is Ü).
+func EncodeScene(s *Scene) ([]byte, error) {
+	var b bytes.Buffer
+	head, err := json.Marshal(s.Builder)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Fprintf(&b, "{\n\t\"builder\": %s,\n\t\"sounds\": [%d, %d, %d, %d],\n\t\"frames\": [\n",
+		head, s.Sounds[0], s.Sounds[1], s.Sounds[2], s.Sounds[3])
+	for i, f := range s.Frames {
+		fj := frameJSON{Scroll: [2]int{f.ScrollX, f.ScrollY}}
+		for k, o := range f.Objects {
+			fj.Objects[k] = [3]int{o.X, o.Y, o.ID}
+		}
+		line, err := json.Marshal(fj)
+		if err != nil {
+			return nil, err
+		}
+		b.WriteString("\t\t")
+		b.Write(line)
+		if i < len(s.Frames)-1 {
+			b.WriteByte(',')
+		}
+		b.WriteByte('\n')
+	}
+	b.WriteString("\t]\n}\n")
+	return b.Bytes(), nil
+}
+
+// DecodeScene reads a scene written by EncodeScene.
+func DecodeScene(data []byte) (*Scene, error) {
+	var in sceneJSON
+	if err := unmarshalJSON(data, &in); err != nil {
+		return nil, err
+	}
+	if len(in.Frames) == 0 || len(in.Frames) > 128 {
+		return nil, fmt.Errorf("%d frames, want 1..128", len(in.Frames))
+	}
+	s := &Scene{Builder: in.Builder, Sounds: in.Sounds, Frames: make([]SceneFrame, len(in.Frames))}
+	for i, raw := range in.Frames {
+		var fj frameJSON
+		if err := unmarshalJSON(raw, &fj); err != nil {
+			return nil, fmt.Errorf("frame %d: %w", i, err)
+		}
+		f := &s.Frames[i]
+		f.ScrollX, f.ScrollY = fj.Scroll[0], fj.Scroll[1]
+		for k, o := range fj.Objects {
+			f.Objects[k] = SceneObject{X: o[0], Y: o[1], ID: o[2]}
+		}
+	}
+	return s, nil
+}
+
+type countsJSON struct {
+	Normal  int `json:"normal"`
+	Penalty int `json:"penalty"`
+	Joke    int `json:"joke"`
+}
+
+// EncodeSceneCounts writes the scene counts as JSON.
+func EncodeSceneCounts(c SceneCounts) ([]byte, error) {
+	return marshalJSON(countsJSON(c))
+}
+
+// DecodeSceneCounts reads scene counts written by EncodeSceneCounts.
+func DecodeSceneCounts(data []byte) (SceneCounts, error) {
+	var in countsJSON
+	if err := unmarshalJSON(data, &in); err != nil {
+		return SceneCounts{}, err
+	}
+	if in.Normal < 1 || in.Penalty < 1 || in.Joke < 1 {
+		return SceneCounts{}, fmt.Errorf("scene counts %+v: each must be at least 1", in)
+	}
+	return SceneCounts(in), nil
 }

@@ -2,9 +2,14 @@ package assets
 
 import (
 	"bytes"
+	"fmt"
+	"image"
+	"image/png"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/embedded"
@@ -23,23 +28,23 @@ func dataDir(t *testing.T) *Dir {
 // gameDir returns the original game directory of the repository (../bmp), or
 // skips the test when it is not there. Only tests of BMMAIN.EXE and of the
 // extraction need it.
-func gameDir(t *testing.T) *Dir {
+func gameDir(t *testing.T) *Original {
 	t.Helper()
 	path := filepath.Join("..", "..", "..", "bmp")
 	if _, err := os.Stat(filepath.Join(path, "BMMAIN.EXE")); err != nil {
 		t.Skip("original game files not found in", path)
 	}
-	d, err := OpenDir(os.DirFS(path))
+	d, err := OpenOriginal(os.DirFS(path))
 	if err != nil {
 		t.Fatal(err)
 	}
 	return d
 }
 
-func TestDecodePicRuns(t *testing.T) {
+func TestParsePicRuns(t *testing.T) {
 	// 4x2 picture: literal of 3 bytes, run of 5 x 7, end marker.
 	data := []byte{4, 0, 2, 0, 0, 0, 0x02, 1, 2, 3, 0x84, 7, 0x80}
-	p, err := DecodePic(data)
+	p, err := ParsePic(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,26 +57,66 @@ func TestDecodePicRuns(t *testing.T) {
 func TestAllPicturesDecodeToTheirSize(t *testing.T) {
 	d := dataDir(t)
 	n := 0
-	for upper := range d.names {
-		ext := filepath.Ext(upper)
-		if ext != ".VGA" && ext != ".CP" {
-			continue
+	err := fs.WalkDir(d.fsys, picDir, func(path string, e fs.DirEntry, err error) error {
+		if err != nil || e.IsDir() {
+			return err
 		}
-		data, err := d.ReadFile(upper)
+		data, err := d.ReadFile(path)
 		if err != nil {
-			t.Fatal(err)
+			return err
 		}
 		p, err := DecodePic(data)
 		if err != nil {
-			t.Fatalf("%s: %v", upper, err)
+			return fmt.Errorf("%s: %w", path, err)
 		}
 		if len(p.Pix) != p.W*p.H || p.W == 0 || p.H == 0 {
-			t.Fatalf("%s: %dx%d with %d pixels", upper, p.W, p.H, len(p.Pix))
+			return fmt.Errorf("%s: %dx%d with %d pixels", path, p.W, p.H, len(p.Pix))
 		}
 		n++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 	if n < 150 {
 		t.Fatalf("only %d pictures found", n)
+	}
+}
+
+func TestPicPNGRoundTrip(t *testing.T) {
+	p := &Pic{W: 3, H: 2, Pix: []byte{0, 1, 255, 7, 7, 128}}
+	var pal Palette
+	data, err := EncodePic(p, &pal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := DecodePic(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got, p) {
+		t.Fatalf("got %+v, want %+v", got, p)
+	}
+	var b bytes.Buffer
+	if err := png.Encode(&b, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := DecodePic(b.Bytes()); err == nil {
+		t.Fatal("a PNG without palette indices was accepted")
+	}
+}
+
+func TestPalettesJSONRoundTrip(t *testing.T) {
+	pals, err := dataDir(t).Palettes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pals) != 3 {
+		t.Fatalf("%d palettes", len(pals))
+	}
+	got, err := DecodePalettes(EncodePalettes(pals))
+	if err != nil || !reflect.DeepEqual(got, pals) {
+		t.Fatalf("round trip: %v", err)
 	}
 }
 
@@ -101,6 +146,55 @@ func TestMana(t *testing.T) {
 	}
 	if m.Clubs[64].Name == "" || m.Clubs[199].Name == "" || m.Clubs[64].Players != nil {
 		t.Fatalf("foreign clubs: %+v %+v", m.Clubs[64], m.Clubs[199])
+	}
+	if m.Clubs[1].Name != "FC BAYERN M\x9aNCHEN" {
+		t.Fatalf("club 1 is not in CP437: %q", m.Clubs[1].Name)
+	}
+}
+
+func TestClubsJSON(t *testing.T) {
+	m, err := dataDir(t).Mana()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := EncodeClubs(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, err := DecodeClubs(data); err != nil || !reflect.DeepEqual(got, m) {
+		t.Fatalf("round trip: %v", err)
+	}
+	for _, want := range []string{`"FC BAYERN MÜNCHEN"`, `"STANDARD L▄TTICH"`} {
+		if !strings.Contains(string(data), want) {
+			t.Errorf("clubs.json lacks %s", want)
+		}
+	}
+	file := string(data)
+	for name, broken := range map[string]string{
+		"long name":      strings.Replace(file, `"FC BAYERN MÜNCHEN"`, `"FC BAYERN MÜNCHEN E.V. 1900"`, 1),
+		"not CP437":      strings.Replace(file, `"FC BAYERN MÜNCHEN"`, `"FC BAYERN MÜNCHEN ✓"`, 1),
+		"one keeper":     strings.Replace(file, "\"goalkeepers\": [\n\t\t\t\t\"EHRMANN\",", `"goalkeepers": [`, 1),
+		"typo":           strings.Replace(file, `"strength"`, `"strenght"`, 1),
+		"too few":        "[]",
+		"foreign roster": strings.Replace(file, `"name": "FC LIVERPOOL"`, `"name": "FC LIVERPOOL", "players": {}`, 1),
+	} {
+		if broken == file {
+			t.Fatalf("%s: the test did not change the file", name)
+		}
+		if _, err := DecodeClubs([]byte(broken)); err == nil {
+			t.Errorf("%s: accepted", name)
+		}
+	}
+}
+
+func TestCP437RoundTrip(t *testing.T) {
+	var all []byte
+	for c := 1; c < 256; c++ {
+		all = append(all, byte(c))
+	}
+	got, err := utf8ToCP437(cp437ToUTF8(string(all)))
+	if err != nil || got != string(all) {
+		t.Fatalf("round trip: %v", err)
 	}
 }
 
@@ -133,7 +227,9 @@ func TestFonts(t *testing.T) {
 	}
 }
 
-func TestExtractWorksWithoutTheExecutable(t *testing.T) {
+// TestExtractIsLossless reads everything of an extract back and compares it
+// with the original files.
+func TestExtractIsLossless(t *testing.T) {
 	d := gameDir(t)
 	out := t.TempDir()
 	if err := Extract(d, out); err != nil {
@@ -170,11 +266,66 @@ func TestExtractWorksWithoutTheExecutable(t *testing.T) {
 			}
 		}
 	}
-	if _, err := e.Pic(22, true); err != nil {
+	pics := d.files("PIC", ".VGA", ".CP")
+	if len(pics) < 150 {
+		t.Fatalf("%d pictures in the original", len(pics))
+	}
+	for _, upper := range pics {
+		ext := filepath.Ext(upper)
+		var n int
+		if _, err := fmt.Sscan(strings.TrimSuffix(strings.TrimPrefix(upper, "PIC/"), ext), &n); err != nil {
+			t.Fatal(upper, err)
+		}
+		a, err := d.Pic(n, ext == ".CP")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if b, err := e.Pic(n, ext == ".CP"); err != nil || !reflect.DeepEqual(a, b) {
+			t.Fatalf("%s differs after the round trip: %v", upper, err)
+		}
+	}
+	pa, err := d.Palettes()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := e.Mana(); err != nil {
+	if pb, err := e.Palettes(); err != nil || !reflect.DeepEqual(pa, pb) {
+		t.Fatalf("palettes differ after the round trip: %v", err)
+	}
+	ma, err := d.Mana()
+	if err != nil {
 		t.Fatal(err)
+	}
+	if mb, err := e.Mana(); err != nil || !reflect.DeepEqual(ma, mb) {
+		t.Fatalf("club database differs after the round trip: %v", err)
+	}
+	scenes := d.files("TORE", ".T", ".V", ".TE", ".VE", ".TJ", ".VJ")
+	if len(scenes) != 94 {
+		t.Fatalf("%d scenes in the original", len(scenes))
+	}
+	for _, upper := range scenes {
+		name := strings.TrimPrefix(upper, "TORE/")
+		a, err := d.Scene(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if b, err := e.Scene(name); err != nil || !reflect.DeepEqual(a, b) {
+			t.Fatalf("%s differs after the round trip: %v", upper, err)
+		}
+	}
+	ca, err := d.SceneCounts()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cb, err := e.SceneCounts(); err != nil || ca != cb {
+		t.Fatalf("scene counts differ: %+v, %v", cb, err)
+	}
+}
+
+func TestOpenDirExplainsTheOriginal(t *testing.T) {
+	d := gameDir(t)
+	_, err := OpenDir(d.fsys)
+	if err == nil || !strings.Contains(err.Error(), "extract it first") {
+		t.Fatalf("got %v", err)
 	}
 }
 

@@ -1,68 +1,66 @@
 package assets
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
-	"strings"
+	"path"
 	"sync"
 )
 
-// Dir gives access to an installed copy of the game. File names are matched
-// case-insensitively, like DOS does.
+// Files of an extract (Extract). Pictures are indexed PNGs whose pixels
+// are the palette indices of the original; everything else is JSON.
+const (
+	clubsFile    = "clubs.json"    // MANA.DAT
+	palettesFile = "palettes.json" // PIC/1.PAL
+	fontFile     = "fonts.json"    // the fonts inside BMMAIN.EXE
+	picDir       = "pic"           // pic/N.png = PIC/N.VGA, pic/full/N.png = PIC/N.CP
+	sceneDir     = "scenes"        // scenes/N.T.json = TORE/N.T, scenes/counts.json = TORE/ANZAHL
+	countsFile   = "counts.json"
+)
+
+// Dir gives access to an extract of the original game: the files built
+// into the remake, or a directory written by Extract.
 type Dir struct {
-	fsys  fs.FS
-	names map[string]string // upper-case path -> real path
+	fsys fs.FS
 
 	mu   sync.Mutex
 	pics map[string]*Pic
 }
 
-// OpenDir indexes the game directory fsys: the directory of the original
-// game, or the extract made by Extract (with FONTS.JSON instead of
-// BMMAIN.EXE).
+// OpenDir opens the extract in fsys.
 func OpenDir(fsys fs.FS) (*Dir, error) {
-	d := &Dir{fsys: fsys, names: map[string]string{}, pics: map[string]*Pic{}}
-	err := fs.WalkDir(fsys, ".", func(path string, e fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	for _, need := range []string{clubsFile, palettesFile, fontFile} {
+		if _, err := fs.Stat(fsys, need); err == nil {
+			continue
 		}
-		if !e.IsDir() {
-			d.names[strings.ToUpper(path)] = path
+		if _, err := fs.Stat(fsys, "BMMAIN.EXE"); err == nil {
+			return nil, errors.New("this is the original game: extract it first (go run ./cmd/bmpextract -data DIR -out OUT)")
 		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s not found: is this an extract of the game?", need)
 	}
-	for _, need := range []string{"MANA.DAT", "PIC/1.PAL"} {
-		if _, ok := d.names[need]; !ok {
-			return nil, fmt.Errorf("%s not found: is this the game directory?", need)
-		}
-	}
-	_, exe := d.names["BMMAIN.EXE"]
-	_, fonts := d.names[fontFile]
-	if !exe && !fonts {
-		return nil, fmt.Errorf("BMMAIN.EXE not found: is this the game directory?")
-	}
-	return d, nil
+	return &Dir{fsys: fsys, pics: map[string]*Pic{}}, nil
 }
 
-// ReadFile reads a file of the game, e.g. "PIC/22.CP".
+// ReadFile reads a file of the extract, e.g. "clubs.json".
 func (d *Dir) ReadFile(name string) ([]byte, error) {
-	real, ok := d.names[strings.ToUpper(strings.ReplaceAll(name, "\\", "/"))]
-	if !ok {
-		return nil, fmt.Errorf("%s: %w", name, fs.ErrNotExist)
-	}
-	return fs.ReadFile(d.fsys, real)
+	return fs.ReadFile(d.fsys, name)
 }
 
-// Pic returns picture n: PIC/N.VGA, or the full-screen PIC/N.CP when full.
-func (d *Dir) Pic(n int, full bool) (*Pic, error) {
-	ext := "VGA"
+// picPath is the file of picture n in an extract.
+func picPath(n int, full bool) string {
 	if full {
-		ext = "CP"
+		return fmt.Sprintf("%s/full/%d.png", picDir, n)
 	}
-	name := fmt.Sprintf("PIC/%d.%s", n, ext)
+	return fmt.Sprintf("%s/%d.png", picDir, n)
+}
+
+// Pic returns picture n: PIC/N.VGA of the original, or the full-screen
+// PIC/N.CP when full.
+func (d *Dir) Pic(n int, full bool) (*Pic, error) {
+	name := picPath(n, full)
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if p, ok := d.pics[name]; ok {
@@ -80,46 +78,80 @@ func (d *Dir) Pic(n int, full bool) (*Pic, error) {
 	return p, nil
 }
 
-// Palettes reads PIC/1.PAL.
+// Palettes reads the palettes of PIC/1.PAL.
 func (d *Dir) Palettes() ([]Palette, error) {
-	data, err := d.ReadFile("PIC/1.PAL")
+	data, err := d.ReadFile(palettesFile)
 	if err != nil {
 		return nil, err
 	}
-	pals := DecodePalettes(data)
-	if len(pals) == 0 {
-		return nil, fmt.Errorf("PIC/1.PAL: no palette")
+	pals, err := DecodePalettes(data)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", palettesFile, err)
 	}
 	return pals, nil
 }
 
-// Mana reads MANA.DAT.
+// Mana reads the club database.
 func (d *Dir) Mana() (*Mana, error) {
-	data, err := d.ReadFile("MANA.DAT")
+	data, err := d.ReadFile(clubsFile)
 	if err != nil {
 		return nil, err
 	}
-	return ParseMana(data)
-}
-
-// MainImage reads and unpacks BMMAIN.EXE.
-func (d *Dir) MainImage() (*Image, error) {
-	data, err := d.ReadFile("BMMAIN.EXE")
+	m, err := DecodeClubs(data)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", clubsFile, err)
 	}
-	return Unexepack(data)
+	return m, nil
 }
 
-// Fonts returns the bitmap fonts: from FONTS.JSON of an extract, or
-// unpacked from BMMAIN.EXE.
+// Fonts returns the bitmap fonts.
 func (d *Dir) Fonts() (map[string]*Font, error) {
-	if data, err := d.ReadFile(fontFile); err == nil {
-		return DecodeFonts(data)
-	}
-	img, err := d.MainImage()
+	data, err := d.ReadFile(fontFile)
 	if err != nil {
 		return nil, err
 	}
-	return Fonts(img)
+	return DecodeFonts(data)
+}
+
+// Scene reads goal scene name, e.g. "10.T".
+func (d *Dir) Scene(name string) (*Scene, error) {
+	file := path.Join(sceneDir, name+".json")
+	data, err := d.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	s, err := DecodeScene(data)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", file, err)
+	}
+	return s, nil
+}
+
+// SceneCounts reads the numbers of goal scenes.
+func (d *Dir) SceneCounts() (SceneCounts, error) {
+	data, err := d.ReadFile(path.Join(sceneDir, countsFile))
+	if err != nil {
+		return SceneCounts{}, err
+	}
+	return DecodeSceneCounts(data)
+}
+
+// marshalJSON encodes v as indented JSON without escaping <, > and &.
+func marshalJSON(v any) ([]byte, error) {
+	var b bytes.Buffer
+	enc := json.NewEncoder(&b)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "\t")
+	if err := enc.Encode(v); err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+// unmarshalJSON decodes data into v and rejects unknown fields, so a typo
+// in a hand-edited file is an error instead of a missing value.
+func unmarshalJSON(data []byte, v any) error {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.DisallowUnknownFields()
+	return dec.Decode(v)
 }
