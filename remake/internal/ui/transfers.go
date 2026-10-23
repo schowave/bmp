@@ -31,7 +31,7 @@ func NewTransferScreen(ss *Session) *TransferScreen {
 	return &TransferScreen{ss: ss,
 		own: &tsList{m: mi, x: 4, head: 30, right: 153, foot: 182, mask: tsMaskTransfer, mode: 0,
 			title: "IHRE MANNSCHAFT", hitX: 2, rowY: 0x24, hitRight: 0x9b, hintY: 0xbe},
-		market: &tsList{m: game.MarketIndex, viewer: mi, x: 163, head: 29, right: 315, foot: 107, mask: tsMaskMarket, mode: 1,
+		market: &tsList{m: game.MarketIndex, x: 163, head: 29, right: 315, foot: 107, mask: tsMaskMarket, mode: 1,
 			title: "TRANSFERMARKT", hitX: 163, rowY: 0x1d, hitRight: 0xa1 + 0x99, hintY: 0xbe, rowBase: 1}}
 }
 

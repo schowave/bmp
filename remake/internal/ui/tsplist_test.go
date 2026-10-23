@@ -41,40 +41,34 @@ func TestMarketPricesDrawOnce(t *testing.T) {
 	}
 }
 
-// In the squad list of the transfer screen a player with an offer of a club
-// is white; in the contract list he keeps his colour.
-func TestOfferRowWhite(t *testing.T) {
+// The name of an own player a club made an offer for is light, in the squad
+// list and in the market list; the rest of the row keeps its colour.
+func TestOfferNameLight(t *testing.T) {
 	_, ss := tsTestSession(t)
 	s := ss.S
-	sl := &s.Squads[ss.Mgr()][3]
-	squad, contracts := &tsList{m: ss.Mgr(), mode: 0}, &tsList{m: ss.Mgr(), mode: 3}
-	plain := squad.rowColor(s, sl)
+	mi := ss.Mgr()
+	sl := &s.Squads[mi][3]
+	squad := &tsList{m: mi, mode: 0}
+	base := squad.rowColor(s, sl)
+	if got := squad.nameColor(s, sl, mi, base); got != base {
+		t.Errorf("name colour %d without an offer", got)
+	}
 	sl.Status |= 0x40
-	if got := squad.rowColor(s, sl); got != ColWhite || plain == ColWhite {
-		t.Errorf("colour %d with an offer, %d without", got, plain)
+	if got := squad.nameColor(s, sl, mi, base); got != ColBeige || squad.rowColor(s, sl) != base {
+		t.Errorf("name colour %d with an offer, row %d", got, squad.rowColor(s, sl))
 	}
-	if got := contracts.rowColor(s, sl); got == ColWhite {
-		t.Error("the contract list marks the offer too")
+	ms := &s.Squads[game.MarketIndex][0]
+	if ms.Empty() {
+		return
 	}
-}
-
-// An own listed player with an offer is white in the market list, a player
-// of somebody else with an offer is not.
-func TestListedOfferRowWhite(t *testing.T) {
-	_, ss := tsTestSession(t)
-	s := ss.S
-	sl := &s.Squads[game.MarketIndex][0]
-	if sl.Empty() {
-		t.Skip("empty market")
+	market := &tsList{m: game.MarketIndex, mode: 1}
+	ms.Status |= 0x80
+	s.Persons[ms.Person].Owner = mi
+	if got := market.nameColor(s, ms, mi, 0); got != ColBeige {
+		t.Errorf("own listed player with an offer: name colour %d", got)
 	}
-	market := &tsList{m: game.MarketIndex, viewer: ss.Mgr(), mode: 1}
-	sl.Status |= 0x80
-	s.Persons[sl.Person].Owner = ss.Mgr()
-	if got := market.rowColor(s, sl); got != ColWhite {
-		t.Errorf("own listed player with an offer: colour %d", got)
-	}
-	s.Persons[sl.Person].Owner = game.MarketIndex
-	if got := market.rowColor(s, sl); got == ColWhite {
-		t.Error("a player of the market is white")
+	s.Persons[ms.Person].Owner = game.MarketIndex
+	if got := market.nameColor(s, ms, mi, 0); got == ColBeige {
+		t.Error("a player of the market is marked")
 	}
 }

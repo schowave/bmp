@@ -201,6 +201,13 @@ Hover texts:
 * market row: `"VON " + (owner==4 ? team name : manager name) + ", " + age + " J."`
 * own-squad row (via f_1ecd_29c6 → f_1ecd_2897): `"STÄRKE:" (s10+s11+s12)/3 ", " age " JAHRE"`.
 
+Name column of both lists (f_1ecd_06af column 2): the name of an own player with an offer
+of a club (`+9 & 0xc0`: 0x40 an offer for a squad player, 0x80 one for a listed player) is drawn
+light (beige) instead of the colour of his position; the rest of the row keeps its colour. The
+remake's port first limited this to the market list; as 0x40 is only set on squad slots, the
+rule covers the squad list too (the jump table of the columns is not in the listing, so this is
+read from the bits, not from the code).
+
 Price column of the market list (f_1ecd_06af column 17, 1ecd:0eeb):
 `price = (owner==4) ? slot.+0x28 : f_2277_25de(slot,0) computed as manager 4`; in LEIHEN view
 (`mode==2`) `price /= 3`. (`"Nicht mehr als N Spieler einsetzen"` in f_1ecd_1560 is a lineup rule,
