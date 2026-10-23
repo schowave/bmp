@@ -31,6 +31,6 @@ playtests and are the original:
 | The strength in the results drops after a lineup change | `spec_match.md` §3 |
 | A refused player stays not negotiable for weeks | `spec_transfers.md` §8.3 |
 | The stadium order field ignores typing (click the upper or lower edge) | `f_0000_0602`, `remake/internal/ui/desk_stadium.go` |
-| A 1-year game ends without season report, with the high scores | `spec_season.md` §5.6 |
+| A 1- or 3-year game ends with the high scores, without season report | `spec_season.md` §2.6 steps 7–9 |
 
 Add a row when a suspected bug turns out to be the original.
