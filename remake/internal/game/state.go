@@ -193,11 +193,13 @@ type Display struct {
 	Speed      int              // Spielgeschwindigkeit, 0..70
 }
 
-// DefaultDisplay is the setting of a new game: everything on but the fades.
+// DefaultDisplay is the setting of a new game: the results, tables and the
+// newspaper on, the half-time scores, goal scenes, cup screens, replays and
+// fades off, at the highest speed (the original starts with all but the fades
+// on and speed 40).
 func DefaultDisplay() Display {
 	on := [NumLeagues]bool{true, true, true}
-	return Display{HalfTime: on, Results: on, Table: on, GoalScenes: true, DFB: true, Europe: true,
-		Replays: true, Newspaper: true, Speed: 40}
+	return Display{Results: on, Table: on, Newspaper: true, Speed: 70}
 }
 
 // TakeDraw returns the next cup draw to present, or false.

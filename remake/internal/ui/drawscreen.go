@@ -50,6 +50,15 @@ func (d *DrawShow) overview(app *App) {
 	app.Replace(NewCupRound(d.ss, d.cup, 0, nil))
 }
 
+// drawShown tells whether the draw of cup c is shown: the options switch the
+// screens of the DfB-Pokal and of the Europapokale.
+func drawShown(s *game.State, c game.Cup) bool {
+	if c == game.CupDFB {
+		return s.Display.DFB
+	}
+	return s.Display.Europe
+}
+
 // Passing implements passer: before its first tick the show has not asked
 // yet whether to watch the draw.
 func (d *DrawShow) Passing() bool { return d.state == -1 }
@@ -59,11 +68,7 @@ func (d *DrawShow) Update(app *App) error {
 	in := &app.Input
 	switch d.state {
 	case -1:
-		on := s.Display.Europe
-		if d.cup == game.CupDFB {
-			on = s.Display.DFB
-		}
-		if !on {
+		if !drawShown(s, d.cup) {
 			app.Pop()
 			return nil
 		}
