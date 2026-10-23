@@ -215,7 +215,7 @@ func (s *State) afterEvent() bool {
 	return true
 }
 
-var specialDates = [3][2]int{{24, 12}, {19, 11}, {12, 4}} // D:0x53d0 / D:0x53d4
+var specialDates = [3][2]int{{24, 12}, {12, 11}, {19, 4}} // D:0x53d0 / D:0x53d4
 
 func (s *State) checkSpecialDates() {
 	d := DateOf(s.StartYear, s.Day-1)
