@@ -3,12 +3,12 @@
 # BMMAIN.EXE: unpacked image, disassembly listing and (with Ghidra) the
 # annotated decompilation the specs in docs/re were written from.
 #
-# usage: tools/re/run.sh [workdir]      (default: ./re-work)
+# usage: tools/re/run.sh [workdir]      (default: tools/re/work, ignored by git)
 # needs: python3 with capstone; optional GHIDRA=<ghidra install dir>
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../.." && pwd)
-work=${1:-re-work}
+work=${1:-$here/work}
 mkdir -p "$work"
 work=$(cd "$work" && pwd)
 

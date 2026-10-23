@@ -6,7 +6,8 @@ implements them.
 
 | Script | What it does |
 |---|---|
-| `run.sh` | Runs the whole pipeline into a work directory (see below). |
+| `run.sh` | Runs the whole pipeline into `tools/re/work/` (ignored by git; see below). |
+| `q.py` | Queries the work directory: strings, a function of the decompilation, its callers, constants of a data segment. |
 | `unexepack.py` | Unpacks the Microsoft EXEPACK compression of the executables. |
 | `disasm16.py` | Recursive-descent disassembly with capstone. Marks which data segment an access goes to (`G4238_xxxx` = far data, `G4cb3_xxxx` = DGROUP) and annotates strings. |
 | `mkmz.py` | Rebuilds an unpacked MZ file with relocations, for Ghidra. |
@@ -23,7 +24,7 @@ implements them.
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install capstone
-PATH=.venv/bin:$PATH GHIDRA=/path/to/ghidra_12.x remake/tools/re/run.sh /tmp/re-work
+PATH=.venv/bin:$PATH GHIDRA=/path/to/ghidra_12.x mise run re:build
 ```
 
 Ghidra's decompiler has no macOS arm64 binary in the release; build it
