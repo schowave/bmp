@@ -57,8 +57,8 @@ func TestSetupAndFirstTurns(t *testing.T) {
 	app.Reset(setup)
 	// Name of manager 1.
 	step(t, app, click(30, slotY+120))
-	if _, ok := top(app).(*InputBox); !ok {
-		t.Fatalf("no name input: %T", top(app))
+	if setup.edit != 0 {
+		t.Fatalf("name field not active")
 	}
 	step(t, app, Input{Chars: []rune("TEST")})
 	step(t, app, Input{Enter: true})
@@ -92,6 +92,10 @@ func TestSetupAndFirstTurns(t *testing.T) {
 			// open every submenu item once on the first turn
 			if ss.S.Event == 0 && i < 300 {
 				openAllMenus(t, app, sc)
+			}
+			if sc.msgOpen {
+				// close the message panel with X
+				step(t, app, click(msgButtonX+5, msgPanelY+msgFieldPitch+5))
 			}
 			// the calendar sheet goes on to the next date
 			step(t, app, click(260, headerPanelY+30))
@@ -127,7 +131,7 @@ func openAllMenus(t *testing.T, app *App, m *MainMenu) {
 			if it.Open == nil {
 				continue
 			}
-			step(t, app, click(submenuCols[k/3]+10, menuRowsY[k%3]+10))
+			step(t, app, click(submenuCols[k/3]+10, submenuRowsY[k%3]+10))
 			sc := top(app)
 			if sc == Scene(m) {
 				t.Fatalf("item %d of group %d did not open", k, gi)
