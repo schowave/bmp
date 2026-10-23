@@ -15,6 +15,8 @@ implements them.
 | `fpdis.py` | Disassembles code that uses the 8087 emulator interrupts (INT 34h–3Dh), e.g. the attendance formula. |
 | `strmap.py`, `topng.py` | Strings per function; pictures as PNG. |
 | `refgame/ctl.py`, `refgame/tcpproxy.py` | Remote control of the original game in the VNC container for reference screenshots (see below). |
+| `refgame/wasm/` | Drives the original in a headless browser through the WASM image: `serve.sh` serves it with the js-dos interface exposed, `driver.mjs` takes clicks, keys and shots as JSON (see `docs/re/spec_ui.md`). |
+| `pixcmp/` | Pixel comparison of screenshots of the original and the remake: `diff.py`, `find.py` (offset of a region), `idx.py` (palette indices), `ink.py`, `pic.py`. |
 | `CONTEXT.md` | The shared brief for the analysis: segments, helpers, data structures. |
 
 ## Pipeline
