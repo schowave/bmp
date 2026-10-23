@@ -179,6 +179,9 @@ ties). Deliberate differences:
   the reference game.
 - The rejection marks of market bids are a field of their own; in the
   original they share a byte with the league goals of the player.
+- When a 1- or 3-year game is over, ENDE under the high scores returns to the
+  title screen, where a new game can start; the original quits the program
+  (`f_076b_114c` in `f_1a58_3176`).
 
 ## Legal
 
