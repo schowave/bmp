@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
@@ -8,6 +10,16 @@ import (
 func NewTurnMenu(ss *Session) *MainMenu {
 	m := &MainMenu{}
 	m.Header = func() Header { return turnHeader(ss) }
+	m.Messages = &MessagePanel{Messages: func() [][]string {
+		var out [][]string
+		for _, msg := range ss.S.Messages(ss.Mgr()) {
+			d := game.DateOf(ss.S.StartYear, msg.Day)
+			date := itoa(d.Day) + ". " + game.MonthNames[d.Month] + " " + itoa(d.Year)
+			out = append(out, append([]string{date}, strings.Split(msg.Text, "\n")...))
+		}
+		return out
+	}}
+	m.NewMessages = func() bool { return ss.S.TakeNewMessages(ss.Mgr()) }
 	push := func(f func() Scene) func(*App) { return func(app *App) { app.Push(f()) } }
 	m.Left[0] = MenuGroup{Icon: IconDesk, Items: [9]MenuItem{
 		{IconFinanceChart, push(func() Scene { return NewFinanceScreen(ss) })},
@@ -42,17 +54,26 @@ func NewTurnMenu(ss *Session) *MainMenu {
 		{IconUEFACup, push(func() Scene { return NewCupScreen(ss, game.CupUEFA) })},
 	}}
 	m.Right[1] = MenuGroup{Icon: IconDisk, Items: [9]MenuItem{
-		{IconSave, push(func() Scene { return NewFileScreen(ss, true) })},
 		{IconLoad, push(func() Scene { return NewFileScreen(ss, false) })},
+		{IconSave, push(func() Scene { return NewFileScreen(ss, true) })},
 		{IconHighscore, push(func() Scene { return NewHighscoreScreen(ss) })},
 		{IconOptions, push(func() Scene { return NewOptionsScreen(ss) })},
+		{IconNew, push(func() Scene { return NewAddManagers(ss) })},
 	}}
-	endTurn := func(app *App) {
+	// The manager tearing his hair asks whether to quit; the turn ends with
+	// a click on the calendar sheet.
+	m.Right[2] = MenuGroup{Icon: IconContinue, Action: func(app *App) {
+		app.Push(NewQuestion(ss.M().Name, "MöCHTEN SIE\nDAS SPIEL WIRKLICH\nBEENDEN ?", "LEIDER JA", "KEIN GEDANKE",
+			func(app *App, yes bool) {
+				if yes {
+					app.Quit()
+				}
+			}))
+	}}
+	m.Calendar = func(app *App) {
 		ss.S.EndTurn()
 		app.Pop()
 	}
-	m.Right[2] = MenuGroup{Icon: IconContinue, Action: endTurn}
-	m.Calendar = endTurn
 	return m
 }
 
@@ -60,7 +81,13 @@ func turnHeader(ss *Session) Header {
 	s := ss.S
 	mg := ss.M()
 	d := s.Date()
+	played := s.Matchday[mg.League] - 1
+	if played > len(mg.PosAfter) {
+		played = len(mg.PosAfter)
+	}
 	h := Header{
+		Places:   mg.PosAfter[:max(played, 0)],
+		Chart:    s.Day > 1,
 		Face:     mg.Face,
 		Matchday: s.EventLabel(ss.Mgr()),
 		Manager:  mg.Name,
@@ -70,14 +97,6 @@ func turnHeader(ss *Session) Header {
 		Month:    game.MonthNames[d.Month],
 		Year:     d.Year,
 	}
-	if opp, home, ok := s.NextOpponent(ss.Mgr()); ok {
-		where := "(A)"
-		if home {
-			where = "(H)"
-		}
-		h.Message[0] = "GEGEN " + s.Teams[opp].Name + " " + where
-	}
-	h.Message[1] = "KONTO: " + Money(mg.Money)
 	return h
 }
 
