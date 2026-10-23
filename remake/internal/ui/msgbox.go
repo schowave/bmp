@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -28,24 +30,34 @@ func NewQuestion(title, text, yes, no string, done func(app *App, yes bool)) *Me
 		Done: func(app *App, c int) { done(app, c == 0) }}
 }
 
+// Geometry of the dialog of the original, measured on the DFB-Pokal
+// question: 156 pixels wide, centred on y=143, a black shadow of two pixels
+// to the right and below.
 const (
 	msgX = 75
-	msgW = 170
+	msgW = 156
+	// msgCenterY is the vertical centre of the dialog.
+	msgCenterY = 143
 )
 
 func (b *MessageBox) geometry(g *Gfx) (y, h int, lines []string) {
 	for _, l := range b.Lines {
-		lines = append(lines, g.Wrap(FontSmall, l, msgW-12)...)
+		for _, part := range strings.Split(l, "\n") {
+			lines = append(lines, g.Wrap(FontSmall, part, msgW-8)...)
+		}
 	}
-	h = 14 + len(lines)*8 + 22
-	y = (ScreenH - h) / 2
+	h = 42 + len(lines)*8
+	y = msgCenterY - h/2
 	if !b.layout {
 		b.layout = true
-		n := len(b.Buttons)
-		bw := 60
-		gap := (msgW - n*bw) / (n + 1)
+		// Two buttons sit 14 pixels from the left and right edge.
+		const bw = 57
+		xs := []int{msgX + (msgW-bw)/2}
+		if len(b.Buttons) == 2 {
+			xs = []int{msgX + 14, msgX + 84}
+		}
 		for i, s := range b.Buttons {
-			b.buttons = append(b.buttons, Button{X: msgX + gap + i*(bw+gap), Y: y + h - 16, W: bw, H: 11, Label: s})
+			b.buttons = append(b.buttons, Button{X: xs[i], Y: y + h - 16, W: bw, H: 12, Label: s})
 		}
 	}
 	return y, h, lines
@@ -78,23 +90,25 @@ func (b *MessageBox) Update(app *App) error {
 func (b *MessageBox) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	y, h, lines := b.geometry(g)
-	FillRect(dst, msgX, y, msgW, h, g.C(ColDarkRed))
-	FrameRect(dst, msgX, y, msgW, h, g.C(ColRed))
-	FrameRect(dst, msgX+1, y+1, msgW-2, h-2, g.C(ColBlack))
-	g.TextCentered(dst, FontNormal, msgX, y+3, msgW, b.Title, g.C(ColBeige))
-	FillRect(dst, msgX+3, y+12, msgW-6, 1, g.C(ColBeige))
+	g.Bevel(dst, msgX, y, msgW, h, ColDarkRed)
+	FillRect(dst, msgX+msgW, y, 2, h+2, g.C(ColBlack))
+	FillRect(dst, msgX+2, y+h, msgW, 2, g.C(ColBlack))
+	// Texts are centred over the dialog and its shadow.
+	x0, x1 := msgX+2, msgX+msgW+1
+	g.TextMid(dst, FontNormal, x0, x1, y+9, b.Title, ColBeige, NoShadow)
+	FillRect(dst, msgX+2, y+11, msgW-4, 1, g.C(ColBeige))
 	for i, l := range lines {
-		g.TextCentered(dst, FontSmall, msgX, y+16+i*8, msgW, l, g.C(ColBeige))
+		g.TextMid(dst, FontSmall, x0, x1, y+21+i*8, l, ColSand, NoShadow)
 	}
+	FillRect(dst, msgX+2, y+h-21, msgW-4, 1, g.C(ColBeige))
 	for i := range b.buttons {
 		bt := &b.buttons[i]
-		FillRect(dst, bt.X, bt.Y, bt.W, bt.H, g.C(ColBlack))
-		FrameRect(dst, bt.X, bt.Y, bt.W, bt.H, g.C(ColGrey3))
-		c := g.C(ColRed)
+		g.BevelButton(dst, bt.X, bt.Y, bt.W, bt.H, ColBlack)
+		c := ColRedDark
 		if app.Input.In(bt.X, bt.Y, bt.W, bt.H) {
-			c = g.C(ColYellow)
+			c = ColLight
 		}
-		g.TextCentered(dst, FontSmall, bt.X, bt.Y+3, bt.W, bt.Label, c)
+		g.TextMid(dst, FontSmall, bt.X, bt.X+bt.W, bt.Y+8, bt.Label, c, NoShadow)
 	}
 }
 

@@ -16,9 +16,11 @@ const (
 	ColGrey5     = 5
 	ColGrey6     = 6
 	ColGrey7     = 7
-	ColBlue      = 8 // panel background
+	ColBlue      = 8  // panel background
+	ColSand      = 10 // text of the dialogs
 	ColBeige     = 11
 	ColDarkRed   = 16
+	ColRedDark   = 17 // text of a button that is not pointed at
 	ColRed       = 18
 	ColOrange    = 19
 	ColBlueLight = 22
@@ -36,6 +38,37 @@ func (g *Gfx) Panel(dst *ebiten.Image, x, y, w, h int) {
 	FillRect(dst, x, y, 1, h, g.C(ColLight))
 	FillRect(dst, x, y+h-1, w, 1, g.C(ColGrey5))
 	FillRect(dst, x+w-1, y, 1, h, g.C(ColGrey5))
+}
+
+// Bevel fills a rectangle with colour fill and draws the bevel of the
+// dialogs of the original: light left side, grey top, dark right side and
+// bottom.
+func (g *Gfx) Bevel(dst *ebiten.Image, x, y, w, h int, fill int) {
+	FillRect(dst, x, y, w, h, g.C(fill))
+	FillRect(dst, x+1, y, w-2, 1, g.C(ColGrey2))
+	FillRect(dst, x, y, 1, h-1, g.C(ColLight))
+	FillRect(dst, x+w-1, y, 1, h-1, g.C(ColGrey7))
+	FillRect(dst, x, y+h-1, w, 1, g.C(ColGrey6))
+}
+
+// Window draws a window of the original (f_06c7_00a7): a bevelled box
+// from x0, y0 to x1, y1 inclusive with a black shadow of two pixels to the
+// right and below.
+func (g *Gfx) Window(dst *ebiten.Image, x0, y0, x1, y1 int, fill int) {
+	w, h := x1-x0+1, y1-y0+1
+	g.Bevel(dst, x0, y0, w, h, fill)
+	FillRect(dst, x1+1, y0, 2, h+2, g.C(ColBlack))
+	FillRect(dst, x0+2, y1+1, w, 2, g.C(ColBlack))
+}
+
+// BevelButton is the bevel of the buttons inside dialogs: like Bevel, but
+// the four corners keep the colour of what lies below.
+func (g *Gfx) BevelButton(dst *ebiten.Image, x, y, w, h int, fill int) {
+	FillRect(dst, x+1, y+1, w-2, h-2, g.C(fill))
+	FillRect(dst, x+1, y, w-2, 1, g.C(ColGrey2))
+	FillRect(dst, x, y+1, 1, h-2, g.C(ColLight))
+	FillRect(dst, x+w-1, y+1, 1, h-2, g.C(ColGrey7))
+	FillRect(dst, x+1, y+h-1, w-2, 1, g.C(ColGrey6))
 }
 
 // Frame draws the grey double frame around a panel.
@@ -85,16 +118,17 @@ func (b *Button) Hit(in *Input) bool {
 }
 
 // MenuButton is the "HAUPTMENÜ" button at the bottom right of most screens.
-var MenuButton = Button{X: 268, Y: 196, W: ButtonW, H: ButtonH}
+var MenuButton = Button{X: 268, Y: 193, W: ButtonW, H: ButtonH}
 
 // DrawMenuButton draws the HAUPTMENÜ icon button.
 func (g *Gfx) DrawMenuButton(dst *ebiten.Image) {
 	g.DrawIconButton(dst, IconMainMenu, MenuButton.X, MenuButton.Y)
 }
 
-// MenuButtonHit reports a click on the HAUPTMENÜ button or a right click.
+// MenuButtonHit reports a click on the HAUPTMENÜ button (or Escape). Like
+// in the original the right button does not leave a screen.
 func MenuButtonHit(in *Input) bool {
-	return in.Clicked(MenuButton.X, MenuButton.Y, MenuButton.W, MenuButton.H) || in.Right || in.Escape
+	return in.Clicked(MenuButton.X, MenuButton.Y, MenuButton.W, MenuButton.H) || in.Escape
 }
 
 // Money formats an amount like the original: "1.500.000 DM".
