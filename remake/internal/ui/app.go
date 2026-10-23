@@ -14,6 +14,17 @@ type Scene interface {
 	Draw(app *App, dst *ebiten.Image)
 }
 
+// passer is a scene that only decides what comes next and has nothing of
+// its own to show (Passing true): when it comes on top it runs again in the
+// same tick, so that it is never drawn for a frame between two screens.
+type passer interface {
+	Scene
+	Passing() bool
+}
+
+// maxPasses bounds the passes of one tick, for a passer that opens nothing.
+const maxPasses = 8
+
 // Input is the state of mouse and keyboard for one frame, in canvas
 // coordinates. The original is played with the mouse: the left button
 // selects, the right button confirms in some places but does not leave a
@@ -184,7 +195,26 @@ func (a *App) update(raw Input, now time.Time) error {
 			a.scriptEnd = len(a.Script) == 0
 		}
 	}
-	return a.stack[len(a.stack)-1].Update(a)
+	return a.updateTop()
+}
+
+// updateTop runs a tick of the top scene, then of every passer that comes
+// on top, without input.
+func (a *App) updateTop() error {
+	if err := a.stack[len(a.stack)-1].Update(a); err != nil {
+		return err
+	}
+	for range maxPasses {
+		p, ok := a.Top().(passer)
+		if !ok || !p.Passing() {
+			break
+		}
+		a.Input = Input{}
+		if err := p.Update(a); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // tickDue reports whether the next tick is due at now. A tick may come up

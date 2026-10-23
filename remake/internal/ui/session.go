@@ -71,6 +71,9 @@ func (d *Driver) Update(app *App) error {
 	return nil
 }
 
+// Passing implements passer: the driver only opens the next screen.
+func (d *Driver) Passing() bool { return true }
+
 func (d *Driver) Draw(app *App, dst *ebiten.Image) {
 	app.Gfx.Background(dst)
 }

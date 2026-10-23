@@ -164,6 +164,10 @@ func (m *MatchScreen) Update(app *App) error {
 // quiet reports a match day without a match of a human team.
 func (m *MatchScreen) quiet() bool { return len(m.panels) == 0 }
 
+// Passing implements passer: without a human match the screen shows nothing
+// and only plays on to the next screen.
+func (m *MatchScreen) Passing() bool { return m.quiet() }
+
 // collect turns the new events of human teams into scenes.
 func (m *MatchScreen) collect(app *App) {
 	for ; m.seen < len(m.md.Events); m.seen++ {
