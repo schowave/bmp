@@ -188,3 +188,46 @@ func TestGoalsPerGame(t *testing.T) {
 		}
 	}
 }
+
+// The cups advance only after the last period has ended, so the cup
+// screens of that period still show the round that was played.
+func TestCupAdvancesAfterLastPeriod(t *testing.T) {
+	s, err := NewGame(mana(t), Options{Managers: []NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Start()
+	for steps := 0; steps < 10000; steps++ {
+		switch s.Loop.Phase {
+		case PhaseTurn:
+			s.EndTurn()
+		case PhaseMatches:
+			for md := s.NextMatchDay(); md != nil; md = s.NextMatchDay() {
+				if md.Cups()&(1<<CupDFB) == 0 {
+					md.Run()
+					continue
+				}
+				round := s.Cups.Round[CupDFB]
+				last := 0
+				for md.Step() {
+					if to := md.PeriodEnded(); to != 0 {
+						last = to
+						if s.Cups.Round[CupDFB] != round {
+							t.Fatalf("DFB round %d advanced to %d at minute %d", round, s.Cups.Round[CupDFB], to)
+						}
+					}
+				}
+				if md.PeriodEnded() != 0 {
+					t.Fatal("the final step reports a period end again")
+				}
+				if last < 90 || s.Cups.Round[CupDFB] == round {
+					t.Fatalf("DFB round %d did not advance (last period %d)", round, last)
+				}
+				return
+			}
+		default:
+			t.Fatalf("phase %d before the first DFB round", s.Loop.Phase)
+		}
+	}
+	t.Fatal("no DFB match day")
+}
