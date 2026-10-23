@@ -8,9 +8,7 @@ cd "$(dirname "$0")/.."
 out=${1:-shots}
 mkdir -p "$out"
 go build -o "$out/bmp" ./cmd/bmp
-for d in setup turn menu start dfb0 uefa0 dfb table results strength squad info transfer \
-    training camp contracts scorers finance eternal history stadium bank sponsor \
-    highscore options load save newspaper notices match; do
+for d in $("$out/bmp" -demos); do
     "$out/bmp" -scale 1 -demo "$d" -shot "$out/$d.png" -shot-frame 10
 done
 rm "$out/bmp"

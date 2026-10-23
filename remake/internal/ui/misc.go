@@ -169,8 +169,8 @@ func (o *GameOver) Update(app *App) error {
 func (o *GameOver) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	o.list.Draw(app, dst)
-	FillRect(dst, 100, 200, 120, 20, g.C(ColDarkRed))
-	g.TextCentered(dst, FontBig, 100, 202, 120, "ENDE", g.C(ColBeige))
+	FillRect(dst, 100, 200, 120, 20, g.PalColor(ColDarkRed))
+	g.TextCentered(dst, FontBig, 100, 202, 120, "ENDE", g.PalColor(ColBeige))
 }
 
 // AlertBox is the small dark red box of f_3091_0e3a: four centred lines

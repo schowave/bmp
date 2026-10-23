@@ -229,7 +229,7 @@ func (m *MatchScreen) periodEnd(to int) {
 	md := m.md
 	if cups := md.Cups(); cups != 0 {
 		if s.Day > 0x13b || cups&1 != 0 && s.Display.DFB || cups&^1 != 0 && s.Display.Europe {
-			for c := 0; c < game.NumCups; c++ {
+			for c := game.CupDFB; c < game.NumCups; c++ {
 				if cups&(1<<c) != 0 {
 					c := c
 					m.end = append(m.end, func(app *App) { app.Push(NewCupRound(m.ss, c, to, nil)) })
@@ -279,7 +279,7 @@ var (
 
 func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
-	dst.Fill(g.C(ColBlack))
+	dst.Fill(g.PalColor(ColBlack))
 	for i := range m.panels {
 		m.drawPanel(g, dst, &m.panels[i])
 	}
@@ -291,7 +291,7 @@ func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
 		if m.scene {
 			m.drawScene(app, dst, minute)
 		}
-		FillRect(dst, 0, 0xe7, 320, 9, g.C(ColBlack))
+		FillRect(dst, 0, 0xe7, 320, 9, g.PalColor(ColBlack))
 		g.TextMid(dst, FontNormal, 0, 0x140, 0xed, m.shows[0].ticker, ColWhite, NoShadow)
 		return
 	}
@@ -347,7 +347,7 @@ func (m *MatchScreen) drawPanel(g *Gfx, dst *ebiten.Image, p *matchPanel) {
 			continue
 		}
 		x0 := x + 0x7e + side*16
-		FillRect(dst, x0, y+0x4d, 11, 0x70-0x4d+1, g.C(12))
+		FillRect(dst, x0, y+0x4d, 11, 0x70-0x4d+1, g.PalColor(12))
 		for i, v := range m.counters(mi, p.fixture, side) {
 			g.TextAt(dst, FontSmall, x0, y+0x52+i*7, itoa(v), ColLight, NoShadow)
 		}
@@ -405,18 +405,18 @@ func (m *MatchScreen) counters(mi, fi, side int) [5]int {
 // (f_0310_1def, f_0310_2086).
 func (m *MatchScreen) drawMinuteBar(g *Gfx, dst *ebiten.Image, minute int) {
 	for _, b := range [][2]int{{35, 126}, {194, 287}} {
-		FillRect(dst, b[0], 234, b[1]-b[0]+1, 4, g.C(ColGrey4))
-		FillRect(dst, b[0], 234, b[1]-b[0], 1, g.C(ColLight))
-		FillRect(dst, b[0], 234, 1, 4, g.C(ColLight))
-		FillRect(dst, b[1], 234, 1, 4, g.C(ColGrey7))
-		FillRect(dst, b[0]+1, 237, b[1]-b[0], 1, g.C(ColGrey7))
+		FillRect(dst, b[0], 234, b[1]-b[0]+1, 4, g.PalColor(ColGrey4))
+		FillRect(dst, b[0], 234, b[1]-b[0], 1, g.PalColor(ColLight))
+		FillRect(dst, b[0], 234, 1, 4, g.PalColor(ColLight))
+		FillRect(dst, b[1], 234, 1, 4, g.PalColor(ColGrey7))
+		FillRect(dst, b[0]+1, 237, b[1]-b[0], 1, g.PalColor(ColGrey7))
 	}
 	bar := func(x0, x1 int) {
 		if x1 < x0 {
 			x0, x1 = x1, x0
 		}
-		FillRect(dst, x0, 235, x1-x0+1, 1, g.C(ColYellow))
-		FillRect(dst, x0, 236, x1-x0+1, 1, g.C(ColWhite))
+		FillRect(dst, x0, 235, x1-x0+1, 1, g.PalColor(ColYellow))
+		FillRect(dst, x0, 236, x1-x0+1, 1, g.PalColor(ColWhite))
 	}
 	switch {
 	case minute <= 45:
@@ -435,7 +435,7 @@ func (m *MatchScreen) drawMinuteBar(g *Gfx, dst *ebiten.Image, minute int) {
 
 // drawMinute writes "N.Minute" centred with its baseline at y.
 func (m *MatchScreen) drawMinute(g *Gfx, dst *ebiten.Image, minute, y int) {
-	FillRect(dst, 0x7f, y-6, 0xc1-0x7f+1, 7, g.C(ColBlack))
+	FillRect(dst, 0x7f, y-6, 0xc1-0x7f+1, 7, g.PalColor(ColBlack))
 	if minute > 0 {
 		g.TextMid(dst, FontNormal, 4, 0x140, y, itoa(minute)+".Minute", ColWhite, ColGrey4)
 	}
@@ -446,15 +446,15 @@ func (m *MatchScreen) drawScene(app *App, dst *ebiten.Image, minute int) {
 	g := app.Gfx
 	s := m.ss.S
 	u := m.sceneY
-	FillRect(dst, 0, u, 320, 0x7f, g.C(ColBlack))
-	FrameRect(dst, 0, u, 320, 0x7f, g.C(ColLight))
+	FillRect(dst, 0, u, 320, 0x7f, g.PalColor(ColBlack))
+	FrameRect(dst, 0, u, 320, 0x7f, g.PalColor(ColLight))
 	for k := 0; k < 2; k++ {
 		Draw(dst, g.Sub(8, rectWH(0xa3, 0x66, 13, 13)), k*0x4e+0x73, u+0x6c)
 	}
 	for k := 0; k < 2; k++ {
 		iv := k * 0xf1
-		FrameRect(dst, 0x12+iv, u+3, 0x3b-0x12+1, 0x2c-3+1, g.C(ColGrey2))
-		FrameRect(dst, 0x12+iv, u+0x3b, 0x3c-0x12+1, 0x66-0x3b+1, g.C(ColGrey2))
+		FrameRect(dst, 0x12+iv, u+3, 0x3b-0x12+1, 0x2c-3+1, g.PalColor(ColGrey2))
+		FrameRect(dst, 0x12+iv, u+0x3b, 0x3c-0x12+1, 0x66-0x3b+1, g.PalColor(ColGrey2))
 	}
 	var f *game.Fixture
 	var ev *game.MatchEvent
@@ -499,7 +499,7 @@ func (m *MatchScreen) drawScene(app *App, dst *ebiten.Image, minute int) {
 	if sh.scene != nil && (sh.pre > 0 || !sh.scene.done || sh.post > 0) {
 		return // the scene runs; clocks and minute stay
 	}
-	FillRect(dst, 10, u+0x6c, 0x136-10+1, 0x79-0x6c+1, g.C(ColBlack))
+	FillRect(dst, 10, u+0x6c, 0x136-10+1, 0x79-0x6c+1, g.PalColor(ColBlack))
 	switch ev.Kind {
 	case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
 		total := (0x78 - s.Display.Speed) * 2

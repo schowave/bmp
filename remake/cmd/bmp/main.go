@@ -1,5 +1,6 @@
-// Command bmp is a re-implementation of Bundesliga Manager Professional. It
-// needs the files of the original game (BMMAIN.EXE, MANA.DAT, PIC/...).
+// Command bmp is a re-implementation of Bundesliga Manager Professional. The
+// pictures, fonts and club data of the original are built into the binary;
+// -data or $BMP_DATA reads them from a directory of the original instead.
 package main
 
 import (
@@ -8,6 +9,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -21,10 +24,19 @@ func main() {
 	scale := flag.Int("scale", 3, "window scale factor")
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")
-	demo := flag.String("demo", "", "show a development demo scene")
+	demo := flag.String("demo", "", "show a development demo scene (see -demos)")
+	demos := flag.Bool("demos", false, "list the demo scenes and quit")
 	script := flag.String("script", "", "play the input of this development script (see ui.ParseScript) and quit")
 	saves := flag.String("saves", defaultSaveDir(), "directory for save games and high scores")
 	flag.Parse()
+	if *demos {
+		fmt.Println(strings.Join(ui.DemoNames(), "\n"))
+		return
+	}
+	if *demo != "" && !slices.Contains(ui.DemoNames(), *demo) {
+		fmt.Fprintln(os.Stderr, "bmp: unknown demo", *demo)
+		os.Exit(2)
+	}
 
 	dir, err := openGameDir(*data)
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 // day. The DFB-Pokal is grouped by the leagues of the two clubs.
 type CupScreen struct {
 	ss     *Session
-	cup    int
+	cup    game.Cup
 	minute int // 0: overview with HAUPTMENÜ, else the minute of a match day
 	done   func(app *App)
 
@@ -39,11 +39,11 @@ var cupGroupTitles = [6]string{
 }
 
 // NewCupScreen shows the current round of cup c from the menu.
-func NewCupScreen(ss *Session, c int) Scene { return NewCupRound(ss, c, 0, nil) }
+func NewCupScreen(ss *Session, c game.Cup) Scene { return NewCupRound(ss, c, 0, nil) }
 
 // NewCupRound shows the round of cup c; minute > 0 shows the state of a
 // match day with the WEITER button. done runs when the screen closes.
-func NewCupRound(ss *Session, c, minute int, done func(app *App)) *CupScreen {
+func NewCupRound(ss *Session, c game.Cup, minute int, done func(app *App)) *CupScreen {
 	return &CupScreen{ss: ss, cup: c, minute: minute, done: done}
 }
 
@@ -182,7 +182,7 @@ func (c *CupScreen) Draw(app *App, dst *ebiten.Image) {
 		icon = IconWeiter
 	}
 	g.DrawIconButton(dst, icon, MenuButton.X, MenuButton.Y)
-	FillRect(dst, 7, c.y0+15, 0x137-7+1, 1, g.C(ColBeige))
+	FillRect(dst, 7, c.y0+15, 0x137-7+1, 1, g.PalColor(ColBeige))
 	g.TextMid(dst, FontNormal, 5, 0x139, c.y0+13, title, ColBeige, ColGrey7)
 
 	colour := func(t int) int {

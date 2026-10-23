@@ -79,12 +79,12 @@ func (t *DeskToast) Draw(app *App, dst *ebiten.Image) {
 	open := min(t.frame+1, n)
 	for i := 0; i < open; i++ {
 		x, y, w, h := t.rect(i)
-		fill6(t.img, x+1, y+1, x+w-1, y+h-1, c(ColDarkRed))
+		fillIncl(t.img, x+1, y+1, x+w-1, y+h-1, c(ColDarkRed))
 	}
 	if t.frame >= n {
 		x, y, w, h := t.rect(n)
-		rect6(t.img, x+3, y+3, x+w-0xc, y+h-3, c(ColBlack))
-		rect6(t.img, x+2, y+2, x+w-0xb, y+h-2, c(ColOrange))
+		frameIncl(t.img, x+3, y+3, x+w-0xc, y+h-3, c(ColBlack))
+		frameIncl(t.img, x+2, y+2, x+w-0xb, y+h-2, c(ColOrange))
 		for i, l := range []string{t.Line1, t.Line2} {
 			w := g.TextWidth(FontNormal, l)
 			x := 0xb9 + (0x12f-0xb9)/2 - w/2

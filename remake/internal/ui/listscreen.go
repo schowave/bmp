@@ -52,11 +52,11 @@ func (l *ListScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Background(dst)
 	g.Panel(dst, 4, 3, 312, 17)
 	if l.Sub != "" {
-		g.Text(dst, FontNormal, 10, 7, l.Title, g.C(ColBeige))
+		g.Text(dst, FontNormal, 10, 7, l.Title, g.PalColor(ColBeige))
 		w := 300 - g.TextWidth(FontNormal, l.Title) - 10
-		g.TextRight(dst, FontSmall, 310, 8, g.Fit(FontSmall, l.Sub, w), g.C(ColLight))
+		g.TextRight(dst, FontSmall, 310, 8, g.Fit(FontSmall, l.Sub, w), g.PalColor(ColLight))
 	} else {
-		g.TextCentered(dst, FontNormal, 4, 7, 312, l.Title, g.C(ColBeige))
+		g.TextCentered(dst, FontNormal, 4, 7, 312, l.Title, g.PalColor(ColBeige))
 	}
 	l.Table.Draw(g, dst)
 	if l.Prev != nil {

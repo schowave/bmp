@@ -40,23 +40,23 @@ func numText(v int64, width int, nodots bool) string {
 	return string(r)
 }
 
-// rect6 draws the outline of the rectangle x0,y0 .. x1,y1 inclusive
+// frameIncl draws the outline of the rectangle x0,y0 .. x1,y1 inclusive
 // (f_06c7_0753).
-func rect6(dst *ebiten.Image, x0, y0, x1, y1 int, c color.Color) {
+func frameIncl(dst *ebiten.Image, x0, y0, x1, y1 int, c color.Color) {
 	FrameRect(dst, x0, y0, x1-x0+1, y1-y0+1, c)
 }
 
-// fill6 fills the rectangle x0,y0 .. x1,y1 inclusive (f_06c7_083c).
-func fill6(dst *ebiten.Image, x0, y0, x1, y1 int, c color.Color) {
+// fillIncl fills the rectangle x0,y0 .. x1,y1 inclusive (f_06c7_083c).
+func fillIncl(dst *ebiten.Image, x0, y0, x1, y1 int, c color.Color) {
 	if x1 < x0 || y1 < y0 {
 		return
 	}
 	FillRect(dst, x0, y0, x1-x0+1, y1-y0+1, c)
 }
 
-// line6 draws a horizontal or vertical line inclusive (f_06c7_09b0).
-func line6(dst *ebiten.Image, x0, y0, x1, y1 int, c color.Color) {
-	fill6(dst, min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1), c)
+// lineIncl draws a horizontal or vertical line inclusive (f_06c7_09b0).
+func lineIncl(dst *ebiten.Image, x0, y0, x1, y1 int, c color.Color) {
+	fillIncl(dst, min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1), c)
 }
 
 // deskVGA converts a colour of 6-bit VGA components like the palette loader.
@@ -70,12 +70,5 @@ func deskVGA(r, g, b int) color.RGBA {
 // under it at y+2 as long as the text.
 func (g *Gfx) deskHeading(dst *ebiten.Image, x, y int, s string) {
 	g.TextAt(dst, FontNormal, x, y, s, ColBeige, -1)
-	line6(dst, x, y+2, x+g.TextWidth(FontNormal, s), y+2, g.C(ColBeige))
-}
-
-// deskMenuHit reports a left click on the HAUPT MENU button or Escape.
-// Unlike MenuButtonHit, the right button does not leave: the desk screens
-// of the original wait for the button only.
-func deskMenuHit(in *Input) bool {
-	return MenuButton.Hit(in) || in.Escape
+	lineIncl(dst, x, y+2, x+g.TextWidth(FontNormal, s), y+2, g.PalColor(ColBeige))
 }

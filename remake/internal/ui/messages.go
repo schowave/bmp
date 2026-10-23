@@ -54,15 +54,16 @@ func (p *MessagePanel) Update(in *Input) bool {
 	return true
 }
 
+// Draw draws the panel with the messages of the current page.
 func (p *MessagePanel) Draw(g *Gfx, dst *ebiten.Image) {
-	FillRect(dst, 0x3b, 0x72, 0xf5-0x3b+1, 0xea-0x72+1, g.C(ColGrey4))
-	FrameRect(dst, 0x39, 0x70, 0x106-0x39+1, 0xea-0x70+1, g.C(ColGrey7))
+	FillRect(dst, 0x3b, 0x72, 0xf5-0x3b+1, 0xea-0x72+1, g.PalColor(ColGrey4))
+	FrameRect(dst, 0x39, 0x70, 0x106-0x39+1, 0xea-0x70+1, g.PalColor(ColGrey7))
 	for i := 0; i < 3; i++ {
 		y0 := msgPanelY + i*msgFieldPitch
-		FillRect(dst, 0x3a, y0, 0xf2-0x3a+1, 1, g.C(ColLight))
-		FillRect(dst, 0x3a, y0, 1, 0x27, g.C(ColLight))
-		FillRect(dst, 0x3b, y0+0x27, 0xf3-0x3b+1, 1, g.C(ColGrey7))
-		FillRect(dst, 0xf3, y0+1, 1, 0x27, g.C(ColGrey7))
+		FillRect(dst, 0x3a, y0, 0xf2-0x3a+1, 1, g.PalColor(ColLight))
+		FillRect(dst, 0x3a, y0, 1, 0x27, g.PalColor(ColLight))
+		FillRect(dst, 0x3b, y0+0x27, 0xf3-0x3b+1, 1, g.PalColor(ColGrey7))
+		FillRect(dst, 0xf3, y0+1, 1, 0x27, g.PalColor(ColGrey7))
 	}
 	Draw(dst, g.Sub(2, rectWH(0, 0, msgButtonW, 0x7a)), msgButtonX, msgPanelY)
 	if p.pressed >= 0 {

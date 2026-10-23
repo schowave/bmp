@@ -285,7 +285,7 @@ func (p *tsPanel) Draw(app *App, dst *ebiten.Image) {
 	}
 	g.TextAt(dst, FontSmall, 8, 0xcf, ps.Name+", "+itoa(ps.Age)+" JAHRE ALT, "+itoa(sl.Games[0])+" LIGASPIELE",
 		ColLight, NoShadow)
-	FillRect(dst, 8, 0xd1, 0xb4-8+1, 1, g.C(ColLight))
+	FillRect(dst, 8, 0xd1, 0xb4-8+1, 1, g.PalColor(ColLight))
 	g.TextAt(dst, FontSmall, 8, 0xd9, "VERTRAGSDAUER (IN SAISONS)", ColGrey2, NoShadow)
 	g.TextAt(dst, FontSmall, 0x82, 0xd9, ":", ColGrey2, NoShadow)
 	g.TextAt(dst, FontSmall, 8, 0xe1, "GEHALT PRO MONAT (IN DM)", ColGrey2, NoShadow)

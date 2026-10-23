@@ -57,20 +57,20 @@ type Manager struct {
 
 	Titles [5]int // +0x227b: Meisterschaften, DFB, Landesmeister, Pokalsieger, UEFA
 
-	TicketPrice int     // +0x234c
-	PosAfter    [38]int // +0x234d: table position after each matchday
-	Einsatz     int     // +0x2373: lineup screen slider 0..34, default 16
-	CupStatus   [4]int  // +0x2374: 0x1e = not taking part, else round reached
-	League      int     // +0x237a
-	CampDays    int     // +0x237b
-	HomeGames   int     // +0x237c
-	Effort      int     // +0x237f: 0..40 from the lineup; 100 = fewer than 8 players
-	RiotPending bool    // +0x2380 bit 0
-	Youth       int     // +0x2381 youth work level 0..34
-	SeasonFlags int     // +0x2382: 1 promoted, 2 relegated, 4 licence, 8 restart
-	Training    [4]int  // +0x2383: points for Kondition, Spiel, Schuss, Taktik (sum <= 20)
-	Intensity   int     // +0x2387: training intensity
-	PosTraining [4]int  // +0x2388: points for Tor, Abwehr, Mittelfeld, Angriff (sum <= 10)
+	TicketPrice   int     // +0x234c
+	PosAfter      [38]int // +0x234d: table position after each matchday
+	EffortSetting int     `json:"Einsatz"` // +0x2373: the EINSATZ slider of the lineup screen, 0..34, default 16
+	CupStatus     [4]int  // +0x2374: 0x1e = not taking part, else round reached
+	League        int     // +0x237a
+	CampDays      int     // +0x237b
+	HomeGames     int     // +0x237c
+	Effort        int     // +0x237f: 0..40 from the lineup; 100 = fewer than 8 players
+	RiotPending   bool    // +0x2380 bit 0
+	Youth         int     // +0x2381 youth work level 0..34
+	SeasonFlags   int     // +0x2382: 1 promoted, 2 relegated, 4 licence, 8 restart
+	Training      [4]int  // +0x2383: points for Kondition, Spiel, Schuss, Taktik (sum <= 20)
+	Intensity     int     // +0x2387: training intensity
+	PosTraining   [4]int  // +0x2388: points for Tor, Abwehr, Mittelfeld, Angriff (sum <= 10)
 
 	Attendance [20]int // +0x238c: attendance/1000 of each home league game
 
@@ -170,7 +170,7 @@ type State struct {
 	Display Display
 	// Draws lists the cups whose new draw the screens still have to
 	// present (f_17c2_0006), in the order of the original.
-	Draws []int
+	Draws []Cup
 	mana  *assets.Mana `json:"-"`
 }
 
@@ -197,7 +197,7 @@ func DefaultDisplay() Display {
 }
 
 // TakeDraw returns the next cup draw to present, or false.
-func (s *State) TakeDraw() (int, bool) {
+func (s *State) TakeDraw() (Cup, bool) {
 	if len(s.Draws) == 0 {
 		return 0, false
 	}

@@ -33,12 +33,12 @@ func (s *State) recordHistory(mi int) {
 		rec[2] += 0x80
 		m.Titles[1]++
 	}
-	for cup := 1; cup < NumCups; cup++ {
+	for cup := CupLandesmeister; cup < NumCups; cup++ {
 		st := m.CupStatus[cup]
 		if st == 0 || st == NotInCup {
 			continue
 		}
-		rec[3] = byte(cup*8 + st)
+		rec[3] = byte(int(cup)*8 + st)
 		if s.Cups.Holder[cup] == m.Team+1 {
 			rec[3] += 0x80
 			m.Titles[1+cup]++
@@ -394,7 +394,7 @@ func (s *State) seasonEnd2() {
 	}
 	s.clearCupResults()
 	s.reshufflePersons()
-	for c := 0; c < NumCups; c++ {
+	for c := CupDFB; c < NumCups; c++ {
 		s.drawCup(c)
 	}
 	s.Draws = append(s.Draws, CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA)

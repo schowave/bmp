@@ -57,9 +57,6 @@ var (
 // digits are '^', a blank of the width of a digit.
 func tsPad(n int64, width int) string {
 	s := itoa64(n)
-	if n < 0 {
-		s = "-" + itoa64(-n)
-	}
 	for len(s) < width {
 		s = "^" + s
 	}
@@ -103,11 +100,11 @@ func (l *tsList) draw(g *Gfx, dst *ebiten.Image, s *game.State, cur, hover int) 
 		g.TextAt(dst, FontNormal, (l.x+l.right-g.TextWidth(FontNormal, l.title))/2, l.head-8, l.title, ColBeige, ColGrey7)
 	}
 	g.TextAt(dst, FontSmall, l.x, l.head, l.header(), ColBeige, NoShadow)
-	FillRect(dst, l.x, l.head+2, l.right-l.x+1, 1, g.C(ColBeige))
+	FillRect(dst, l.x, l.head+2, l.right-l.x+1, 1, g.PalColor(ColBeige))
 	for i := 0; i < l.count(s); i++ {
 		l.drawRow(g, dst, s, cur, i, l.head+10+i*6, i == hover)
 	}
-	FillRect(dst, l.x, l.foot, l.right-l.x+1, 1, g.C(ColBeige))
+	FillRect(dst, l.x, l.foot, l.right-l.x+1, 1, g.PalColor(ColBeige))
 }
 
 // rowColor is the colour of the texts of a row.
@@ -132,7 +129,7 @@ func (l *tsList) drawRow(g *Gfx, dst *ebiten.Image, s *game.State, cur, i, y int
 	xor := 0
 	if hot {
 		xor = 31
-		FillRect(dst, l.hitX, y-4, l.hitRight-l.hitX+1, 5, g.C(ColBlue^31))
+		FillRect(dst, l.hitX, y-4, l.hitRight-l.hitX+1, 5, g.PalColor(ColBlue^31))
 	}
 	text := func(x int, t string, c int) { g.TextAt(dst, FontSmall, x, y, t, c^xor, NoShadow) }
 	x := l.x
@@ -152,7 +149,7 @@ func (l *tsList) drawRow(g *Gfx, dst *ebiten.Image, s *game.State, cur, i, y int
 		case 1:
 			text(x, tsPos[p.Position()], col)
 			if sl.Loan != 0 || (p.Owner == cur && (l.mode == 1 || l.mode == 2)) {
-				FillRect(dst, x+tsWidths[1]-3, y-2, 1, 1, g.C(col^xor))
+				FillRect(dst, x+tsWidths[1]-3, y-2, 1, 1, g.PalColor(col^xor))
 			}
 		case 2:
 			if (l.mode == 1 || l.mode == 2) && sl.Status&0xc0 != 0 && p.Owner == cur {

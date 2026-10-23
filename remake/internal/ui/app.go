@@ -13,8 +13,9 @@ type Scene interface {
 }
 
 // Input is the state of mouse and keyboard for one frame, in canvas
-// coordinates. The original is played with the mouse: left button selects,
-// right button confirms or goes back.
+// coordinates. The original is played with the mouse: the left button
+// selects, the right button confirms in some places but does not leave a
+// screen.
 type Input struct {
 	X, Y       int
 	Left       bool // left button pressed this frame
@@ -53,7 +54,8 @@ type App struct {
 	// input; a step with a Shot saves the canvas after that frame.
 	Script    []ScriptStep
 	shot      string
-	scriptEnd bool // the last step of the script ran: quit after drawing
+	scriptEnd bool  // the last step of the script ran: quit after drawing
+	err       error // a screenshot could not be saved; Update returns it
 }
 
 // ScriptStep is the input of one frame of a script.
@@ -91,6 +93,12 @@ func (a *App) Quit() { a.quit = true }
 
 // Update implements ebiten.Game.
 func (a *App) Update() error {
+	if a.err != nil {
+		return a.err
+	}
+	if err := a.Gfx.Err(); err != nil {
+		return err
+	}
 	if a.quit || len(a.stack) == 0 {
 		return ebiten.Termination
 	}
@@ -133,8 +141,8 @@ func (a *App) Draw(screen *ebiten.Image) {
 		s.Draw(a, screen)
 	}
 	if a.shot != "" {
-		if err := savePNG(screen, a.shot); err != nil {
-			panic(err)
+		if err := savePNG(screen, a.shot); err != nil && a.err == nil {
+			a.err = err
 		}
 		a.shot = ""
 	}
@@ -142,8 +150,8 @@ func (a *App) Draw(screen *ebiten.Image) {
 		a.quit = true
 	}
 	if a.ShotPath != "" && a.frame >= a.ShotFrame {
-		if err := savePNG(screen, a.ShotPath); err != nil {
-			panic(err)
+		if err := savePNG(screen, a.ShotPath); err != nil && a.err == nil {
+			a.err = err
 		}
 		a.ShotPath = ""
 		a.quit = true

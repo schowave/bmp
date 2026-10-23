@@ -110,7 +110,7 @@ func (n *NewspaperScene) pic(g *Gfx, k int) *ebiten.Image {
 	}
 	p, err := g.dir.Pic(k, false)
 	if err != nil {
-		panic(err)
+		return g.missing(err)
 	}
 	rgba := image.NewRGBA(image.Rect(0, 0, p.W, p.H))
 	for i, c := range p.Pix {
@@ -122,7 +122,7 @@ func (n *NewspaperScene) pic(g *Gfx, k int) *ebiten.Image {
 }
 
 // drawNewsText draws s left-aligned at x with its baseline at y.
-func drawNewsText(g *Gfx, dst *ebiten.Image, font string, x, y int, s string, c int) {
+func drawNewsText(g *Gfx, dst *ebiten.Image, font Font, x, y int, s string, c int) {
 	g.Text(dst, font, x, y-g.baseline(font), s, newsPalette(c))
 }
 

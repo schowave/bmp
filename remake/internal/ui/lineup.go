@@ -174,7 +174,7 @@ func (q *SquadScreen) Update(app *App) error {
 
 	// The EINSATZ meter follows the mouse while the button is held.
 	if (in.Left || in.LeftHeld) && in.X > 0x10a && in.X < 0x13f && in.Y > 4 && in.Y < 0x24 {
-		m.Einsatz = lnClamp(in.X-0x113, 0, 0x22)
+		m.EffortSetting = lnClamp(in.X-0x113, 0, 0x22)
 		return nil
 	}
 	if in.Escape {
@@ -300,8 +300,8 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 		}
 	}
 	g.TextAt(dst, FontSmall, lnListX0, lnHeadY, head, ColBeige, NoShadow)
-	line6(dst, lnListX0, lnHeadY+2, lnListX1, lnHeadY+2, g.C(ColBeige))
-	line6(dst, lnListX0, lnBottomY, lnListX1, lnBottomY, g.C(ColBeige))
+	lineIncl(dst, lnListX0, lnHeadY+2, lnListX1, lnHeadY+2, g.PalColor(ColBeige))
+	lineIncl(dst, lnListX0, lnBottomY, lnListX1, lnBottomY, g.PalColor(ColBeige))
 
 	// The row under the mouse, or the one of the player under the mouse
 	// on the board, is shown inverted (XOR 31: a yellow bar).
@@ -329,7 +329,7 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 		}
 		y := lnRow0Y + 6*i
 		if i == bar {
-			fill6(dst, barX0, y-4, barX1, y, g.C(ColYellow))
+			fillIncl(dst, barX0, y-4, barX1, y, g.PalColor(ColYellow))
 		}
 		q.drawRow(g, dst, i, y, i == bar, barX0, barX1)
 	}
@@ -337,8 +337,8 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 
 	// EINSATZ meter (f_1ecd_1435).
 	Draw(dst, g.Sub(37, image.Rect(0, 0, 0x33, 0x1f)), lnMeterX, lnMeterY)
-	line6(dst, 0x113, 0x19, 0x113+m.Einsatz, 0x19, g.C(ColWhite))
-	line6(dst, 0x113, 0x1a, 0x113+m.Einsatz, 0x1a, g.C(ColWhite))
+	lineIncl(dst, 0x113, 0x19, 0x113+m.EffortSetting, 0x19, g.PalColor(ColWhite))
+	lineIncl(dst, 0x113, 0x1a, 0x113+m.EffortSetting, 0x1a, g.PalColor(ColWhite))
 
 	for i, ic := range lnIcons {
 		g.drawIconButton(dst, ic, lnIconX, lnIconY[i], q.pressed() == i)
@@ -583,12 +583,12 @@ func (t *lineupToast) Draw(app *App, dst *ebiten.Image) {
 	x, y := 0xb3-step, 0x1b-step
 	w, h := 7+10*step, 3+2*step
 	if step < lnToastSteps-1 {
-		fill6(dst, x+1, y+1, x+w-1, y+h-1, g.C(ColDarkRed))
+		fillIncl(dst, x+1, y+1, x+w-1, y+h-1, g.PalColor(ColDarkRed))
 		return
 	}
-	fill6(dst, 165, 13, 319, 44, g.C(ColOrange))
-	fill6(dst, 166, 14, 318, 43, g.C(ColBlack))
-	fill6(dst, 167, 15, 317, 42, g.C(ColDarkRed))
+	fillIncl(dst, 165, 13, 319, 44, g.PalColor(ColOrange))
+	fillIncl(dst, 166, 14, 318, 43, g.PalColor(ColBlack))
+	fillIncl(dst, 167, 15, 317, 42, g.PalColor(ColDarkRed))
 	g.TextMid(dst, FontNormal, 0xb9, 0x12f, 0x1a, t.lines[0], ColWhite, ColBlack)
 	g.TextMid(dst, FontNormal, 0xb9, 0x12f, 0x27, t.lines[1], ColWhite, ColBlack)
 }

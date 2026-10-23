@@ -37,7 +37,7 @@ func (s *State) NextOpponent(mi int) (opp int, home bool, ok bool) {
 			}
 		}
 	}
-	cups := []int{}
+	cups := []Cup{}
 	if ev&EvDFB != 0 {
 		cups = append(cups, CupDFB)
 	}

@@ -145,7 +145,7 @@ func (st *StadiumScreen) Update(app *App) error {
 		st.open(app, st.hover)
 		return nil
 	}
-	if deskMenuHit(in) {
+	if MenuButtonHit(in) {
 		app.Pop()
 	}
 	_ = m
@@ -231,7 +231,7 @@ func (st *StadiumScreen) Draw(app *App, dst *ebiten.Image) {
 	st.drawTable(g, dst)
 
 	if st.mode == stIdle {
-		line6(dst, 0x97, 0x54, 0x120, 0x54, g.C(ColBeige))
+		lineIncl(dst, 0x97, 0x54, 0x120, 0x54, g.PalColor(ColBeige))
 	}
 	if st.mode != stConfirm {
 		g.TextAt(dst, FontSmall, 0x9a, 0x5e, "IHR KONTOSTAND:"+numText(m.Money, 1, false)+" DM", ColLight, -1)
@@ -249,7 +249,7 @@ func (st *StadiumScreen) drawOrder(g *Gfx, dst *ebiten.Image) {
 	m := st.ss.M()
 	p, k := st.row, st.row-1
 	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x16, stadiumStatus[p], ColBeige, ColBlack)
-	line6(dst, 0x97, 0x18, 0x120, 0x18, g.C(ColBeige))
+	lineIncl(dst, 0x97, 0x18, 0x120, 0x18, g.PalColor(ColBeige))
 	if st.mode == stConfirm {
 		st.drawConfirm(g, dst)
 		return
@@ -265,7 +265,7 @@ func (st *StadiumScreen) drawOrder(g *Gfx, dst *ebiten.Image) {
 	if st.mode == stHeaderOnly && p < 4 {
 		return
 	}
-	line6(dst, 0x97, 0x42, 0x120, 0x42, g.C(ColBeige))
+	lineIncl(dst, 0x97, 0x42, 0x120, 0x42, g.PalColor(ColBeige))
 	switch {
 	case p < 4:
 		max := st.lim.Max
@@ -289,7 +289,7 @@ func (st *StadiumScreen) drawOrder(g *Gfx, dst *ebiten.Image) {
 			hi := st.list == di-first
 			if hi {
 				r := di - first
-				fill6(dst, 0x97, 7*(r+4), 0x11f, 7*r+0x20, g.C(ColBlue^31))
+				fillIncl(dst, 0x97, 7*(r+4), 0x11f, 7*r+0x20, g.PalColor(ColBlue^31))
 				c ^= 31
 			}
 			g.TextAt(dst, FontSmall, 0x9a, y, stadiumLevel(k, int64(di)), c, -1)

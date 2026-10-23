@@ -188,9 +188,9 @@ func (s *State) seasonPopup(mi int, text string) {
 }
 
 // trophy queues the title screen of f_17c2_274d for manager mi.
-func (s *State) trophy(mi, cup int) {
-	s.AddNotice(Notice{Kind: NoticeTrophy, Manager: mi, Cup: cup,
-		Lines: lines(msgTrophy(s.Teams[s.Managers[mi].Team].Name, cup))})
+func (s *State) trophy(mi, trophy int) {
+	s.AddNotice(Notice{Kind: NoticeTrophy, Manager: mi, Cup: trophy,
+		Lines: lines(msgTrophy(s.Teams[s.Managers[mi].Team].Name, trophy))})
 }
 
 // popupWindow reports the days on which f_0000_20e1 shows the completion
@@ -225,7 +225,7 @@ func SampleNotices(s *State) []Notice {
 		{Kind: NoticeAlert, Manager: 0, Lines: lines(msgForfeit(m.Name))},
 		full, card, bday,
 		{Kind: NoticeTrophy, Manager: 0, Lines: lines(msgTrophy(club, 0))},
-		{Kind: NoticeTrophy, Manager: 0, Cup: CupDFB + 1, Lines: lines(msgTrophy(club, CupDFB+1))},
+		{Kind: NoticeTrophy, Manager: 0, Cup: int(CupDFB) + 1, Lines: lines(msgTrophy(club, int(CupDFB)+1))},
 		season,
 		{Kind: NoticePopup, Manager: 0, Backdrop: BackdropDesk, Lines: lines(msgCompletion(3)), Day: s.Day},
 	}

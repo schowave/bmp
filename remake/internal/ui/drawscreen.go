@@ -11,7 +11,7 @@ import (
 // PIC/47.VGA, then the overview of the round.
 type DrawShow struct {
 	ss    *Session
-	cup   int
+	cup   game.Cup
 	state int // drawAsk, drawRun, drawDone
 	shown int // plates on the board
 	t     int // frames of the moving plate
@@ -36,7 +36,7 @@ const (
 )
 
 // NewDrawShow creates the presentation of the draw of cup c.
-func NewDrawShow(ss *Session, c int) *DrawShow { return &DrawShow{ss: ss, cup: c, state: -1} }
+func NewDrawShow(ss *Session, c game.Cup) *DrawShow { return &DrawShow{ss: ss, cup: c, state: -1} }
 
 func (d *DrawShow) slots() []int {
 	var out []int
@@ -121,7 +121,7 @@ func (d *DrawShow) plateLabel(t int) (string, int) {
 
 func (d *DrawShow) drawPlate(g *Gfx, dst *ebiten.Image, t, x, y int) {
 	label, c := d.plateLabel(t)
-	FillRect(dst, x, y, plateW, plateH, g.C(ColBeige))
+	FillRect(dst, x, y, plateW, plateH, g.PalColor(ColBeige))
 	g.TextMid(dst, FontSmall, x, x+plateW-1, y+5, label, c, NoShadow)
 }
 

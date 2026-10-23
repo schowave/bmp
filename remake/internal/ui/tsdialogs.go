@@ -94,12 +94,12 @@ func (t *tsToast) Draw(app *App, dst *ebiten.Image) {
 		x1 = cx + (x1-cx)*k/tsToastGrow
 		y0 = cy - (cy-y0)*k/tsToastGrow
 		y1 = cy + (y1-cy)*k/tsToastGrow
-		FillRect(dst, x0, y0, x1-x0+1, y1-y0+1, g.C(ColDarkRed))
+		FillRect(dst, x0, y0, x1-x0+1, y1-y0+1, g.PalColor(ColDarkRed))
 		return
 	}
-	FrameRect(dst, x0, y0, x1-x0+1, y1-y0+1, g.C(ColOrange))
-	FrameRect(dst, x0+1, y0+1, x1-x0-1, y1-y0-1, g.C(ColBlack))
-	FillRect(dst, x0+2, y0+2, x1-x0-3, y1-y0-3, g.C(ColDarkRed))
+	FrameRect(dst, x0, y0, x1-x0+1, y1-y0+1, g.PalColor(ColOrange))
+	FrameRect(dst, x0+1, y0+1, x1-x0-1, y1-y0-1, g.PalColor(ColBlack))
+	FillRect(dst, x0+2, y0+2, x1-x0-3, y1-y0-3, g.PalColor(ColDarkRed))
 	g.TextMid(dst, FontNormal, 0xb9, 0x12f, 0x1a, t.l0, ColWhite, ColBlack)
 	g.TextMid(dst, FontNormal, 0xb9, 0x12f, 0x27, t.l1, ColWhite, ColBlack)
 }
@@ -108,7 +108,7 @@ func (t *tsToast) Draw(app *App, dst *ebiten.Image) {
 // a block cursor after the text, Enter ends, Escape leaves it empty.
 type tsNumField struct {
 	x, y   int
-	font   string
+	font   Font
 	color  int
 	maxLen int
 	text   string
@@ -116,7 +116,7 @@ type tsNumField struct {
 }
 
 // start begins the input.
-func (f *tsNumField) start(x, y, maxLen int, font string, color int) {
+func (f *tsNumField) start(x, y, maxLen int, font Font, color int) {
 	*f = tsNumField{x: x, y: y, font: font, color: color, maxLen: maxLen, active: true}
 }
 
@@ -145,7 +145,8 @@ func (f *tsNumField) update(in *Input) bool {
 	return false
 }
 
-// value returns the number typed, 0 for none.
+// value returns the number typed, 0 for none. The text has at most maxLen
+// digits, so it fails to parse only when empty.
 func (f *tsNumField) value() int64 {
 	v, _ := strconv.ParseInt(f.text, 10, 64)
 	return v
@@ -155,6 +156,6 @@ func (f *tsNumField) draw(g *Gfx, dst *ebiten.Image) {
 	g.TextAt(dst, f.font, f.x, f.y, f.text, f.color, NoShadow)
 	if f.active {
 		x := f.x + g.TextWidth(f.font, f.text)
-		FillRect(dst, x+2, f.y-4, 3, 5, g.C(f.color))
+		FillRect(dst, x+2, f.y-4, 3, 5, g.PalColor(f.color))
 	}
 }

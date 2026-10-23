@@ -34,7 +34,7 @@ func lgPad(n, w int) string {
 
 // lgTextFig draws s like TextAt; a lgFigSpace leaves the width of a digit
 // blank.
-func (g *Gfx) lgTextFig(dst *ebiten.Image, font string, x, y int, s string, c int) {
+func (g *Gfx) lgTextFig(dst *ebiten.Image, font Font, x, y int, s string, c int) {
 	for i, part := range strings.Split(s, string(lgFigSpace)) {
 		if i > 0 {
 			x += g.TextWidth(font, "0")
@@ -169,8 +169,8 @@ func (t *TableScreen) Draw(app *App, dst *ebiten.Image) {
 		icon = IconWeiter
 	}
 	g.DrawIconButton(dst, icon, MenuButton.X, MenuButton.Y)
-	FillRect(dst, 7, tblLineTop, 0x137-7+1, 1, g.C(ColLight))
-	FillRect(dst, 7, tblLineBottom, 0x137-7+1, 1, g.C(ColLight))
+	FillRect(dst, 7, tblLineTop, 0x137-7+1, 1, g.PalColor(ColLight))
+	FillRect(dst, 7, tblLineBottom, 0x137-7+1, 1, g.PalColor(ColLight))
 	g.TextAt(dst, FontSmall, 9, 0x17, tblHeader, ColLight, NoShadow)
 	for i, name := range tblModeNames {
 		c := ColLight
@@ -186,7 +186,7 @@ func (t *TableScreen) Draw(app *App, dst *ebiten.Image) {
 
 	// Places: champion and UEFA cup, promotion, relegation.
 	n := game.TeamsPerLeague[l]
-	box := func(y0, y1, c int) { FillRect(dst, 9, y0, 0x13-9+1, y1-y0+1, g.C(c)) }
+	box := func(y0, y1, c int) { FillRect(dst, 9, y0, 0x13-9+1, y1-y0+1, g.PalColor(c)) }
 	if l == 0 {
 		box(0x1c, 0x22, 15)
 		box(0x23, game.UEFAPlaces*7+0x22, 12)
@@ -336,7 +336,7 @@ func (r *ResultsScreen) Draw(app *App, dst *ebiten.Image) {
 		g.DrawIconButton(dst, IconLeft, resPrevX, resIconY)
 		g.DrawIconButton(dst, IconRight, resNextX, resIconY)
 	}
-	FillRect(dst, 3, 0xe, 0x139-3+1, 1, g.C(ColBeige))
+	FillRect(dst, 3, 0xe, 0x139-3+1, 1, g.PalColor(ColBeige))
 	g.TextMid(dst, FontNormal, 7, 0x139, 0xb, r.title(), ColLight, ColGrey7)
 
 	played := r.md < s.Matchday[l]+lgB2i(r.live)
@@ -485,8 +485,8 @@ func (st *StrengthScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Background(dst)
 	g.Window(dst, strX0, strY0, strX1, strY1, ColBlue)
 	g.DrawIconButton(dst, IconMainMenu, MenuButton.X, MenuButton.Y)
-	FillRect(dst, 0x3f, 0x23, 0xf6-0x3f+1, 1, g.C(ColLight))
-	FillRect(dst, 0x3f, 0xb2, 0xf6-0x3f+1, 1, g.C(ColLight))
+	FillRect(dst, 0x3f, 0x23, 0xf6-0x3f+1, 1, g.PalColor(ColLight))
+	FillRect(dst, 0x3f, 0xb2, 0xf6-0x3f+1, 1, g.PalColor(ColLight))
 	g.TextMid(dst, FontNormal, 0x3d, 0xf8, 0x19, "STÄRKEN "+game.LeagueNames[st.league], ColLight, ColGrey7)
 	g.TextAt(dst, FontSmall, 0x41, 0x21, strHeader, ColLight, NoShadow)
 	g.BevelButton(dst, 0x85, 0xb5, 0x39, 0xc, ColBlack)

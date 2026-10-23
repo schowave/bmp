@@ -57,7 +57,7 @@ func newSetup(mana *assets.Mana, saveDir string) *Setup {
 	s.teams = [4]int{-1, -1, -1, -1}
 	s.opts.Level = 2
 	for i := 0; i < game.NumGerman; i++ {
-		s.clubs = append(s.clubs, setupClub{name: cp437(mana.Clubs[i].Name), logo: mana.Clubs[i].Logo, id: i})
+		s.clubs = append(s.clubs, setupClub{name: game.FromCP437(mana.Clubs[i].Name), logo: mana.Clubs[i].Logo, id: i})
 	}
 	return s
 }
@@ -222,7 +222,7 @@ func (s *Setup) Draw(app *App, dst *ebiten.Image) {
 	for k := 0; k < 7; k++ {
 		Draw(dst, g.Pic(s.clubs[s.clubAt(k)].logo, false), s.stripX+12+41*k, stripY+7)
 	}
-	g.TextCentered(dst, FontNormal, s.stripX+1, stripY+52, 309, s.clubs[s.center].name, g.C(ColBlack))
+	g.TextCentered(dst, FontNormal, s.stripX+1, stripY+52, 309, s.clubs[s.center].name, g.PalColor(ColBlack))
 	for i, x := range s.slotsX {
 		Draw(dst, g.Pic(35, false), x, slotY)
 		if t := s.teams[i]; t >= 0 {
@@ -232,23 +232,9 @@ func (s *Setup) Draw(app *App, dst *ebiten.Image) {
 		// The name is typed into its field, with a block cursor.
 		g.TextAt(dst, FontSmall, x+8, slotY+125, s.names[i], ColOrange, NoShadow)
 		if s.edit == i && (app.frame/20)%2 == 0 {
-			FillRect(dst, x+10+g.TextWidth(FontSmall, s.names[i]), slotY+121, 3, 5, g.C(ColOrange))
+			FillRect(dst, x+10+g.TextWidth(FontSmall, s.names[i]), slotY+121, 3, 5, g.PalColor(ColOrange))
 		}
 	}
-}
-
-// cp437 converts a MANA.DAT name for display.
-func cp437(s string) string {
-	m := map[byte]rune{0x8e: 'Ä', 0x99: 'Ö', 0x9a: 'Ü', 0x84: 'ä', 0x94: 'ö', 0x81: 'ü', 0xe1: 'ß'}
-	var r []rune
-	for i := 0; i < len(s); i++ {
-		if u, ok := m[s[i]]; ok {
-			r = append(r, u)
-		} else {
-			r = append(r, rune(s[i]))
-		}
-	}
-	return string(r)
 }
 
 // setupOptions is the option box: level, game length, historic start.
@@ -287,15 +273,15 @@ func drawOptSwitch(g *Gfx, dst *ebiten.Image, x, y int, aus, on bool) {
 // digit, grey or orange when chosen.
 func drawOptDigit(g *Gfx, dst *ebiten.Image, x, y, k int, on bool) {
 	Draw(dst, optCell(g, false, on), x, y)
-	FillRect(dst, x+3, y+3, 18, 11, g.C(ColGrey6))
+	FillRect(dst, x+3, y+3, 18, 11, g.PalColor(ColGrey6))
 	c := ColGrey4
 	if on {
 		c = ColOrange
-		FillRect(dst, x+21, y+2, 1, 1, g.C(ColBlack))
-		FillRect(dst, x+2, y+14, 1, 1, g.C(ColBlack))
-		FillRect(dst, x, y+16, 1, 1, g.C(ColLight))
+		FillRect(dst, x+21, y+2, 1, 1, g.PalColor(ColBlack))
+		FillRect(dst, x+2, y+14, 1, 1, g.PalColor(ColBlack))
+		FillRect(dst, x, y+16, 1, 1, g.PalColor(ColLight))
 	} else {
-		FillRect(dst, x+2, y+2, 1, 1, g.C(ColLight))
+		FillRect(dst, x+2, y+2, 1, 1, g.PalColor(ColLight))
 	}
 	g.TextMid(dst, FontNormal, x, x+24, y+11, itoa(k), c, ColBlack)
 }

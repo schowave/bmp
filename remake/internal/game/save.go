@@ -10,6 +10,12 @@ import (
 // saveVersion changes whenever the save format changes incompatibly.
 const saveVersion = 1
 
+// Errors of Save and Load. The screens show the original's own alerts.
+var (
+	ErrNotSavable  = errors.New("games can only be saved during a turn")
+	ErrSaveVersion = errors.New("save game of another version")
+)
+
 type saveFile struct {
 	Version int
 	State   *State
@@ -18,7 +24,7 @@ type saveFile struct {
 // Save serialises the game. Games are saved during a manager's turn.
 func (s *State) Save() ([]byte, error) {
 	if s.Loop.Phase != PhaseTurn && s.Loop.Phase != PhaseContracts {
-		return nil, errors.New("Spielstände können nur im Hauptmenü gespeichert werden")
+		return nil, ErrNotSavable
 	}
 	return json.Marshal(saveFile{Version: saveVersion, State: s})
 }
@@ -30,7 +36,7 @@ func Load(data []byte, mana *assets.Mana) (*State, error) {
 		return nil, err
 	}
 	if f.Version != saveVersion || f.State == nil {
-		return nil, errors.New("Spielstand aus falscher Version !")
+		return nil, ErrSaveVersion
 	}
 	f.State.mana = mana
 	if f.State.Display == (Display{}) {

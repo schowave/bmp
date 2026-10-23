@@ -191,11 +191,11 @@ const (
 // Title screen of f_17c2_274d: "<club>", "gewinnt die" (D:0x26c0),
 // "Deutsche Meisterschaft" (D:0x26bc); for cup c (1..4) "gewinnt den"
 // (D:0x26c4) and the cup name (D:0x24d8 + c*4).
-func msgTrophy(club string, cup int) string {
-	if cup == 0 {
+func msgTrophy(club string, trophy int) string {
+	if trophy == 0 {
 		return club + "\ngewinnt die\nDeutsche Meisterschaft"
 	}
-	return club + "\ngewinnt den\n" + CupNames[cup-1]
+	return club + "\ngewinnt den\n" + CupNames[trophy-1]
 }
 
 // Dialogs of f_0cb5_0012 when a player with an expired contract leaves:

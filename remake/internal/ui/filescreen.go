@@ -152,7 +152,7 @@ func (f *FileScreen) Update(app *App) error {
 			return nil
 		}
 	}
-	if in.Clicked(MenuButton.X, MenuButton.Y, MenuButton.W, MenuButton.H) || in.Escape {
+	if MenuButtonHit(in) {
 		app.Pop()
 		return nil
 	}
@@ -160,11 +160,15 @@ func (f *FileScreen) Update(app *App) error {
 	if f.buttons[7].Hit(in) && f.name != "" {
 		app.Push(NewQuestion(f.ss.M().Name, "FILE\n"+f.name+"\nWIRKLICH LöSCHEN ?", "MACH SCHON!", "OH NEIN!",
 			func(app *App, yes bool) {
-				if yes {
-					_ = os.Remove(f.path())
-					f.name = ""
-					f.scan()
+				if !yes {
+					return
 				}
+				if err := os.Remove(f.path()); err != nil {
+					app.Push(diskError())
+					return
+				}
+				f.name = ""
+				f.scan()
 			}))
 	}
 	return nil
@@ -277,7 +281,7 @@ func (f *FileScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Window(dst, 6, 33, 247, 214, ColBlue)
 	g.DrawMenuButton(dst)
 	for y := 163; y < 184; y += 10 {
-		FillRect(dst, 7, y, 240, 1, g.C(ColBeige))
+		FillRect(dst, 7, y, 240, 1, g.PalColor(ColBeige))
 	}
 	// The bar under the pointer is drawn with XOR (f_3930_052d mode 2):
 	// blue becomes yellow and every colour c becomes c^31.
@@ -286,7 +290,7 @@ func (f *FileScreen) Draw(app *App, dst *ebiten.Image) {
 		hover = false
 	}
 	if hover {
-		FillRect(dst, hc*120+10, hr*fileRowH+37, 116, 5, g.C(ColBlue^31))
+		FillRect(dst, hc*120+10, hr*fileRowH+37, 116, 5, g.PalColor(ColBlue^31))
 	}
 	for k := 0; k < filePerPage && f.page+k < len(f.entries); k++ {
 		e := f.entries[f.page+k]
@@ -308,7 +312,7 @@ func (f *FileScreen) Draw(app *App, dst *ebiten.Image) {
 	g.TextAt(dst, FontSmall, 10, 180, "FILENAME      :", ColLight, NoShadow)
 	g.TextAt(dst, FontSmall, fileNameX, 180, f.name, ColLight, NoShadow)
 	if f.typing {
-		FillRect(dst, fileNameX+g.TextWidth(FontSmall, f.name)+2, 176, 3, 5, g.C(ColLight))
+		FillRect(dst, fileNameX+g.TextWidth(FontSmall, f.name)+2, 176, 3, 5, g.PalColor(ColLight))
 	}
 	g.TextAt(dst, FontSmall, 210, 180, "SEITE: "+itoa(f.page/filePerPage+1), ColGrey2, NoShadow)
 	for i := range f.buttons {

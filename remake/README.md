@@ -62,7 +62,8 @@ the files from a game directory instead.
 | `-data DIR` | `$BMP_DATA`, else the built-in files | Directory of the original game |
 | `-saves DIR` | user config directory | Save games and high scores |
 | `-scale N` | `3` | Window size as a multiple of 320×240 |
-| `-demo NAME` | | Open a development demo screen (see `internal/ui/demo.go`) |
+| `-demo NAME` | | Open a development demo screen |
+| `-demos` | | List the demo screens and quit |
 | `-shot FILE` | | Save the canvas as a PNG and quit (with `-shot-frame N`, default 10) |
 | `-script FILE` | | Play a development input script and quit (see `internal/ui/script.go`) |
 

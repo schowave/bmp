@@ -88,7 +88,7 @@ func (t *TransferScreen) Update(app *App) error {
 		}
 		return nil
 	}
-	if tsMenuHit(in) {
+	if MenuButtonHit(in) {
 		s.LineupStrength(mi, false)
 		app.Pop()
 		return nil
@@ -252,7 +252,7 @@ func (t *TransferScreen) Draw(app *App, dst *ebiten.Image) {
 	g.DrawMenuButton(dst)
 	g.Window(dst, 0xa1, 0x83, 0xa1+0x9b, 0x83+0x31, ColBlue)
 	g.TextAt(dst, FontNormal, 0xa5, 0xa4, "Kontostand:", ColBeige, NoShadow)
-	FillRect(dst, 0xa3, 0xa6, 0x13a-0xa3+1, 1, g.C(ColBeige))
+	FillRect(dst, 0xa3, 0xa6, 0x13a-0xa3+1, 1, g.PalColor(ColBeige))
 	g.TextAt(dst, FontNormal, 0xa5, 0xb0, Money(t.ss.M().Money), ColLight, NoShadow)
 
 	busy := t.bid.active || t.offer != nil || len(app.stack) > 0 && app.stack[len(app.stack)-1] != Scene(t)
@@ -286,7 +286,7 @@ func (t *TransferScreen) Draw(app *App, dst *ebiten.Image) {
 		g.TextAt(dst, FontNormal, 0xa5, 0x98, "Ablöse", ColLight, NoShadow)
 		g.TextAt(dst, FontNormal, 0xd9, 0x8e, ": "+Money(t.offer.Amount)+".", ColLight, NoShadow)
 		g.TextAt(dst, FontNormal, 0xd9, 0x98, ": "+Money(t.offer.Credited)+".", ColLight, NoShadow)
-		FillRect(dst, 0xa3, 0x9a, 0x13a-0xa3+1, 1, g.C(ColBeige))
+		FillRect(dst, 0xa3, 0x9a, 0x13a-0xa3+1, 1, g.PalColor(ColBeige))
 		tsButton(g, dst, 0xaf, 0x6e, "BEHALTEN", ColLight)
 		tsButton(g, dst, 0xf5, 0x6e, "VERKAUFEN", ColRed)
 		return
@@ -299,7 +299,7 @@ func (t *TransferScreen) Draw(app *App, dst *ebiten.Image) {
 	tsButton(g, dst, 0xf5, 0x6e, "KAUFEN", kc)
 	if t.showBid {
 		g.TextAt(dst, FontNormal, 0xa5, 0x8c, "Ihr Angebot:", ColLight, NoShadow)
-		FillRect(dst, 0xa3, 0x8e, 0x13a-0xa3+1, 1, g.C(ColLight))
+		FillRect(dst, 0xa3, 0x8e, 0x13a-0xa3+1, 1, g.PalColor(ColLight))
 		t.bid.draw(g, dst)
 	}
 }
