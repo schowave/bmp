@@ -136,7 +136,11 @@ Per new manager m (f_08bc_2184, loop over managers):
    M+0x23c0 = 3 − 2*(3-year), M+0x23b8 = 3 − (3-year); M+0x2373 = 0x10;
    **M+0x241e = 50 − 20*L0** (board/target value, see §5); f_08bc_0a63(m); f_14a4_2cb4().
 8. Managers added later into a running game get: M+0x234d..+0x2372 = 10, M+0x2374..+0x2378 = 0x1e,
-   history M+0x2280+4k = 0xff (k<50) and 4 random youth/free players per position.
+   history M+0x2280+4k = 0xff (k<50) and, before the club placement, D:0x9438[k] = {2,5,8,5}
+   free players per position k: p = rand(D:0x7a6[k], D:0x7a7[k]) with D:0x7a6 = {1,20,64,106,151}
+   until owner(p) == 5 (at most 1000 tries; 151 lies behind the person table), owner = m,
+   f_1ecd_37d8(p, 1, 0, 15000, 0, 0x18). The UEFA re-placement and M+0x2377 = 1 of a 1-year
+   game happen only in a new game (local_38 == 0).
 
 ### 1.3 In-game options f_262f_01b8 (display toggles, speed, cheats)
 
