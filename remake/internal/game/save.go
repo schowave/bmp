@@ -33,6 +33,10 @@ func Load(data []byte, mana *assets.Mana) (*State, error) {
 		return nil, errors.New("Spielstand aus falscher Version !")
 	}
 	f.State.mana = mana
+	if f.State.Display == (Display{}) {
+		// saved before the options existed
+		f.State.Display = DefaultDisplay()
+	}
 	return f.State, nil
 }
 

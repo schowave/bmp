@@ -1,7 +1,5 @@
 package game
 
-import "strconv"
-
 // trainingMatrix is D:0x292: effect of the training points (Kondition,
 // Spiel, Schuss, Taktik) on Kondition, Technik and Form.
 var trainingMatrix = [4][3]int{{80, 5, 15}, {30, 40, 30}, {20, 25, 55}, {5, 65, 30}}
@@ -65,7 +63,7 @@ func (s *State) turn(mi int) {
 				sl.Status |= 0x80
 				sl.Buyer = s.chooseBuyer(x, false)
 				sl.Message = true
-				s.notify(mi, s.Teams[sl.Buyer].Name+" bietet für "+s.Persons[sl.Person].Name+".")
+				s.notify(mi, msgInterested(s.Teams[sl.Buyer].Name, s.Persons[sl.Person].Name))
 			}
 		}
 	}
@@ -82,13 +80,13 @@ func (s *State) turn(mi int) {
 		}
 		if sl.Out == 0 && sl.Status == 0 && r.Between(0, 30*s.Level+base+80) == 0 {
 			s.injure(sl)
-			s.notify(mi, "Verletzung im Training: "+p.Name+" ("+InjuryNames[sl.Injury]+")")
+			s.notify(mi, msgInjury(p.Name, InjuryNames[sl.Injury]))
 			relineup = true
 		}
 		e := s.retirementAge(sl)
 		if rr := r.Between(32, 45); rr < e && sl.Nego&0x80 == 0 && sl.Nego < 100 {
 			sl.Nego |= 0x80
-			s.notify(mi, p.Name+" kündigt an, daß er seinen Vertrag nicht mehr verlängern wird.")
+			s.notify(mi, msgNoExtension(p.Name))
 		}
 		if sl.Out != 0 {
 			sl.Lineup = 0
@@ -124,7 +122,7 @@ func (s *State) turn(mi int) {
 				}
 				sl.Nego = 100 + n
 				sl.Message = true
-				s.notify(mi, p.Name+" bietet an, von 1 auf "+strconv.Itoa(n)+" Jahre zu verlängern.")
+				s.notify(mi, msgOfferExtension(p.Name, sl.Years, n))
 			}
 		}
 	}
@@ -142,7 +140,7 @@ func (s *State) turn(mi int) {
 			foreign := v >= 91 && r.Between(0, 12) == 0
 			sl.Buyer = s.chooseBuyer(v, foreign)
 			sl.Message = true
-			s.notify(mi, s.Teams[sl.Buyer].Name+" ist an "+s.Persons[sl.Person].Name+" interessiert.")
+			s.notify(mi, msgInterested(s.Teams[sl.Buyer].Name, s.Persons[sl.Person].Name))
 		}
 	}
 	s.develop(mi)
