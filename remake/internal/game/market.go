@@ -321,12 +321,12 @@ func (s *State) AnswerManagerBid(mi, i int, bid int64, loan, accept bool) (BuyRe
 	return BidNeedsContract, nil
 }
 
-// subsidy offers a sponsor subsidy after a deal with the AI (f_0000_272d).
+// subsidy offers a sponsor subsidy after a deal with the AI
+// (f_0000_272d), also one of 0 DM for a cheap player.
 func (s *State) subsidy(bid int64) {
 	if s.Rand.Between(0, 6) == 0 {
-		if z := (bid / 100) * int64(s.Rand.Between(20, 65)) / 10000 * 10000; z > 0 {
-			s.PendingSubsidy = z
-		}
+		s.SubsidyOffered = true
+		s.PendingSubsidy = (bid / 100) * int64(s.Rand.Between(20, 65)) / 10000 * 10000
 	}
 }
 
@@ -447,7 +447,7 @@ func (s *State) AcceptSubsidy(mi int, yes bool) {
 	if yes {
 		s.Managers[mi].Money += s.PendingSubsidy
 	}
-	s.PendingSubsidy = 0
+	s.SubsidyOffered, s.PendingSubsidy = false, 0
 }
 
 // ContractHint is the salary the player would like for y years

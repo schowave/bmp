@@ -130,3 +130,27 @@ func TestAwayForfeitKeepsHomeGate(t *testing.T) {
 		t.Errorf("home manager got %d for %d spectators", s.Managers[1].Money-home, f.Attendance)
 	}
 }
+
+// f_0000_272d offers the sponsor subsidy whenever rand(0,6) hits, also
+// one of 0 DM after a cheap deal.
+func TestSubsidyOfZero(t *testing.T) {
+	offered := 0
+	for seed := uint32(1); seed < 200; seed++ {
+		s := &State{Rand: Rand{Seed: seed}, Managers: []*Manager{{}}}
+		s.subsidy(10000)
+		if !s.SubsidyOffered {
+			continue
+		}
+		offered++
+		if s.PendingSubsidy != 0 {
+			t.Fatalf("seed %d: subsidy %d for a deal of 10000", seed, s.PendingSubsidy)
+		}
+		s.AcceptSubsidy(0, false)
+		if s.SubsidyOffered {
+			t.Fatal("the offer stays after the answer")
+		}
+	}
+	if offered == 0 {
+		t.Error("never offered")
+	}
+}

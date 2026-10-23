@@ -232,14 +232,24 @@ func (t *TransferScreen) bidResult(app *App, i int, bid int64, res game.BuyResul
 				return
 			}
 			t.showBid = false
-			if z := s.PendingSubsidy; z > 0 {
-				app.Push(NewQuestion(t.ss.M().Name+":", "NEHMEN SIE EINEN SPONSOR-\nZUSCHUß VON\n"+Money(z)+" AN ?",
-					"ABER IMMER!", "LIEBER NICHT.", func(app *App, yes bool) { s.AcceptSubsidy(mi, yes) }))
-			}
+			t.offerSubsidy(app)
 		}))
 	default:
 		t.showBid = false
+		t.offerSubsidy(app)
 	}
+}
+
+// offerSubsidy asks for the sponsor subsidy the deal brought, also one of
+// 0 DM (f_0000_272d).
+func (t *TransferScreen) offerSubsidy(app *App) {
+	s := t.ss.S
+	if !s.SubsidyOffered {
+		return
+	}
+	mi := t.ss.Mgr()
+	app.Push(NewQuestion(t.ss.M().Name+":", "NEHMEN SIE EINEN SPONSOR-\nZUSCHUß VON\n"+Money(s.PendingSubsidy)+" AN ?",
+		"ABER IMMER!", "LIEBER NICHT.", func(app *App, yes bool) { s.AcceptSubsidy(mi, yes) }))
 }
 
 func (t *TransferScreen) Draw(app *App, dst *ebiten.Image) {
