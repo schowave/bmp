@@ -14,3 +14,9 @@ untested.
 
 Example: `msgLines` in `remake/internal/ui/messages.go`. While its loop sat in
 `Draw`, a wrapped line overwrote the lines after it, and no test could see it.
+
+## Generated data is checked by its test
+
+Skip `remake/internal/embedded/data` in a diff: `mise run remake:extract`
+writes it, and `TestEmbeddedFilesMatchTheOriginal` fails when it differs from
+a fresh extract. Review the extractor (`remake/internal/assets`) instead.
