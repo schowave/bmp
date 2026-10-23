@@ -86,7 +86,7 @@ func (f *FileScreen) scan() {
 
 // isSave reports whether a name ends with .MAN (shown orange).
 func isSave(show string) bool {
-	return strings.HasSuffix(show, ".MAN") || strings.HasSuffix(show, ".MAN.JSON")
+	return strings.HasSuffix(show, ".MAN")
 }
 
 // path returns the file of the name in the FILENAME field: an entry of
