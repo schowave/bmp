@@ -95,13 +95,20 @@ var msgChristmasLines = [5]string{
 	"erspähen. Was für eine Freude !",
 }
 
+// ChristmasAmounts are the small lines of the christmas card with
+// packages worth x in the Bundesliga.
+func ChristmasAmounts(x int64, year int) []string { return msgChristmasAmounts(x, year) }
+
 func msgChristmasAmounts(x int64, year int) []string {
-	third := "AMATEUR-OBERLIGA"
+	second, third := "2.LIGA", "AMATEUR-OBERLIGA"
+	if n := LeagueName(1, year); n != LeagueNames[1] {
+		second = strings.ToUpper(n)
+	}
 	if n := LeagueName(2, year); n != LeagueNames[2] {
 		third = strings.ToUpper(n)
 	}
 	return []string{
-		"BUNDESLIGA: " + FormatMoney(x) + " DM, 2.LIGA: " + FormatMoney(x/2) + " DM,",
+		"BUNDESLIGA: " + FormatMoney(x) + " DM, " + second + ": " + FormatMoney(x/2) + " DM,",
 		third + ": " + FormatMoney(x/3) + " DM (INCL. MWST.)",
 	}
 }
