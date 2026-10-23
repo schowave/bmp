@@ -6,7 +6,7 @@ package game
 func (s *State) CancelNegotiation(m, si int) {
 	sl := &s.Squads[m][si]
 	if sl.Nego > 99 {
-		sl.Message = false
+		s.endMessage(sl)
 	}
 	sl.Nego = s.Rand.Between(10, 18)
 }

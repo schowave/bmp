@@ -182,7 +182,7 @@ func (s *State) SquadOffer(mi, si int) (Offer, bool) {
 func (s *State) AnswerSquadOffer(mi, si int, o Offer, sell bool) {
 	sl := &s.Squads[mi][si]
 	sl.Status &^= 0x40
-	sl.Message = false
+	s.endMessage(sl)
 	if !sell {
 		return
 	}
@@ -213,7 +213,7 @@ func (s *State) ListedOffer(mi, i int) (Offer, bool) {
 func (s *State) AnswerListedOffer(mi, i int, o Offer, sell bool) {
 	sl := &s.Squads[MarketIndex][i]
 	sl.Status &^= 0x80
-	sl.Message = false
+	s.endMessage(sl)
 	if !sell {
 		return
 	}
@@ -527,7 +527,7 @@ func (s *State) NegotiateContract(m, si, y int, sal int64, forced int) error {
 	name := s.Persons[sl.Person].Name
 	defer func() {
 		if sl.Nego > 99 {
-			sl.Message = false
+			s.endMessage(sl)
 		}
 		sl.Nego = s.Rand.Between(10, 18)
 	}()

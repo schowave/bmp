@@ -40,7 +40,7 @@ func (s *State) turn(mi int) {
 			}
 			if r.Between(0, 3) == 0 && sl.Status > 0x1f && sl.Message {
 				sl.Status &= 0x1f
-				sl.Message = false
+				s.endMessage(sl)
 			}
 		}
 	}
@@ -63,7 +63,7 @@ func (s *State) turn(mi int) {
 				sl.Status |= 0x80
 				sl.Buyer = s.chooseBuyer(x, false)
 				sl.Message = true
-				s.notify(mi, msgInterested(s.Teams[sl.Buyer].Name, s.Persons[sl.Person].Name))
+				s.notifyFor(mi, sl.Person, msgInterested(s.Teams[sl.Buyer].Name, s.Persons[sl.Person].Name))
 			}
 		}
 	}
@@ -89,13 +89,13 @@ func (s *State) turn(mi int) {
 		}
 		if r.Between(0, 3) == 0 && sl.Status > 0x1f && sl.Message {
 			sl.Status &= 0x1f
-			sl.Message = false
+			s.endMessage(sl)
 		}
 		q := sl.Nego
 		if q > 99 && q&0x80 == 0 {
 			if r.Between(0, 5) == 0 && sl.Message {
 				sl.Nego = r.Between(9, 17)
-				sl.Message = false
+				s.endMessage(sl)
 			}
 		} else if q != 0 && q&0x80 == 0 {
 			sl.Nego--
@@ -117,7 +117,7 @@ func (s *State) turn(mi int) {
 				}
 				sl.Nego = 100 + n
 				sl.Message = true
-				s.notify(mi, msgOfferExtension(p.Name, sl.Years, n))
+				s.notifyFor(mi, sl.Person, msgOfferExtension(p.Name, sl.Years, n))
 			}
 		}
 	}
@@ -135,7 +135,7 @@ func (s *State) turn(mi int) {
 			foreign := v >= 91 && r.Between(0, 12) == 0
 			sl.Buyer = s.chooseBuyer(v, foreign)
 			sl.Message = true
-			s.notify(mi, msgInterested(s.Teams[sl.Buyer].Name, s.Persons[sl.Person].Name))
+			s.notifyFor(mi, sl.Person, msgInterested(s.Teams[sl.Buyer].Name, s.Persons[sl.Person].Name))
 		}
 	}
 	s.develop(mi)

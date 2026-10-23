@@ -12,14 +12,17 @@ import (
 // f_1ecd_000e finds the cell under the pointer and shows its hint). A list
 // shows a selection of 18 columns, given as a bit mask.
 type tsList struct {
-	m     int    // squad: manager index or game.MarketIndex
-	x     int    // left edge of the texts
-	head  int    // baseline of the column headers
-	right int    // right end of the header line
-	foot  int    // the line below the rows
-	mask  uint32 // columns shown
-	mode  int    // 0 squad, 1 market (buy), 2 market (loan), 3 contracts
-	title string // drawn centred above the headers
+	m int // squad: manager index or game.MarketIndex
+	// viewer is the manager looking at the market list: his own listed
+	// players with an offer are marked.
+	viewer int
+	x      int    // left edge of the texts
+	head   int    // baseline of the column headers
+	right  int    // right end of the header line
+	foot   int    // the line below the rows
+	mask   uint32 // columns shown
+	mode   int    // 0 squad, 1 market (buy), 2 market (loan), 3 contracts
+	title  string // drawn centred above the headers
 
 	// Pointer tests (f_1ecd_000e): the cell grid starts at hitX, the rows
 	// at rowY; the yellow bar reaches from hitX to hitRight, the hint is
@@ -146,12 +149,16 @@ func (l *tsList) draw(g *Gfx, dst *ebiten.Image, s *game.State, cur, hover int) 
 	FillRect(dst, l.x, l.foot, l.right-l.x+1, 1, g.PalColor(ColBeige))
 }
 
-// rowColor is the colour of the texts of a row. In the squad list of the
-// transfer screen a player a club made an offer for is white, so that the
-// offer is found (the remake's; the original draws him like the others).
+// rowColor is the colour of the texts of a row. A player a club made an
+// offer for is white, so that the offer is found: in the squad list of the
+// transfer screen, and an own listed player in the market list (the
+// remake's; the original draws him like the others).
 func (l *tsList) rowColor(s *game.State, sl *game.Slot) int {
 	c := tsPosColor[s.Persons[sl.Person].Position()]
 	if l.mode == 0 && sl.Status&0x40 != 0 {
+		return ColWhite
+	}
+	if (l.mode == 1 || l.mode == 2) && sl.Status&0x80 != 0 && s.Persons[sl.Person].Owner == l.viewer {
 		return ColWhite
 	}
 	if l.mode == 3 {
