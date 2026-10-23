@@ -3,8 +3,10 @@ package assets
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -24,10 +26,13 @@ type glyphJSON struct {
 	Rows []string // '#' = pixel set
 }
 
-// EncodeFonts serialises fonts for FONTS.JSON.
+// EncodeFonts serialises fonts for FONTS.JSON, sorted by name so that an
+// extract does not change from run to run.
 func EncodeFonts(fonts map[string]*Font) ([]byte, error) {
 	var out []fontJSON
-	for _, f := range fonts {
+	names := slices.Sorted(maps.Keys(fonts))
+	for _, name := range names {
+		f := fonts[name]
 		fj := fontJSON{Name: f.Name, Height: f.Height, Spacing: f.Spacing, Remap: map[string]string{}}
 		for k, v := range f.remap {
 			fj.Remap[fmt.Sprint(k)] = fmt.Sprint(v)
@@ -49,7 +54,7 @@ func EncodeFonts(fonts map[string]*Font) ([]byte, error) {
 		}
 		out = append(out, fj)
 	}
-	return json.Marshal(out)
+	return json.MarshalIndent(out, "", "\t")
 }
 
 // DecodeFonts reads FONTS.JSON.

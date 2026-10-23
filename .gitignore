@@ -13,7 +13,6 @@ wasm/dist/
 
 # Go re-implementation
 remake/bin/
-remake/internal/embedded/data/
 # Output of remake/tools/re/run.sh (mise run re:build): disassembly and decompilation
 remake/tools/re/work/
 

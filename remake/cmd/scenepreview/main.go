@@ -16,6 +16,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/embedded"
 	"github.com/schowave/bmp/remake/internal/ui"
 )
 
@@ -68,7 +69,7 @@ func (p *preview) Draw(screen *ebiten.Image) {
 func (p *preview) Layout(w, h int) (int, int) { return ui.ScreenW, ui.ScreenH }
 
 func main() {
-	data := flag.String("data", "../bmp", "directory of the original game")
+	data := flag.String("data", "", "directory of the original game instead of the files built into the binary")
 	name := flag.String("scene", "10.T", "scene file in TORE/")
 	mirror := flag.Bool("mirror", false, "mirrored (chance of the away team)")
 	out := flag.String("out", "", "save every picture as PNG into this directory")
@@ -80,7 +81,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, "scenepreview:", err)
 		os.Exit(1)
 	}
-	dir, err := assets.OpenDir(os.DirFS(*data))
+	fsys := embedded.FS()
+	if *data != "" {
+		fsys = os.DirFS(*data)
+	}
+	dir, err := assets.OpenDir(fsys)
 	if err != nil {
 		die(err)
 	}

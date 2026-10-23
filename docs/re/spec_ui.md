@@ -32,7 +32,7 @@ cup draws. Main menu groups: x=30 at y=130/173/216 on the left, x=290 at
 y=130/173 on the right; submenu items x=107/161/215, y=132/175/217. HAUPT MENU
 or WEITER at 295,213. The turn ends on the calendar sheet at 275,75.
 
-The remake side: `bmp -data ../bmp -scale 1 -demo NAME -shot f.png` or
+The remake side: `bmp -scale 1 -demo NAME -shot f.png` or
 `-script file` (`internal/ui/script.go`: `click X Y`, `rclick X Y`, `move X Y`,
 `type TEXT`, `key enter`, `wait N` frames, `shot FILE`). Demo names are in
 `internal/ui/demo.go` (`start` runs a new game from the first cup draw,

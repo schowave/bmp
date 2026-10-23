@@ -2,24 +2,19 @@ package ui
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/embedded"
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// testApp creates an app with the original assets, or skips.
+// testApp creates an app with the original assets built into the remake.
 func testApp(t *testing.T) (*App, *assets.Mana) {
 	t.Helper()
-	path := filepath.Join("..", "..", "..", "bmp")
-	if _, err := os.Stat(filepath.Join(path, "BMMAIN.EXE")); err != nil {
-		t.Skip("original game files not found")
-	}
-	dir, err := assets.OpenDir(os.DirFS(path))
+	dir, err := assets.OpenDir(embedded.FS())
 	if err != nil {
 		t.Fatal(err)
 	}

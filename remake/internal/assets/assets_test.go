@@ -1,13 +1,28 @@
 package assets
 
 import (
+	"bytes"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/schowave/bmp/remake/internal/embedded"
 )
 
+// dataDir returns the files of the original built into the remake.
+func dataDir(t *testing.T) *Dir {
+	t.Helper()
+	d, err := OpenDir(embedded.FS())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d
+}
+
 // gameDir returns the original game directory of the repository (../bmp), or
-// skips the test when it is not there.
+// skips the test when it is not there. Only tests of BMMAIN.EXE and of the
+// extraction need it.
 func gameDir(t *testing.T) *Dir {
 	t.Helper()
 	path := filepath.Join("..", "..", "..", "bmp")
@@ -35,7 +50,7 @@ func TestDecodePicRuns(t *testing.T) {
 }
 
 func TestAllPicturesDecodeToTheirSize(t *testing.T) {
-	d := gameDir(t)
+	d := dataDir(t)
 	n := 0
 	for upper := range d.names {
 		ext := filepath.Ext(upper)
@@ -61,7 +76,7 @@ func TestAllPicturesDecodeToTheirSize(t *testing.T) {
 }
 
 func TestFullScreenPictureIs320x240(t *testing.T) {
-	d := gameDir(t)
+	d := dataDir(t)
 	p, err := d.Pic(22, true)
 	if err != nil {
 		t.Fatal(err)
@@ -72,7 +87,7 @@ func TestFullScreenPictureIs320x240(t *testing.T) {
 }
 
 func TestMana(t *testing.T) {
-	d := gameDir(t)
+	d := dataDir(t)
 	m, err := d.Mana()
 	if err != nil {
 		t.Fatal(err)
@@ -160,5 +175,40 @@ func TestExtractWorksWithoutTheExecutable(t *testing.T) {
 	}
 	if _, err := e.Mana(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestEmbeddedFilesMatchTheOriginal(t *testing.T) {
+	d := gameDir(t)
+	out := t.TempDir()
+	if err := Extract(d, out); err != nil {
+		t.Fatal(err)
+	}
+	want, got := os.DirFS(out), embedded.FS()
+	n := 0
+	err := fs.WalkDir(want, ".", func(path string, e fs.DirEntry, err error) error {
+		if err != nil || e.IsDir() {
+			return err
+		}
+		a, _ := fs.ReadFile(want, path)
+		b, err := fs.ReadFile(got, path)
+		if err != nil || !bytes.Equal(a, b) {
+			t.Errorf("%s differs from the extract of %s, run mise run remake:extract", path, "../bmp")
+		}
+		n++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := 0
+	fs.WalkDir(got, ".", func(path string, e fs.DirEntry, err error) error {
+		if err == nil && !e.IsDir() {
+			m++
+		}
+		return err
+	})
+	if m != n {
+		t.Errorf("embedded %d files, the extract has %d", m, n)
 	}
 }

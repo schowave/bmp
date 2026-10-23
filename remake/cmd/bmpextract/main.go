@@ -1,6 +1,6 @@
 // Command bmpextract copies the files the re-implementation needs from the
 // original game into a directory: the pictures, MANA.DAT and the fonts of
-// BMMAIN.EXE. Building with -tags embeddata embeds that directory.
+// BMMAIN.EXE. Every build embeds the default output directory.
 package main
 
 import (
