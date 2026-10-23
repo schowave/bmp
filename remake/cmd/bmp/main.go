@@ -62,6 +62,7 @@ func main() {
 	}
 	app := ui.NewApp(gfx, first)
 	app.ShotPath, app.ShotFrame = *shot, *shotFrame
+	pace(app)
 	if *script != "" {
 		f, err := os.Open(*script)
 		if err == nil {

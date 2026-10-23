@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"time"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -56,7 +58,18 @@ type App struct {
 	shot      string
 	scriptEnd bool  // the last step of the script ran: quit after drawing
 	err       error // a screenshot could not be saved; Update returns it
+
+	// Paced runs the scenes at TPS ticks a second by the clock, for an
+	// Ebitengine that calls Update on every input event as well (see
+	// cmd/bmp). The input between two ticks is gathered in pending.
+	Paced   bool
+	next    time.Time
+	pending Input
+	pressed bool // pending holds a click: its place is kept
 }
+
+// TPS is the number of ticks a second the scenes are updated.
+const TPS = 60
 
 // ScriptStep is the input of one frame of a script.
 type ScriptStep struct {
@@ -99,6 +112,12 @@ func (a *App) Update() error {
 	if err := a.Gfx.Err(); err != nil {
 		return err
 	}
+	return a.update(readInput(), time.Now())
+}
+
+// update runs a tick of the top scene with the input read from Ebitengine
+// at now; a paced app gathers the input until the next tick is due.
+func (a *App) update(raw Input, now time.Time) error {
 	if a.quit || len(a.stack) == 0 {
 		return ebiten.Termination
 	}
@@ -107,8 +126,12 @@ func (a *App) Update() error {
 		// screenshot of the script to be drawn.
 		return nil
 	}
+	a.gather(raw)
+	if a.Paced && !a.tickDue(now) {
+		return nil
+	}
+	a.Input, a.pending, a.pressed = a.pending, Input{}, false
 	a.frame++
-	a.readInput()
 	if len(a.Script) > 0 {
 		a.Input = a.Script[0].In
 		a.shot = a.Script[0].Shot
@@ -118,9 +141,44 @@ func (a *App) Update() error {
 	return a.stack[len(a.stack)-1].Update(a)
 }
 
-func (a *App) readInput() {
+// tickDue reports whether the next tick is due at now. A tick may come up
+// to half a tick early, so that a frame ticker at TPS does not beat against
+// the clock; the ticks still average TPS a second.
+func (a *App) tickDue(now time.Time) bool {
+	const tick = time.Second / TPS
+	if a.next.IsZero() || now.Sub(a.next) > 4*tick {
+		// The first tick, or the game was stalled: start the clock anew.
+		a.next = now
+	}
+	if now.Before(a.next.Add(-tick / 2)) {
+		return false
+	}
+	a.next = a.next.Add(tick)
+	return true
+}
+
+// gather adds the input of one Update to the input of the next tick: the
+// presses and the typed keys add up, the pointer is the latest one unless a
+// click is pending, which keeps the place it was made at.
+func (a *App) gather(in Input) {
+	p := &a.pending
+	if !a.pressed {
+		p.X, p.Y = in.X, in.Y
+		a.pressed = in.Left || in.Right
+	}
+	p.Left = p.Left || in.Left
+	p.Right = p.Right || in.Right
+	p.LeftHeld = in.LeftHeld
+	p.Chars = append(p.Chars, in.Chars...)
+	p.Enter = p.Enter || in.Enter
+	p.Escape = p.Escape || in.Escape
+	p.Backspace = p.Backspace || in.Backspace
+	p.WheelDelta += in.WheelDelta
+}
+
+func readInput() Input {
 	x, y := ebiten.CursorPosition()
-	a.Input = Input{
+	in := Input{
 		X:         x,
 		Y:         y,
 		Left:      inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft),
@@ -131,7 +189,8 @@ func (a *App) readInput() {
 		Escape:    inpututil.IsKeyJustPressed(ebiten.KeyEscape),
 		Backspace: inpututil.IsKeyJustPressed(ebiten.KeyBackspace),
 	}
-	_, a.Input.WheelDelta = ebiten.Wheel()
+	_, in.WheelDelta = ebiten.Wheel()
+	return in
 }
 
 // Draw implements ebiten.Game. Every scene of the stack is drawn, bottom
