@@ -248,7 +248,7 @@ func (st *StadiumScreen) Draw(app *App, dst *ebiten.Image) {
 func (st *StadiumScreen) drawOrder(g *Gfx, dst *ebiten.Image) {
 	m := st.ss.M()
 	p, k := st.row, st.row-1
-	g.deskMid(dst, FontSmall, 0x97, 0x120, 0x16, stadiumStatus[p], ColBeige, ColBlack)
+	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x16, stadiumStatus[p], ColBeige, ColBlack)
 	line6(dst, 0x97, 0x18, 0x120, 0x18, g.C(ColBeige))
 	if st.mode == stConfirm {
 		st.drawConfirm(g, dst)
@@ -322,15 +322,15 @@ func (st *StadiumScreen) drawConfirm(g *Gfx, dst *ebiten.Image) {
 	default:
 		l1, l2, c2 = "NEUER STATUS: ", stadiumLevel(k, o.Amount), ColLight
 	}
-	g.deskMid(dst, FontSmall, 0x97, 0x120, 0x25, l1, ColGrey2, -1)
-	g.deskMid(dst, FontSmall, 0x97, 0x120, 0x2e, l2, c2, -1)
-	g.deskMid(dst, FontSmall, 0x97, 0x120, 0x37, "KOSTEN: "+numText(o.Cost, 1, false)+" DM", ColGrey2, -1)
+	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x25, l1, ColGrey2, -1)
+	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x2e, l2, c2, -1)
+	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x37, "KOSTEN: "+numText(o.Cost, 1, false)+" DM", ColGrey2, -1)
 	bau := "BAUZEIT: CIRKA"
 	if o.Again {
 		bau = "BAUZEIT: INSGESAMT CA."
 	}
-	g.deskMid(dst, FontSmall, 0x97, 0x120, 0x40, bau, ColGrey2, -1)
-	g.deskMid(dst, FontSmall, 0x97, 0x120, 0x49, numText(int64(o.Days/7+1), 1, false)+" WOCHEN", ColLight, ColBlack)
+	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x40, bau, ColGrey2, -1)
+	g.TextMid(dst, FontSmall, 0x97, 0x120, 0x49, numText(int64(o.Days/7+1), 1, false)+" WOCHEN", ColLight, ColBlack)
 	g.deskButton(dst, 0x9e, 0x51, "NA KLAR !", ColRed)
 	g.deskButton(dst, 0xe3, 0x51, "ACH NEE...", ColLight)
 }
@@ -338,7 +338,7 @@ func (st *StadiumScreen) drawConfirm(g *Gfx, dst *ebiten.Image) {
 // deskButton is the dialog button f_3091_123d: 57x12, black with a bevel.
 func (g *Gfx) deskButton(dst *ebiten.Image, x, y int, label string, c int) {
 	g.BevelButton(dst, x, y, 0x39, 0xc, ColBlack)
-	g.deskMid(dst, FontSmall, x+1, x+0x39, y+8, label, c, -1)
+	g.TextMid(dst, FontSmall, x+1, x+0x39, y+8, label, c, -1)
 }
 
 // drawTable is f_0000_1a49: the table of the stadium.
@@ -455,5 +455,5 @@ func (n *deskNumber) update(app *App) {
 
 func (n *deskNumber) draw(g *Gfx, dst *ebiten.Image) {
 	Draw(dst, g.Pic(21, false), n.x, n.y)
-	g.deskMid(dst, FontNormal, n.x, n.x+0x46, n.y-2+0x18, numText(n.value, 1, false), 9, ColBlack)
+	g.TextMid(dst, FontNormal, n.x, n.x+0x46, n.y-2+0x18, numText(n.value, 1, false), 9, ColBlack)
 }

@@ -49,7 +49,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 	g.DrawMenuButton(dst)
 	g.TextAt(dst, FontNormal, 10, 0x11, "Sais. Pl.   Liga       DfB-Pokal       Europapokal", ColBeige, -1)
 	line6(dst, 5, 0x13, 0x138, 0x13, g.C(ColBeige))
-	g.deskMid(dst, FontNormal, 6, 0x106, 0xa5, "Gesamtentwicklung", ColBeige, -1)
+	g.TextMid(dst, FontNormal, 6, 0x106, 0xa5, "Gesamtentwicklung", ColBeige, -1)
 	line6(dst, 6, 0xa7, 0x106, 0xa7, g.C(ColBeige))
 
 	n := h.rows()
@@ -72,7 +72,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 	}
 
 	if s.Seasons == 0 || n == 0 {
-		g.deskMid(dst, FontSmall, 0, 0x140, 0x1d, "NOCH HABEN SIE KEINE HISTORISCH SONDERLICH WICHTIGEN ERFOLGE ERZIELT...", ColLight, ColGrey7)
+		g.TextMid(dst, FontSmall, 0, 0x140, 0x1d, "NOCH HABEN SIE KEINE HISTORISCH SONDERLICH WICHTIGEN ERFOLGE ERZIELT...", ColLight, ColGrey7)
 		return
 	}
 	base := 1963
@@ -96,7 +96,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 				c = ColBeige
 			}
 			g.TextAt(dst, FontSmall, 0x2a, y, numText(int64(int(e[0])-game.FirstID[l]), 2, false)+".", c, -1)
-			g.deskMid(dst, FontSmall, 0x55, 0x55, y, game.LeagueNames[l], ColLight, -1)
+			g.TextMid(dst, FontSmall, 0x55, 0x55, y, game.LeagueNames[l], ColLight, -1)
 			// the DFB-Pokal
 			buf, c := game.LeagueNames[l], ColLight
 			txt := "SIEGER"
@@ -106,7 +106,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 				buf = historyRounds[e[2]&7]
 				txt = buf
 			}
-			g.deskMid(dst, FontSmall, 0x90, 0x90, y, txt, c, -1)
+			g.TextMid(dst, FontSmall, 0x90, 0x90, y, txt, c, -1)
 			// the European cups; a season without a round keeps the
 			// previous text like the original
 			c = ColLight
@@ -125,7 +125,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 				}
 				txt = buf + name
 			}
-			g.deskMid(dst, FontSmall, 0xb4, 0x139, y, txt, c, -1)
+			g.TextMid(dst, FontSmall, 0xb4, 0x139, y, txt, c, -1)
 		}
 		if (r+1)&0xf != 0 {
 			line6(dst, 6, y+2, 0x138, y+2, g.C(ColGrey6))

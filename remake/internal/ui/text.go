@@ -162,7 +162,18 @@ func (g *Gfx) TextAt(dst *ebiten.Image, font string, x, y int, s string, c, shad
 
 // TextMid draws s centred between x0 and x1 with its baseline at y.
 func (g *Gfx) TextMid(dst *ebiten.Image, font string, x0, x1, y int, s string, c, shadow int) {
-	g.TextAt(dst, font, x0+(x1-x0)/2-g.TextWidth(font, s)/2, y, s, c, shadow)
+	g.TextAt(dst, font, midX(x0, x1, g.TextWidth(font, s)), y, s, c, shadow)
+}
+
+// midX is where f_06c7_087c starts a text of width w centred between x0
+// and x1: x0 + (x1-x0)/2 - w/2 with C division, and at the left edge when
+// the text, one pixel further right, would leave the screen.
+func midX(x0, x1, w int) int {
+	x := x0 + (x1-x0)/2 - w/2
+	if x+1+w > 0x13f || x+1 < 0 {
+		return 0
+	}
+	return x
 }
 
 // TextEnd draws s right-aligned so that it ends before x, baseline at y.

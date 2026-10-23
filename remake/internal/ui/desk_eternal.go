@@ -91,21 +91,21 @@ func (e *EternalScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Window(dst, 5, 8, 5+0x87, 8+0xde, ColBlue)
 	g.Window(dst, 0x91, 8, 0x91+0xa8, 8+0xb4, ColBlue)
 	g.DrawMenuButton(dst)
-	g.deskMid(dst, FontNormal, 5, 0x8c, 0x11, "Ewige Tabelle", ColBeige, -1)
+	g.TextMid(dst, FontNormal, 5, 0x8c, 0x11, "Ewige Tabelle", ColBeige, -1)
 	line6(dst, 6, 0x13, 0x8b, 0x13, g.C(ColBeige))
-	g.deskMid(dst, FontNormal, 0x91, 0x139, 0x11, "Ewige Bilanz", ColBeige, -1)
+	g.TextMid(dst, FontNormal, 0x91, 0x139, 0x11, "Ewige Bilanz", ColBeige, -1)
 	line6(dst, 0x92, 0x13, 0x138, 0x13, g.C(ColBeige))
 	trophies := g.Sub(36, image.Rect(0, 0, 0x15, 0x71))
 	Draw(dst, trophies, 0x9b, 0x16)
 	Draw(dst, trophies, 0x119, 0x16)
 
 	for i := 0; i < 5; i++ {
-		g.deskMid(dst, FontSmall, 0xb0, 0x11e, i*0x17+0x1e, eternalTitles[i], ColLight, ColBlack)
+		g.TextMid(dst, FontSmall, 0xb0, 0x11e, i*0x17+0x1e, eternalTitles[i], ColLight, ColBlack)
 		txt, c := " KOMMT VIELLEICHT NOCH...", ColLight
 		if m.Titles[i] != 0 {
 			txt, c = numText(int64(m.Titles[i]), 1, false), ColBeige
 		}
-		g.deskMid(dst, FontSmall, 0xb0, 0x119, i*0x17+0x26, txt, c, ColBlack)
+		g.TextMid(dst, FontSmall, 0xb0, 0x119, i*0x17+0x26, txt, c, ColBlack)
 		g.TextAt(dst, FontSmall, 0x94, i*7+0x9c, eternalRows[i], ColLight, -1)
 	}
 	g.TextAt(dst, FontSmall, 0xb7, 0x93, "GESAMT           HEIM         AUSWÄRTS", ColLight, -1)
