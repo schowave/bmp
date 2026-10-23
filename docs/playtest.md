@@ -32,5 +32,9 @@ playtests and are the original:
 | A refused player stays not negotiable for weeks | `spec_transfers.md` §8.3 |
 | The stadium order field ignores typing (click the upper or lower edge) | `f_0000_0602`, `remake/internal/ui/desk_stadium.go` |
 | A 1- or 3-year game ends with the high scores, without season report | `spec_season.md` §2.6 steps 7–9 |
+| Typing letters in the options screen changes skills, money or the level | cheat keys of `f_262f_01b8`, `remake/internal/game/cheats.go` |
+| A goal of a computer club names no scorer | computer clubs have no squads |
+| A boundary board without logo still earns 45,000 DM ("KÜNDBAR") | `spec_finance.md` §12 |
+| The yellow bar of the file list also covers empty rows | XOR bar of `f_3930_052d` |
 
 Add a row when a suspected bug turns out to be the original.
