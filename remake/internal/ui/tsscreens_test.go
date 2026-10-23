@@ -189,10 +189,31 @@ func TestTurnMenuOptimalKey(t *testing.T) {
 		t.Errorf("message %q, want %q and the gain", toast.lines[0], want)
 	}
 	// The gains fit the box also at their widest.
-	for _, l := range []string{"AUFSTELLUNG 2,00 +2,00", "TRAINING 99,9 +99,9"} {
+	for _, l := range []string{"AUFSTELLUNG 2,00 +2,00", "TRAINING 99,9 +99,9", "EINTRITT 25 +999.999", "EINNAHME 9.999.999"} {
 		if w := app.Gfx.TextWidth(FontNormal, l); w > lnToastWidth {
 			t.Errorf("%q is %d pixels wide", l, w)
 		}
 	}
-	t.Logf("plan %+v -> %+v, %q %q", old, ss.S.PlanOf(ss.Mgr()), toast.lines, toast.third)
+	t.Logf("plan %+v -> %+v, %q %q", old, ss.S.PlanOf(ss.Mgr()), toast.lines, toast.extra)
+}
+
+// The key o on the stadium screen sets the ticket price with the most gate
+// money at the next home match.
+func TestStadiumOptimalKey(t *testing.T) {
+	app, ss := tsTestSession(t)
+	st := NewStadiumScreen(ss)
+	app.Push(st)
+	r := ss.S.Rand
+	step(t, app, Input{Chars: []rune("o")})
+	toast, ok := top(app).(*lineupToast)
+	if !ok {
+		t.Fatalf("no message, top is %T", top(app))
+	}
+	if ss.S.Rand != r {
+		t.Error("the generator moved")
+	}
+	p := ss.M().TicketPrice
+	if p < 5 || p > 25 || !strings.HasPrefix(toast.lines[0], "EINTRITT "+itoa(p)+" ") {
+		t.Errorf("price %d, message %q", p, toast.lines)
+	}
 }

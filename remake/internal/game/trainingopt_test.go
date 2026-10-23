@@ -84,3 +84,27 @@ func TestOptimalTrainingStrengthensTheEleven(t *testing.T) {
 	}
 	t.Logf("eleven strength at the end: %.1f, with the optimal training %.1f; points %d and %d", a, b, plain.Points, opt.Points)
 }
+
+// The optimal ticket price earns the most expected gate money of all prices
+// at the next home match and leaves the generator alone.
+func TestOptimizeTicketPrice(t *testing.T) {
+	s := lineupState(t)
+	r := s.Rand
+	res := s.OptimizeTicketPrice(0)
+	if s.Rand != r {
+		t.Error("the generator moved")
+	}
+	if res.Opponent < 0 {
+		t.Fatal("no home match found")
+	}
+	_, imp, _ := s.nextHomeMatch(0)
+	for p := 5; p <= 25; p++ {
+		if g := s.expectedGate(0, res.Opponent, imp, p); g > res.AfterGate {
+			t.Errorf("price %d earns %d, more than %d at %d", p, g, res.AfterGate, res.After)
+		}
+	}
+	if s.Managers[0].TicketPrice != res.After || res.AfterGate < res.BeforeGate {
+		t.Errorf("result %+v, price %d", res, s.Managers[0].TicketPrice)
+	}
+	t.Logf("%+v", res)
+}
