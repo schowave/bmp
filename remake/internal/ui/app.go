@@ -14,9 +14,10 @@ type Scene interface {
 	Draw(app *App, dst *ebiten.Image)
 }
 
-// passer is a scene that only decides what comes next and has nothing of
-// its own to show (Passing true): when it comes on top it runs again in the
-// same tick, so that it is never drawn for a frame between two screens.
+// passer is a scene that has to run before it is drawn (Passing true): it
+// only decides what comes next, or has not started yet. When it comes on
+// top it runs again in the same tick, so that it is never drawn for a frame
+// in a state the player should not see.
 type passer interface {
 	Scene
 	Passing() bool

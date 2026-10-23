@@ -50,6 +50,10 @@ func (d *DrawShow) overview(app *App) {
 	app.Replace(NewCupRound(d.ss, d.cup, 0, nil))
 }
 
+// Passing implements passer: before its first tick the show has not asked
+// yet whether to watch the draw.
+func (d *DrawShow) Passing() bool { return d.state == -1 }
+
 func (d *DrawShow) Update(app *App) error {
 	s := d.ss.S
 	in := &app.Input

@@ -36,6 +36,10 @@ func tsContractList(m int) *tsList {
 		title: "IHRE MANNSCHAFT", hitX: 6, rowY: 0x1e, hitRight: 0xef, hintY: 0xb8}
 }
 
+// Passing implements passer: at the season end the screen only opens the
+// talks with the next player, or closes.
+func (c *ContractScreen) Passing() bool { return c.seasonEnd && !c.busy }
+
 func (c *ContractScreen) Update(app *App) error {
 	if !c.seasonEnd {
 		return c.inner.Update(app)
