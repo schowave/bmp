@@ -99,7 +99,7 @@ pointer. Texts are centred over box and shadow (x0=75+2, x1=75+157).
 The left button selects. The right button does **not** leave screens: they
 close with HAUPT MENU or WEITER only (exceptions: the sponsor screen and the
 setup/options, where the right button confirms). In the main menu the right
-button closes the open group. During a match day the left button plays the
+button closes the open group, on the manager tearing his hair it asks to quit. During a match day the left button plays the
 rest of the half at once, the right button shows the author of the last goal
 scene, the space bar opens the options.
 
@@ -158,8 +158,10 @@ club opens its information.
 - Left groups x=5, right x=266, rows y=110/153/196; submenu columns
   82/136/190, rows 112/154/196. The group clicked last keeps frame 25.
 - Disk menu: LADEN, SPEICHERN, HIGHSCORE | OPTIONEN, NEU.
-- The manager tearing his hair: "MöCHTEN SIE / DAS SPIEL WIRKLICH / BEENDEN ?"
-  LEIDER JA / KEIN GEDANKE. The turn ends on the calendar sheet only (not
+- The manager tearing his hair: a **right** click asks "MöCHTEN SIE / DAS SPIEL
+  WIRKLICH / BEENDEN ?" LEIDER JA / KEIN GEDANKE (the icon shows the screaming
+  manager of PIC/37.VGA, 0,31, 32×23, while it is open; LEIDER JA ends the
+  program); a left click does nothing. The turn ends on the calendar sheet only (not
   while the message panel is open).
 - Message panel f_3091_05c4: fill 0x3b,0x72–0xf5,0xea colour 4, outline
   0x39,0x70–0x106,0xea colour 7, three raised fields from y=0x71 every 0x29,
