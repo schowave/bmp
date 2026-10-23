@@ -215,6 +215,9 @@ func (s *State) available(slot *Slot) bool {
 	return st == 0 || (st == 1 && s.CupDay)
 }
 
+// CountOnPitch returns the number of players in the team of manager m.
+func (s *State) CountOnPitch(m int) int { return s.countLineup(m, 1) }
+
 // countLineup returns the number of slots with a player (mode 0), on the
 // pitch (1) or on the bench (2) (f_3091_1109).
 func (s *State) countLineup(m, mode int) int {

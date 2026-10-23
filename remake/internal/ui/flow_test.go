@@ -112,8 +112,8 @@ func TestSetupAndFirstTurns(t *testing.T) {
 			step(t, app, click(260, headerPanelY+30))
 		case *MatchScreen:
 			step(t, app, click(160, 120))
-		case *SubstitutionScreen:
-			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
+		case *SquadScreen:
+			step(t, app, click(lnIconX+10, lnIconY[3]+10))
 		case *DrawShow:
 			step(t, app, click(160, 120))
 		case *NewspaperScene:

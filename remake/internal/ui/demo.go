@@ -36,11 +36,14 @@ func Demo(name string, mana *assets.Mana, saveDir string) Scene {
 		case game.PhaseTurn:
 			s.EndTurn()
 		case game.PhaseMatches:
-			if name == "match" && i > 20 {
+			if (name == "match" || name == "matchlineup") && i > 20 {
 				md := s.NextMatchDay()
 				if md != nil {
 					for k := 0; k < 70; k++ {
 						md.Step()
+					}
+					if name == "matchlineup" {
+						return NewMatchLineup(ss, md, 0)
 					}
 					return NewMatchScreen(ss, md)
 				}
@@ -93,7 +96,7 @@ var playedDemos = map[string]func(ss *Session) Scene{
 
 // DemoNames returns the names Demo knows, sorted.
 func DemoNames() []string {
-	names := []string{"setup", "dfb0", "uefa0", "start", "newspaper", "turn", "match"}
+	names := []string{"setup", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup"}
 	for n := range playedDemos {
 		names = append(names, n)
 	}

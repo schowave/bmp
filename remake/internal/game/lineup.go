@@ -108,6 +108,8 @@ var (
 	ErrMaxReserves    = LineupError{"Maximal 4", "Reservespieler !"}
 	ErrSuspendedShort = LineupError{"Spieler ist", "GESPERRT."}
 	ErrInjuredShort   = LineupError{"Spieler ist", "VERLETZT "}
+	ErrNotOnPitch     = LineupError{"Spieler ist", "nicht aufgestellt"}
+	ErrNoSubs         = LineupError{"Keine Auswechslung", "mehr möglich"}
 )
 
 // BoardCell is a cell of the tactics board. The lineup screen keeps the
