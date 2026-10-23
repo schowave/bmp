@@ -89,7 +89,8 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
    - On the right: cups and the disk menu (load, save, high scores,
      options, NEU).
    - A click on the calendar sheet ends the turn, a click in the middle
-     opens the messages, and the manager tearing his hair quits the game.
+     opens the messages, and a right click on the manager tearing his hair quits
+     the game.
 4. **Match days** run live with the goal scenes:
 
    | Input | Effect |

@@ -30,8 +30,9 @@ type MenuItem struct {
 type MenuGroup struct {
 	Icon  Icon
 	Items [9]MenuItem // 3x3, column by column
-	// Action runs instead of a submenu when there are no items.
-	Action func(app *App)
+	// RightAction runs on a right click on the icon instead of a submenu
+	// (the manager tearing his hair); done ends its alert state.
+	RightAction func(app *App, done func())
 }
 
 // Header is what the panel at the top shows.
@@ -67,6 +68,7 @@ type MainMenu struct {
 	Messages    *MessagePanel
 	NewMessages func() bool
 	msgOpen     bool
+	alert       *MenuGroup // its RightAction runs: the icon shows the alert face
 	started     bool
 }
 
@@ -88,8 +90,18 @@ func (m *MainMenu) Update(app *App) error {
 		return nil
 	}
 	if !in.Left {
-		if in.Right && m.open != nil {
-			m.open = nil
+		if in.Right {
+			for i := range m.Right {
+				g := &m.Right[i]
+				if g.RightAction != nil && in.In(menuRightX, menuRowsY[i], ButtonW, ButtonH) {
+					m.alert = g
+					g.RightAction(app, func() { m.alert = nil })
+					return nil
+				}
+			}
+			if m.open != nil {
+				m.open = nil
+			}
 		}
 		return nil
 	}
@@ -104,13 +116,12 @@ func (m *MainMenu) Update(app *App) error {
 			g *MenuGroup
 		}{{menuLeftX, &m.Left[i]}, {menuRightX, &m.Right[i]}} {
 			if in.Clicked(side.x, menuRowsY[i], ButtonW, ButtonH) {
-				m.pressed = side.g
-				if side.g.Action != nil {
-					m.open = nil
-					side.g.Action(app)
-				} else {
-					m.open = side.g
+				if side.g.RightAction != nil {
+					// only the right button does something here
+					return nil
 				}
+				m.pressed = side.g
+				m.open = side.g
 				return nil
 			}
 		}
@@ -146,6 +157,10 @@ func (m *MainMenu) Draw(app *App, dst *ebiten.Image) {
 	for i := range 3 {
 		g.drawIconButton(dst, m.Left[i].Icon, menuLeftX, menuRowsY[i], m.pressed == &m.Left[i])
 		g.drawIconButton(dst, m.Right[i].Icon, menuRightX, menuRowsY[i], m.pressed == &m.Right[i])
+		if m.alert == &m.Right[i] {
+			// The screaming manager of PIC/37.VGA while the question is open.
+			Draw(dst, g.Sub(37, rectWH(0, 31, 32, 23)), menuRightX+9, menuRowsY[i]+9)
+		}
 	}
 	if m.msgOpen {
 		m.Messages.Draw(g, dst)

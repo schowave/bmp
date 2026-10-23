@@ -60,11 +60,12 @@ func NewTurnMenu(ss *Session) *MainMenu {
 		{IconOptions, push(func() Scene { return NewOptionsScreen(ss) })},
 		{IconNew, push(func() Scene { return NewAddManagers(ss) })},
 	}}
-	// The manager tearing his hair asks whether to quit; the turn ends with
-	// a click on the calendar sheet.
-	m.Right[2] = MenuGroup{Icon: IconContinue, Action: func(app *App) {
+	// A right click on the manager tearing his hair asks whether to quit,
+	// a left click does nothing; the turn ends on the calendar sheet.
+	m.Right[2] = MenuGroup{Icon: IconContinue, RightAction: func(app *App, done func()) {
 		app.Push(NewQuestion(ss.M().Name, "MöCHTEN SIE\nDAS SPIEL WIRKLICH\nBEENDEN ?", "LEIDER JA", "KEIN GEDANKE",
 			func(app *App, yes bool) {
+				done()
 				if yes {
 					app.Quit()
 				}
@@ -85,9 +86,12 @@ func turnHeader(ss *Session) Header {
 	if played > len(mg.PosAfter) {
 		played = len(mg.PosAfter)
 	}
+	if s.Day <= 1 {
+		played = 0 // the curve starts on the second day, before it a dark line
+	}
 	h := Header{
 		Places:   mg.PosAfter[:max(played, 0)],
-		Chart:    s.Day > 1,
+		Chart:    true,
 		Face:     mg.Face,
 		Matchday: s.EventLabel(ss.Mgr()),
 		Manager:  mg.Name,
