@@ -12,6 +12,9 @@ type Session struct {
 	S       *game.State
 	Mana    *assets.Mana
 	SaveDir string
+	// unsaved are the high-score entries a season end could not save;
+	// they are entered again with the next ones.
+	unsaved []game.HighscoreEntry
 }
 
 // Mgr returns the index of the manager whose turn it is.

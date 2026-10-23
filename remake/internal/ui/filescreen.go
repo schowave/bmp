@@ -97,7 +97,7 @@ func (f *FileScreen) path() string {
 			return filepath.Join(f.ss.SaveDir, e.file)
 		}
 	}
-	return filepath.Join(f.ss.SaveDir, f.name)
+	return filepath.Join(f.ss.SaveDir, filepath.Base(f.name))
 }
 
 // hover returns the column and row of the list under the pointer.
@@ -180,7 +180,8 @@ func (f *FileScreen) typeName(app *App) {
 	in := &app.Input
 	g := app.Gfx
 	for _, c := range in.Chars {
-		if c <= 0x20 && c != ' ' || c >= 0x7f {
+		// no path separators: saves stay in the save directory
+		if c <= 0x20 && c != ' ' || c >= 0x7f || c == '/' || c == '\\' || c == ':' {
 			continue
 		}
 		n := f.name + strings.ToUpper(string(c))

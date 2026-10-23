@@ -138,7 +138,6 @@ type State struct {
 	// Squads holds the slots of the human managers 0..3 and of the
 	// transfer market (index 4).
 	Squads [MaxManagers + 1][SquadSlots]Slot
-	Stats  Records
 
 	Day        int // D:0x7dc, day of the season, 0 = 29 July
 	Event      int // F:0x16e

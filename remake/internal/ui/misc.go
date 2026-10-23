@@ -34,16 +34,22 @@ func saveHighscores(ss *Session, hs []game.HighscoreEntry) error {
 
 // recordHighscores enters es into the table and saves it, at every season
 // end (f_322b_2366(2)) and at the game end (@1a58:4161). It returns the
-// table; a table that cannot be read is not overwritten.
+// table; a table that cannot be read is not overwritten. Entries that
+// could not be saved are kept and entered first the next time.
 func recordHighscores(ss *Session, es []game.HighscoreEntry) ([]game.HighscoreEntry, error) {
+	es = append(ss.unsaved, es...)
+	ss.unsaved = nil
 	hs, err := loadHighscores(ss)
 	for _, e := range es {
 		hs, _ = game.EnterHighscore(hs, e)
 	}
-	if err != nil {
-		return hs, err
+	if err == nil {
+		err = saveHighscores(ss, hs)
 	}
-	return hs, saveHighscores(ss, hs)
+	if err != nil {
+		ss.unsaved = es
+	}
+	return hs, err
 }
 
 // HighscoreScreen is the high-score table on the full-screen picture

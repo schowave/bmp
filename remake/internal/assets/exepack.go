@@ -1,8 +1,8 @@
 // Package assets reads the files of the original game: pictures, palettes,
 // the bitmap fonts embedded in BMMAIN.EXE and the club database MANA.DAT.
 //
-// None of the original files are part of this repository. They are read at
-// runtime from the directory of an installed copy of the game.
+// The files are read from the directory of an installed copy of the game
+// or, without one, from the copy built into the binary (package embedded).
 package assets
 
 import (

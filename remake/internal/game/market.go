@@ -368,6 +368,8 @@ func (s *State) FinishPurchase(agreed bool) error {
 	mi := pp.Manager
 	if !agreed {
 		s.removeSlot(mi, pp.Slot, true, SquadMax)
+		// Like the original only the club comes back: the league goals and
+		// games addPerson cleared stay at zero.
 		s.Persons[pp.Person].Team = pp.OldTeam
 		if !pp.H2H {
 			s.Squads[MarketIndex][pp.Market].Rejected |= 1<<mi | 0x80
