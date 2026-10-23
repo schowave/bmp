@@ -21,3 +21,14 @@ relegation without drawing.
 Skip `remake/internal/embedded/data` in a diff: `mise run remake:extract`
 writes it, and `TestEmbeddedFilesMatchTheOriginal` fails when it differs from
 a fresh extract. Review the extractor (`remake/internal/assets`) instead.
+
+## A rule of the original is in its spec
+
+A diff whose code relies on a rule of the original (a comment names
+`f_SSSS_OOOO`, `D:` or `F:`) finds that rule in `docs/re/spec_*.md`, or adds
+it there in the same diff. A rule found while debugging and kept only in a
+code comment is lost to the next port.
+
+Example: the substitution after an injury relies on `D:0x664` (players
+allowed on the pitch); `docs/re/spec_match.md` §10.4 says how
+`f_1a58_1f75` passes it to `f_1ecd_1560`.
