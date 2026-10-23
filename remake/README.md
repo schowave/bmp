@@ -29,6 +29,9 @@ original.
 - **Linux only:** the GL and X11 headers Ebitengine builds against, e.g.
   `sudo apt-get install libgl1-mesa-dev xorg-dev`
 
+The original game in `../bmp` is only needed to extract the files anew, for
+the tests against `BMMAIN.EXE` and for the reverse-engineering tools.
+
 ## Quick start
 
 From the repository root:
@@ -122,8 +125,9 @@ mise run remake:test    # go vet ./... && go test -timeout 300s ./...
 The tests compare constant tables with the original executable, check the
 start finances against the original, play several seasons with random
 managers and drive the screens headless with the built-in files. Tests of
-`BMMAIN.EXE` and of the extraction are skipped when `../bmp` is missing. The timeout turns a screen that never
-closes into a failure instead of a hang.
+`BMMAIN.EXE` and of the extraction are skipped when `../bmp` is missing.
+The timeout turns a screen that never closes into a failure instead of a
+hang.
 
 `mise run hooks` enables the pre-commit hook, which builds and vets the
 staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
