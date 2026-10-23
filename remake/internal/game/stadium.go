@@ -40,7 +40,7 @@ func (s *State) constructionProgress(mi int) {
 			if s.popupWindow() {
 				s.popup(mi, BackdropDesk, msgCompletion(k))
 			} else {
-				s.notify(mi, msgCompletion(k))
+				s.notifyTimed(mi, msgCompletion(k))
 			}
 		}
 	}
@@ -289,7 +289,7 @@ func (s *State) stadiumEvents(mi int) {
 		dmg := (st[StSeats]/2 + 4*st[StStanding]) * int64(r.Between(2, 5)) / 1000 * 1000
 		m.Money -= dmg
 		m.RiotPending = false
-		s.notify(mi, msgRiot(dmg))
+		s.notifyTimed(mi, msgRiot(dmg))
 		if st[StCondition] > 1 {
 			if m.Money > 2000000 && r.Between(0, 1) == 0 {
 				st[StCondition]--
@@ -300,7 +300,7 @@ func (s *State) stadiumEvents(mi int) {
 	}
 	if r.Between(0, int(442-52*st[StComfort])) == 0 && st[StComfort] > 1 && m.League == 0 {
 		st[StComfort]--
-		s.notify(mi, msgComfort())
+		s.notifyTimed(mi, msgComfort())
 	}
 }
 

@@ -14,7 +14,19 @@ type Message struct {
 	Day    int
 	Text   string
 	Person int `json:",omitempty"`
+	// Life are the turns left of a message with a time limit (F:0x1d34),
+	// 0 for one without.
+	Life int `json:",omitempty"`
 }
+
+// Timed messages (f_0000_239e and the retirement announcement of
+// f_0cb5_13bd): each lives timedLife turns, counted down by the turn of
+// manager 0 (twice a week), in at most timedSlots places per manager; with
+// no place free the message goes at once (f_3091_0000 returns 0x7f).
+const (
+	timedLife  = 3
+	timedSlots = 10
+)
 
 // MaxMessages is the length of a manager's message list (F:0x5524, 20 per
 // manager).
@@ -32,6 +44,42 @@ func (s *State) notify(mi int, text string) {
 		m.Inbox = m.Inbox[:MaxMessages]
 	}
 	m.NewMessages = true
+}
+
+// notifyTimed adds a message with a time limit, if a place is free.
+func (s *State) notifyTimed(mi int, text string) {
+	if mi < 0 || mi >= len(s.Managers) {
+		return
+	}
+	n := 0
+	for _, msg := range s.Managers[mi].Inbox {
+		if msg.Life > 0 {
+			n++
+		}
+	}
+	if n >= timedSlots {
+		return
+	}
+	s.notify(mi, text)
+	s.Managers[mi].Inbox[0].Life = timedLife
+}
+
+// ageMessages counts the timed messages of every manager down and deletes
+// those that run out (f_0cb5_13bd, in the turn of manager 0). The original
+// counts only the managers 0..2; the remake counts manager 3 too.
+func (s *State) ageMessages() {
+	for _, m := range s.Managers {
+		kept := m.Inbox[:0]
+		for _, msg := range m.Inbox {
+			if msg.Life > 0 {
+				if msg.Life--; msg.Life == 0 {
+					continue
+				}
+			}
+			kept = append(kept, msg)
+		}
+		m.Inbox = kept
+	}
 }
 
 // notifyFor adds a message about the player person that his slot points to

@@ -337,6 +337,9 @@ ties). Deliberate differences:
   anywhere in a row of the list substitutes, also on the name; the original
   takes it only on the number and the position. The player taken out leaves
   the board at once (not checked against the original).
+- The timed messages of manager 3 expire like those of the others; the
+  original counts down only those of the managers 1 to 3 (index 0..2), so his
+  never go.
 - The key `o` on the training screen sets an optimal training plan, on the
   stadium screen an optimal ticket price, on the main menu all of them with the
   lineup (see *Hidden keys*).

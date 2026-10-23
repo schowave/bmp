@@ -270,6 +270,14 @@ Sequence per call (all for manager m):
 For each transfer-list slot t (m=4): if fatigue > 56: fatigue -= rand(3,9);
 if rand(0,3)==0 and (flags 9 > 0x1f) and message: flags9 &= 0x1f, delete message.
 Then message lifetimes F:0x1d34[k] (k = m*10..) count down; at 0 the message is deleted.
+Only timed messages have a lifetime: those of `f_0000_239e` (format 2: injury in training,
+riot damage, comfort downgrade, a finished construction `f_0000_20e1`) and the retirement
+announcement (format 4), each 3. A manager has 10 places for them (`f_3091_0000`); with none
+free the message is deleted at once and never shown. The loop counts the managers 0..2 only,
+so the timed messages of manager 3 never expire (the remake counts all four). The messages a
+squad or market slot points to (+0x30: an offer of a club, a request for a longer contract)
+have no lifetime; they are deleted when the slot lets them go (offer expired or answered,
+request withdrawn, season end).
 (Followed for every m by CPU bids on transfer-list players owned by m — transfer topic:
 uses value(t,0)/10000 vs rand(0,180), bit 0x80, team via f_14a4_24bf.)
 

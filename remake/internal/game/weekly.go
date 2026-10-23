@@ -43,6 +43,7 @@ func (s *State) turn(mi int) {
 				s.endMessage(sl)
 			}
 		}
+		s.ageMessages()
 	}
 	bit := 1 << mi
 	for i := 0; i < MarketSlots; i++ {
@@ -75,13 +76,13 @@ func (s *State) turn(mi int) {
 		sl := &sq[i]
 		p := &s.Persons[sl.Person]
 		if s.trainingInjury(sl, noMatch) {
-			s.notify(mi, msgInjury(p.Name, InjuryNames[sl.Injury]))
+			s.notifyTimed(mi, msgInjury(p.Name, InjuryNames[sl.Injury]))
 			relineup = true
 		}
 		e := s.retirementAge(sl)
 		if rr := r.Between(32, 45); rr < e && sl.Nego&0x80 == 0 && sl.Nego < 100 {
 			sl.Nego |= 0x80
-			s.notify(mi, msgNoExtension(p.Name))
+			s.notifyTimed(mi, msgNoExtension(p.Name))
 		}
 		if sl.Out != 0 {
 			sl.Lineup = 0
