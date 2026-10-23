@@ -52,3 +52,37 @@ func TestAddManagerGetsSquad(t *testing.T) {
 		t.Errorf("%d players, want 20", n)
 	}
 }
+
+// f_14a4_1798 brings all foreign players beyond 4 home in its first round.
+func TestReshuffleBringsForeignersHome(t *testing.T) {
+	s, err := NewGame(mana(t), Options{Managers: []NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for p := 1; p <= 30; p++ {
+		if s.Persons[p].Owner == OwnerFree {
+			s.Persons[p].Team = NumGerman + p
+		}
+	}
+	s.reshufflePersons()
+	foreign := 0
+	for p := 1; p < NumPersons; p++ {
+		if tm := s.Persons[p].Team; tm >= NumGerman && tm != 0xff {
+			foreign++
+		}
+	}
+	if foreign > 4 {
+		t.Errorf("%d foreign players left", foreign)
+	}
+}
+
+// The buyer of a moved person is chosen by his value / 10000.
+func TestPersonValue(t *testing.T) {
+	s := &State{}
+	s.Persons[1] = Person{Age: 24, Skill: [3]int{70, 80, 50}}
+	// (70+80)/2*58/100 = 43, age (45-24)*100/27*25/100 = 19: 62 * 10000
+	// - 100000 = 520000, * 5/3 = 866666 -> 866000.
+	if v := s.personValue(1); v != 866000 {
+		t.Errorf("value %d, want 866000", v)
+	}
+}
