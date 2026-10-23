@@ -139,57 +139,22 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 		s.StartYear = 1992
 	}
 	s.initPersons()
-	endless := opt.Length == Endless
-	l0 := 0
-	if endless {
-		l0 = 2
-	}
-	short := opt.Length == OneYear
-	for mi, m := range s.Managers {
-		if short {
-			m.Ads = [9]int64{180000, 45000, 45000, 45000, 45000, 45000, 45000, 0, 30000}
-		} else {
-			m.Ads = adDefaults
-		}
-		m.Money = 1500000
-		if s.Level == 4 {
-			m.Money = 1900000
-		}
-		m.MinAudience = 99999
-		s.placeClub(mi, l0, short)
-		m.League = l0
-		m.TicketPrice = (boolInt(short)+8)*2 - 3*l0
-		m.Stadium[StStanding] = int64((5 - l0) * 4000)
-		m.Stadium[StSeats] = int64((2 - l0) * 3000)
-		if short {
-			m.Stadium[StSeats] += 5000
-			m.Stadium[StStanding] += 10000
-		}
-		m.Stadium[StCovered] = int64((2 - l0) * 3500)
-		m.Stadium[StCondition] = int64(4 + boolInt(short))
-		m.Stadium[StComfort] = int64(3 + boolInt(short))
-		if !endless {
-			three := boolInt(opt.Length == ThreeYears)
-			m.Stadium[StScoreboard] = int64(3 - 2*three)
-			m.Stadium[StFloodlight] = int64(3 - three)
-		}
-		m.Training = [4]int{5, 4, 6, 5}
-		m.Intensity = 6
-		m.PosTraining = [4]int{1, 3, 3, 3}
-		m.Einsatz = 16
-		for k := range m.PosAfter {
-			m.PosAfter[k] = 10
-		}
-		m.Popularity = 50 - 20*l0
-		s.startSquad(mi, l0, short)
-		s.seasonBudget(mi)
-		s.sponsorOffers(mi)
+	for mi := range s.Managers {
+		s.initManager(mi, opt.Length)
 	}
 	s.driftBankRates()
 	s.driftStrengths(10)
 	s.reshufflePersons()
 	s.drawCup(CupDFB)
+	s.Draws = []int{CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA}
+	s.Display = DefaultDisplay()
 	s.Day = 0
+	// The table places before the first matchday are the table order.
+	for l := 0; l < NumLeagues; l++ {
+		for i, id := range s.Tables[l][:TeamsPerLeague[l]] {
+			s.Clubs[id].Pos = i
+		}
+	}
 	s.refreshMarket()
 	for mi := range s.Managers {
 		s.AutoLineup(mi)
@@ -243,6 +208,89 @@ func (s *State) placeClub(mi, l0 int, short bool) {
 		s.swapIdentity(y, x, false)
 		s.Clubs[y], s.Clubs[x] = s.Clubs[x], s.Clubs[y]
 	}
+}
+
+// initManager gives manager mi of a new game, or one added later with NEU,
+// the start values of f_08bc_2184: club placement, stadium, squad, money.
+func (s *State) initManager(mi int, length GameLength) {
+	m := s.Managers[mi]
+	endless := length == Endless
+	l0 := 0
+	if endless {
+		l0 = 2
+	}
+	short := length == OneYear
+	if short {
+		m.Ads = [9]int64{180000, 45000, 45000, 45000, 45000, 45000, 45000, 0, 30000}
+	} else {
+		m.Ads = adDefaults
+	}
+	m.Money = 1500000
+	if s.Level == 4 {
+		m.Money = 1900000
+	}
+	m.MinAudience = 99999
+	s.placeClub(mi, l0, short)
+	m.League = l0
+	m.TicketPrice = (boolInt(short)+8)*2 - 3*l0
+	m.Stadium[StStanding] = int64((5 - l0) * 4000)
+	m.Stadium[StSeats] = int64((2 - l0) * 3000)
+	if short {
+		m.Stadium[StSeats] += 5000
+		m.Stadium[StStanding] += 10000
+	}
+	m.Stadium[StCovered] = int64((2 - l0) * 3500)
+	m.Stadium[StCondition] = int64(4 + boolInt(short))
+	m.Stadium[StComfort] = int64(3 + boolInt(short))
+	if !endless {
+		three := boolInt(length == ThreeYears)
+		m.Stadium[StScoreboard] = int64(3 - 2*three)
+		m.Stadium[StFloodlight] = int64(3 - three)
+	}
+	m.Training = [4]int{5, 4, 6, 5}
+	m.Intensity = 6
+	m.PosTraining = [4]int{1, 3, 3, 3}
+	m.Einsatz = 16
+	for k := range m.PosAfter {
+		m.PosAfter[k] = 10
+	}
+	m.Popularity = 50 - 20*l0
+	s.startSquad(mi, l0, short)
+	s.seasonBudget(mi)
+	s.sponsorOffers(mi)
+}
+
+// Length returns the game length of the running game, from its end year.
+func (s *State) Length() GameLength {
+	switch s.EndYear {
+	case 1964, 1993:
+		return OneYear
+	case 1966, 1995:
+		return ThreeYears
+	}
+	return Endless
+}
+
+// AddManager adds a manager to a running game (NEU in the disk menu): he
+// gets club team (an id of the current table) and the start values of a new
+// game.
+func (s *State) AddManager(name string, team, face int) error {
+	if len(s.Managers) >= MaxManagers {
+		return errors.New("Es können höchstens vier Manager spielen.")
+	}
+	for _, m := range s.Managers {
+		if m.Team == team {
+			return errors.New("Der Verein hat schon einen Manager.")
+		}
+	}
+	mi := len(s.Managers)
+	m := &Manager{Name: name, Number: mi + 1, Team: team, Face: face, AutoLineup: 2}
+	m.CupStatus = [4]int{NotInCup, NotInCup, NotInCup, NotInCup}
+	s.Managers = append(s.Managers, m)
+	s.initManager(mi, s.Length())
+	s.AutoLineup(mi)
+	s.LineupStrength(mi, false)
+	return nil
 }
 
 // inCupDraw reports whether a club is drawn in cup c.
