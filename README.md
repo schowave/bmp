@@ -71,8 +71,9 @@ mise run remake:test    # vet, gofmt and tests
 The remake reproduces the original, bugs included; the deliberate differences
 are listed under *Deviations from the original* in
 [remake/README.md](remake/README.md), which also has the command-line options,
-the project layout and the [hidden keys of the options
-screen](remake/README.md#hidden-keys-cheats) (the original has them too).
+the project layout and the [hidden keys](remake/README.md#hidden-keys-cheats):
+those of the original's options screen and the remake's own key `o`, which
+sets the optimal lineup and training.
 
 ## Deployment
 
