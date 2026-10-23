@@ -10,12 +10,15 @@ var posShort = [4]string{"TOR", "ABW", "MIT", "ANG"}
 
 // PlayerInfo shows the details of a player (f_14a4_0906).
 type PlayerInfo struct {
-	ss   *Session
-	m, i int
+	ss    *Session
+	m, i  int
+	value int64 // MARKTWERT, drawn once like the original
 }
 
 // NewPlayerInfo creates the info screen of slot i of squad m.
-func NewPlayerInfo(ss *Session, m, i int) *PlayerInfo { return &PlayerInfo{ss: ss, m: m, i: i} }
+func NewPlayerInfo(ss *Session, m, i int) *PlayerInfo {
+	return &PlayerInfo{ss: ss, m: m, i: i, value: ss.S.PlayerValue(m, i, 0)}
+}
 
 func (p *PlayerInfo) Update(app *App) error {
 	if app.Input.Left || app.Input.Right || app.Input.Escape || app.Input.Enter {
@@ -49,7 +52,7 @@ func (p *PlayerInfo) Draw(app *App, dst *ebiten.Image) {
 		"KARTEN: GELB " + itoa(sl.Cards[1]) + "  ROT " + itoa(sl.Cards[0]) + "  GELB-ROT " + itoa(sl.Cards[2]),
 		"",
 		"VERTRAG: " + itoa(sl.Years) + " JAHR(E), GEHALT " + Money(sl.Salary) + "/MONAT",
-		"MARKTWERT: " + Money(s.PlayerValue(p.m, p.i, 0)),
+		"MARKTWERT: " + Money(p.value),
 	}
 	switch {
 	case sl.Status&2 != 0:

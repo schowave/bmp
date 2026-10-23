@@ -73,6 +73,7 @@ func (t *TransferScreen) Update(app *App) error {
 	if t.loan {
 		t.market.mode = 2
 	}
+	t.market.updatePrices(s)
 	if t.bid.active {
 		if t.bid.update(in) {
 			t.placeBid(app)

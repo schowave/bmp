@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"slices"
+
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/game"
@@ -26,6 +28,43 @@ type tsList struct {
 	// rowBase is the row index of the first slot (the market list counts
 	// its rows from 1).
 	rowBase int
+
+	// prices are the market prices of the rows. The value of a listed
+	// player with an offer draws a random number (f_2277_25de), which the
+	// original does when it builds the list (f_1ecd_06af), not each frame.
+	prices   []int64
+	priceKey []int64
+}
+
+// updatePrices works out the market prices again when the rows or the
+// mode changed.
+func (l *tsList) updatePrices(s *game.State) {
+	if l.mode != 1 && l.mode != 2 {
+		l.prices, l.priceKey = nil, nil
+		return
+	}
+	n := l.count(s)
+	key := []int64{int64(l.mode)}
+	for i := 0; i < n; i++ {
+		sl := &s.Squads[l.m][i]
+		key = append(key, int64(sl.Person), int64(sl.Status), int64(sl.Buyer), sl.Salary)
+	}
+	if slices.Equal(key, l.priceKey) {
+		return
+	}
+	l.priceKey = key
+	l.prices = l.prices[:0]
+	for i := 0; i < n; i++ {
+		l.prices = append(l.prices, s.MarketPrice(i, l.mode == 2))
+	}
+}
+
+// price is the market price of row i, 0 before the first update.
+func (l *tsList) price(i int) int64 {
+	if i < len(l.prices) {
+		return l.prices[i]
+	}
+	return 0
 }
 
 // Column masks of the lists of the original.
@@ -200,7 +239,7 @@ func (l *tsList) drawRow(g *Gfx, dst *ebiten.Image, s *game.State, cur, i, y int
 		case 17:
 			var v int64
 			if l.mode == 1 || l.mode == 2 {
-				v = s.MarketPrice(i, l.mode == 2)
+				v = l.price(i)
 			} else {
 				v = sl.Salary
 			}
