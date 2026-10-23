@@ -86,15 +86,21 @@ func Fonts(img *Image) (map[string]*Font, error) {
 // umlauts are mapped like the original does; unknown characters render as
 // a space.
 func (f *Font) Glyph(c byte) *Glyph {
+	return &f.Glyphs[f.Cell(c)-firstGlyph]
+}
+
+// Cell returns the character whose glyph cell shows c (0x20..0x7e).
+func (f *Font) Cell(c byte) byte {
 	if c < firstGlyph {
-		c = ' '
+		return ' '
 	}
 	if r, ok := f.remap[c]; ok {
-		c = r
-	} else if c >= 0x7f {
-		c = ' '
+		return r
 	}
-	return &f.Glyphs[c-firstGlyph]
+	if c >= 0x7f {
+		return ' '
+	}
+	return c
 }
 
 // Width returns the width of a string in pixels.

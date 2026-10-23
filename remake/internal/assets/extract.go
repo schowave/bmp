@@ -91,7 +91,7 @@ func DecodeFonts(data []byte) (map[string]*Font, error) {
 // FONTS.JSON.
 func Extract(src *Dir, dst string) error {
 	for upper, real := range src.names {
-		keep := upper == "MANA.DAT" || (strings.HasPrefix(upper, "PIC/") &&
+		keep := upper == "MANA.DAT" || strings.HasPrefix(upper, "TORE/") || (strings.HasPrefix(upper, "PIC/") &&
 			(strings.HasSuffix(upper, ".VGA") || strings.HasSuffix(upper, ".CP") || strings.HasSuffix(upper, ".PAL")))
 		if !keep {
 			continue
