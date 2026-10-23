@@ -154,11 +154,11 @@ func (s *State) sortTable(l int) {
 	for i, id := range t {
 		s.Clubs[id].Pos = i
 	}
+	// Every manager gets the place of his club at the matchday of league l,
+	// also a manager of another league (f_2a41_2d33).
 	if md := s.Matchday[l] - 1; md >= 0 && md < len(Manager{}.PosAfter) {
 		for _, m := range s.Managers {
-			if m.League == l {
-				m.PosAfter[md] = s.Clubs[m.Team].Pos
-			}
+			m.PosAfter[md] = s.Clubs[m.Team].Pos
 		}
 	}
 }

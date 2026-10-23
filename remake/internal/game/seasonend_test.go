@@ -95,3 +95,20 @@ func TestRescheduleLimitPerDate(t *testing.T) {
 		}
 	}
 }
+
+// f_2a41_2d33 writes the place of every manager's club at the matchday of
+// the sorted league, also for a manager of another league.
+func TestSortTableWritesEveryManager(t *testing.T) {
+	s, err := NewGame(mana(t), Options{Managers: []NewManager{{Name: "EINS", Team: 9}, {Name: "ZWEI", Team: 4}}, Level: 2, Seed: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Managers[1].League = 1
+	s.Matchday[0] = 5
+	s.Clubs[s.Managers[1].Team].Pos = 7
+	s.Managers[1].PosAfter[4] = 10
+	s.sortTable(0)
+	if got := s.Managers[1].PosAfter[4]; got != 7 {
+		t.Errorf("manager of another league: place %d, want 7", got)
+	}
+}
