@@ -172,8 +172,17 @@ f_14a4_1798 calls it with a *person* index as slot (bug, see §4.4).
    to a German club, and each round moves one more non-human person.
    (f_2277_25de is called with the person index as slot index of the current manager – original bug;
    value is effectively garbage-ish.)
-3. Writes a 3-int result `out[k] = cnt_k*100/F2*G/100` (cnt_k = squad sizes of humans in league k,
-   F2 = #foreign persons (min 1), G = 150-F2) to the caller's buffer. Not transfer-relevant.
+3. Writes a 3-int result `out[k] = cnt_k*100/T*G/100` to the caller's buffer (bytes): cnt_k = squad
+   sizes of the humans in league k (counted before step 1), T = sum of cnt_k + #foreign persons after
+   step 2 (min 1), G = 150-T.
+4. f_0cb5_2756 (end of f_0cb5_0012, before the summer days) calls f_14a4_1798, then per range k of
+   D:0x2272 ({0,17},{18,37},{38,57},{58,255}; out[3] = 0) counts the persons with a team in the range
+   (each lowers out[k] while > 0) and lists those with owner > 3. For k = 0..3, while out[k] > 0 (at
+   most 1000 rounds), it takes from every other range j, while j has listed persons left: a random
+   still listed entry (`rand(0, count_j-1)`, at most 1001 tries), `team = f_0cb5_2987(k)`. Then it
+   calls f_14a4_1798 again.
+   f_0cb5_2987(k): k > 2 → `rand(D:0x2272[2k], 255)`; else loop { x = rand(0,3); if rand(0,1) x =
+   rand(0,6); if rand(0,5)==0 x = rand(0,12); t = D:0x226e[k] + x } while t has a human manager.
 
 ---------------------------------------------------------------------------------------------
 ## 5. The market screen `f_2277_04a5`
