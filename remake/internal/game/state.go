@@ -171,7 +171,10 @@ type State struct {
 	// Draws lists the cups whose new draw the screens still have to
 	// present (f_17c2_0006), in the order of the original.
 	Draws []Cup
-	mana  *assets.Mana `json:"-"`
+	// Highscores are the entries of the managers at the last season end
+	// that the screens still have to put into the high-score table.
+	Highscores []HighscoreEntry
+	mana       *assets.Mana `json:"-"`
 }
 
 // Display holds the toggles of the options screen (D:0x05fe..0x060c) and

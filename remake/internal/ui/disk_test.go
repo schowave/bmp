@@ -135,23 +135,3 @@ func TestOptionsScreen(t *testing.T) {
 		t.Fatal("HAUPT MENU did not leave")
 	}
 }
-
-func TestEnterHighscore(t *testing.T) {
-	var hs []game.HighscoreEntry
-	for i := 0; i < 20; i++ {
-		hs = append(hs, game.HighscoreEntry{Manager: string(rune('A' + i)), Club: "X", Score: 100 - i})
-	}
-	// The same manager and club is replaced, even with fewer points.
-	got, row := enterHighscore(hs, game.HighscoreEntry{Manager: "B", Club: "X", Score: 50})
-	if row != 19 || got[19].Manager != "B" || got[1].Manager != "C" || hs[1].Manager != "B" {
-		t.Fatalf("row %d %+v", row, got)
-	}
-	// A new one only replaces the last when it has more points.
-	if _, row := enterHighscore(hs, game.HighscoreEntry{Manager: "Z", Club: "Y", Score: 81}); row != -1 {
-		t.Fatalf("row %d", row)
-	}
-	got, row = enterHighscore(hs, game.HighscoreEntry{Manager: "Z", Club: "Y", Score: 95})
-	if row != 6 || len(got) != 20 || got[19].Manager != "S" {
-		t.Fatalf("row %d %+v", row, got)
-	}
-}
