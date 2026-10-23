@@ -79,14 +79,16 @@ func convertLogo(img image.Image, pal *assets.Palette) *assets.Pic {
 	return p
 }
 
-// nearest is the logo colour closest to c.
+// nearest is the logo colour closest to c. It counts in integers: floats
+// may fuse a*b+c on one CPU and not on another, and a tie would then pick
+// another colour.
 func nearest(c color.RGBA, pal *assets.Palette) uint8 {
-	best, bd := logoColors[0], math.MaxFloat64
+	best, bd := logoColors[0], math.MaxInt
 	for _, i := range logoColors {
 		p := pal[i]
-		dr, dg, db := float64(c.R)-float64(p.R), float64(c.G)-float64(p.G), float64(c.B)-float64(p.B)
+		dr, dg, db := int(c.R)-int(p.R), int(c.G)-int(p.G), int(c.B)-int(p.B)
 		// Weighted like the eye: green counts most.
-		d := 0.3*dr*dr + 0.59*dg*dg + 0.11*db*db
+		d := 30*dr*dr + 59*dg*dg + 11*db*db
 		if d < bd {
 			best, bd = i, d
 		}
