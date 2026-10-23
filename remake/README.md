@@ -160,15 +160,15 @@ out of place: the goalkeeper stays in goal and a field player in his own line
 or next to it. A tired player (Erschöpfung 130 or more) plays only if he is
 worth 0,05 points more than who would play for him: a match adds 7 to 10 to
 the Erschöpfung of a player in the team, and above 135 his training does
-little and an injury in training gets likelier. The rating in the message does
+little and an injury in training gets likelier. The rating in the note does
 not count this rule, so it can be lower than before when a tired player rests.
 
 - With a match today the rating is against the next opponent in his venue:
   the strengths of the clubs change before the turn and not again before the
   match, so he plays as the strengths screen shows him. The lineup values
   of the manager have dice of their own (a wrong side or position, no
-  goalkeeper), so the rating is the mean of eight fixed series of them. A
-  third line of the message names the opponent. An opponent with a human
+  goalkeeper), so the rating is the mean of eight fixed series of them. The
+  note names the opponent. An opponent with a human
   manager counts as no opponent, because his lineup is not known yet.
 - Without a match, or against a human, the rating is the mean over every other
   club of the league, home and away, and the dice count with their mean. One club
@@ -177,10 +177,14 @@ not count this rule, so it can be lower than before when a tired player rests.
   point ahead it is two in three), which the search would use for nothing
   against the others.
 
-The message gives the points with a decimal comma (`OPTIMAL 1,13`): the
-rating of the new lineup and the ratings of the automatic lineups of the three
-formations (`STAND.`: 4-4-2, 3-5-2, 3-4-3), against the same opponent or
-clubs. A change counts only if it raises the rating by 0,03 points (the model
+Each key leaves a note of what it did instead of a message, as long as the
+screen is open: in the footer of the lineup screen (while no hint is shown
+there; beside the tactics board only the parts that fit), under the intensity
+of the training screen, below the table of the stadium screen, and in the
+middle of the main menu until the turn ends. The lineup note gives the points
+with a decimal comma (`OPTIMAL 1,13`): the rating of the new lineup and the
+ratings of the automatic lineups of the three formations (`STAND.`: 4-4-2,
+3-5-2, 3-4-3), against the same opponent or clubs. A change counts only if it raises the rating by 0,03 points (the model
 is not more exact), so the lineup is left alone where nothing is gained. The
 lineup stays automatic if the automatic one of the formation is already the
 best, otherwise it becomes manual.
@@ -195,8 +199,8 @@ game for each plan it tries: every split of the training points at intensity
 and single moves of the position points over all of it
 (`internal/game/trainingopt.go`). The strength is that of the best goalkeeper
 and the ten best field players, (Kondition + Technik + Form) / 3 less the
-Erschöpfung as the lineup counts it; the message names it for the new plan and
-the old one (`OPTIMAL 41,0`, `BISHER 37,5`). Training camps and the youth work
+Erschöpfung as the lineup counts it; the note names it for the new plan and
+the old one (`OPTIMAL 41,0  BISHER 37,5`). Training camps and the youth work
 are left alone. The plan looks to the end of the season, so pressing it again
 now and then is enough: after transfers or long injuries.
 
@@ -206,18 +210,18 @@ It tries every price of the screen (5..25 DM) and keeps the one with the most
 expected gate money, attendance × price, at the next home match: today's if
 it is at home, else the next home match of the league. The attendance is that
 of the original (`f_0f9d_11e0`, `internal/game/ticketopt.go`), the mean of 32
-fixed series of its dice. The message names the price, its gain against the
-price before and the gate money (`EINTRITT 12 +12.157`,
-`EINNAHME 132.157`) and the opponent; without a home match left the price
+fixed series of its dice. The note names the price, its gain against the
+price before and the gate money (`EINTRITT 12 +12.157  EINNAHME 132.157`)
+and the opponent; without a home match left the price
 stays. The price changes nothing else in the original.
 
 #### The key of the main menu
 
 It runs the training key, the lineup key and the ticket price key, and the
-message names the ratings with their gain against the ones before
+note names the ratings with their gain against the ones before
 (`AUFSTELLUNG 1,13 +0,41`, `TRAINING 41,0 +3,5`, `EINTRITT 12 +12.157`) and the
-opponent of the lineup. While the
-panel with new messages is open, it takes the keys; close it first.
+opponent of the lineup. A submenu or the panel of the messages covers it; while
+the panel with new messages is open, it takes the keys, so close it first.
 
 ## Project layout
 

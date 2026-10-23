@@ -102,6 +102,10 @@ type SquadScreen struct {
 	md      *game.MatchDay
 	matchMi int
 	out     int
+
+	// note is what the key o did, in the footer while nothing else is
+	// shown there: as many of its parts as fit.
+	note []string
 }
 
 // NewSquadScreen creates the lineup screen (team group, first item).
@@ -305,45 +309,21 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 	return true
 }
 
-// optimize sets the best lineup (game.State.OptimizeLineup) and tells what
-// it is worth, as expected points per match: the new lineup and the
-// automatic lineups of the three formations, against the next opponent, who is named in a last line, or
-// else against the clubs of the league.
+// optimize sets the best lineup (game.State.OptimizeLineup) and notes in the
+// footer what it is worth, as expected points per match: the new lineup and
+// the automatic lineups of the three formations, against the next opponent,
+// who is named, or else against the clubs of the league.
 func (q *SquadScreen) optimize(app *App) {
 	s := q.ss.S
 	res := s.OptimizeLineup(q.mi())
 	q.picked = -1
 	q.vac = game.BoardCell{}
-	app.Push(remakeToast(app, s, res.Opponent, "OPTIMAL "+pointsText(res.After),
-		"STAND. "+pointsText(res.Auto[0])+"/"+pointsText(res.Auto[1])+"/"+pointsText(res.Auto[2])))
-}
-
-// remakeToast is a message of the remake's hidden keys: its lines and, for
-// an opponent (a club id, or -1), a last one that names him.
-func remakeToast(app *App, s *game.State, opponent int, lines ...string) *lineupToast {
-	toast := newLineupToast(game.LineupError{lines[0], lines[1]})
-	toast.wide = true
-	toast.extra = append(toast.extra, lines[2:]...)
-	if opponent >= 0 {
-		toast.extra = append(toast.extra, opponentLine(app, s.Teams[opponent].Name))
+	q.note = []string{"OPTIMAL " + pointsText(res.After),
+		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2])}
+	if res.Opponent >= 0 {
+		q.note = append(q.note, "GEGEN "+s.Teams[res.Opponent].Name)
 	}
-	return toast
 }
-
-// opponentLine is "GEGEN" and the name of the opponent, cut to fit the
-// message box.
-func opponentLine(app *App, opponent string) string {
-	name := []rune(opponent)
-	l := "GEGEN " + string(name)
-	for len(name) > 0 && app.Gfx.TextWidth(FontNormal, l) > lnToastWidth {
-		name = name[:len(name)-1]
-		l = "GEGEN " + string(name)
-	}
-	return l
-}
-
-// lnToastWidth is the width of a line in the message box (167..317).
-const lnToastWidth = 148
 
 // pointsText writes n hundredths of a point with a decimal comma, "1,35".
 func pointsText(n int) string { return decimalText(n, 2) }
@@ -468,6 +448,9 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 			fillIncl(dst, barX0, y-4, barX1, y, g.PalColor(ColYellow))
 		}
 		q.drawRow(g, dst, i, y, i == bar, barX0, barX1)
+	}
+	if footer == "" {
+		footer = fitParts(g, FontSmall, q.x1()-lnListX0, q.note...)
 	}
 	g.TextMid(dst, FontSmall, lnListX0, q.x1(), lnFooterY, footer, ColLight, NoShadow)
 
@@ -702,10 +685,6 @@ func lnB2i(b bool) int {
 // as long. It takes no input.
 type lineupToast struct {
 	lines [2]string
-	// extra are lines of the remake below the two of the original; each makes
-	// the box taller by lnToastLineH. wide marks a message of the remake.
-	extra []string
-	wide  bool
 	auto  bool
 	frame int
 }
@@ -716,8 +695,6 @@ func newLineupToast(e game.LineupError) *lineupToast {
 
 // lnToastLineH is the distance of the lines of the message box.
 const lnToastLineH = 13
-
-func (t *lineupToast) extraH() int { return len(t.extra) * lnToastLineH }
 
 const lnToastSteps = 16
 
@@ -750,7 +727,7 @@ func (t *lineupToast) Draw(app *App, dst *ebiten.Image) {
 		}
 	}
 	x, y := 0xb3-step, 0x1b-step
-	w, h := 7+10*step, 3+2*step+t.extraH()*step/(lnToastSteps-1)
+	w, h := 7+10*step, 3+2*step
 	if step < lnToastSteps-1 {
 		fillIncl(dst, x+1, y+1, x+w-1, y+h-1, g.PalColor(ColDarkRed))
 		return
@@ -772,20 +749,12 @@ type toastLayout struct {
 	bottom int   // last row of the box
 }
 
-// layout places the lines of the full box: the two of the original centred
-// in 0xb9..0x12f; a message of the remake (wide) centred in the band as wide
-// as the box with the same middle, for its longer lines, and each extra line
-// below them makes the box taller.
+// layout places the two lines of the full box, centred in 0xb9..0x12f.
 func (t *lineupToast) layout() toastLayout {
-	lay := toastLayout{x0: 0xb9, x1: 0x12f, bottom: 44 + t.extraH()}
-	if t.wide {
-		lay.x0, lay.x1 = 169, 319
-	}
-	for i, l := range append([]string{t.lines[0], t.lines[1]}, t.extra...) {
-		if l != "" {
-			lay.lines = append(lay.lines, l)
-			lay.ys = append(lay.ys, 0x1a+i*lnToastLineH)
-		}
+	lay := toastLayout{x0: 0xb9, x1: 0x12f, bottom: 44}
+	for i, l := range t.lines {
+		lay.lines = append(lay.lines, l)
+		lay.ys = append(lay.ys, 0x1a+i*lnToastLineH)
 	}
 	return lay
 }
