@@ -31,20 +31,28 @@ func NewDriver(ss *Session) *Driver { return &Driver{ss: ss} }
 
 func (d *Driver) Update(app *App) error {
 	s := d.ss.S
+	// Dialogs and screens the game queued (credit due, cards, trophies,
+	// the season report ...) come first.
+	if s.HasNotices() {
+		ShowNotices(app, d.ss, nil)
+		return nil
+	}
+	if c, ok := s.TakeDraw(); ok {
+		app.Push(NewDrawShow(d.ss, c))
+		return nil
+	}
 	switch s.Loop.Phase {
 	case game.PhaseTurn:
-		mi := s.Loop.Current
-		msgs := s.TakeInbox(mi)
-		texts := make([]string, len(msgs))
-		for i, m := range msgs {
-			texts[i] = m.Text
-		}
 		app.Push(NewTurnMenu(d.ss))
-		ShowMessages(app, s.Managers[mi].Name+":", texts, nil)
 	case game.PhaseMatches:
 		md := s.NextMatchDay()
 		if md != nil {
-			app.Push(NewMatchScreen(d.ss, md))
+			if s.HasNotices() {
+				// the forfeit is queued by NextMatchDay
+				ShowNotices(app, d.ss, func(app *App) { app.Push(NewMatchScreen(d.ss, md)) })
+			} else {
+				app.Push(NewMatchScreen(d.ss, md))
+			}
 		}
 	case game.PhaseContracts:
 		app.Push(NewContractScreen(d.ss, true))
