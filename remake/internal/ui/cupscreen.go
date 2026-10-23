@@ -84,6 +84,11 @@ func (c *CupScreen) layout() (rowsH int, title string) {
 		round = s.Cups.Round[game.CupLandesmeister]
 	}
 	title = game.RoundNames[round] + " " + game.CupNames[c.cup]
+	if c.minute != 0 && s.Day >= 0x13b {
+		// The relegation plays in the slots of the Landesmeister
+		// (f_0310_02bf); during its match day f_17c2_1ccb names it.
+		title = "Relegation"
+	}
 	if c.minute == 0 {
 		if d, ok := c.nextDate(); ok {
 			title += "    " + itoa(d.Day) + "." + itoa(d.Month+1) + "."
