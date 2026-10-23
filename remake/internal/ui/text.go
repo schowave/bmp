@@ -7,13 +7,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// Font names of the original.
+// Font is the file name of a font of the original.
+type Font string
+
+// The fonts of the original.
 const (
-	FontNormal = "flow.font"    // 8 pixels, most text
-	FontSmall  = "micro4.font"  // 6 pixels, small print
-	FontBig    = "newbold.font" // 16 pixels, headlines
+	FontNormal Font = "flow.font"    // 8 pixels, most text
+	FontSmall       = "micro4.font"  // 6 pixels, small print
+	FontBig         = "newbold.font" // 16 pixels, headlines
 )
 
 // fontAtlas keeps the glyphs of a font as white pixels on one image, so text
@@ -49,57 +53,28 @@ func newFontAtlas(f *assets.Font) *fontAtlas {
 	return a
 }
 
-// encode turns a Go string into the 8-bit encoding the fonts expect: CP437
-// for German umlauts, '?' for anything the fonts cannot show.
-func encode(s string) []byte {
-	b := make([]byte, 0, len(s))
-	for _, r := range s {
-		switch {
-		case r < 0x80:
-			b = append(b, byte(r))
-		case r == 'Ä':
-			b = append(b, 0x8e)
-		case r == 'Ö':
-			b = append(b, 0x99)
-		case r == 'Ü':
-			b = append(b, 0x9a)
-		case r == 'ä':
-			b = append(b, 0x84)
-		case r == 'ö':
-			b = append(b, 0x94)
-		case r == 'ü':
-			b = append(b, 0x81)
-		case r == 'ß':
-			b = append(b, 0xe1)
-		default:
-			b = append(b, '?')
-		}
-	}
-	return b
-}
-
 // TextWidth returns the width of s in pixels.
-func (g *Gfx) TextWidth(font, s string) int {
+func (g *Gfx) TextWidth(font Font, s string) int {
 	a := g.fonts[font]
 	w := 0
-	for _, c := range encode(s) {
+	for _, c := range game.ToCP437(s) {
 		w += a.font.Glyph(c).W
 	}
 	return w
 }
 
 // FontHeight returns the height of a font.
-func (g *Gfx) FontHeight(font string) int {
+func (g *Gfx) FontHeight(font Font) int {
 	return g.fonts[font].font.Height
 }
 
 // Text draws s with its top-left corner at x, y.
-func (g *Gfx) Text(dst *ebiten.Image, font string, x, y int, s string, c color.Color) {
+func (g *Gfx) Text(dst *ebiten.Image, font Font, x, y int, s string, c color.Color) {
 	a := g.fonts[font]
 	r, gr, b, al := c.RGBA()
 	op := &ebiten.DrawImageOptions{}
 	op.ColorScale.Scale(float32(r)/0xffff, float32(gr)/0xffff, float32(b)/0xffff, float32(al)/0xffff)
-	for _, ch := range encode(s) {
+	for _, ch := range game.ToCP437(s) {
 		cell := a.cache(ch)
 		op.GeoM.Reset()
 		op.GeoM.Translate(float64(x), float64(y))
@@ -108,20 +83,24 @@ func (g *Gfx) Text(dst *ebiten.Image, font string, x, y int, s string, c color.C
 	}
 }
 
-// TextCentered draws s centred horizontally in [x, x+w).
-func (g *Gfx) TextCentered(dst *ebiten.Image, font string, x, y, w int, s string, c color.Color) {
+// TextCentered draws s centred horizontally in [x, x+w), with y the top of
+// the text. It rounds (w - width)/2 down, one pixel left of TextMid when w
+// is even and the width odd, and has no clamp at the screen edge: the
+// screens it draws were matched with the original that way. Text placed
+// like f_06c7_087c uses TextMid.
+func (g *Gfx) TextCentered(dst *ebiten.Image, font Font, x, y, w int, s string, c color.Color) {
 	g.Text(dst, font, x+(w-g.TextWidth(font, s))/2, y, s, c)
 }
 
 // TextCenteredShadow draws s centred like TextCentered, over a shadow one
 // pixel to the right, like the calendar sheet of the original.
-func (g *Gfx) TextCenteredShadow(dst *ebiten.Image, font string, x, y, w int, s string, c, shadow color.Color) {
+func (g *Gfx) TextCenteredShadow(dst *ebiten.Image, font Font, x, y, w int, s string, c, shadow color.Color) {
 	g.TextCentered(dst, font, x+1, y, w, s, shadow)
 	g.TextCentered(dst, font, x, y, w, s, c)
 }
 
 // TextRight draws s right-aligned so that it ends at x.
-func (g *Gfx) TextRight(dst *ebiten.Image, font string, x, y int, s string, c color.Color) {
+func (g *Gfx) TextRight(dst *ebiten.Image, font Font, x, y int, s string, c color.Color) {
 	g.Text(dst, font, x-g.TextWidth(font, s), y, s, c)
 }
 
@@ -138,7 +117,7 @@ func (a *fontAtlas) cache(c byte) image.Rectangle {
 const NoShadow = -1
 
 // baseline returns the row of the bottom of the capitals of a font.
-func (g *Gfx) baseline(font string) int {
+func (g *Gfx) baseline(font Font) int {
 	a := g.fonts[font]
 	gl := a.font.Glyph('A')
 	for r := len(gl.Rows) - 1; r >= 0; r-- {
@@ -152,16 +131,16 @@ func (g *Gfx) baseline(font string) int {
 }
 
 // TextAt draws s left-aligned at x with its baseline at y.
-func (g *Gfx) TextAt(dst *ebiten.Image, font string, x, y int, s string, c, shadow int) {
+func (g *Gfx) TextAt(dst *ebiten.Image, font Font, x, y int, s string, c, shadow int) {
 	top := y - g.baseline(font)
 	if shadow >= 0 {
-		g.Text(dst, font, x+1, top, s, g.C(shadow))
+		g.Text(dst, font, x+1, top, s, g.PalColor(shadow))
 	}
-	g.Text(dst, font, x, top, s, g.C(c))
+	g.Text(dst, font, x, top, s, g.PalColor(c))
 }
 
 // TextMid draws s centred between x0 and x1 with its baseline at y.
-func (g *Gfx) TextMid(dst *ebiten.Image, font string, x0, x1, y int, s string, c, shadow int) {
+func (g *Gfx) TextMid(dst *ebiten.Image, font Font, x0, x1, y int, s string, c, shadow int) {
 	g.TextAt(dst, font, midX(x0, x1, g.TextWidth(font, s)), y, s, c, shadow)
 }
 
@@ -177,6 +156,6 @@ func midX(x0, x1, w int) int {
 }
 
 // TextEnd draws s right-aligned so that it ends before x, baseline at y.
-func (g *Gfx) TextEnd(dst *ebiten.Image, font string, x, y int, s string, c, shadow int) {
+func (g *Gfx) TextEnd(dst *ebiten.Image, font Font, x, y int, s string, c, shadow int) {
 	g.TextAt(dst, font, x-g.TextWidth(font, s), y, s, c, shadow)
 }

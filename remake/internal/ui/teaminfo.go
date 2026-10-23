@@ -140,7 +140,7 @@ func (ti *TeamInfo) Draw(app *App, dst *ebiten.Image) {
 		}
 	}
 	g.TextMid(dst, FontNormal, tiX, tiX+0xe0, 0x3f, title, ColBeige, ColBlack)
-	FillRect(dst, tiX+1, 0x41, 0xdf, 1, g.C(ColBeige))
+	FillRect(dst, tiX+1, 0x41, 0xdf, 1, g.PalColor(ColBeige))
 
 	xs, labels := ti.buttons()
 	for i, x := range xs {
@@ -269,7 +269,7 @@ func (ti *TeamInfo) drawInfo(g *Gfx, dst *ebiten.Image) {
 	if c.Eternal == 0 {
 		txt += "NOCH KEINEN EINZIGEN..."
 	} else {
-		txt += formatMoney(c.Eternal)
+		txt += game.FormatMoney(c.Eternal)
 	}
 	left(y2, txt, ColGrey2)
 }
@@ -325,7 +325,7 @@ func (ti *TeamInfo) drawRest(g *Gfx, dst *ebiten.Image) {
 	g.TextAt(dst, FontSmall, 0xbe, 0x48, "PLATZ (STÄRKE)", ColLight, NoShadow)
 	g.TextMid(dst, FontSmall, 0x108, 0x108, 0x48, "DATUM", ColLight, NoShadow)
 	g.TextAt(dst, FontSmall, 0x115, 0x48, "ERGEBNIS", ColLight, NoShadow)
-	FillRect(dst, 0x5a, 0x4a, 0x138-0x5a+1, 1, g.C(ColLight))
+	FillRect(dst, 0x5a, 0x4a, 0x138-0x5a+1, 1, g.PalColor(ColLight))
 
 	half := game.MatchdaysPerLeague[l] / 2
 	first := 1

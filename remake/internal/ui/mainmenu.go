@@ -3,6 +3,7 @@ package ui
 import (
 	"image"
 	"image/color"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -196,31 +197,16 @@ func drawHeader(app *App, dst *ebiten.Image, h Header) {
 	}
 	// The sheet is printed grey-blue with a shadow to the right, the day
 	// darker.
-	ink, inkShadow := g.C(ColGrey4), g.C(ColGrey7)
+	ink, inkShadow := g.PalColor(ColGrey4), g.PalColor(ColGrey7)
 	g.TextCenteredShadow(dst, FontNormal, 244, headerPanelY+13, 60, h.Weekday, ink, inkShadow)
-	g.TextCenteredShadow(dst, FontBig, 243, headerPanelY+24, 60, itoa(h.Day)+".", g.C(ColGrey6), dark)
+	g.TextCenteredShadow(dst, FontBig, 243, headerPanelY+24, 60, itoa(h.Day)+".", g.PalColor(ColGrey6), dark)
 	g.TextCenteredShadow(dst, FontNormal, 244, headerPanelY+43, 60, h.Month, ink, inkShadow)
 	g.TextCenteredShadow(dst, FontNormal, 244, headerPanelY+53, 60, itoa(h.Year), ink, inkShadow)
 }
 
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	neg := n < 0
-	if neg {
-		n = -n
-	}
-	var b []byte
-	for n > 0 {
-		b = append([]byte{byte('0' + n%10)}, b...)
-		n /= 10
-	}
-	if neg {
-		b = append([]byte{'-'}, b...)
-	}
-	return string(b)
-}
+func itoa(n int) string { return strconv.Itoa(n) }
+
+func itoa64(n int64) string { return strconv.FormatInt(n, 10) }
 
 // drawPlaces draws the curve of the table places in the box of the header
 // (f_08bc_0b5f): from the left edge at y=74 to one point per matchday, the
@@ -228,14 +214,14 @@ func itoa(n int) string {
 func drawPlaces(g *Gfx, dst *ebiten.Image, places []int) {
 	const x0, x1, y0 = 0x3f, 0xb1, 0x4a
 	if len(places) == 0 {
-		drawLine(dst, x0, y0, x1, y0, g.C(ColGrey7))
+		drawLine(dst, x0, y0, x1, y0, g.PalColor(ColGrey7))
 		return
 	}
 	px, py := x0, y0
 	for k, p := range places {
 		x := x0 + (k+1)*(x1-x0)/len(places)
 		y := 0x41 + p
-		drawLine(dst, px, py, x, y, g.C(ColBeige))
+		drawLine(dst, px, py, x, y, g.PalColor(ColBeige))
 		px, py = x, y
 	}
 }

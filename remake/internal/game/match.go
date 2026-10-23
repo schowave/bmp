@@ -34,7 +34,7 @@ type MatchEvent struct {
 type Fixture struct {
 	League     int // 0..2, or -1 for a cup match
 	MD         int // matchday of a league match (1-based)
-	Cup        int // cup index for cup matches
+	Cup        Cup // cup of cup matches
 	Pair       int // pair index (league) or slot index of the home team (cup)
 	Home, Away int
 	Chances    [2][8]int // minutes of the planned chances
@@ -162,7 +162,7 @@ func (s *State) newMatchDay(leagueMask, cupMask int, replay bool) *MatchDay {
 			md.Fixtures = append(md.Fixtures, &Fixture{League: l, MD: s.Matchday[l], Pair: i, Home: p.Home, Away: p.Away})
 		}
 	}
-	for c := 0; c < NumCups; c++ {
+	for c := CupDFB; c < NumCups; c++ {
 		if cupMask&(1<<c) == 0 {
 			continue
 		}
@@ -1030,7 +1030,7 @@ func (md *MatchDay) afterRegularTime() {
 	if !md.extra {
 		md.extra = true
 		any := false
-		for c := 0; c < NumCups; c++ {
+		for c := CupDFB; c < NumCups; c++ {
 			if md.cupMask&(1<<c) != 0 && len(s.needsExtraTime(c, md.cupPairs(c), 0)) > 0 {
 				any = true
 			}
@@ -1042,7 +1042,7 @@ func (md *MatchDay) afterRegularTime() {
 	}
 	if !md.pens {
 		md.pens = true
-		for c := 0; c < NumCups; c++ {
+		for c := CupDFB; c < NumCups; c++ {
 			if md.cupMask&(1<<c) == 0 {
 				continue
 			}
@@ -1053,7 +1053,7 @@ func (md *MatchDay) afterRegularTime() {
 	}
 }
 
-func (md *MatchDay) cupPairs(c int) int {
+func (md *MatchDay) cupPairs(c Cup) int {
 	n := 0
 	for _, f := range md.Fixtures {
 		if f.League < 0 && f.Cup == c {
@@ -1065,7 +1065,7 @@ func (md *MatchDay) cupPairs(c int) int {
 
 // shootout decides a tie by penalties (f_0310_356d). The shoot-out score
 // replaces the match score, marked with +20.
-func (md *MatchDay) shootout(c, slot int) {
+func (md *MatchDay) shootout(c Cup, slot int) {
 	s := md.s
 	r := &s.Rand
 	var f *Fixture
@@ -1123,7 +1123,7 @@ func (md *MatchDay) finish() {
 			f.HasFinal = true
 		}
 	}
-	for c := 0; c < NumCups; c++ {
+	for c := CupDFB; c < NumCups; c++ {
 		if md.cupMask&(1<<c) != 0 {
 			s.advanceCup(c)
 		}

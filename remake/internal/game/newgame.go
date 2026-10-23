@@ -33,20 +33,6 @@ type NewManager struct {
 	Face int
 }
 
-// cp437 converts a CP437 string of MANA.DAT to UTF-8.
-func cp437(s string) string {
-	m := map[byte]rune{0x8e: 'Ä', 0x99: 'Ö', 0x9a: 'Ü', 0x84: 'ä', 0x94: 'ö', 0x81: 'ü', 0xe1: 'ß'}
-	var r []rune
-	for i := 0; i < len(s); i++ {
-		if u, ok := m[s[i]]; ok {
-			r = append(r, u)
-		} else {
-			r = append(r, rune(s[i]))
-		}
-	}
-	return string(r)
-}
-
 // Constants of the person table (f_322b_035c).
 var (
 	personBlocks   = [5]int{0, 20, 64, 106, 151} // D:0x7a6
@@ -75,7 +61,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	for t := 0; t < NumTeams; t++ {
 		c := mana.Clubs[t]
 		tm := &s.Teams[t]
-		tm.Name = cp437(c.Name)
+		tm.Name = FromCP437(c.Name)
 		tm.Logo = c.Logo
 		for k := 0; k < 3; k++ {
 			tm.Strength[k] = c.Strength[k]
@@ -114,7 +100,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	}
 	s.qualifyEurope()
 	s.clearCupResults()
-	for c := 1; c < NumCups; c++ {
+	for c := CupLandesmeister; c < NumCups; c++ {
 		s.drawCup(c)
 	}
 	// The original draws before the managers exist.
@@ -146,7 +132,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	s.driftStrengths(10)
 	s.reshufflePersons()
 	s.drawCup(CupDFB)
-	s.Draws = []int{CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA}
+	s.Draws = []Cup{CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA}
 	s.Display = DefaultDisplay()
 	s.Day = 0
 	// The table places before the first matchday are the table order.
@@ -250,7 +236,7 @@ func (s *State) initManager(mi int, length GameLength) {
 	m.Training = [4]int{5, 4, 6, 5}
 	m.Intensity = 6
 	m.PosTraining = [4]int{1, 3, 3, 3}
-	m.Einsatz = 16
+	m.EffortSetting = 16
 	for k := range m.PosAfter {
 		m.PosAfter[k] = 10
 	}
@@ -294,7 +280,7 @@ func (s *State) AddManager(name string, team, face int) error {
 }
 
 // inCupDraw reports whether a club is drawn in cup c.
-func (s *State) inCupDraw(id, c int) bool {
+func (s *State) inCupDraw(id int, c Cup) bool {
 	for _, x := range s.Cups.Slots[c] {
 		if x == id {
 			return true
@@ -306,7 +292,7 @@ func (s *State) inCupDraw(id, c int) bool {
 // inEuropeDraw reports whether a club is drawn in a European cup
 // (f_08bc_1df3).
 func (s *State) inEuropeDraw(id int) bool {
-	for c := 1; c < NumCups; c++ {
+	for c := CupLandesmeister; c < NumCups; c++ {
 		for _, x := range s.Cups.Slots[c] {
 			if x == id {
 				return true
@@ -321,7 +307,7 @@ func (s *State) manaName(t, n int) string {
 	if s.mana == nil || t < 0 || t >= assets.NumGermanClubs || n >= len(s.mana.Clubs[t].Players) {
 		return ""
 	}
-	return cp437(s.mana.Clubs[t].Players[n])
+	return FromCP437(s.mana.Clubs[t].Players[n])
 }
 
 // randomName picks an unused name of a non-human Bundesliga club
@@ -361,7 +347,7 @@ func (s *State) randomName(k, p int) string {
 // manaIndex returns the MANA.DAT record of the club now in slot t.
 func (s *State) manaIndex(t int) int {
 	for i := 0; i < assets.NumGermanClubs; i++ {
-		if cp437(s.mana.Clubs[i].Name) == s.Teams[t].Name {
+		if FromCP437(s.mana.Clubs[i].Name) == s.Teams[t].Name {
 			return i
 		}
 	}

@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"slices"
+
 	"github.com/schowave/bmp/remake/internal/assets"
 	"github.com/schowave/bmp/remake/internal/game"
 )
@@ -55,54 +57,46 @@ func Demo(name string, mana *assets.Mana, saveDir string) Scene {
 			}
 		}
 	}
-	l := ss.M().League
-	switch name {
-	case "table":
-		return NewTableScreen(ss, l)
-	case "results":
-		return NewResultsScreen(ss, l)
-	case "strength":
-		return NewStrengthScreen(ss, l)
-	case "squad":
-		return NewSquadScreen(ss)
-	case "info":
-		return NewPlayerInfo(ss, 0, 3)
-	case "transfer":
-		return NewTransferScreen(ss)
-	case "training":
-		return NewTrainingScreen(ss)
-	case "camp":
-		return NewCampScreen(ss)
-	case "contracts":
-		return NewContractScreen(ss, false)
-	case "scorers":
-		return NewScorerScreen(ss)
-	case "finance":
-		return NewFinanceScreen(ss)
-	case "eternal":
-		return NewEternalScreen(ss)
-	case "history":
-		return NewHistoryScreen(ss)
-	case "stadium":
-		return NewStadiumScreen(ss)
-	case "bank":
-		return NewBankScreen(ss)
-	case "sponsor":
-		return NewSponsorScreen(ss)
-	case "dfb":
-		return NewCupScreen(ss, game.CupDFB)
-	case "uefa":
-		return NewCupScreen(ss, game.CupUEFA)
-	case "highscore":
-		return NewHighscoreScreen(ss)
-	case "notices":
-		return NoticeDemo(ss)
-	case "options":
-		return NewOptionsScreen(ss)
-	case "load":
-		return NewFileScreen(ss, false)
-	case "save":
-		return NewFileScreen(ss, true)
+	if d, ok := playedDemos[name]; ok {
+		return d(ss)
 	}
 	return NewTurnMenu(ss)
+}
+
+// playedDemos are the demos of screens shown after some matchdays.
+var playedDemos = map[string]func(ss *Session) Scene{
+	"menu":      func(ss *Session) Scene { return NewTurnMenu(ss) },
+	"table":     func(ss *Session) Scene { return NewTableScreen(ss, ss.M().League) },
+	"results":   func(ss *Session) Scene { return NewResultsScreen(ss, ss.M().League) },
+	"strength":  func(ss *Session) Scene { return NewStrengthScreen(ss, ss.M().League) },
+	"squad":     func(ss *Session) Scene { return NewSquadScreen(ss) },
+	"info":      func(ss *Session) Scene { return NewPlayerInfo(ss, 0, 3) },
+	"transfer":  func(ss *Session) Scene { return NewTransferScreen(ss) },
+	"training":  func(ss *Session) Scene { return NewTrainingScreen(ss) },
+	"camp":      func(ss *Session) Scene { return NewCampScreen(ss) },
+	"contracts": func(ss *Session) Scene { return NewContractScreen(ss, false) },
+	"scorers":   func(ss *Session) Scene { return NewScorerScreen(ss) },
+	"finance":   func(ss *Session) Scene { return NewFinanceScreen(ss) },
+	"eternal":   func(ss *Session) Scene { return NewEternalScreen(ss) },
+	"history":   func(ss *Session) Scene { return NewHistoryScreen(ss) },
+	"stadium":   func(ss *Session) Scene { return NewStadiumScreen(ss) },
+	"bank":      func(ss *Session) Scene { return NewBankScreen(ss) },
+	"sponsor":   func(ss *Session) Scene { return NewSponsorScreen(ss) },
+	"dfb":       func(ss *Session) Scene { return NewCupScreen(ss, game.CupDFB) },
+	"uefa":      func(ss *Session) Scene { return NewCupScreen(ss, game.CupUEFA) },
+	"highscore": func(ss *Session) Scene { return NewHighscoreScreen(ss) },
+	"notices":   func(ss *Session) Scene { return NoticeDemo(ss) },
+	"options":   func(ss *Session) Scene { return NewOptionsScreen(ss) },
+	"load":      func(ss *Session) Scene { return NewFileScreen(ss, false) },
+	"save":      func(ss *Session) Scene { return NewFileScreen(ss, true) },
+}
+
+// DemoNames returns the names Demo knows, sorted.
+func DemoNames() []string {
+	names := []string{"setup", "dfb0", "uefa0", "start", "newspaper", "turn", "match"}
+	for n := range playedDemos {
+		names = append(names, n)
+	}
+	slices.Sort(names)
+	return names
 }

@@ -498,7 +498,7 @@ func (s *State) LineupStrength(m int, detailed bool) {
 		for i := 0; i < 3; i++ {
 			tsum[i] += s.Level
 			if ksum[i] != 0 {
-				ksum[i] += mg.Einsatz - 16
+				ksum[i] += mg.EffortSetting - 16
 			}
 			if tsum[i] != 0 && s.Level < 4 {
 				tsum[i] += (mg.Subs*3 + n[i]*bal[i]) * 10
@@ -515,7 +515,7 @@ func (s *State) LineupStrength(m int, detailed bool) {
 		if kt < 0 {
 			kt = 0
 		}
-		kt = clamp(kt+mg.Einsatz, 0, 40)
+		kt = clamp(kt+mg.EffortSetting, 0, 40)
 		if mg.Effort != ForfeitEffort {
 			mg.Effort = kt
 		}

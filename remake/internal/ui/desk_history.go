@@ -31,7 +31,7 @@ func (h *HistoryScreen) rows() int { return min(len(h.ss.M().History), 50) }
 func (h *HistoryScreen) Update(app *App) error {
 	in := &app.Input
 	switch {
-	case deskMenuHit(in):
+	case MenuButtonHit(in):
 		app.Pop()
 	case in.Clicked(5, 8, 0x135, 0x90) && (h.page+1)*16 < h.rows():
 		h.page++
@@ -48,9 +48,9 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Window(dst, 5, 8, 5+0x134, 8+0x8f, ColBlue)
 	g.DrawMenuButton(dst)
 	g.TextAt(dst, FontNormal, 10, 0x11, "Sais. Pl.   Liga       DfB-Pokal       Europapokal", ColBeige, -1)
-	line6(dst, 5, 0x13, 0x138, 0x13, g.C(ColBeige))
+	lineIncl(dst, 5, 0x13, 0x138, 0x13, g.PalColor(ColBeige))
 	g.TextMid(dst, FontNormal, 6, 0x106, 0xa5, "Gesamtentwicklung", ColBeige, -1)
-	line6(dst, 6, 0xa7, 0x106, 0xa7, g.C(ColBeige))
+	lineIncl(dst, 6, 0xa7, 0x106, 0xa7, g.PalColor(ColBeige))
 
 	n := h.rows()
 	// the bar graph: colours by the league of the place
@@ -66,7 +66,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 			}
 			if rank <= y {
 				yy := int(uint8(y - 0x56))
-				line6(dst, 5*i+7, yy, 5*i+0xb, yy, g.C(c))
+				lineIncl(dst, 5*i+7, yy, 5*i+0xb, yy, g.PalColor(c))
 			}
 		}
 	}
@@ -128,7 +128,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 			g.TextMid(dst, FontSmall, 0xb4, 0x139, y, txt, c, -1)
 		}
 		if (r+1)&0xf != 0 {
-			line6(dst, 6, y+2, 0x138, y+2, g.C(ColGrey6))
+			lineIncl(dst, 6, y+2, 0x138, y+2, g.PalColor(ColGrey6))
 		}
 		y += 8
 	}

@@ -105,7 +105,7 @@ func (b *BankScreen) Update(app *App) error {
 		b.ask(1)
 		return nil
 	}
-	if deskMenuHit(in) {
+	if MenuButtonHit(in) {
 		app.Pop()
 	}
 	return nil
@@ -232,8 +232,8 @@ func (b *BankScreen) Draw(app *App, dst *ebiten.Image) {
 	g.DrawMenuButton(dst)
 
 	// the credits of the lender
-	line6(dst, 7, 0x84, 0x82, 0x84, g.C(ColGrey6))
-	line6(dst, 7, 0x9f, 0x82, 0x9f, g.C(ColGrey6))
+	lineIncl(dst, 7, 0x84, 0x82, 0x84, g.PalColor(ColGrey6))
+	lineIncl(dst, 7, 0x9f, 0x82, 0x9f, g.PalColor(ColGrey6))
 	if b.sums {
 		g.TextAt(dst, FontSmall, 9, 0x8f, "SCHULDEN HIER: "+numText(s.CreditSum(b.ss.Mgr(), b.lender, false), 1, false)+" DM", ColLight, -1)
 		g.TextAt(dst, FontSmall, 9, 0x98, "ZINSEN HIER: "+numText(s.CreditSum(b.ss.Mgr(), b.lender, true), 1, false)+" DM", ColLight, -1)
@@ -269,13 +269,13 @@ func (b *BankScreen) Draw(app *App, dst *ebiten.Image) {
 		g.TextAt(dst, FontNormal, x, y, numText(int64((i+1)*3), 2, false)+" Mon.", ColGrey2, -1)
 		g.TextAt(dst, FontNormal, 0xdf, y, numText(int64(s.BankRates[i]), 2, false)+"%", ColGrey2, -1)
 		if i < 5 {
-			line6(dst, 0x97, i*0xb+0x27, 0x102, i*0xb+0x27, g.C(ColGrey6))
+			lineIncl(dst, 0x97, i*0xb+0x27, 0x102, i*0xb+0x27, g.PalColor(ColGrey6))
 		}
 	}
 
 	// the account
-	line6(dst, 0x97, 0x84, 0x102, 0x84, g.C(ColGrey6))
-	line6(dst, 0x97, 0x9f, 0x102, 0x9f, g.C(ColGrey6))
+	lineIncl(dst, 0x97, 0x84, 0x102, 0x84, g.PalColor(ColGrey6))
+	lineIncl(dst, 0x97, 0x9f, 0x102, 0x9f, g.PalColor(ColGrey6))
 	mid := func(y int, t string) { g.TextMid(dst, FontNormal, 0x97, 0x103, y, t, ColLight, ColBlack) }
 	mid(0x72, "Kontostand:")
 	mid(0x7e, numText(m.Money, 1, false)+" DM")
@@ -321,6 +321,8 @@ func (k *deskKeyInput) update(in *Input) (done, ok bool) {
 	return false, false
 }
 
+// value returns the number typed. The text has at most max digits, so it
+// fails to parse only when empty, which is 0.
 func (k *deskKeyInput) value() int64 {
 	v, _ := strconv.ParseInt(k.text, 10, 64)
 	return v
@@ -329,7 +331,7 @@ func (k *deskKeyInput) value() int64 {
 func (k *deskKeyInput) draw(g *Gfx, dst *ebiten.Image, frame int) {
 	g.TextAt(dst, FontNormal, k.x, k.y, k.text, ColBeige, -1)
 	x := k.x + g.TextWidth(FontNormal, k.text)
-	fill6(dst, x+2, k.y-4, x+4, k.y, g.C(ColBeige))
+	fillIncl(dst, x+2, k.y-4, x+4, k.y, g.PalColor(ColBeige))
 }
 
 // deskMsg4 is the message box f_3091_0e3a: four lines on dark red and an

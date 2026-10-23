@@ -73,7 +73,7 @@ func (o *OptionsScreen) Update(app *App) error {
 		d.Speed = x - knobX0
 	}
 	// Only the HAUPT MENU button leaves the screen.
-	if in.Clicked(MenuButton.X, MenuButton.Y, MenuButton.W, MenuButton.H) || in.Escape {
+	if MenuButtonHit(in) {
 		app.Pop()
 	}
 	return nil
@@ -103,9 +103,9 @@ func (o *OptionsScreen) Draw(app *App, dst *ebiten.Image) {
 		g.TextAt(dst, FontNormal, x, 29, itoa(l+1)+".Liga", ColLight, NoShadow)
 	}
 	// The lines take the colour of the last text: light, then white.
-	FillRect(dst, 16, 17, 289, 1, g.C(ColLight))
-	FillRect(dst, 16, 98, 289, 1, g.C(ColWhite))
-	FillRect(dst, 16, 180, 289, 1, g.C(ColWhite))
+	FillRect(dst, 16, 17, 289, 1, g.PalColor(ColLight))
+	FillRect(dst, 16, 98, 289, 1, g.PalColor(ColWhite))
+	FillRect(dst, 16, 180, 289, 1, g.PalColor(ColWhite))
 	label(182, 300, 150, "Spielgeschwindigkeit")
 	for i, p := range optSwitchPos {
 		on := *optFlag(d, i)
@@ -115,7 +115,7 @@ func (o *OptionsScreen) Draw(app *App, dst *ebiten.Image) {
 	Draw(dst, g.Sub(33, rectWH(0, 0, 100, 19)), sliderX, sliderY)
 	drawKnob(g, dst, min(max(d.Speed, 0), maxSpeed))
 	if o.flash > 0 {
-		c := g.C(ColLight)
+		c := g.PalColor(ColLight)
 		FillRect(dst, 0, 0, ScreenW, 1, c)
 		FillRect(dst, 0, 0, 1, ScreenH, c)
 		FillRect(dst, ScreenW-1, 0, 1, ScreenH, c)
@@ -124,12 +124,12 @@ func (o *OptionsScreen) Draw(app *App, dst *ebiten.Image) {
 
 // drawKnob draws the track and the knob of the speed slider (f_262f_0086).
 func drawKnob(g *Gfx, dst *ebiten.Image, speed int) {
-	FillRect(dst, knobX0, knobY, 76, 8, g.C(ColGrey5))
+	FillRect(dst, knobX0, knobY, 76, 8, g.PalColor(ColGrey5))
 	x := knobX0 + speed
-	FillRect(dst, x, knobY, 1, 1, g.C(16))
-	FillRect(dst, x, knobY+1, 1, 6, g.C(17))
-	FillRect(dst, x+1, knobY, 5, 1, g.C(17))
-	FillRect(dst, x+1, knobY+6, 5, 1, g.C(19))
-	FillRect(dst, x+5, knobY+1, 1, 6, g.C(19))
-	FillRect(dst, x+1, knobY+1, 4, 5, g.C(18))
+	FillRect(dst, x, knobY, 1, 1, g.PalColor(16))
+	FillRect(dst, x, knobY+1, 1, 6, g.PalColor(17))
+	FillRect(dst, x+1, knobY, 5, 1, g.PalColor(17))
+	FillRect(dst, x+1, knobY+6, 5, 1, g.PalColor(19))
+	FillRect(dst, x+5, knobY+1, 1, 6, g.PalColor(19))
+	FillRect(dst, x+1, knobY+1, 4, 5, g.PalColor(18))
 }

@@ -4,7 +4,6 @@
 package ui
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -24,7 +23,8 @@ type Gfx struct {
 	dir   *assets.Dir
 	pals  []assets.Palette
 	pics  map[picKey]*ebiten.Image
-	fonts map[string]*fontAtlas
+	fonts map[Font]*fontAtlas
+	err   error // the first picture that could not be read
 }
 
 type picKey struct {
@@ -44,9 +44,9 @@ func NewGfx(dir *assets.Dir) (*Gfx, error) {
 	if err != nil {
 		return nil, err
 	}
-	g := &Gfx{dir: dir, pals: pals, pics: map[picKey]*ebiten.Image{}, fonts: map[string]*fontAtlas{}}
+	g := &Gfx{dir: dir, pals: pals, pics: map[picKey]*ebiten.Image{}, fonts: map[Font]*fontAtlas{}}
 	for name, f := range fonts {
-		g.fonts[name] = newFontAtlas(f)
+		g.fonts[Font(name)] = newFontAtlas(f)
 	}
 	return g, nil
 }
@@ -60,8 +60,7 @@ func (g *Gfx) Palette(i int) *assets.Palette {
 }
 
 // Pic returns picture n (N.VGA, or N.CP when full) rendered with palette 0.
-// It panics when the picture is missing: the game directory was checked at
-// start-up and a missing picture is a programming error.
+// A picture that cannot be read is drawn as nothing and kept in Err.
 func (g *Gfx) Pic(n int, full bool) *ebiten.Image {
 	return g.PicPal(n, full, 0, -1)
 }
@@ -79,7 +78,7 @@ func (g *Gfx) PicPal(n int, full bool, pal int, key int) *ebiten.Image {
 	}
 	p, err := g.dir.Pic(n, full)
 	if err != nil {
-		panic(fmt.Sprintf("picture %d: %v", n, err))
+		return g.missing(err)
 	}
 	var rgba *image.RGBA
 	if key >= 0 {
@@ -91,6 +90,17 @@ func (g *Gfx) PicPal(n int, full bool, pal int, key int) *ebiten.Image {
 	g.pics[k] = img
 	return img
 }
+
+// missing records err and returns an empty picture to draw instead.
+func (g *Gfx) missing(err error) *ebiten.Image {
+	if g.err == nil {
+		g.err = err
+	}
+	return ebiten.NewImage(1, 1)
+}
+
+// Err returns the error of the first picture that could not be read.
+func (g *Gfx) Err() error { return g.err }
 
 // Sub returns the part r of picture n (sheets like 3.VGA hold many icons).
 func (g *Gfx) Sub(n int, r image.Rectangle) *ebiten.Image {

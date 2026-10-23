@@ -1,14 +1,19 @@
 package game
 
-// Cup indexes: 0 DFB-Pokal, 1 Pokal der Landesmeister, 2 Pokal der
+// Cup is one of the four cups, in the order of the original.
+type Cup int
+
+// The cups: 0 DFB-Pokal, 1 Pokal der Landesmeister, 2 Pokal der
 // Pokalsieger, 3 UEFA-Pokal.
 const (
-	CupDFB = iota
+	CupDFB Cup = iota
 	CupLandesmeister
 	CupPokalsieger
 	CupUEFA
-	NumCups
 )
+
+// NumCups is the number of cups.
+const NumCups = 4
 
 // CupNames are the texts of the original.
 var CupNames = [NumCups]string{"DfB-Pokal", "Pokal der Landesmeister", "Pokal der Pokalsieger", "UEFA-Pokal"}
@@ -75,10 +80,10 @@ func (c *Cups) isUsed(id int) bool {
 func (s *State) qualifyEurope() {
 	c := &s.Cups
 	c.Used = nil
-	for k := 1; k < NumCups; k++ {
+	for k := CupLandesmeister; k < NumCups; k++ {
 		c.Qualified[k] = nil
 	}
-	add := func(cup, id int) {
+	add := func(cup Cup, id int) {
 		c.Qualified[cup] = append(c.Qualified[cup], id)
 		c.Used = append(c.Used, id)
 	}
@@ -126,12 +131,12 @@ func (s *State) qualifyEurope() {
 func (s *State) QualifiedForEurope(id int) bool { return s.Cups.isUsed(id) }
 
 // drawCup draws round 1 of a cup (f_17c2_09e0).
-func (s *State) drawCup(cup int) {
+func (s *State) drawCup(cup Cup) {
 	c := &s.Cups
 	c.Round[cup] = 0
 	r := &s.Rand
 	if cup == CupLandesmeister {
-		for k := 1; k < NumCups; k++ {
+		for k := CupLandesmeister; k < NumCups; k++ {
 			c.First[k] = [32]int{}
 		}
 	}
@@ -177,7 +182,7 @@ func (s *State) drawCup(cup int) {
 				for j := 0; j < i && !dup; j++ {
 					dup = slots[j] == id
 				}
-				for o := 0; o < NumCups && !dup; o++ {
+				for o := CupDFB; o < NumCups && !dup; o++ {
 					if o == cup {
 						continue
 					}
@@ -227,7 +232,7 @@ func (s *State) dfbHomeRule() {
 }
 
 // CupPairs returns the pairs of the current round of a cup.
-func (s *State) CupPairs(cup int) []Pair {
+func (s *State) CupPairs(cup Cup) []Pair {
 	c := &s.Cups
 	round := c.Round[CupDFB]
 	if cup != CupDFB {
@@ -244,7 +249,7 @@ func (s *State) CupPairs(cup int) []Pair {
 // tieOut decides a two-legged tie for slot i (f_17c2_15e8): 1 = the club
 // in slot i is out, 0 = it is through, 0x1e = still level. The penalty
 // score replaces the second-leg score, as in the original.
-func (s *State) tieOut(cup, i int) int {
+func (s *State) tieOut(cup Cup, i int) int {
 	c := &s.Cups
 	h2 := c.Result[cup][i] % 10
 	a2 := c.Result[cup][i+1]
@@ -263,7 +268,7 @@ func (s *State) tieOut(cup, i int) int {
 
 // needsExtraTime marks ties that are level after 90 (pass 0) or 120 (pass
 // 1) minutes with +10 and reports whether there is any (f_17c2_1226).
-func (s *State) needsExtraTime(cup, n, pass int) []int {
+func (s *State) needsExtraTime(cup Cup, n, pass int) []int {
 	c := &s.Cups
 	var level []int
 	for i := 0; i < n; i += 2 {
@@ -284,7 +289,7 @@ func (s *State) needsExtraTime(cup, n, pass int) []int {
 }
 
 // advanceCup handles the winners after a cup event (f_17c2_16dc).
-func (s *State) advanceCup(cup int) {
+func (s *State) advanceCup(cup Cup) {
 	c := &s.Cups
 	round := c.Round[cup]
 	n := pairsPerRound[round] * 2
@@ -346,7 +351,7 @@ func (s *State) afterEuropeanRound() {
 		return
 	}
 	s.clearCupResults()
-	for k := 1; k < NumCups; k++ {
+	for k := CupLandesmeister; k < NumCups; k++ {
 		s.nextCupRound(k)
 	}
 }
@@ -354,13 +359,13 @@ func (s *State) afterEuropeanRound() {
 func (s *State) clearCupResults() { s.Cups.Result = [NumCups][32]int{} }
 
 // nextCupRound compacts the winners and shuffles them (f_17c2_13a2).
-func (s *State) nextCupRound(cup int) {
+func (s *State) nextCupRound(cup Cup) {
 	c := &s.Cups
 	if c.Round[cup] == 5 {
 		return
 	}
 	if cup != CupDFB {
-		for k := 1; k < NumCups; k++ {
+		for k := CupLandesmeister; k < NumCups; k++ {
 			c.First[k] = [32]int{}
 		}
 	}

@@ -9,12 +9,6 @@ import (
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// tsMenuHit reports a click on the HAUPT MENU button (the team screens are
-// not left with the right button) or Escape.
-func tsMenuHit(in *Input) bool {
-	return in.Clicked(MenuButton.X, MenuButton.Y, MenuButton.W, MenuButton.H) || in.Escape
-}
-
 // TrainingScreen sets the training (f_112a_274c): rows of footballs for
 // Kondition, Spiel, Schuss, Taktik (20 points) and Tor, Abwehr,
 // Mittelfeld, Angriff (10 points), the intensity, the points left in the
@@ -36,7 +30,7 @@ func tsSum(v [4]int) int { return v[0] + v[1] + v[2] + v[3] }
 func (t *TrainingScreen) Update(app *App) error {
 	in := &app.Input
 	m := t.ss.M()
-	if tsMenuHit(in) {
+	if MenuButtonHit(in) {
 		app.Pop()
 		return nil
 	}
@@ -115,7 +109,7 @@ func (t *TrainingScreen) Draw(app *App, dst *ebiten.Image) {
 	t.drawKTE(g, dst)
 	// JUGEND: the length of the line is the youth work, below its cost.
 	Draw(dst, g.Sub(0x25, image.Rect(0, 0x36, 0x32, 0x36+0x29)), 0xd1, 0xc1)
-	FillRect(dst, 0xd9, 0xd4, m.Youth+1, 2, g.C(ColWhite))
+	FillRect(dst, 0xd9, 0xd4, m.Youth+1, 2, g.PalColor(ColWhite))
 	g.TextMid(dst, FontSmall, 0xd3, 0x105, 0xdf, itoa64(int64(m.Youth+1)*10000/16), ColWhite, NoShadow)
 }
 
@@ -135,15 +129,15 @@ func (t *TrainingScreen) drawKTE(g *Gfx, dst *ebiten.Image) {
 		}
 	}
 	n = max(n, 1)
-	FillRect(dst, 3, 0xb7, 0x16-3+1, 0xe8-0xb7+1, g.C(ColGrey7))
-	FrameRect(dst, 3, 0xb7, 0x16-3+1, 0xe8-0xb7+1, g.C(ColLight))
+	FillRect(dst, 3, 0xb7, 0x16-3+1, 0xe8-0xb7+1, g.PalColor(ColGrey7))
+	FrameRect(dst, 3, 0xb7, 0x16-3+1, 0xe8-0xb7+1, g.PalColor(ColLight))
 	vals := [3]int{k / n, te / n, e/n - 0x32}
 	for i, l := range [3]string{"K", "T", "E"} {
 		g.TextAt(dst, FontSmall, i*6+5, 0xe6, l, i+13, NoShadow)
 		top := min(0x26-vals[i]*0x26/100, 0x26) + 0xb9
 		x := i*6 + 5
-		FillRect(dst, x, top, 4, 0xdf-top+1, g.C(i+13))
-		FrameRect(dst, x, top, 4, 0xdf-top+1, g.C(ColBlack))
+		FillRect(dst, x, top, 4, 0xdf-top+1, g.PalColor(i+13))
+		FrameRect(dst, x, top, 4, 0xdf-top+1, g.PalColor(ColBlack))
 	}
 }
 
@@ -190,7 +184,7 @@ func (c *CampScreen) Update(app *App) error {
 		}
 		return nil
 	}
-	if tsMenuHit(in) {
+	if MenuButtonHit(in) {
 		app.Pop()
 		return nil
 	}
@@ -273,7 +267,7 @@ func (sc *ScorerScreen) refresh() {
 
 func (sc *ScorerScreen) Update(app *App) error {
 	in := &app.Input
-	if tsMenuHit(in) {
+	if MenuButtonHit(in) {
 		app.Pop()
 		return nil
 	}
@@ -313,7 +307,7 @@ func (sc *ScorerScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Background(dst)
 	g.Window(dst, 0x23, 8, 0x23+0xfa, 8+0xb5, ColBlue)
 	g.DrawMenuButton(dst)
-	FillRect(dst, 0x24, 0x1a, 0x11c-0x24+1, 1, g.C(ColLight))
+	FillRect(dst, 0x24, 0x1a, 0x11c-0x24+1, 1, g.PalColor(ColLight))
 	title := "Die Besten der Liga"
 	if sc.players {
 		title = "Die Besten der Spieler"

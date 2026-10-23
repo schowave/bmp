@@ -207,7 +207,8 @@ comp 0 = league, 1 = DFB-Pokal, ≥2 = European cups. For each human manager m i
   away manager gets `att * homePrice / 2`; otherwise
   `price = D:0x5390[bucket(home)] + rand(0,1)`,
   `att = f_0f9d_11e0(awayMgr, home, away, 1, 2, 1, price)` and money += `price*att/2`.
-* Riot roll (only for the home manager, after the game, in the replay/result block):
+* Riot roll (only for the home manager, still before the game: the end of the per-manager
+  block of f_1a58_20b2 @1a58:291a, after the gate and the squad update):
   `x = clamp((int16)(Steh.lo - Sitz.lo) / 1000, 0, 30)`;
   `if rand(0, (30-x)*4 + 15) == 0: M.0x2380 |= 1`. Damage is booked in f_0cb5_13bd (§9).
 
@@ -243,7 +244,9 @@ if price < 22: att = att*(c+2)/3
 if md + 5 > total and price < 22:          // last 4 matchdays
     if md == total: att = cap               // last matchday sold out
     else:
-        if posH < 7 - 2*(L!=0): att += cap/4; if posA < 7: att += cap/5
+        if posH < 7 - 2*(L!=0):
+            att += cap/4
+            if posA < 7: att += cap/5     // only checked here (@0f9d:1776..17be)
         if posH + (L!=0) + 5 > D:0x225e[L]: att += cap/4
 if price > 10: att += (10 - price)*900
 lim = (2*lf - (lf==4)) * 100000            // 700k / 400k / 200k DM gate cap

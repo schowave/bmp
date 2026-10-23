@@ -116,6 +116,8 @@ func (s *State) aiAccepts(i int, bid int64, loan bool) bool {
 	if int64(r.Between(120, 130))*v/100 < bid {
 		return true
 	}
+	// Only a bid of 0 for a player worth 0 gets here, where the original
+	// divides by zero.
 	if v == 0 {
 		return true
 	}

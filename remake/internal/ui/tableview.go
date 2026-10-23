@@ -32,7 +32,7 @@ type Row struct {
 // scroll and pick rows.
 type TableView struct {
 	X, Y, W, H int
-	Font       string
+	Font       Font
 	RowH       int
 	Columns    []Column
 	Rows       []Row
@@ -110,20 +110,20 @@ func (t *TableView) Draw(g *Gfx, dst *ebiten.Image) {
 	}
 	if !t.NoHeader {
 		for _, c := range t.Columns {
-			g.drawCell(dst, FontSmall, t.X+c.X, t.Y+2, c, c.Title, g.C(tc))
+			g.drawCell(dst, FontSmall, t.X+c.X, t.Y+2, c, c.Title, g.PalColor(tc))
 		}
-		FillRect(dst, t.X+2, t.Y+9, t.W-4, 1, g.C(ColGrey5))
+		FillRect(dst, t.X+2, t.Y+9, t.W-4, 1, g.PalColor(ColGrey5))
 	}
 	y := t.Y + t.headerH()
 	for i := t.Top; i < len(t.Rows) && i < t.Top+t.Visible(); i++ {
 		row := t.Rows[i]
 		if row.Bar != 0 {
-			FillRect(dst, t.X+2, y, t.W-4, t.RowH, g.C(row.Bar))
+			FillRect(dst, t.X+2, y, t.W-4, t.RowH, g.PalColor(row.Bar))
 		}
 		if i == t.Selected {
-			FillRect(dst, t.X+2, y, t.W-4, t.RowH, g.C(ColGrey6))
+			FillRect(dst, t.X+2, y, t.W-4, t.RowH, g.PalColor(ColGrey6))
 		} else if i == t.Hover {
-			FillRect(dst, t.X+2, y, t.W-4, t.RowH, g.C(ColGrey7))
+			FillRect(dst, t.X+2, y, t.W-4, t.RowH, g.PalColor(ColGrey7))
 		}
 		col := ColLight
 		if row.Color != 0 {
@@ -131,7 +131,7 @@ func (t *TableView) Draw(g *Gfx, dst *ebiten.Image) {
 		}
 		for k, c := range t.Columns {
 			if k < len(row.Cells) {
-				g.drawCell(dst, t.Font, t.X+c.X, y+(t.RowH-g.FontHeight(t.Font))/2, c, row.Cells[k], g.C(col))
+				g.drawCell(dst, t.Font, t.X+c.X, y+(t.RowH-g.FontHeight(t.Font))/2, c, row.Cells[k], g.PalColor(col))
 			}
 		}
 		y += t.RowH
@@ -141,12 +141,12 @@ func (t *TableView) Draw(g *Gfx, dst *ebiten.Image) {
 		bh := t.H - t.headerH() - 2
 		th := max(4, bh*t.Visible()/len(t.Rows))
 		ty := t.Y + t.headerH() + (bh-th)*t.Top/max(1, len(t.Rows)-t.Visible())
-		FillRect(dst, t.X+t.W-3, t.Y+t.headerH(), 2, bh, g.C(ColGrey7))
-		FillRect(dst, t.X+t.W-3, ty, 2, th, g.C(ColGrey3))
+		FillRect(dst, t.X+t.W-3, t.Y+t.headerH(), 2, bh, g.PalColor(ColGrey7))
+		FillRect(dst, t.X+t.W-3, ty, 2, th, g.PalColor(ColGrey3))
 	}
 }
 
-func (g *Gfx) drawCell(dst *ebiten.Image, font string, x, y int, c Column, s string, col interface {
+func (g *Gfx) drawCell(dst *ebiten.Image, font Font, x, y int, c Column, s string, col interface {
 	RGBA() (r, g, b, a uint32)
 }) {
 	s = g.Fit(font, s, c.W)

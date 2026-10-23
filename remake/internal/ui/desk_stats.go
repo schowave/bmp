@@ -105,7 +105,7 @@ func deskUmlauts(s string) string {
 }
 
 func (st *StatsScreen) Update(app *App) error {
-	if deskMenuHit(&app.Input) {
+	if MenuButtonHit(&app.Input) {
 		app.Pop()
 	}
 	return nil
@@ -211,11 +211,11 @@ func (st *StatsScreen) Draw(app *App, dst *ebiten.Image) {
 	g.TextAt(dst, FontNormal, 0x5c, 0x14, "G       H       A", ColBeige, -1)
 
 	// attendance graph
-	fill6(dst, 0xd1, 0x69, 0x130, 0x76, g.C(ColBlack))
-	rect6(dst, 0xd0, 0x68, 0x131, 0x77, g.C(ColGrey6))
+	fillIncl(dst, 0xd1, 0x69, 0x130, 0x76, g.PalColor(ColBlack))
+	frameIncl(dst, 0xd0, 0x68, 0x131, 0x77, g.PalColor(ColGrey6))
 	// meter of the balance
-	fill6(dst, 0xd1, 0xab, 0x130, 0xb8, g.C(ColBlack))
-	rect6(dst, 0xd0, 0xaa, 0x131, 0xb9, g.C(ColGrey6))
+	fillIncl(dst, 0xd1, 0xab, 0x130, 0xb8, g.PalColor(ColBlack))
+	frameIncl(dst, 0xd0, 0xaa, 0x131, 0xb9, g.PalColor(ColGrey6))
 	n := min(m.HomeGames, len(m.Attendance))
 	hi, lo := int8(-127), int8(127)
 	for i := 0; i < n; i++ {
@@ -233,17 +233,17 @@ func (st *StatsScreen) Draw(app *App, dst *ebiten.Image) {
 	}
 	for i := 0; i < n; i++ {
 		h := (int(uint8(m.Attendance[i]))-int(lo))*11/rng + 2
-		rect6(dst, 5*i+0xd1, 0x76-h, 5*i+0xd6, 0x76, statsPal(0x15))
-		fill6(dst, 5*i+0xd2, 0x77-h, 5*i+0xd6, 0x76, g.C(ColRedDark))
+		frameIncl(dst, 5*i+0xd1, 0x76-h, 5*i+0xd6, 0x76, statsPal(0x15))
+		fillIncl(dst, 5*i+0xd2, 0x77-h, 5*i+0xd6, 0x76, g.PalColor(ColRedDark))
 	}
 	v := m.Money - m.Debts()
 	k := 0
 	t := int64(-2375000)
 	for x := 0xd1; x < 0x131; x++ {
 		if v < t && v+50000 >= t {
-			line6(dst, x, 0xab, x, 0xb8, statsPal(k+0x13))
+			lineIncl(dst, x, 0xab, x, 0xb8, statsPal(k+0x13))
 		} else {
-			line6(dst, x, 0xae, x, 0xb5, statsPal(k+0x13))
+			lineIncl(dst, x, 0xae, x, 0xb5, statsPal(k+0x13))
 		}
 		if (x+1-0xd1)%7 == 0 && k < 0xc {
 			k++
@@ -251,10 +251,10 @@ func (st *StatsScreen) Draw(app *App, dst *ebiten.Image) {
 		t += 50000
 	}
 	if v <= -2375000 {
-		line6(dst, 0xd1, 0xab, 0xd1, 0xb8, statsPal(0x13))
+		lineIncl(dst, 0xd1, 0xab, 0xd1, 0xb8, statsPal(0x13))
 	}
 	if v > 2325000 {
-		line6(dst, 0x130, 0xab, 0x130, 0xb8, statsPal(0x1f))
+		lineIncl(dst, 0x130, 0xab, 0x130, 0xb8, statsPal(0x1f))
 	}
 }
 

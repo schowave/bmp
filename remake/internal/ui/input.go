@@ -4,6 +4,8 @@ import (
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
+
+	"github.com/schowave/bmp/remake/internal/game"
 )
 
 // InputBox asks for a number or a text.
@@ -73,22 +75,22 @@ func (b *InputBox) Update(app *App) error {
 func (b *InputBox) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	x, y, w, h := 70, 84, 180, 62
-	FillRect(dst, x, y, w, h, g.C(ColDarkRed))
-	FrameRect(dst, x, y, w, h, g.C(ColRed))
-	g.TextCentered(dst, FontNormal, x, y+3, w, b.Title, g.C(ColBeige))
-	g.TextCentered(dst, FontSmall, x, y+16, w, b.Prompt, g.C(ColBeige))
-	FillRect(dst, x+20, y+27, w-40, 11, g.C(ColBlack))
+	FillRect(dst, x, y, w, h, g.PalColor(ColDarkRed))
+	FrameRect(dst, x, y, w, h, g.PalColor(ColRed))
+	g.TextCentered(dst, FontNormal, x, y+3, w, b.Title, g.PalColor(ColBeige))
+	g.TextCentered(dst, FontSmall, x, y+16, w, b.Prompt, g.PalColor(ColBeige))
+	FillRect(dst, x+20, y+27, w-40, 11, g.PalColor(ColBlack))
 	v := b.Value
 	if b.Numeric && v != "" {
 		if n, err := strconv.ParseInt(v, 10, 64); err == nil {
-			v = formatMoney(n)
+			v = game.FormatMoney(n)
 		}
 	}
 	cursor := ""
 	if (app.frame/20)%2 == 0 {
 		cursor = "_"
 	}
-	g.TextCentered(dst, FontNormal, x+20, y+29, w-40, v+cursor, g.C(ColYellow))
+	g.TextCentered(dst, FontNormal, x+20, y+29, w-40, v+cursor, g.PalColor(ColYellow))
 	b.ok.Draw(g, dst, app.Input.In(b.ok.X, b.ok.Y, b.ok.W, b.ok.H))
 	b.cancel.Draw(g, dst, app.Input.In(b.cancel.X, b.cancel.Y, b.cancel.W, b.cancel.H))
 }

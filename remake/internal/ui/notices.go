@@ -206,14 +206,14 @@ func (c *cardScreen) Update(app *App) error {
 
 func (c *cardScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
-	fill6(dst, 0, 0, 319, 239, g.C(ColDarkRed))
-	rect6(dst, 0, 0, 319, 239, g.C(ColOrange))
+	fillIncl(dst, 0, 0, 319, 239, g.PalColor(ColDarkRed))
+	frameIncl(dst, 0, 0, 319, 239, g.PalColor(ColOrange))
 	pic := 42
 	if c.n.Birthday {
 		pic = 41
 	}
 	Draw(dst, g.Sub(pic, rectWH(0, 0, 0x30, 0x39)), 0x88, 0x34)
-	rect6(dst, 0x86, 0x32, 0xb7, 0x6c, g.C(ColWhite))
+	frameIncl(dst, 0x86, 0x32, 0xb7, 0x6c, g.PalColor(ColWhite))
 	d := game.DateOf(c.start, c.n.Day)
 	head := game.WeekdayNames[game.Weekday(c.n.Day)] + ", " + itoa(d.Day) + ". " + game.MonthNames[d.Month]
 	g.TextMid(dst, FontNormal, 0, 319, 8, head, ColBeige, ColBlack)
@@ -257,10 +257,10 @@ func (t *trophyScreen) Update(app *App) error {
 
 func (t *trophyScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
-	fill6(dst, 0, 0, 319, 239, g.C(ColBeige))
-	fill6(dst, 1, 1, 0x13e, 0x4f, g.C(ColBlack))
-	fill6(dst, 1, 0x50, 0x13e, 0xa0, g.C(ColRed))
-	fill6(dst, 1, 0xa1, 0x13e, 0xee, g.C(ColOrange))
+	fillIncl(dst, 0, 0, 319, 239, g.PalColor(ColBeige))
+	fillIncl(dst, 1, 1, 0x13e, 0x4f, g.PalColor(ColBlack))
+	fillIncl(dst, 1, 0x50, 0x13e, 0xa0, g.PalColor(ColRed))
+	fillIncl(dst, 1, 0xa1, 0x13e, 0xee, g.PalColor(ColOrange))
 	line := func(i int) string {
 		if i < len(t.n.Lines) {
 			return t.n.Lines[i]
@@ -328,9 +328,9 @@ func (s *seasonEndScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Window(dst, 0x17, 0x19, 0x17+0xde, 0x19+0x3c, ColBlue)
 	g.Window(dst, 10, 0x7e, 10+0x127, 0x7e+0x52, ColBlue)
 	g.TextMid(dst, FontNormal, 0x17, 0xf5, 0x21, s.n.Title, ColBeige, NoShadow)
-	line6(dst, 0x18, 0x24, 0xf4, 0x24, g.C(ColBeige))
+	lineIncl(dst, 0x18, 0x24, 0xf4, 0x24, g.PalColor(ColBeige))
 	g.TextMid(dst, FontNormal, 10, 0x131, 0x86, s.n.Heading, ColBeige, NoShadow)
-	line6(dst, 0xb, 0x89, 0x130, 0x89, g.C(ColBeige))
+	lineIncl(dst, 0xb, 0x89, 0x130, 0x89, g.PalColor(ColBeige))
 	if len(s.n.Lines) > 0 {
 		g.TextMid(dst, FontNormal, 0x17, 0xf5, 0x3c, s.n.Lines[0], ColLight, NoShadow)
 	}

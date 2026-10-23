@@ -110,8 +110,8 @@ func TestLineupListClicks(t *testing.T) {
 	}
 	// The EINSATZ meter follows the mouse.
 	step(t, app, click(0x113+10, 20))
-	if s.Managers[0].Einsatz != 10 {
-		t.Fatalf("Einsatz %d, want 10", s.Managers[0].Einsatz)
+	if s.Managers[0].EffortSetting != 10 {
+		t.Fatalf("EffortSetting %d, want 10", s.Managers[0].EffortSetting)
 	}
 	// The contracts icon shows the contract list.
 	step(t, app, click(lnIconX+10, lnIconY[2]+10))

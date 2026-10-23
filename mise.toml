@@ -99,14 +99,14 @@ run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "
 description = "Screenshot of a remake screen: demo name, PNG path, optional input script"
 dir = "{{config_root}}/remake"
 usage = '''
-arg "<demo>" help="Demo scene, see internal/ui/demo.go"
+arg "<demo>" help="Demo scene, listed by bmp -demos"
 arg "<out>" help="PNG file (320x240)"
 arg "[script]" help="Input script (internal/ui/script.go); without it the screen is shot after a few frames"
 '''
-# Ebitengine needs a monitor: caffeinate -u wakes a sleeping display first,
-# otherwise bmp fails with "no monitor was found".
+# Ebitengine needs a monitor: on macOS caffeinate -u wakes a sleeping display
+# first, otherwise bmp fails with "no monitor was found".
 run = '''
-caffeinate -u -t 2 || true
+if command -v caffeinate >/dev/null; then caffeinate -u -t 2; fi
 if [ -n "${usage_script:-}" ]; then
   go run ./cmd/bmp -scale 1 -demo "$usage_demo" -script "$usage_script"
 else

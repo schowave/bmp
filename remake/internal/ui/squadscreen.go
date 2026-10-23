@@ -44,7 +44,7 @@ func squadRow(s *game.State, sl *game.Slot) Row {
 	goals := sl.Goals[0] + sl.Goals[1] + sl.Goals[2]
 	row := Row{Cells: []string{nr, posShort[p.Position()], p.Name, itoa(games),
 		itoa(sl.Skill[0]), itoa(sl.Skill[1]), itoa(sl.Skill[2]), itoa(sl.Strength()), itoa(goals),
-		itoa(sl.Cards[1]) + " " + itoa(sl.Cards[0]), status, td, itoa(sl.Years), formatMoney(sl.Salary)}}
+		itoa(sl.Cards[1]) + " " + itoa(sl.Cards[0]), status, td, itoa(sl.Years), game.FormatMoney(sl.Salary)}}
 	switch {
 	case sl.Lineup >= 1 && sl.Lineup <= 11:
 		row.Color = ColWhite
@@ -82,7 +82,7 @@ func (p *PlayerInfo) Draw(app *App, dst *ebiten.Image) {
 	x, y, w, h := 30, 20, 260, 200
 	g.Frame(dst, x, y, w, h)
 	g.Panel(dst, x, y, w, h)
-	g.TextCentered(dst, FontNormal, x, y+4, w, "Info über "+ps.Name, g.C(ColBeige))
+	g.TextCentered(dst, FontNormal, x, y+4, w, "Info über "+ps.Name, g.PalColor(ColBeige))
 	lines := []string{
 		ps.Name + " IST " + itoa(ps.Age) + " JAHRE ALT " + game.AgeLabel(ps.Age),
 		game.PositionNames[ps.Position()] + game.SideText(ps.Side),
@@ -114,7 +114,7 @@ func (p *PlayerInfo) Draw(app *App, dst *ebiten.Image) {
 		lines = append(lines, "STATUS: HÄNGT HALT SO RUM...")
 	}
 	for i, l := range lines {
-		g.Text(dst, FontSmall, x+8, y+18+i*10, l, g.C(ColLight))
+		g.Text(dst, FontSmall, x+8, y+18+i*10, l, g.PalColor(ColLight))
 	}
 }
 
@@ -178,12 +178,12 @@ func (u *SubstitutionScreen) Update(app *App) error {
 func (u *SubstitutionScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Background(dst)
-	g.Text(dst, FontNormal, 4, 3, "AUSWECHSELN - "+u.ss.S.Managers[u.mi].Name, g.C(ColBeige))
+	g.Text(dst, FontNormal, 4, 3, "AUSWECHSELN - "+u.ss.S.Managers[u.mi].Name, g.PalColor(ColBeige))
 	u.table.Draw(g, dst)
 	msg := u.msg
 	if msg == "" {
 		msg = "Spieler auswählen, der ausgewechselt werden soll."
 	}
-	g.Text(dst, FontSmall, 4, 196, msg, g.C(ColWhite))
+	g.Text(dst, FontSmall, 4, 196, msg, g.PalColor(ColWhite))
 	g.DrawMenuButton(dst)
 }

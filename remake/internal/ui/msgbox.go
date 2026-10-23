@@ -91,16 +91,16 @@ func (b *MessageBox) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	y, h, lines := b.geometry(g)
 	g.Bevel(dst, msgX, y, msgW, h, ColDarkRed)
-	FillRect(dst, msgX+msgW, y, 2, h+2, g.C(ColBlack))
-	FillRect(dst, msgX+2, y+h, msgW, 2, g.C(ColBlack))
+	FillRect(dst, msgX+msgW, y, 2, h+2, g.PalColor(ColBlack))
+	FillRect(dst, msgX+2, y+h, msgW, 2, g.PalColor(ColBlack))
 	// Texts are centred over the dialog and its shadow.
 	x0, x1 := msgX+2, msgX+msgW+1
 	g.TextMid(dst, FontNormal, x0, x1, y+9, b.Title, ColBeige, NoShadow)
-	FillRect(dst, msgX+2, y+11, msgW-4, 1, g.C(ColBeige))
+	FillRect(dst, msgX+2, y+11, msgW-4, 1, g.PalColor(ColBeige))
 	for i, l := range lines {
 		g.TextMid(dst, FontSmall, x0, x1, y+21+i*8, l, ColSand, NoShadow)
 	}
-	FillRect(dst, msgX+2, y+h-21, msgW-4, 1, g.C(ColBeige))
+	FillRect(dst, msgX+2, y+h-21, msgW-4, 1, g.PalColor(ColBeige))
 	for i := range b.buttons {
 		bt := &b.buttons[i]
 		g.BevelButton(dst, bt.X, bt.Y, bt.W, bt.H, ColBlack)

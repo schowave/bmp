@@ -250,11 +250,11 @@ func (sp *SponsorScreen) Draw(app *App, dst *ebiten.Image) {
 		if m.BoardMonths[b] != 0 {
 			Draw(dst, sponsorLogo(logos, m.BoardIndex[b]), x, 0x13)
 		} else {
-			fill6(dst, x, 0x13, 0x34*b+0x2e, 0x31, c1(9))
+			fillIncl(dst, x, 0x13, 0x34*b+0x2e, 0x31, c1(9))
 		}
 	}
 	value := func(y int, v int64) {
-		fill6(dst, 0xf0, y, 0x134, y+0xa, c1(ColBlack))
+		fillIncl(dst, 0xf0, y, 0x134, y+0xa, c1(ColBlack))
 		x := 0xf0
 		if v < 0 {
 			at(x, y+7, "-", ColLight)
@@ -273,17 +273,17 @@ func (sp *SponsorScreen) Draw(app *App, dst *ebiten.Image) {
 
 	// the selection frame (f_262f_23e4)
 	if sp.sel == 10 {
-		rect6(dst, 5, 0x3b, 0x6e, 0xe5, c1(ColWhite))
+		frameIncl(dst, 5, 0x3b, 0x6e, 0xe5, c1(ColWhite))
 	} else if sp.sel >= 0 {
 		x0, x1 := 0x34*sp.sel+5, 0x34*sp.sel+0x36
-		line6(dst, x0, 0x32, x1, 0x32, c1(ColWhite))
-		line6(dst, x1, 0x13, x1, 0x32, c1(ColWhite))
+		lineIncl(dst, x0, 0x32, x1, 0x32, c1(ColWhite))
+		lineIncl(dst, x1, 0x13, x1, 0x32, c1(ColWhite))
 	}
 
 	// the logo box, the arrows and the panel
 	switch {
 	case sp.logo == -1:
-		fill6(dst, 0x7f, 0x43, 0xa4, 0x60, c1(9))
+		fillIncl(dst, 0x7f, 0x43, 0xa4, 0x60, c1(9))
 	case sp.logo >= 0:
 		Draw(dst, sponsorLogo(logos, sp.logo), 0x7f, 0x43)
 	}
@@ -302,7 +302,7 @@ func (sp *SponsorScreen) Draw(app *App, dst *ebiten.Image) {
 		Draw(dst, sub(sheet, 0x3c, 0x17, 0x1e, 0x17), 0xb5, 0x54)
 	}
 	if sp.shown {
-		fill6(dst, 0xd9, 0x3c, 0x139, 0x5a, c1(ColBlack))
+		fillIncl(dst, 0xd9, 0x3c, 0x139, 0x5a, c1(ColBlack))
 		if sp.pLeft {
 			mid(0x4e, sp.panel[0])
 		} else {

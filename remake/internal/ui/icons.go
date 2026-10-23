@@ -84,7 +84,7 @@ func (g *Gfx) drawIconButton(dst *ebiten.Image, i Icon, x, y int, pressed bool) 
 	}
 	Draw(dst, g.Pic(frame, false), x, y)
 	// The window of the frame is blue inside a black line.
-	FillRect(dst, x+9, y+9, 32, 23, g.C(ColBlue))
+	FillRect(dst, x+9, y+9, 32, 23, g.PalColor(ColBlue))
 	img := g.IconImage(i)
 	b := img.Bounds()
 	// Vertically the sheet is a grid of 24 pixels; a cell of 23 rows goes

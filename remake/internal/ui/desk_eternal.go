@@ -35,7 +35,7 @@ func NewEternalScreen(ss *Session) Scene {
 }
 
 func (e *EternalScreen) Update(app *App) error {
-	if deskMenuHit(&app.Input) {
+	if MenuButtonHit(&app.Input) {
 		app.Pop()
 	}
 	return nil
@@ -77,7 +77,7 @@ func (g *Gfx) drawTrophyRim(dst *ebiten.Image, cx, cy, c int) {
 	for dy, row := range trophyRim {
 		for dx, ch := range row {
 			if ch == '#' {
-				FillRect(dst, cx+dx-13, cy+dy-11, 1, 1, g.C(c))
+				FillRect(dst, cx+dx-13, cy+dy-11, 1, 1, g.PalColor(c))
 			}
 		}
 	}
@@ -92,9 +92,9 @@ func (e *EternalScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Window(dst, 0x91, 8, 0x91+0xa8, 8+0xb4, ColBlue)
 	g.DrawMenuButton(dst)
 	g.TextMid(dst, FontNormal, 5, 0x8c, 0x11, "Ewige Tabelle", ColBeige, -1)
-	line6(dst, 6, 0x13, 0x8b, 0x13, g.C(ColBeige))
+	lineIncl(dst, 6, 0x13, 0x8b, 0x13, g.PalColor(ColBeige))
 	g.TextMid(dst, FontNormal, 0x91, 0x139, 0x11, "Ewige Bilanz", ColBeige, -1)
-	line6(dst, 0x92, 0x13, 0x138, 0x13, g.C(ColBeige))
+	lineIncl(dst, 0x92, 0x13, 0x138, 0x13, g.PalColor(ColBeige))
 	trophies := g.Sub(36, image.Rect(0, 0, 0x15, 0x71))
 	Draw(dst, trophies, 0x9b, 0x16)
 	Draw(dst, trophies, 0x119, 0x16)
@@ -166,7 +166,7 @@ func (e *EternalScreen) Draw(app *App, dst *ebiten.Image) {
 		if extra-i == -0x16 && len(s.Managers) != extra {
 			y += 0xe
 			for dy := y - 0x13; dy < y-7; dy += 2 {
-				FillRect(dst, 0xd, dy, 1, 1, g.C(ColLight))
+				FillRect(dst, 0xd, dy, 1, 1, g.PalColor(ColLight))
 			}
 		}
 	}
