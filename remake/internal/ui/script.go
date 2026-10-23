@@ -18,7 +18,7 @@ import (
 //	              and move
 //	dump FILE     write the running game as a save file
 //	type TEXT     type characters
-//	key NAME      enter, escape or backspace
+//	key NAME      enter, escape, backspace or space
 //	wait N        N frames without input
 //	shot FILE     save the canvas as PNG
 //
@@ -64,6 +64,8 @@ func ParseScript(r io.Reader) ([]ScriptStep, error) {
 				in.Escape = true
 			case "backspace":
 				in.Backspace = true
+			case "space":
+				in.Chars = []rune{' '}
 			default:
 				return nil, fmt.Errorf("line %d: unknown key", n)
 			}
