@@ -77,7 +77,7 @@ func (s *State) driftStrengths(p int) {
 		lg := LeagueOf(t)
 		x := r.Between(0, 2*p)
 		if p != 1 {
-			s.Teams[t].Logo &^= 0x80
+			s.Teams[t].Ticker = false
 			p = 3
 		}
 		st, lo, hi := 1, 1, 99
