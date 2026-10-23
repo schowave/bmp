@@ -347,6 +347,14 @@ const lnToastWidth = 148
 // pointsText writes n hundredths of a point with a decimal comma, "1,35".
 func pointsText(n int) string { return decimalText(n, 2) }
 
+// signedDecimal is decimalText with a plus for a gain: "+0,21", "-0,05".
+func signedDecimal(n, places int) string {
+	if n >= 0 {
+		return "+" + decimalText(n, places)
+	}
+	return decimalText(n, places)
+}
+
 // decimalText writes n with places digits after a decimal comma:
 // decimalText(135, 2) is "1,35", decimalText(410, 1) "41,0".
 func decimalText(n, places int) string {

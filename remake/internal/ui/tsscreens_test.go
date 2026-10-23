@@ -185,8 +185,14 @@ func TestTurnMenuOptimalKey(t *testing.T) {
 	if !strings.HasPrefix(toast.lines[0], "AUFSTELLUNG ") || !strings.HasPrefix(toast.lines[1], "TRAINING ") {
 		t.Errorf("message %q", toast.lines)
 	}
-	if want := "AUFSTELLUNG " + pointsText(ss.S.LineupRating(ss.Mgr())); toast.lines[0] != want {
-		t.Errorf("message %q, want %q", toast.lines[0], want)
+	if want := "AUFSTELLUNG " + pointsText(ss.S.LineupRating(ss.Mgr())) + " "; !strings.HasPrefix(toast.lines[0], want) {
+		t.Errorf("message %q, want %q and the gain", toast.lines[0], want)
+	}
+	// The gains fit the box also at their widest.
+	for _, l := range []string{"AUFSTELLUNG 2,00 +2,00", "TRAINING 99,9 +99,9"} {
+		if w := app.Gfx.TextWidth(FontNormal, l); w > lnToastWidth {
+			t.Errorf("%q is %d pixels wide", l, w)
+		}
 	}
 	t.Logf("plan %+v -> %+v, %q %q", old, ss.S.PlanOf(ss.Mgr()), toast.lines, toast.third)
 }
