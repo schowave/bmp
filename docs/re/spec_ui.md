@@ -44,8 +44,16 @@ picture) and `pixcmp/find.py original.png remake.png x0 y0 x1 y1 [r]` (where
 a region of the remake lies in the original: the way to measure offsets when
 the data differ). `idx.py` dumps palette indices row or column wise.
 
-macOS: Ebitengine needs a monitor. With the display asleep `bmp` fails with
-"no monitor was found"; `caffeinate -u -t 2` wakes it, `caffeinate -d` keeps it.
+The decompilation is in `remake/tools/re/work/` (`mise run re:build`);
+`remake/tools/re/q.py` finds strings (`str`), prints a function (`fn`, with the
+listing when Ghidra failed, as for the main menu f_08bc_0b5f), its callers
+(`calls`) and constants of the data segments (`seg D 24c4 ptrs:7`).
+
+`mise run remake:shot DEMO OUT [SCRIPT]` takes one shot, `remake/tools/shots.sh`
+renders every demo screen (CI uploads them as the artifact remake-shots).
+Ebitengine needs a monitor: with the display asleep `bmp` fails with "no
+monitor was found"; `caffeinate -u -t 2` wakes it (the mise task does this),
+`caffeinate -d` keeps it awake. On Linux run under `xvfb-run`.
 
 ## 2. Drawing primitives
 
