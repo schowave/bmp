@@ -199,5 +199,6 @@ ties). Deliberate differences:
 ## Legal
 
 The original game files are copyrighted by Software 2000.
-`internal/embedded/data` and every binary contain them, so share them only
-where you would share the `bmp/` directory itself.
+`internal/embedded/data` and every binary contain them; converted into PNG
+and JSON they are still the same pictures and data. Share them only where
+you would share the `bmp/` directory itself.

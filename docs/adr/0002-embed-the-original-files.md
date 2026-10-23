@@ -14,7 +14,8 @@ binary someone downloads.
   `mise run remake:extract`, commit it and build it into every binary: one file to
   run, tests without `bmp/`; the binary carries copyrighted files.
 - Read `bmp/` at run time only: rejected, every run and test would need the
-  game directory. It stays possible with `-data DIR` or `$BMP_DATA`.
+  game directory. It stays possible with `-data DIR` or `$BMP_DATA` (since
+  ADR 0005 with an extract instead of the game directory).
 - Redraw the assets: rejected, the remake aims to look like the original pixel
   for pixel.
 
