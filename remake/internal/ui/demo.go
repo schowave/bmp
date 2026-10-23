@@ -92,6 +92,7 @@ var playedDemos = map[string]func(ss *Session) Scene{
 	"options":   func(ss *Session) Scene { return NewOptionsScreen(ss) },
 	"load":      func(ss *Session) Scene { return NewFileScreen(ss, false) },
 	"save":      func(ss *Session) Scene { return NewFileScreen(ss, true) },
+	"banner":    func(ss *Session) Scene { return newEventBanner("Ligaspiel", func(*App) {}) },
 }
 
 // DemoNames returns the names Demo knows, sorted.

@@ -257,10 +257,7 @@ func (t *trophyScreen) Update(app *App) error {
 
 func (t *trophyScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
-	fillIncl(dst, 0, 0, 319, 239, g.PalColor(ColBeige))
-	fillIncl(dst, 1, 1, 0x13e, 0x4f, g.PalColor(ColBlack))
-	fillIncl(dst, 1, 0x50, 0x13e, 0xa0, g.PalColor(ColRed))
-	fillIncl(dst, 1, 0xa1, 0x13e, 0xee, g.PalColor(ColOrange))
+	drawFlag(g, dst)
 	line := func(i int) string {
 		if i < len(t.n.Lines) {
 			return t.n.Lines[i]
@@ -271,6 +268,60 @@ func (t *trophyScreen) Draw(app *App, dst *ebiten.Image) {
 	g.TextMid(dst, FontBig, 0, 319, 0xdd, line(2), ColWhite, ColBlack)
 	g.TextMid(dst, FontNormal, 0, 319, 0x3c, line(1), ColWhite, ColBlack)
 	Draw(dst, g.Sub(50+t.n.Cup, rectWH(0, 0, 0x58, 0x58)), 0x74, 0x54)
+}
+
+// drawFlag draws the German flag of f_0310_00fa over the screen: a beige
+// border and the black, red and gold stripes.
+func drawFlag(g *Gfx, dst *ebiten.Image) {
+	fillIncl(dst, 0, 0, 319, 239, g.PalColor(ColBeige))
+	fillIncl(dst, 1, 1, 0x13e, 0x4f, g.PalColor(ColBlack))
+	fillIncl(dst, 1, 0x50, 0x13e, 0xa0, g.PalColor(ColRed))
+	fillIncl(dst, 1, 0xa1, 0x13e, 0xee, g.PalColor(ColOrange))
+}
+
+// eventBanner is f_0310_01f2: before the matches of a competition the flag
+// with its name in the big font ("Ligaspiel", "DFB-Pokal", ...), for
+// f_3930_01e7(0x32); then next opens the matches. The winter break and the
+// season end show it too (game.State.TakeBanner), with no next.
+type eventBanner struct {
+	text   string
+	frames int
+	next   func(*App)
+}
+
+func newEventBanner(text string, next func(*App)) *eventBanner {
+	return &eventBanner{text: text, frames: waitFrames(0x32), next: next}
+}
+
+func (b *eventBanner) Update(app *App) error {
+	if b.frames--; b.frames <= 0 {
+		app.Pop()
+		if b.next != nil {
+			b.next(app)
+		}
+	}
+	return nil
+}
+
+func (b *eventBanner) Draw(app *App, dst *ebiten.Image) {
+	drawFlag(app.Gfx, dst)
+	app.Gfx.TextMid(dst, FontBig, 0, 0x13f, 0x80, b.text, ColWhite, ColBlack)
+}
+
+// bannerText is the name f_0310_0995, f_0310_0261, f_0310_0290, f_0310_02bf
+// and f_0310_07a2 show before the matches of md.
+func bannerText(md *game.MatchDay) string {
+	switch {
+	case md.Replays():
+		return "Nachholspiele"
+	case md.Title == "Relegationsspiel":
+		return "Relegationsspiel"
+	case md.Cups() == 1:
+		return "DFB-Pokal"
+	case md.Cups() != 0:
+		return "Europapokal"
+	}
+	return "Ligaspiel"
 }
 
 // seasonEndScreen is the season report of f_0cb5_0012 on the backdrop of

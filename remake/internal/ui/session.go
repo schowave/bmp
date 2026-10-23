@@ -40,6 +40,12 @@ func (d *Driver) Update(app *App) error {
 			return nil
 		}
 	}
+	// The flags of the winter break and of the season end come first, as
+	// in the loop of the original, before its turns and reports.
+	if b, ok := s.TakeBanner(); ok {
+		app.Push(newEventBanner(b, nil))
+		return nil
+	}
 	// Dialogs and screens the game queued (credit due, cards, trophies,
 	// the season report ...) come first.
 	if s.HasNotices() {
@@ -65,12 +71,15 @@ func (d *Driver) Update(app *App) error {
 	case game.PhaseMatches:
 		md := s.NextMatchDay()
 		if md != nil {
-			if s.HasNotices() {
-				// the forfeit is queued by NextMatchDay
-				ShowNotices(app, d.ss, func(app *App) { app.Push(NewMatchScreen(d.ss, md)) })
-			} else {
-				app.Push(NewMatchScreen(d.ss, md))
-			}
+			// The flag with the competition comes first, then the forfeit
+			// NextMatchDay may have queued, then the matches.
+			app.Push(newEventBanner(bannerText(md), func(app *App) {
+				if s.HasNotices() {
+					ShowNotices(app, d.ss, func(app *App) { app.Push(NewMatchScreen(d.ss, md)) })
+				} else {
+					app.Push(NewMatchScreen(d.ss, md))
+				}
+			}))
 		}
 	case game.PhaseContracts:
 		app.Push(NewContractScreen(d.ss, true))

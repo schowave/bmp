@@ -60,6 +60,7 @@ func (s *State) topScorerInTeam(mi int) bool {
 
 // seasonEnd1 runs the season end up to the contract talks.
 func (s *State) seasonEnd1() {
+	s.banner("SAISONENDE") // f_1a58_4597
 	n := len(s.Managers)
 	s.Loop.Before = make([]int64, n)
 	s.Loop.Scorer = make([]bool, n)

@@ -197,6 +197,24 @@ club opens its information.
   message, X closes. It opens by itself when new messages came (F:0x56e2) and a
   click in the free middle opens it.
 
+### Flag with a word (f_0310_01f2)
+
+The German flag of `f_0310_00fa` over the whole screen (beige border; black
+1..0x4f, red 0x50..0xa0, gold 0xa1..0xee), the word in newbold centred on
+baseline 0x80, colour 0x1d with shadow 0; then `f_3930_01e7(0x32)` (not with
+the auto play D:0x5d4), no click needed. Shown before the matches of every
+competition of a match day: "Ligaspiel" (`f_0310_0995`), "DFB-Pokal"
+(`f_0310_0261`), "Europapokal" (`f_0310_0290`), "Relegationsspiel"
+(`f_0310_02bf`), "Nachholspiele" (`f_0310_07a2`); in the loop `f_1a58_3176`
+after the matches of an event whose day is inside the winter break (130 < day <
+207), "WINTERPAUSE"; at the start of the season end (`f_1a58_4597`),
+"SAISONENDE". The newbold font has capitals only, so "Ligaspiel" reads
+LIGASPIEL. Compared with the original after the first turn: only the pointer
+differs. The winter guard also reads the pixel at 1,1 (`f_3930_043a`, skip if
+it is colour 8) and leaves colour 8 there (`f_3930_04fd`, `f_3930_03ce`); the
+remake shows WINTERPAUSE once for a run of days without a turn (unverified in
+the running original).
+
 ### Match day (f_0310_15db, f_0310_2303, f_1a58_042f, f_1a58_0ca3)
 - One scoreboard per match of a human team at (0,0), (161,0), (0,115),
   (161,115): PIC/38.VGA 155×114 at x+3,y; names micro colour 1 centred in
