@@ -48,3 +48,40 @@ func TestAIScorersWithoutGoals(t *testing.T) {
 		t.Error("a team with a goal draws nothing")
 	}
 }
+
+// On a day of the 2. Bundesliga alone, f_0310_2303 still plans the chances
+// of the other two leagues: their draws are made, their results stay.
+func TestIdleLeaguesArePlanned(t *testing.T) {
+	s, err := NewGame(mana(t), Options{Managers: []NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 3})
+	if err != nil {
+		t.Fatal(err)
+	}
+	md := s.newMatchDay(2, 0, false)
+	for _, f := range md.Fixtures {
+		if f.League != 1 {
+			t.Fatalf("fixture of league %d", f.League)
+		}
+	}
+	before := s.Rand
+	results := s.Results
+	md.startPeriod(1, 45)
+	all := s.Rand
+
+	s.Rand = before
+	md.planFixtures(1, 45, func(*Fixture) bool { return true })
+	if s.Rand == all {
+		t.Error("the idle leagues draw nothing")
+	}
+	if s.Results[0] != results[0] || s.Results[2] != results[2] {
+		t.Error("planning changes the results of an idle league")
+	}
+
+	// Planning the three leagues in their order gives the same draws.
+	s.Rand = before
+	md.planIdle(0, 1, 45)
+	md.planFixtures(1, 45, func(*Fixture) bool { return true })
+	md.planIdle(2, 1, 45)
+	if s.Rand != all {
+		t.Error("the leagues are planned out of order")
+	}
+}

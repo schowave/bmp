@@ -338,8 +338,10 @@ accepted on the first try; two chances in the same minute are both played.
 ### 5.3 Per-minute order inside a period – `f_0310_2303(lgMask, cupMask, ., from, to, show)`
 ```
 reset F:0x5710/0x5778 (period chance counters)
-league: pre-plan ALL 3 leagues (all pairs up to 'F') with f_0f9d_08e9(...,1)
-        (lgMask==0 -> only league 0 = Nachholspiele); f_0310_152e(30) (forfeits)
+league: f_0310_152e(30) (forfeits), then pre-plan ALL 3 leagues (all pairs up
+        to 'F') with f_0f9d_08e9(...,1), whatever lgMask says: a league that does
+        not play is planned (draws) but not played (lgMask==0 -> only league 0 =
+        Nachholspiele)
 cups:   pre-plan pairs of every c with bit c in cupMask: f_0f9d_08e9(c+10, idx, ..., 1)
 for minute = from .. to:
    (UI, key ' ' -> options menu f_262f_01b8)
