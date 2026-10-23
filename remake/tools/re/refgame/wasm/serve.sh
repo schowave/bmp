@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 # Builds the WASM web root, exposes the js-dos command interface as
 # window.ci (the driver needs it) and serves it on port 8000.
-# Usage: remake/tools/re/refgame/wasm/serve.sh   (from the repository root)
+# With --driver it also runs driver.mjs and stops both together (Ctrl-C, or
+# the driver's ["quit"] command).
+# Usage: remake/tools/re/refgame/wasm/serve.sh [--driver]   (from anywhere)
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/../../../../.." && pwd)"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$HERE/../../../../.." && pwd)"
 "$ROOT/wasm/build-bundle.sh" "$ROOT/wasm/dist"
 sed -i.bak 's/if (event === "ci-ready") {/if (event === "ci-ready") { window.ci = ci;/' "$ROOT/wasm/dist/index.html"
 rm -f "$ROOT/wasm/dist/index.html.bak"
-exec python3 -m http.server 8000 -d "$ROOT/wasm/dist"
+if [ "${1:-}" != "--driver" ]; then
+    exec python3 -m http.server 8000 -d "$ROOT/wasm/dist"
+fi
+python3 -m http.server 8000 -d "$ROOT/wasm/dist" >/dev/null 2>&1 &
+server=$!
+trap 'kill $server 2>/dev/null' EXIT
+cd "$HERE" && node driver.mjs
