@@ -203,24 +203,27 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 	exempt := d.Month == 5 && d.Day >= 10
 	var homeAtt int64
 	homePrice := 0
-	// The home team's manager first: the away manager of a DFB-Pokal tie
-	// shares his gate.
-	var order []int
-	for _, side := range []int{f.Home, f.Away} {
-		for mi, m := range s.Managers {
-			if m.Team == side {
-				order = append(order, mi)
-			}
-		}
-	}
-	for _, mi := range order {
+	done := make([]bool, len(s.Managers))
+	// one handles a manager of the match; it returns false when he forfeits.
+	var one func(mi int) bool
+	one = func(mi int) bool {
+		done[mi] = true
 		m := s.Managers[mi]
 		side := 0
 		if m.Team == f.Away {
 			side = 1
 		}
 		if m.Effort == ForfeitEffort && !exempt {
-			// f_1a58_2051: the match is not played at all.
+			// f_1a58_2051: the match is not played at all. The original
+			// returns at once, so a home manager after the away manager
+			// would get nothing; the remake handles him as if he came first.
+			if side == 1 {
+				for hi, h := range s.Managers {
+					if h.Team == f.Home && !done[hi] && !one(hi) {
+						return false
+					}
+				}
+			}
 			s.alert(mi, BackdropNone, msgForfeit(m.Name))
 			m.Money -= 200000
 			f.Forfeit = side + 1
@@ -230,7 +233,7 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 					md.humans[k].plays = false
 				}
 			}
-			return
+			return false
 		}
 		f.Watched = true
 		hm := &md.humans[mi]
@@ -285,6 +288,15 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 			if s.Rand.Between(0, (30-x)*4+15) == 0 {
 				m.RiotPending = true
 			}
+		}
+		return true
+	}
+	// The managers in the order of their index: when the away manager of
+	// a DFB-Pokal tie comes first, his share is the estimate for an AI home
+	// team.
+	for mi, m := range s.Managers {
+		if (m.Team == f.Home || m.Team == f.Away) && !done[mi] && !one(mi) {
+			return
 		}
 	}
 }
