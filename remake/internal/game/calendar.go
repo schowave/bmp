@@ -28,8 +28,15 @@ var (
 // UEFAPlaces is D:0x226d.
 const UEFAPlaces = 4
 
-// PointsPerWin is D:0x2271 (2-point rule).
-const PointsPerWin = 2
+// PointsPerWin is D:0x2271: 2 in the original (2-point rule). A game of a
+// real season gives 3 from 1995/96 on, when the German leagues took up the
+// 3-point rule.
+func (s *State) PointsPerWin() int {
+	if s.Season != "" && s.StartYear >= 1995 {
+		return 3
+	}
+	return 2
+}
 
 // firstReserveClub is the first of the ids 58..63, reserve clubs outside
 // the leagues (LeagueOf counts them to league 2).

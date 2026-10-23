@@ -7,7 +7,9 @@ func (s *State) recordHistory(mi int) {
 	c := &s.Clubs[m.Team]
 	for h := 0; h < 2; h++ {
 		m.EtPoints[h] += c.Points[h]
-		m.EtMinus[h] += 2*c.Games[h] - c.Points[h]
+		// The minus points of the 2-point rule; under the 3-point rule the
+		// points lost.
+		m.EtMinus[h] += s.PointsPerWin()*c.Games[h] - c.Points[h]
 		m.EtGoals[h] += c.Goals[h]
 		m.EtAgainst[h] += c.Against[h]
 		m.EtGames[h] += c.Games[h]
@@ -218,7 +220,9 @@ func (s *State) youthPlayer(mi int) {
 	r := &s.Rand
 	m := s.Managers[mi]
 	year := DateOf(s.StartYear, s.Day).Year
-	if !((year > 1966 && !s.Modern) || (year > 1995 && s.Modern)) {
+	// The original: after 1966, or after 1995 in a modern game, i.e. from
+	// the fourth season on.
+	if year <= s.FirstYear+3 {
 		return
 	}
 	y := m.YouthPoints / 12

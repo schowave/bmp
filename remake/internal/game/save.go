@@ -46,8 +46,25 @@ func Load(data []byte, mana *assets.Mana) (*State, error) {
 	if err := json.Unmarshal(f.State, s); err != nil {
 		return nil, err
 	}
+	if s.FirstYear == 0 {
+		// Saved before games kept their first year.
+		s.FirstYear = 1963
+		if s.Modern {
+			s.FirstYear = 1992
+		}
+	}
 	s.mana = mana
 	return s, nil
+}
+
+// SaveSeason returns the real season of a saved game, empty for the clubs
+// of the original, so that the caller can pass Load the right clubs.
+func SaveSeason(data []byte) (string, error) {
+	var f struct{ State struct{ Season string } }
+	if err := json.Unmarshal(data, &f); err != nil {
+		return "", err
+	}
+	return f.State.Season, nil
 }
 
 // MatchdayDay returns the season day on which matchday md of league l is

@@ -149,7 +149,7 @@ func DecodeClubs(data []byte) (*Mana, error) {
 			}
 			continue
 		}
-		if cj.Logo <= 0 || cj.Logo > 255 {
+		if cj.Logo <= 0 {
 			return nil, fmt.Errorf("club %d (%s): logo %d", i, cj.Name, cj.Logo)
 		}
 		if cj.Players == nil {

@@ -400,7 +400,7 @@ func (s *State) goalMessages(mi int) {
 	idx := [3][3]int{{0, 4, n - 4}, {0, 1, n - 5}, {0, 3, n - 5}}[l]
 	pts := func(t int) int { return s.Clubs[t].TotalPoints() }
 	maxpts := func(t int) int {
-		return pts(t) + (MatchdaysPerLeague[l]-s.Clubs[t].TotalGames())*PointsPerWin
+		return pts(t) + (MatchdaysPerLeague[l]-s.Clubs[t].TotalGames())*s.PointsPerWin()
 	}
 	me := m.Team
 	club := s.Teams[me].Name
