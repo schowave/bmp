@@ -149,18 +149,9 @@ func (l *tsList) draw(g *Gfx, dst *ebiten.Image, s *game.State, cur, hover int) 
 	FillRect(dst, l.x, l.foot, l.right-l.x+1, 1, g.PalColor(ColBeige))
 }
 
-// rowColor is the colour of the texts of a row. A player a club made an
-// offer for is white, so that the offer is found: in the squad list of the
-// transfer screen, and an own listed player in the market list (the
-// remake's; the original draws him like the others).
+// rowColor is the colour of the texts of a row.
 func (l *tsList) rowColor(s *game.State, sl *game.Slot) int {
 	c := tsPosColor[s.Persons[sl.Person].Position()]
-	if l.mode == 0 && sl.Status&0x40 != 0 {
-		return ColWhite
-	}
-	if (l.mode == 1 || l.mode == 2) && sl.Status&0x80 != 0 && s.Persons[sl.Person].Owner == l.viewer {
-		return ColWhite
-	}
 	if l.mode == 3 {
 		if sl.Nego > 0 && sl.Nego < 100 {
 			c = ColGrey3
@@ -170,6 +161,21 @@ func (l *tsList) rowColor(s *game.State, sl *game.Slot) int {
 		}
 	}
 	return c
+}
+
+// nameColor is the colour of the name of a row, base unless the name is
+// marked light: an own player a club made an offer for (0x40 marks an offer
+// for a squad player, 0x80 one for a listed player, so the rule covers the
+// squad list as well as the market list), or in the contract list a player
+// who asks for a longer contract.
+func (l *tsList) nameColor(s *game.State, sl *game.Slot, cur, base int) int {
+	if l.mode <= 2 && sl.Status&0xc0 != 0 && s.Persons[sl.Person].Owner == cur {
+		return ColBeige
+	}
+	if l.mode == 3 && sl.Message && sl.Nego&0x7f > 99 {
+		return ColBeige
+	}
+	return base
 }
 
 func (l *tsList) drawRow(g *Gfx, dst *ebiten.Image, s *game.State, cur, i, y int, hot bool) {
@@ -203,13 +209,7 @@ func (l *tsList) drawRow(g *Gfx, dst *ebiten.Image, s *game.State, cur, i, y int
 				FillRect(dst, x+tsWidths[1]-3, y-2, 1, 1, g.PalColor(col^xor))
 			}
 		case 2:
-			if (l.mode == 1 || l.mode == 2) && sl.Status&0xc0 != 0 && p.Owner == cur {
-				col = ColBeige
-			}
-			if l.mode == 3 && sl.Message && sl.Nego&0x7f > 99 {
-				col = ColBeige
-			}
-			text(x, p.Name, col)
+			text(x, p.Name, l.nameColor(s, sl, cur, col))
 		case 3, 4, 5:
 			text(x, tsPad(int64(sl.Games[c-3]), 2), col)
 		case 6:
