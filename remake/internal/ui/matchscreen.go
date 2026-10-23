@@ -48,6 +48,9 @@ type matchShow struct {
 	scene     *matchScene
 	pre, post int
 	pen       bool
+	// after runs when the show is over: the lineup after a red card or an
+	// injury of a human team.
+	after func(app *App)
 }
 
 // Panel positions (D:0x0632, D:0x063c).
@@ -122,6 +125,9 @@ func (m *MatchScreen) Update(app *App) error {
 			sh.frames--
 			if sh.frames <= 0 || in.Left {
 				m.shows = m.shows[1:]
+				if sh.after != nil {
+					sh.after(app)
+				}
 			}
 		}
 		return nil
@@ -132,7 +138,7 @@ func (m *MatchScreen) Update(app *App) error {
 	}
 	if in.Left {
 		if mi := m.logoHit(in); mi >= 0 {
-			app.Push(NewSubstitutionScreen(m.ss, m.md, mi))
+			app.Push(NewMatchLineup(m.ss, m.md, mi))
 			return nil
 		}
 		m.fast = true
@@ -209,7 +215,7 @@ func (m *MatchScreen) collect(app *App) {
 		m.shows = append(m.shows, sh)
 		if e.Manager >= 0 && (e.Kind == game.EvInjury || e.Kind == game.EvRed || e.Kind == game.EvYellowRed) && !m.md.Done {
 			mi := e.Manager
-			m.end = append(m.end, func(app *App) { app.Push(NewSubstitutionScreen(m.ss, m.md, mi)) })
+			sh.after = func(app *App) { app.Push(NewMatchLineup(m.ss, m.md, mi)) }
 		}
 	}
 }

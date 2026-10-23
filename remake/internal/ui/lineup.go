@@ -95,11 +95,27 @@ type SquadScreen struct {
 	picked int            // slot picked on the tactics board, or -1
 	// cursor is the cell under the mouse on the board, col < 0 for none.
 	cursorCol, cursorRow int
+
+	// During a match (f_1a58_1f75: f_1ecd_1560 with N players) the screen
+	// substitutes: md is the match day, matchMi the manager and out the
+	// player taken out of the team, or -1.
+	md      *game.MatchDay
+	matchMi int
+	out     int
 }
 
 // NewSquadScreen creates the lineup screen (team group, first item).
 func NewSquadScreen(ss *Session) *SquadScreen {
-	return &SquadScreen{ss: ss, picked: -1, cursorCol: -1}
+	return &SquadScreen{ss: ss, picked: -1, cursorCol: -1, out: -1}
+}
+
+// NewMatchLineup opens the lineup of manager mi during a match: a click on
+// a player of the team takes him out, a click on a reserve player then
+// brings that one in.
+func NewMatchLineup(ss *Session, md *game.MatchDay, mi int) *SquadScreen {
+	q := NewSquadScreen(ss)
+	q.md, q.matchMi = md, mi
+	return q
 }
 
 // NewSquadContracts opens the lineup screen with the contract list
@@ -110,7 +126,12 @@ func NewSquadContracts(ss *Session) *SquadScreen {
 	return q
 }
 
-func (q *SquadScreen) mi() int { return q.ss.Mgr() }
+func (q *SquadScreen) mi() int {
+	if q.md != nil {
+		return q.matchMi
+	}
+	return q.ss.Mgr()
+}
 
 func (q *SquadScreen) mask() int {
 	if q.view == lineupContracts {
@@ -212,13 +233,19 @@ func (q *SquadScreen) Update(app *App) error {
 		return nil
 	}
 	if q.view == lineupContracts {
-		if in.Left {
+		if in.Left && q.md == nil {
 			(&ContractScreen{ss: q.ss}).negotiate(app, slot)
 		}
 		return nil
 	}
 	// The number and the position take the clicks.
 	if col > 1 {
+		return nil
+	}
+	if q.md != nil {
+		if in.Left {
+			q.substitute(app, slot)
+		}
 		return nil
 	}
 	var err error
@@ -242,7 +269,7 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 	if !in.Left {
 		return false
 	}
-	for f := 0; f < 3; f++ {
+	for f := 0; f < 3 && q.md == nil; f++ {
 		if lnIconHit(in, f*60+4, lnFormY) {
 			s.SetFormation(mi, f)
 			q.picked = -1
@@ -272,8 +299,32 @@ func (q *SquadScreen) setView(v int) {
 	q.picked = -1
 }
 
+// substitute handles a click on slot i during a match: a player of the
+// team is taken out, a reserve player then comes in for him.
+func (q *SquadScreen) substitute(app *App, i int) {
+	s := q.ss.S
+	mi := q.mi()
+	err := q.md.CanSubstitute(mi, i)
+	if err == nil {
+		switch sl := &s.Squads[mi][i]; {
+		case sl.Lineup <= 11:
+			q.out = i
+		case q.out < 0:
+			err = game.LineupError{"Nicht mehr als " + itoa(s.CountOnPitch(mi)), "Spieler einsetzen !"}
+		default:
+			err = q.md.Substitute(mi, q.out, i)
+			q.out = -1
+		}
+	}
+	if le, ok := err.(game.LineupError); ok {
+		app.Push(newLineupToast(le))
+	}
+}
+
 func (q *SquadScreen) exit(app *App) {
-	q.ss.S.LineupStrength(q.mi(), false)
+	// During a match the strength gets the tactical bonuses (f_0f9d_0002
+	// with 1).
+	q.ss.S.LineupStrength(q.mi(), q.md != nil)
 	app.Pop()
 }
 
@@ -282,7 +333,7 @@ func lnClamp(v, lo, hi int) int { return max(lo, min(hi, v)) }
 func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	s := q.ss.S
-	m := q.ss.M()
+	m := s.Managers[q.mi()]
 	in := &app.Input
 	g.Background(dst)
 
@@ -343,7 +394,13 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 	for i, ic := range lnIcons {
 		g.drawIconButton(dst, ic, lnIconX, lnIconY[i], q.pressed() == i)
 	}
-	g.DrawIconButton(dst, IconMainMenu, lnIconX, lnIconY[3])
+	exit := IconMainMenu
+	if q.md != nil {
+		// During a match WEITER, and the club below the list.
+		exit = IconWeiter
+		g.TextMid(dst, FontBig, 2, 0xf0, 0xe4, s.Teams[m.Team].Name, ColBeige, ColBlack)
+	}
+	g.DrawIconButton(dst, exit, lnIconX, lnIconY[3])
 	if q.view == lineupPitch {
 		q.drawBoard(g, dst)
 	}
@@ -366,7 +423,8 @@ func (q *SquadScreen) drawRow(g *Gfx, dst *ebiten.Image, i, y int, inBar bool, b
 		txt := ""
 		switch c {
 		case 0:
-			if sl.Lineup != 0 {
+			// The player taken out for a substitution has no number.
+			if sl.Lineup != 0 && i != q.out {
 				txt = numText(int64(sl.Lineup), 2, true)
 				if sl.Lineup > 11 {
 					col = lnReserveColor

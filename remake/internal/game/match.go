@@ -857,24 +857,51 @@ func (md *MatchDay) replan(mi, minute int) {
 	}
 }
 
+// CanSubstitute checks a click on slot i of the lineup during a match
+// (f_1ecd_1560 with N players): the player must be in the team or a
+// reserve, and a substitution of his kind (keeper or field player) must be
+// left.
+func (md *MatchDay) CanSubstitute(mi, i int) error {
+	s := md.s
+	sl := &s.Squads[mi][i]
+	if !md.humans[mi].plays || md.Done || sl.Empty() || sl.Lineup == 0 {
+		return ErrNotOnPitch
+	}
+	if !md.subsLeft(mi, s.Persons[sl.Person].Position() == PosKeeper) {
+		return ErrNoSubs
+	}
+	return nil
+}
+
+func (md *MatchDay) subsLeft(mi int, keeper bool) bool {
+	hm := &md.humans[mi]
+	return keeper && hm.keeperSubs > 0 || !keeper && hm.fieldSubs > 0
+}
+
 // Substitute exchanges a player on the pitch for one from the bench during
-// a match.
+// a match (f_1ecd_1560 with N players).
 func (md *MatchDay) Substitute(mi, out, in int) error {
 	s := md.s
 	hm := &md.humans[mi]
 	if !hm.plays || md.Done {
-		return CreditError("Ihre Mannschaft spielt nicht.")
+		return ErrNotOnPitch
 	}
 	o, n := &s.Squads[mi][out], &s.Squads[mi][in]
 	if o.Lineup < 1 || o.Lineup > 11 {
-		return CreditError("Spieler ist nicht aufgestellt")
+		return ErrNotOnPitch
 	}
 	keeper := s.Persons[o.Person].Position() == PosKeeper
-	if keeper && hm.keeperSubs == 0 || !keeper && hm.fieldSubs == 0 {
-		return CreditError("Keine Auswechslung mehr möglich")
+	if !md.subsLeft(mi, keeper) {
+		return ErrNoSubs
 	}
-	if n.Empty() || !s.available(n) || (n.Lineup >= 1 && n.Lineup <= 11) {
-		return CreditError("Spieler kann nicht eingewechselt werden")
+	if n.Empty() || n.Lineup >= 1 && n.Lineup <= 11 {
+		return ErrNotOnPitch
+	}
+	if !s.available(n) {
+		if n.Status&3 == 1 {
+			return ErrSuspendedShort
+		}
+		return ErrInjuredShort
 	}
 	if keeper {
 		hm.keeperSubs--
