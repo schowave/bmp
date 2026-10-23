@@ -53,6 +53,26 @@ Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :59
                                                    └── D: /savegame    (persistent saves)
 ```
 
+## Remake
+
+Next to the two images there is a re-implementation of the game in Go with
+[Ebitengine](https://ebitengine.org), in `remake/`. The rules come from the
+decompiled `BMMAIN.EXE` (`docs/re/spec_*.md`) and the screens are compared
+pixel by pixel with the running original. Pictures, fonts and club data are
+extracted from `bmp/` and built into the binary, so the original files are
+only needed to extract them again.
+
+```bash
+mise run remake:run     # play it (Go and, on Linux, the GL/X11 headers)
+mise run remake:build   # build remake/bin/bmp
+mise run remake:test    # vet, gofmt and tests
+```
+
+The remake reproduces the original, bugs included; the deliberate differences
+are listed under *Deviations from the original* in
+[remake/README.md](remake/README.md), which also has the command-line options
+and the project layout.
+
 ## Deployment
 
 ### Synology NAS
