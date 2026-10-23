@@ -94,7 +94,7 @@ func LoadGame(data []byte, orig *assets.Mana) (*game.State, error) {
 func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Background(dst)
-	g.TextMid(dst, FontBig, 0, 320, 20, "WELCHE SAISON ?", ColBeige, ColBlack)
+	g.TextMid(dst, FontBig, 0, 320, 20, "WELCHE SAISON", ColBeige, ColBlack)
 	g.Window(dst, 6, 33, 314, 172, ColBlue)
 	h := c.hover(&app.Input)
 	for i, s := range c.entries {
@@ -111,5 +111,5 @@ func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 		}
 		g.TextAt(dst, FontSmall, x, y+4, seasonLabel(s), fg, NoShadow)
 	}
-	g.TextMid(dst, FontSmall, 0, 320, 190, "LINKE MAUSTASTE: VEREINE DIESER SAISON", ColGrey2, ColBlack)
+	g.TextMid(dst, FontNormal, 0, 320, 196, "Mit welchen Vereinen wird gespielt?", ColBeige, ColBlack)
 }

@@ -1,0 +1,3586 @@
+[
+	{
+		"name": "FC BAYERN MÜNCHEN",
+		"logo": 83,
+		"strength": [
+			95,
+			95,
+			95
+		],
+		"players": {
+			"goalkeepers": [
+				"KAHN",
+				"RENSING"
+			],
+			"defenders": [
+				"LAHM",
+				"LIZARAZU",
+				"SAGNOL",
+				"KUFFOUR",
+				"LINKE",
+				"TARNAT"
+			],
+			"midfielders": [
+				"SCHWEINSTEIGER",
+				"SCHOLL",
+				"SALIHAMIDZIC",
+				"JEREMIES",
+				"FINK",
+				"HARGREAVES",
+				"BALLACK"
+			],
+			"forwards": [
+				"ZICKLER",
+				"PIZARRO",
+				"ELBER",
+				"CRUZ",
+				"MAKAAY"
+			]
+		}
+	},
+	{
+		"name": "VFB STUTTGART",
+		"logo": 92,
+		"strength": [
+			91,
+			94,
+			92
+		],
+		"players": {
+			"goalkeepers": [
+				"HILDEBRAND",
+				"ERNST"
+			],
+			"defenders": [
+				"MEIRA",
+				"HINKEL",
+				"SCHNEIDER",
+				"BORDON",
+				"LECHNER",
+				"WENZEL"
+			],
+			"midfielders": [
+				"SOLDO",
+				"BALAKOW",
+				"MEIßNER",
+				"TIFFERT",
+				"GERBER",
+				"BERGER",
+				"CARNELL"
+			],
+			"forwards": [
+				"CACAU",
+				"GOMEZ",
+				"GANEA",
+				"KURANYI",
+				"DUNDEE"
+			]
+		}
+	},
+	{
+		"name": "BORUSSIA DORTMUND",
+		"logo": 89,
+		"strength": [
+			94,
+			92,
+			90
+		],
+		"players": {
+			"goalkeepers": [
+				"WEIDENFELLER",
+				"LEHMANN"
+			],
+			"defenders": [
+				"DEDE",
+				"REUTER",
+				"WÖRNS",
+				"METZELDER",
+				"EVANILSON",
+				"BRZENSKA"
+			],
+			"midfielders": [
+				"RICKEN",
+				"KEHL",
+				"KRINGE",
+				"ROSICKY",
+				"ADDO",
+				"HEINRICH",
+				"OLISEH"
+			],
+			"forwards": [
+				"HERRLICH",
+				"EWERTHON",
+				"REINA",
+				"ODONKOR",
+				"AMOROSO"
+			]
+		}
+	},
+	{
+		"name": "HAMBURGER SV",
+		"logo": 87,
+		"strength": [
+			92,
+			91,
+			85
+		],
+		"players": {
+			"goalkeepers": [
+				"PIECKENHAGEN",
+				"WÄCHTER"
+			],
+			"defenders": [
+				"HOLLERBACH",
+				"HOOGMA",
+				"HERTZSCH",
+				"BENJAMIN",
+				"REINHARDT",
+				"UJFALUSI"
+			],
+			"midfielders": [
+				"JAROLIM",
+				"MAHDAVIKIA",
+				"BARBAREZ",
+				"CARDOSO",
+				"GROTH",
+				"BEINLICH",
+				"ADEWUNMI"
+			],
+			"forwards": [
+				"TAKAHARA",
+				"ROMEO",
+				"MEIJER",
+				"MAMOUM",
+				"STEEGMANN"
+			]
+		}
+	},
+	{
+		"name": "HERTHA BSC",
+		"logo": 116,
+		"strength": [
+			85,
+			90,
+			91
+		],
+		"players": {
+			"goalkeepers": [
+				"FIEDLER",
+				"KIRALY"
+			],
+			"defenders": [
+				"SCHMIDT",
+				"VAN BURIK",
+				"HARTMANN",
+				"FRIEDRICH",
+				"SIMUNIC",
+				"REHMER"
+			],
+			"midfielders": [
+				"DARDAI",
+				"SVERRISSON",
+				"SANTOS",
+				"NEUENDORF",
+				"GOOR",
+				"TRETSCHOK",
+				"MARX"
+			],
+			"forwards": [
+				"PREETZ",
+				"KRETSCHMER",
+				"ALVES",
+				"RAFAEL",
+				"BOBIC"
+			]
+		}
+	},
+	{
+		"name": "WERDER BREMEN",
+		"logo": 80,
+		"strength": [
+			81,
+			89,
+			89
+		],
+		"players": {
+			"goalkeepers": [
+				"REINKE",
+				"BOREL"
+			],
+			"defenders": [
+				"STALTERI",
+				"SKRYPNYK",
+				"KRSTAJIC",
+				"VERLAAT",
+				"ISMAEL",
+				"MAGNIN"
+			],
+			"midfielders": [
+				"BAUMANN",
+				"ERNST",
+				"MICOUD",
+				"SCHULZ",
+				"LISZTES",
+				"TJIKUZU",
+				"BANOVIC"
+			],
+			"forwards": [
+				"GONCALVES",
+				"KLASNIC",
+				"VALDEZ",
+				"CHARISTEAS",
+				"MAMOUM"
+			]
+		}
+	},
+	{
+		"name": "FC SCHALKE 04",
+		"logo": 91,
+		"strength": [
+			90,
+			87,
+			83
+		],
+		"players": {
+			"goalkeepers": [
+				"ROST",
+				"RECK"
+			],
+			"defenders": [
+				"KOBIASHVILI",
+				"VAN HOOGDALEM",
+				"WALDOCH",
+				"HAJTO",
+				"RODRIGUEZ",
+				"MATELLAN"
+			],
+			"midfielders": [
+				"ASAMOAH",
+				"KAMPHUIS",
+				"POULSEN",
+				"BÖHME",
+				"VERMANT",
+				"KMETSCH",
+				"MÖLLER"
+			],
+			"forwards": [
+				"SAND",
+				"KERCKHOVEN",
+				"HANKE",
+				"AGALI",
+				"GLIEDER"
+			]
+		}
+	},
+	{
+		"name": "VFL WOLFSBURG",
+		"logo": 143,
+		"strength": [
+			87,
+			86,
+			78
+		],
+		"players": {
+			"goalkeepers": [
+				"REITMAIER",
+				"JENTZSCH"
+			],
+			"defenders": [
+				"SCHNOOR",
+				"SARPEI",
+				"BILISKOV",
+				"FRANZ",
+				"RYTTER",
+				"ROMANCZUK"
+			],
+			"midfielders": [
+				"KARHAN",
+				"GREINER",
+				"AKONNOR",
+				"THIAM",
+				"SIEGERT",
+				"MUNTEANU",
+				"D'ALESSANDRO"
+			],
+			"forwards": [
+				"KLIMOWICZ",
+				"MENSEGUEZ",
+				"JANICKI",
+				"MARIC",
+				"PONTE"
+			]
+		}
+	},
+	{
+		"name": "VFL BOCHUM",
+		"logo": 84,
+		"strength": [
+			78,
+			85,
+			94
+		],
+		"players": {
+			"goalkeepers": [
+				"VAN DUIJNHOVEN",
+				"VANDER"
+			],
+			"defenders": [
+				"REIS",
+				"BÖNIG",
+				"COLDING",
+				"FAHRENHORST",
+				"MEICHELBECK",
+				"BEMBEN"
+			],
+			"midfielders": [
+				"ZDEBEL",
+				"SCHINDZIELORZ",
+				"WOSZ",
+				"HASHEMIAN",
+				"COSTA",
+				"MANDREKO",
+				"TONI TAPALOVIC"
+			],
+			"forwards": [
+				"BUCKLEY",
+				"CHRISTIANSEN",
+				"GONCALVES",
+				"DIABANG",
+				"GRAULUND"
+			]
+		}
+	},
+	{
+		"name": "TSV 1860 MÜNCHEN",
+		"logo": 120,
+		"strength": [
+			79,
+			83,
+			82
+		],
+		"players": {
+			"goalkeepers": [
+				"HOFMANN",
+				"JENTZSCH"
+			],
+			"defenders": [
+				"KURZ",
+				"COSTA",
+				"STRANZL",
+				"HOFFMANN",
+				"MEYER",
+				"JANKER"
+			],
+			"midfielders": [
+				"BORISSOW",
+				"CERNY",
+				"TYCE",
+				"HÄßLER",
+				"BAIER",
+				"SCHÄFER",
+				"LEHMANN"
+			],
+			"forwards": [
+				"AGOSTINO",
+				"SCHROTH",
+				"MAX",
+				"LAUTH",
+				"KIOYO"
+			]
+		}
+	},
+	{
+		"name": "HANNOVER 96",
+		"logo": 98,
+		"strength": [
+			76,
+			82,
+			87
+		],
+		"players": {
+			"goalkeepers": [
+				"HAAS",
+				"ZIEGLER"
+			],
+			"defenders": [
+				"CHERUNDOLO",
+				"LINKE",
+				"ZURAW",
+				"BERGANTIN",
+				"STEFULJ",
+				"KONSTANTINIDIS"
+			],
+			"midfielders": [
+				"LALA",
+				"KRUPNIKOVIC",
+				"DABROWSKI",
+				"DE GUZMAN",
+				"SCHRÖTER",
+				"SANCHEZ",
+				"NEHRBAUER"
+			],
+			"forwards": [
+				"STAJNER",
+				"STENDEL",
+				"KOTULJAC",
+				"IDRISSOU",
+				"CHRISTIANSEN"
+			]
+		}
+	},
+	{
+		"name": "BOR. MÖNCHENGLADBACH",
+		"logo": 93,
+		"strength": [
+			83,
+			81,
+			81
+		],
+		"players": {
+			"goalkeepers": [
+				"KAMPS",
+				"STIEL"
+			],
+			"defenders": [
+				"KORZYNIETZ",
+				"ASANIN",
+				"PLETSCH",
+				"EBERL",
+				"STRASSER",
+				"KORELL"
+			],
+			"midfielders": [
+				"DEMO",
+				"KLUGE",
+				"HAUSWEILER",
+				"ULICH",
+				"STASSIN",
+				"GAEDE",
+				"CARNELL"
+			],
+			"forwards": [
+				"WITECZEK",
+				"VAN LENT",
+				"VAN HOUDT",
+				"SVERKOS",
+				"VAN HOUT"
+			]
+		}
+	},
+	{
+		"name": "HANSA ROSTOCK",
+		"logo": 119,
+		"strength": [
+			89,
+			79,
+			77
+		],
+		"players": {
+			"goalkeepers": [
+				"SCHOBER",
+				"BUSCH"
+			],
+			"defenders": [
+				"MAUL",
+				"JAKOBSSON",
+				"HILL",
+				"RASMUSSEN",
+				"MÖHRLE",
+				"HOLST"
+			],
+			"midfielders": [
+				"RYDLEWICZ",
+				"LANTZ",
+				"WIBRAN",
+				"MÜLLER",
+				"PERSSON",
+				"BRUNNEMANN",
+				"TALJEVIC"
+			],
+			"forwards": [
+				"ARVIDSSON",
+				"PRICA",
+				"DI SALVO",
+				"SYKORA",
+				"VORBECK"
+			]
+		}
+	},
+	{
+		"name": "1.FC KAISERSLAUTERN",
+		"logo": 88,
+		"strength": [
+			86,
+			78,
+			79
+		],
+		"players": {
+			"goalkeepers": [
+				"G.KOCH",
+				"WIESE"
+			],
+			"defenders": [
+				"H.KOCH",
+				"RAMZY",
+				"NZELO-LEMBI",
+				"TCHATO",
+				"HENGEN",
+				"KLOS"
+			],
+			"midfielders": [
+				"HRISTOV",
+				"RATINHO",
+				"GRAMMOZIS",
+				"BASLER",
+				"BJELICA",
+				"SOARES",
+				"SFORZA"
+			],
+			"forwards": [
+				"KLOSE",
+				"LOKVENC",
+				"TIMM",
+				"MIFSUD",
+				"ADZIC"
+			]
+		}
+	},
+	{
+		"name": "BAYER 04 LEVERKUSEN",
+		"logo": 90,
+		"strength": [
+			77,
+			77,
+			86
+		],
+		"players": {
+			"goalkeepers": [
+				"BUTT",
+				"STARKE"
+			],
+			"defenders": [
+				"NOWOTNY",
+				"BABIC",
+				"ZIVKOVIC",
+				"JUAN",
+				"PLACENTE",
+				"LUCIO"
+			],
+			"midfielders": [
+				"RAMELOW",
+				"SCHNEIDER",
+				"BIEROFKA",
+				"BASTÜRK",
+				"BALITSCH",
+				"JERAT",
+				"VRANJES"
+			],
+			"forwards": [
+				"KIRSTEN",
+				"NEUVILLE",
+				"BERBATOW",
+				"BRDARIC",
+				"PONTE"
+			]
+		}
+	},
+	{
+		"name": "ARMINIA BIELEFELD",
+		"logo": 125,
+		"strength": [
+			82,
+			76,
+			76
+		],
+		"players": {
+			"goalkeepers": [
+				"HAIN",
+				"EILHOFF"
+			],
+			"defenders": [
+				"BORGES",
+				"GABRIEL",
+				"REINHARDT",
+				"HOLSING",
+				"OWOMOYELA",
+				"LENSE"
+			],
+			"midfielders": [
+				"KAUF",
+				"DAMMEIER",
+				"VATA",
+				"PORCELLO",
+				"BRINKMANN",
+				"DABROWSKI",
+				"GRIENEISEN"
+			],
+			"forwards": [
+				"WICHNIAREK",
+				"VAN DER VEN",
+				"KÜNTZEL",
+				"BOAKYE",
+				"DIABANG"
+			]
+		}
+	},
+	{
+		"name": "1.FC NÜRNBERG",
+		"logo": 95,
+		"strength": [
+			74,
+			74,
+			73
+		],
+		"players": {
+			"goalkeepers": [
+				"SCHÄFER",
+				"KAMPA"
+			],
+			"defenders": [
+				"NIKL",
+				"WOLF",
+				"MÜLLER",
+				"REINHARDT",
+				"KOS",
+				"WIBLISHAUSER"
+			],
+			"midfielders": [
+				"MINTAL",
+				"LARSEN",
+				"JAROLIM",
+				"SANNEH",
+				"SCHLAUDERER",
+				"JUNIOR",
+				"GASPAR"
+			],
+			"forwards": [
+				"DRILLER",
+				"KIEßLING",
+				"CIRIC",
+				"CACAU",
+				"MICHALKE"
+			]
+		}
+	},
+	{
+		"name": "ENERGIE COTTBUS",
+		"logo": 1050,
+		"strength": [
+			73,
+			73,
+			74
+		],
+		"players": {
+			"goalkeepers": [
+				"PIPLICA",
+				"KOCH"
+			],
+			"defenders": [
+				"DA SILVA",
+				"BERHALTER",
+				"BEECK",
+				"LÖW",
+				"HUJDUROVIC",
+				"SCHÖCKEL"
+			],
+			"midfielders": [
+				"ROST",
+				"REGHECAMPF",
+				"LATOUNDJI",
+				"JUNGNICKEL",
+				"SCHRÖTER",
+				"KALUZNY",
+				"BANDROWSKI"
+			],
+			"forwards": [
+				"BITTENCOURT",
+				"KOBYLANSKI",
+				"IORDACHE",
+				"TOPIC",
+				"VAGNER"
+			]
+		}
+	},
+	{
+		"name": "SC FREIBURG",
+		"logo": 105,
+		"strength": [
+			74,
+			74,
+			70
+		],
+		"players": {
+			"goalkeepers": [
+				"GOLZ",
+				"REUS"
+			],
+			"defenders": [
+				"DIARRA",
+				"MÜLLER",
+				"RIETHER",
+				"HERMEL",
+				"KOBIASHVILI",
+				"KONDE"
+			],
+			"midfielders": [
+				"COULIBALY",
+				"ZEYER",
+				"TSKITISHVILI",
+				"WILLI",
+				"ANTAR",
+				"RAMDANE",
+				"BAJRAMOVIC"
+			],
+			"forwards": [
+				"IASCHWILI",
+				"TANKO",
+				"KRUPPKE",
+				"MÖSSNER",
+				"AMADI"
+			]
+		}
+	},
+	{
+		"name": "1.FC KÖLN",
+		"logo": 85,
+		"strength": [
+			67,
+			73,
+			73
+		],
+		"players": {
+			"goalkeepers": [
+				"PRÖLL",
+				"WESSELS"
+			],
+			"defenders": [
+				"CICHON",
+				"VOIGT",
+				"CULLMANN",
+				"D.NDJENG",
+				"SICHONE",
+				"SINKIEWICZ"
+			],
+			"midfielders": [
+				"SPRINGER",
+				"LOTTNER",
+				"SCHÄFER",
+				"SINKALA",
+				"PODOLSKI",
+				"KREUZ",
+				"M.NDJENG"
+			],
+			"forwards": [
+				"SCHERZ",
+				"KURTH",
+				"SEBO",
+				"EBBERS",
+				"STEEGMANN"
+			]
+		}
+	},
+	{
+		"name": "EINTRACHT FRANKFURT",
+		"logo": 86,
+		"strength": [
+			73,
+			71,
+			71
+		],
+		"players": {
+			"goalkeepers": [
+				"NIKOLOW",
+				"PRÖLL"
+			],
+			"defenders": [
+				"BINDEWALD",
+				"HENING",
+				"WIEDENER",
+				"BÜRGER",
+				"KELLER",
+				"TSOUMOU-MADZA"
+			],
+			"midfielders": [
+				"SCHUR",
+				"SKELA",
+				"STREIT",
+				"JONES",
+				"GÜNTHER",
+				"DRAGUSHA",
+				"KREUZ"
+			],
+			"forwards": [
+				"KRYSZALOWICZ",
+				"BEIERLE",
+				"FROMMER",
+				"DIAKITE",
+				"TOPPMÖLLER"
+			]
+		}
+	},
+	{
+		"name": "1.FSV MAINZ 05",
+		"logo": 101,
+		"strength": [
+			70,
+			70,
+			74
+		],
+		"players": {
+			"goalkeepers": [
+				"WACHE",
+				"WETKLO"
+			],
+			"defenders": [
+				"ROSE",
+				"NIKOLIC",
+				"BODOG",
+				"ABEL",
+				"CHRIST",
+				"DUHANEY"
+			],
+			"midfielders": [
+				"NEUSTÄDTER",
+				"HOCK",
+				"KRAMNY",
+				"BABATZ",
+				"KÜHNE",
+				"SCHWARZ",
+				"D.WEILAND"
+			],
+			"forwards": [
+				"THURK",
+				"AUER",
+				"N.WEILAND",
+				"WORONIN",
+				"TEINERT"
+			]
+		}
+	},
+	{
+		"name": "SPVGG GREUTHER FÜRTH",
+		"logo": 1080,
+		"strength": [
+			71,
+			68,
+			67
+		],
+		"players": {
+			"goalkeepers": [
+				"REICHOLD",
+				"NEUHAUS"
+			],
+			"defenders": [
+				"KLEINE",
+				"WEBER",
+				"WESTERMANN",
+				"BOY",
+				"MAMIC",
+				"SCHLICKE"
+			],
+			"midfielders": [
+				"REICHEL",
+				"SURMANN",
+				"AZZOUZI",
+				"CAILLAS",
+				"BURKHARDT",
+				"RÖSLER",
+				"FUCHS"
+			],
+			"forwards": [
+				"RUMAN",
+				"EIGLER",
+				"FEINBIER",
+				"HELLER",
+				"POLICELLA"
+			]
+		}
+	},
+	{
+		"name": "ALEMANNIA AACHEN",
+		"logo": 1012,
+		"strength": [
+			61,
+			67,
+			68
+		],
+		"players": {
+			"goalkeepers": [
+				"STRAUB",
+				"C.SCHMIDT"
+			],
+			"defenders": [
+				"LANDGRAF",
+				"HEEREN",
+				"KLITZPERA",
+				"F.SCHMIDT",
+				"HAMMOUCHI",
+				"MBWANDO"
+			],
+			"midfielders": [
+				"GRLIC",
+				"PFLIPSEN",
+				"BAYOCK",
+				"VAN DER LUER",
+				"MANGA",
+				"MOOSMAYER",
+				""
+			],
+			"forwards": [
+				"LÄMMERMANN",
+				"MEIJER",
+				"MICHALKE",
+				"IVANOVIC",
+				"KRONTIRIS"
+			]
+		}
+	},
+	{
+		"name": "EINTRACHT TRIER",
+		"logo": 1021,
+		"strength": [
+			65,
+			65,
+			65
+		],
+		"players": {
+			"goalkeepers": [
+				"ISCHDONAT",
+				"A.KELLER"
+			],
+			"defenders": [
+				"LATINOVIC",
+				"PRUS",
+				"KOCH",
+				"BENSCHNEIDER",
+				"DRAGELJEVIC",
+				"VURAL"
+			],
+			"midfielders": [
+				"M.KELLER",
+				"PEKOVIC",
+				"KEVRIC",
+				"RACANEL",
+				"LÖSCH",
+				"BAUER",
+				"DRAGUSHA"
+			],
+			"forwards": [
+				"WINKLER",
+				"LABAK",
+				"PATSCHINSKI",
+				"AZIZ",
+				"BRAHAM"
+			]
+		}
+	},
+	{
+		"name": "MSV DUISBURG",
+		"logo": 114,
+		"strength": [
+			64,
+			64,
+			56
+		],
+		"players": {
+			"goalkeepers": [
+				"LANGERBEIN",
+				"BEUCKERT"
+			],
+			"defenders": [
+				"WOLTERS",
+				"DRSEK",
+				"BUGERA",
+				"BÖNIG",
+				"KIENLE",
+				"TWEED"
+			],
+			"midfielders": [
+				"VANA",
+				"KEIDEL",
+				"VOSS",
+				"GRUEV",
+				"STEFFEN",
+				"KASMI",
+				"MAAS"
+			],
+			"forwards": [
+				"KURTH",
+				"AHANFOUF",
+				"GÜVENISIK",
+				"EBBERS",
+				"SPIZAK"
+			]
+		}
+	},
+	{
+		"name": "1.FC UNION BERLIN",
+		"logo": 1006,
+		"strength": [
+			59,
+			62,
+			53
+		],
+		"players": {
+			"goalkeepers": [
+				"GLINKER",
+				"BEUCKERT"
+			],
+			"defenders": [
+				"NIKOL",
+				"PERSICH",
+				"PAGE",
+				"MENZE",
+				"ERNEMANN",
+				"SANDMANN"
+			],
+			"midfielders": [
+				"KOILOW",
+				"OKEKE",
+				"WIDOLOW",
+				"FIEL",
+				"BRUNS",
+				"SOBOTZIK",
+				"VEIT"
+			],
+			"forwards": [
+				"RISTIC",
+				"BAUMGART",
+				"KEITA",
+				"DIVIC",
+				"SIRADZE"
+			]
+		}
+	},
+	{
+		"name": "WACKER BURGHAUSEN",
+		"logo": 1110,
+		"strength": [
+			68,
+			61,
+			62
+		],
+		"players": {
+			"goalkeepers": [
+				"GOSPODAREK",
+				"WEHNER"
+			],
+			"defenders": [
+				"HERTL",
+				"FORKEL",
+				"ROSIN",
+				"STARK",
+				"NAGY",
+				"DIONE"
+			],
+			"midfielders": [
+				"SCHMIDT",
+				"YOUNGA",
+				"BURGHARTSWIESER",
+				"MOKHTARI",
+				"ATANACKOVIC",
+				"BÖHME",
+				"WISE"
+			],
+			"forwards": [
+				"REISINGER",
+				"GRZYBOWSKI",
+				"KONETZKE",
+				"AGU",
+				""
+			]
+		}
+	},
+	{
+		"name": "VFB LÜBECK",
+		"logo": 1102,
+		"strength": [
+			56,
+			59,
+			64
+		],
+		"players": {
+			"goalkeepers": [
+				"OBERBECK",
+				""
+			],
+			"defenders": [
+				"TÜRKMEN",
+				"ACHILLES",
+				"LAASER",
+				"THORWART",
+				"HASSE",
+				"ACHENBACH"
+			],
+			"midfielders": [
+				"KULLIG",
+				"PLAßHENRICH",
+				"ZANDI",
+				"SCHWEIßING",
+				"PRZONDZIONO",
+				"WEIßHAUPT",
+				"PETERSEN"
+			],
+			"forwards": [
+				"BÄRWOLF",
+				"SCHARPING",
+				"KRUPPKE",
+				"THIOUNE",
+				"ADZIC"
+			]
+		}
+	},
+	{
+		"name": "LR AHLEN",
+		"logo": 1058,
+		"strength": [
+			52,
+			58,
+			61
+		],
+		"players": {
+			"goalkeepers": [
+				"MEIER",
+				"RATAJCZAK"
+			],
+			"defenders": [
+				"FENGLER",
+				"DENIC",
+				"VASILJEVIC",
+				"THIAM",
+				"VELKOBORSKY",
+				"BECK"
+			],
+			"midfielders": [
+				"BAMBA",
+				"DASCHNER",
+				"SOPIC",
+				"MIKOLAJCZAK",
+				"ARNOLD",
+				"CHIQUINHO",
+				"BÖNIG"
+			],
+			"forwards": [
+				"BELLA",
+				"FEINBIER",
+				"N'DIAYE",
+				"RATH",
+				"BENCIK"
+			]
+		}
+	},
+	{
+		"name": "KARLSRUHER SC",
+		"logo": 96,
+		"strength": [
+			62,
+			56,
+			52
+		],
+		"players": {
+			"goalkeepers": [
+				"MILLER",
+				"WALTER"
+			],
+			"defenders": [
+				"EGGIMANN",
+				"ROTHENBACH",
+				"STOLL",
+				"DICK",
+				"GRIMM",
+				"FRITZ"
+			],
+			"midfielders": [
+				"MÄNNER",
+				"ENGELHARDT",
+				"GRAF",
+				"TRARES",
+				"FUCHS",
+				"OUAKILI",
+				"HAFFNER"
+			],
+			"forwards": [
+				"CETIN",
+				"SAJENKO",
+				"LABBADIA",
+				"CASEY",
+				"SCHMITT"
+			]
+		}
+	},
+	{
+		"name": "ROT-WEIß OBERHAUSEN",
+		"logo": 1059,
+		"strength": [
+			58,
+			53,
+			55
+		],
+		"players": {
+			"goalkeepers": [
+				"ADLER",
+				"NULLE"
+			],
+			"defenders": [
+				"CIUCA",
+				"REICHERT",
+				"RAICKOVIC",
+				"LANGENEKE",
+				"WOJTALA",
+				"COSTA"
+			],
+			"midfielders": [
+				"LUGINGER",
+				"JUDT",
+				"RIETPIETSCH",
+				"HAYER",
+				"RADULOVIC",
+				"OUEDRAOGO",
+				"MONTERO"
+			],
+			"forwards": [
+				"OBAD",
+				"BELJAKOW",
+				"SIMIONI",
+				"OURO-AKPO",
+				"KAMPF"
+			]
+		}
+	},
+	{
+		"name": "EINTRACHT BRAUNSCHWEIG",
+		"logo": 110,
+		"strength": [
+			55,
+			52,
+			50
+		],
+		"players": {
+			"goalkeepers": [
+				"STUCKMANN",
+				"KUNZE"
+			],
+			"defenders": [
+				"GRIMM",
+				"JÜLICH",
+				"EIGNER",
+				"THIAM",
+				"SCHANDA",
+				"RIDDER"
+			],
+			"midfielders": [
+				"FUCHS",
+				"THOMAS",
+				"DA SILVA",
+				"GRAF",
+				"LIEBERKNECHT",
+				"DINZEY",
+				"ARNOLD"
+			],
+			"forwards": [
+				"RISCHE",
+				"WEETENDORF",
+				"TEIXEIRA",
+				"JANSEN",
+				"ZIMMERMANN"
+			]
+		}
+	},
+	{
+		"name": "SSV REUTLINGEN 05",
+		"logo": 136,
+		"strength": [
+			53,
+			55,
+			58
+		],
+		"players": {
+			"goalkeepers": [
+				"LANGNER",
+				"CURKO"
+			],
+			"defenders": [
+				"REHM",
+				"UNSÖLD",
+				"ENDREß",
+				"KOPILAS",
+				"",
+				""
+			],
+			"midfielders": [
+				"WEIGL",
+				"HOFFMANN",
+				"BECKER",
+				"SCHMIEDEL",
+				"GAMBO",
+				"OGUNGBURE",
+				"SPRECAKOVIC"
+			],
+			"forwards": [
+				"FROMMER",
+				"GARCIA",
+				"WÜRLL",
+				"PAESLACK",
+				"KLEE"
+			]
+		}
+	},
+	{
+		"name": "FC ST.PAULI",
+		"logo": 82,
+		"strength": [
+			50,
+			50,
+			59
+		],
+		"players": {
+			"goalkeepers": [
+				"HOLLERIETH",
+				"BULAT"
+			],
+			"defenders": [
+				"STANISLAWSKI",
+				"MORENA",
+				"GUNESCH",
+				"GIBBS",
+				"GRUSZKA",
+				"SCHEINHARDT"
+			],
+			"midfielders": [
+				"BOLL",
+				"LOTTER",
+				"BOUNOUA",
+				"INCEMAN",
+				"KOLINGER",
+				"MAYER",
+				"HELD"
+			],
+			"forwards": [
+				"PATSCHINSKI",
+				"KAZIOR",
+				"AGU",
+				"MEIER",
+				"MARCAO"
+			]
+		}
+	},
+	{
+		"name": "SV WALDHOF MANNHEIM",
+		"logo": 111,
+		"strength": [
+			49,
+			49,
+			49
+		],
+		"players": {
+			"goalkeepers": [
+				"NULLE",
+				"HOLLERIETH"
+			],
+			"defenders": [
+				"PASIEKA",
+				"BOUKADIDA",
+				"FICKERT",
+				"MACKERT",
+				"IFEJIAGWA",
+				"PLASSNEGGER"
+			],
+			"midfielders": [
+				"ASAEDA",
+				"WALDECKER",
+				"HOERSEN",
+				"ZINNOW",
+				"GÖHRING",
+				"ERDOGAN",
+				"OTTO"
+			],
+			"forwards": [
+				"LICHT",
+				"KERN",
+				"IWANOW",
+				"MAMOUM",
+				"ISAAC"
+			]
+		}
+	},
+	{
+		"name": "SPVGG UNTERHACHING",
+		"logo": 1082,
+		"strength": [
+			47,
+			47,
+			47
+		],
+		"players": {
+			"goalkeepers": [
+				"HEERWAGEN",
+				"BRASAS"
+			],
+			"defenders": [
+				"BUCHER",
+				"STREHMEL",
+				"SEIFERT",
+				"OMODIAGBE",
+				"GRASSOW",
+				"CUSTOS"
+			],
+			"midfielders": [
+				"ZIMMERMANN",
+				"COPADO",
+				"MAJSTOROVIC",
+				"SUKALO",
+				"STRAUBE",
+				"LUST",
+				"LEITL"
+			],
+			"forwards": [
+				"LECHLEITER",
+				"VACCARO",
+				"DJAPPA",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "FC ERZGEBIRGE AUE",
+		"logo": 1112,
+		"strength": [
+			46,
+			46,
+			46
+		],
+		"players": {
+			"goalkeepers": [
+				"PETKOW",
+				"HAHNEL"
+			],
+			"defenders": [
+				"TREHKOPF",
+				"NOVESKI",
+				"REHM",
+				"JASAREVIC",
+				"GÖRKE",
+				"BENTHIN"
+			],
+			"midfielders": [
+				"CURRI",
+				"KURTH",
+				"EMMERICH",
+				"HEIDRICH",
+				"TSCHIPEW",
+				"TETZNER",
+				""
+			],
+			"forwards": [
+				"JANK",
+				"TOPPMÖLLER",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "SSV JAHN REGENSBURG",
+		"logo": 1046,
+		"strength": [
+			49,
+			49,
+			47
+		],
+		"players": {
+			"goalkeepers": [
+				"GOSPODAREK",
+				"MARTIN"
+			],
+			"defenders": [
+				"KEULER",
+				"BINDER",
+				"SCHMIDT",
+				"DIONE",
+				"STRÄßER",
+				"T.FINK"
+			],
+			"midfielders": [
+				"GFREITER",
+				"KNACKMUß",
+				"ZELLNER",
+				"YILDIRIM",
+				"ZANI",
+				"O.FINK",
+				"HUTWELKER"
+			],
+			"forwards": [
+				"TÖLCSERES",
+				"PAPIC",
+				"RRAKLLI",
+				"SCHWEINSTEIGER",
+				"GLUHACEVIC"
+			]
+		}
+	},
+	{
+		"name": "VFL OSNABRÜCK",
+		"logo": 109,
+		"strength": [
+			47,
+			47,
+			43
+		],
+		"players": {
+			"goalkeepers": [
+				"BRUNN",
+				"OCHS"
+			],
+			"defenders": [
+				"BRITO",
+				"TAMMEN",
+				"UKROW",
+				"TREDUP",
+				"LANGENEKE",
+				"GLEDSON"
+			],
+			"midfielders": [
+				"ENOCHS",
+				"SCHÜTTE",
+				"SPORK",
+				"SCHÜßLER",
+				"MICEVSKI",
+				"FINK",
+				"DZAKA"
+			],
+			"forwards": [
+				"CLAAßEN",
+				"MENGA",
+				"VIER",
+				"ISA",
+				"SCHIED"
+			]
+		}
+	},
+	{
+		"name": "ROT-WEISS ESSEN",
+		"logo": 103,
+		"strength": [
+			46,
+			46,
+			41
+		],
+		"players": {
+			"goalkeepers": [
+				"KIRSCHSTEIN",
+				"RENNO"
+			],
+			"defenders": [
+				"KOEN",
+				"WEIGELT",
+				"FISCHER",
+				"BRINKMANN",
+				"KÜCK",
+				"HAASTRUP"
+			],
+			"midfielders": [
+				"BILGIN",
+				"BONAN",
+				"ERNST",
+				"WEDAU",
+				"GOLDBAEK",
+				"WINKLER",
+				"YILDIRIM"
+			],
+			"forwards": [
+				"WEBER",
+				"VAN DER VEN",
+				"AKSOY",
+				"KOMADE",
+				""
+			]
+		}
+	},
+	{
+		"name": "FC AUGSBURG",
+		"logo": 122,
+		"strength": [
+			40,
+			43,
+			37
+		],
+		"players": {
+			"goalkeepers": [
+				"MILETIC",
+				"MILLER"
+			],
+			"defenders": [
+				"DREßLER",
+				"WENCZEL",
+				"ALDER",
+				"GORA",
+				"EHLERS",
+				"HOFSCHNEIDER"
+			],
+			"midfielders": [
+				"LÖRING",
+				"THORANDT",
+				"BODE",
+				"REEB",
+				"HALLER",
+				"BICK",
+				"SOLTAU"
+			],
+			"forwards": [
+				"COULIBALY",
+				"KOVACEC",
+				"MÜLLER",
+				"DEMIR",
+				"PAPIC"
+			]
+		}
+	},
+	{
+		"name": "SG WATTENSCHEID 09",
+		"logo": 113,
+		"strength": [
+			32,
+			44,
+			49
+		],
+		"players": {
+			"goalkeepers": [
+				"RENNO",
+				""
+			],
+			"defenders": [
+				"STUCKMANN",
+				"GRAUER",
+				"PUSCHMANN",
+				"EHRHARD",
+				"PINSKE",
+				""
+			],
+			"midfielders": [
+				"KOITKA",
+				"HOMOLA",
+				"JERAT",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"WITECZEK",
+				"LÖBE",
+				"POLLOK",
+				"DYCHTJAR",
+				""
+			]
+		}
+	},
+	{
+		"name": "TSG HOFFENHEIM",
+		"logo": 1056,
+		"strength": [
+			38,
+			40,
+			44
+		],
+		"players": {
+			"goalkeepers": [
+				"PETKOVIC",
+				""
+			],
+			"defenders": [
+				"BINDNAGEL",
+				"ENDREß",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"SIEGER",
+				"MÖCKEL",
+				"LANIG",
+				"N.HOFMANN",
+				"GABER",
+				"",
+				""
+			],
+			"forwards": [
+				"TEINERT",
+				"HERDLING",
+				"S.HOFMANN",
+				"MAIER",
+				"HAAS"
+			]
+		}
+	},
+	{
+		"name": "1.FC SAARBRÜCKEN",
+		"logo": 99,
+		"strength": [
+			43,
+			41,
+			25
+		],
+		"players": {
+			"goalkeepers": [
+				"EICH",
+				"SABANOV"
+			],
+			"defenders": [
+				"ADIELE",
+				"STUFF",
+				"SCHÄFER",
+				"HEEREN",
+				"GABRIEL",
+				"RISTAU"
+			],
+			"midfielders": [
+				"CHOJI",
+				"NEHRBAUER",
+				"LAPING",
+				"HAGNER",
+				"CARUSO",
+				"IDRISSI",
+				"NSALIWA"
+			],
+			"forwards": [
+				"ÖRTÜLÜ",
+				"THIEBAUT",
+				"BULJAN",
+				"HAAS",
+				""
+			]
+		}
+	},
+	{
+		"name": "DYNAMO DRESDEN",
+		"logo": 118,
+		"strength": [
+			44,
+			38,
+			20
+		],
+		"players": {
+			"goalkeepers": [
+				"KRESIC",
+				"HERBER"
+			],
+			"defenders": [
+				"OPPITZ",
+				"CSIK",
+				"PAULUS",
+				"BEUCHEL",
+				"LANGEN",
+				"ZIEBIG"
+			],
+			"midfielders": [
+				"WAGEFELD",
+				"FRÖHLICH",
+				"HEIDRICH",
+				"SCHOLZE",
+				"RATKE",
+				"KÜHNE",
+				"DÄBRITZ"
+			],
+			"forwards": [
+				"NEUBERT",
+				"HÄHNGE",
+				"JOVANOVIC",
+				"MILDE",
+				"AHANFOUF"
+			]
+		}
+	},
+	{
+		"name": "SV WEHEN",
+		"logo": 1002,
+		"strength": [
+			35,
+			37,
+			35
+		],
+		"players": {
+			"goalkeepers": [
+				"KOLTERMANN",
+				""
+			],
+			"defenders": [
+				"NAKAS",
+				"SAUER",
+				"KAYMAK",
+				"USTER",
+				"GORGES",
+				"KIRSCH"
+			],
+			"midfielders": [
+				"AMSTÄTTER",
+				"MEHIC",
+				"SIMON",
+				"DA SILVA",
+				"MOKHTARI",
+				"ZIEHL",
+				"GUNKEL"
+			],
+			"forwards": [
+				"NAGORNY",
+				"FLYGARE",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "KICKERS OFFENBACH",
+		"logo": 1053,
+		"strength": [
+			41,
+			35,
+			23
+		],
+		"players": {
+			"goalkeepers": [
+				"THIER",
+				"TAKIDIS"
+			],
+			"defenders": [
+				"BARLETTA",
+				"BRIGHACHE",
+				"LANGEN",
+				"MENZE",
+				"",
+				""
+			],
+			"midfielders": [
+				"MÜLLER",
+				"JUDT",
+				"DWORSCHAK",
+				"AKRAPOVIC",
+				"CORROCHANO",
+				"KAGIOUZIS",
+				"FALK"
+			],
+			"forwards": [
+				"TÜRKER",
+				"PETRY",
+				"FIORENTINO",
+				"KNAPPMANN",
+				"POLICELLA"
+			]
+		}
+	},
+	{
+		"name": "SC PADERBORN 07",
+		"logo": 1063,
+		"strength": [
+			31,
+			32,
+			46
+		],
+		"players": {
+			"goalkeepers": [
+				"KRUSE",
+				""
+			],
+			"defenders": [
+				"BOLLMANN",
+				"BECKER",
+				"EIGNER",
+				"OWOMOYELA",
+				"ZIMMERMANN",
+				""
+			],
+			"midfielders": [
+				"KRÖSCHE",
+				"DEVOLI",
+				"MAAß",
+				"DA SILVA",
+				"BRINKMANN",
+				"TOMOSKI",
+				"LORENZ"
+			],
+			"forwards": [
+				"GEROW",
+				"DOBRY",
+				"SAGLIK",
+				"DONKOW",
+				""
+			]
+		}
+	},
+	{
+		"name": "FC ROT-WEIß ERFURT",
+		"logo": 140,
+		"strength": [
+			37,
+			34,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"TWARDZIK",
+				""
+			],
+			"defenders": [
+				"LOOSE",
+				"GANSAUGE",
+				"TRAUB",
+				"STRÄßER",
+				"RASPE",
+				"RICHTER"
+			],
+			"midfielders": [
+				"HEBESTREIT",
+				"OKIC",
+				"ZIEGNER",
+				"ZEDI",
+				"LAARS",
+				"SZEWCZUK",
+				"AKRAPOVIC"
+			],
+			"forwards": [
+				"FUCHS",
+				"NEITZEL",
+				"MÜLLER",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "VFR AALEN",
+		"logo": 1106,
+		"strength": [
+			26,
+			31,
+			31
+		],
+		"players": {
+			"goalkeepers": [
+				"LINSE",
+				""
+			],
+			"defenders": [
+				"STICKEL",
+				"BOCHTLER",
+				"BUSCH",
+				"NOLL",
+				"SCHÖCKEL",
+				"SCHNEIDER"
+			],
+			"midfielders": [
+				"SCHIELE",
+				"MAIER",
+				"DEMIRKIRAN",
+				"KANYUK",
+				"BRAUN",
+				"MAYER",
+				"SCHMIEDEL"
+			],
+			"forwards": [
+				"ROGOSIC",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "KFC UERDINGEN 05",
+		"logo": 81,
+		"strength": [
+			29,
+			29,
+			28
+		],
+		"players": {
+			"goalkeepers": [
+				"MARTIN",
+				"SELKE"
+			],
+			"defenders": [
+				"EVERS",
+				"JANOTA",
+				"SAUERLAND",
+				"TAUER",
+				"COSIC",
+				""
+			],
+			"midfielders": [
+				"MAAß",
+				"NOURI",
+				"SCHERBE",
+				"BALTES",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"HEUN",
+				"CEBE",
+				"KROHM",
+				"REICHENBERGER",
+				"FELDHOFF"
+			]
+		}
+	},
+	{
+		"name": "SC PFULLENDORF",
+		"logo": 1001,
+		"strength": [
+			20,
+			28,
+			34
+		],
+		"players": {
+			"goalkeepers": [
+				"HERMANUTZ",
+				""
+			],
+			"defenders": [
+				"SCHNETZLER",
+				"BUCK",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"RAPP",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"BLESSIN",
+				"FUCHS",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "CHEMNITZER FC",
+		"logo": 123,
+		"strength": [
+			23,
+			26,
+			32
+		],
+		"players": {
+			"goalkeepers": [
+				"HIEMANN",
+				""
+			],
+			"defenders": [
+				"MEHLHORN",
+				"GÖHLERT",
+				"AHLF",
+				"KARL",
+				"FILLINGER",
+				"BIERMANN"
+			],
+			"midfielders": [
+				"WALTHER",
+				"TSCHIPEW",
+				"SCHINDLER",
+				"ZEDI",
+				"TALJEVIC",
+				"TETZNER",
+				""
+			],
+			"forwards": [
+				"MEISSNER",
+				"DEMIR",
+				"M'BOMA",
+				"KÖNIG",
+				"PRYMULA"
+			]
+		}
+	},
+	{
+		"name": "PREUßEN MÜNSTER",
+		"logo": 107,
+		"strength": [
+			22,
+			25,
+			29
+		],
+		"players": {
+			"goalkeepers": [
+				"GÖßLING",
+				"STUCKMANN"
+			],
+			"defenders": [
+				"SCHYRBA",
+				"METZELDER",
+				"NIANG",
+				"HEEMSOTH",
+				"",
+				""
+			],
+			"midfielders": [
+				"BÄUMER",
+				"SCHÄPER",
+				"PRZONDZIONO",
+				"GUNKEL",
+				"HAYER",
+				"CIRBA",
+				""
+			],
+			"forwards": [
+				"LÜTTMANN",
+				"ERWIG",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "1.FC SCHWEINFURT 05",
+		"logo": 115,
+		"strength": [
+			28,
+			23,
+			38
+		],
+		"players": {
+			"goalkeepers": [
+				"SCHERBAUM",
+				"SCHOPPEL"
+			],
+			"defenders": [
+				"BEER",
+				"SOARES",
+				"OUEIFIO",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"KOLINGER",
+				"NÄGELEIN",
+				"WUTTKE",
+				"WOHLAND",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"POPOVIC",
+				"GALUSCHKA",
+				"NAGORNY",
+				"BASTOS",
+				""
+			]
+		}
+	},
+	{
+		"name": "HOLSTEIN KIEL",
+		"logo": 1045,
+		"strength": [
+			25,
+			20,
+			40
+		],
+		"players": {
+			"goalkeepers": [
+				"OGRINC",
+				"KRONENBERG"
+			],
+			"defenders": [
+				"ROHWER",
+				"SPASSKOV",
+				"TRULSEN",
+				"JENSEN",
+				"",
+				""
+			],
+			"midfielders": [
+				"BREITENREITER",
+				"DOWE",
+				"HANSEN",
+				"SEIDEL",
+				"SCHULTZ",
+				"",
+				""
+			],
+			"forwards": [
+				"JURGELEIT",
+				"TREJGIS",
+				"GUSCINAS",
+				"TEIXEIRA",
+				"LÜTTMANN"
+			]
+		}
+	},
+	{
+		"name": "SV ELVERSBERG",
+		"logo": 1073,
+		"strength": [
+			34,
+			22,
+			22
+		],
+		"players": {
+			"goalkeepers": [
+				"RICHTER",
+				"PAYNE"
+			],
+			"defenders": [
+				"MOLZ",
+				"SCHOMMER",
+				"GIBSON",
+				"VURAL",
+				"",
+				""
+			],
+			"midfielders": [
+				"GERLACH",
+				"WITTEK",
+				"MASON",
+				"BICK",
+				"DEIßENBERGER",
+				"",
+				""
+			],
+			"forwards": [
+				"PETRI",
+				"OTTIJI",
+				"KOVACEC",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "STUTTGARTER KICKERS",
+		"logo": 106,
+		"strength": [
+			40,
+			44,
+			30
+		],
+		"players": {
+			"goalkeepers": [
+				"NICHT",
+				"YELLDELL"
+			],
+			"defenders": [
+				"STEINLE",
+				"STIERLE",
+				"BARTH",
+				"CAST",
+				"ZIMMERMANN",
+				"KRESIN"
+			],
+			"midfielders": [
+				"MINKWITZ",
+				"MILCHRAUM",
+				"CATIZONE",
+				"PROTZEL",
+				"MARCHESE",
+				"AKCAY",
+				""
+			],
+			"forwards": [
+				"MESIC",
+				"RUBIM",
+				"BRAUN",
+				"CHUKWUNYELU",
+				"KENNEDY"
+			]
+		}
+	},
+	{
+		"name": "SC VERL",
+		"logo": 137,
+		"strength": [
+			30,
+			37,
+			40
+		],
+		"players": {
+			"goalkeepers": [
+				"GÖßLING",
+				"MÜLLER"
+			],
+			"defenders": [
+				"HAHN",
+				"SUNDERMANN",
+				"BECK",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"SIEDSCHLAG",
+				"SCHLÖSSER",
+				"KIRCH",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"CALAMITA",
+				"AYDIN",
+				"MILDE",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "SPORTFREUNDE SIEGEN",
+		"logo": 1084,
+		"strength": [
+			37,
+			40,
+			37
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"ISLAMOGLU",
+				"WEIKL",
+				"CUSTOS",
+				"UNSÖLD",
+				"NORKUS",
+				"VITALI"
+			],
+			"midfielders": [
+				"NEMETH",
+				"TRUCKENBROD",
+				"CIRBA",
+				"NEUMANN",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"BETTENSTAEDT",
+				"VAN BUSKIRK",
+				"HELMES",
+				"TOBORG",
+				""
+			]
+		}
+	},
+	{
+		"name": "SV BABELSBERG 03",
+		"logo": 1070,
+		"strength": [
+			26,
+			30,
+			44
+		],
+		"players": {
+			"goalkeepers": [
+				"RAUCH",
+				"HERBER"
+			],
+			"defenders": [
+				"CIVA",
+				"HÄRTEL",
+				"GROSSERT",
+				"FENSCH",
+				"BENTHIN",
+				"NADAROGLU"
+			],
+			"midfielders": [
+				"CHALASKIEWICZ",
+				"LORENZ",
+				"BOBAN",
+				"SCHMIDT",
+				"GATTI",
+				"",
+				""
+			],
+			"forwards": [
+				"RÖVER",
+				"LAU",
+				"KAMPF",
+				"MILOVANOVIC",
+				""
+			]
+		}
+	},
+	{
+		"name": "SV DARMSTADT 98",
+		"logo": 112,
+		"strength": [
+			44,
+			33,
+			33
+		],
+		"players": {
+			"goalkeepers": [
+				"CLAUß",
+				""
+			],
+			"defenders": [
+				"HASA",
+				"USTER",
+				"CIUCA",
+				"NAKAS",
+				"",
+				""
+			],
+			"midfielders": [
+				"JUSKIC",
+				"KOLB",
+				"DA COSTA",
+				"WOLF",
+				"ANICIC",
+				"SEITZ",
+				"PLEULER"
+			],
+			"forwards": [
+				"BEIGANG",
+				"MAIER",
+				"LAKIES",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "DRESDNER SC",
+		"logo": 1000,
+		"strength": [
+			33,
+			26,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"KELLER",
+				""
+			],
+			"defenders": [
+				"HOßMANG",
+				"DIEBITZ",
+				"TREHKOPF",
+				"BENKEN",
+				"BALTAZAR",
+				"DIETRICH"
+			],
+			"midfielders": [
+				"KURILENKO",
+				"ZÖPHEL",
+				"SCHWANKE",
+				"SEIFERT",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"KUBIS",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "AC MAILAND",
+		"strength": [
+			99,
+			99,
+			99
+		]
+	},
+	{
+		"name": "INTER MAILAND",
+		"strength": [
+			99,
+			99,
+			99
+		]
+	},
+	{
+		"name": "JUVENTUS TURIN",
+		"strength": [
+			98,
+			98,
+			98
+		]
+	},
+	{
+		"name": "APOEL NIKOSIA",
+		"strength": [
+			98,
+			98,
+			98
+		]
+	},
+	{
+		"name": "FC BARCELONA",
+		"strength": [
+			97,
+			97,
+			97
+		]
+	},
+	{
+		"name": "FC BASEL",
+		"strength": [
+			97,
+			97,
+			97
+		]
+	},
+	{
+		"name": "ZELJEZNICAR SARAJEVO",
+		"strength": [
+			96,
+			96,
+			96
+		]
+	},
+	{
+		"name": "MACCABI HAIFA",
+		"strength": [
+			96,
+			96,
+			96
+		]
+	},
+	{
+		"name": "MANCHESTER UNITED",
+		"strength": [
+			95,
+			95,
+			95
+		]
+	},
+	{
+		"name": "REAL MADRID",
+		"strength": [
+			95,
+			95,
+			95
+		]
+	},
+	{
+		"name": "BELSCHYNA BABRUJSK",
+		"strength": [
+			95,
+			95,
+			95
+		]
+	},
+	{
+		"name": "BOAVISTA PORTO",
+		"strength": [
+			94,
+			94,
+			94
+		]
+	},
+	{
+		"name": "BRONDBY IF",
+		"strength": [
+			94,
+			94,
+			94
+		]
+	},
+	{
+		"name": "KS DINAMO TIRANA",
+		"strength": [
+			93,
+			93,
+			93
+		]
+	},
+	{
+		"name": "DYNAMO KIEW",
+		"strength": [
+			93,
+			93,
+			93
+		]
+	},
+	{
+		"name": "FC BRÜGGE",
+		"strength": [
+			92,
+			92,
+			92
+		]
+	},
+	{
+		"name": "FC PJUNIK JEREWAN",
+		"strength": [
+			92,
+			92,
+			92
+		]
+	},
+	{
+		"name": "TORPEDO KUTAISSI",
+		"strength": [
+			91,
+			91,
+			91
+		]
+	},
+	{
+		"name": "FC VALENCIA",
+		"strength": [
+			91,
+			91,
+			91
+		]
+	},
+	{
+		"name": "FK PARTIZAN BELGRAD",
+		"strength": [
+			91,
+			91,
+			91
+		]
+	},
+	{
+		"name": "GRAZER AK",
+		"strength": [
+			90,
+			90,
+			90
+		]
+	},
+	{
+		"name": "HIBERNIANS F. CLUB",
+		"strength": [
+			90,
+			90,
+			90
+		]
+	},
+	{
+		"name": "LEGIA WARSCHAU",
+		"strength": [
+			89,
+			89,
+			89
+		]
+	},
+	{
+		"name": "LEWSKI SOFIA",
+		"strength": [
+			89,
+			89,
+			89
+		]
+	},
+	{
+		"name": "NEWCASTLE UNITED",
+		"strength": [
+			88,
+			88,
+			88
+		]
+	},
+	{
+		"name": "SCHENGIS ASTANA",
+		"strength": [
+			88,
+			88,
+			88
+		]
+	},
+	{
+		"name": "SHERIFF TIRASPOL",
+		"strength": [
+			87,
+			87,
+			87
+		]
+	},
+	{
+		"name": "SKONTO RIGA",
+		"strength": [
+			87,
+			87,
+			87
+		]
+	},
+	{
+		"name": "SPARTA PRAG",
+		"strength": [
+			87,
+			87,
+			87
+		]
+	},
+	{
+		"name": "VARDAR SKOPJE",
+		"strength": [
+			86,
+			86,
+			86
+		]
+	},
+	{
+		"name": "ZALAEGERSZEGI TE FC",
+		"strength": [
+			86,
+			86,
+			86
+		]
+	},
+	{
+		"name": "AJ AUXERRE",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "AS ROM",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "B36 TORSHAVN",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "BARRY TOWN UNITED",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "CELTIC GLASGOW",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "DEPORTIVO LA CORUNA",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "DINAMO BUKAREST",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "F91 DÜDELINGEN",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "FBK KAUNAS",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "FC ARSENAL",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "FC FLORA TALLINN",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "FC LIVERPOOL",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "FENERBAHCE ISTANBUL",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "KRC GENK",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "LILLESTROM SK",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "LOKOMOTIVE MOSKAU",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "MSK ZILINA",
+		"strength": [
+			78,
+			78,
+			78
+		]
+	},
+	{
+		"name": "NK MARIBOR",
+		"strength": [
+			78,
+			78,
+			78
+		]
+	},
+	{
+		"name": "NK ZAGREB",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "OLYMPIAKOS PIRÄUS",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "OLYMPIQUE LYON",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "FC PORTADOWN",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "RC LENS",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "ROSENBORG TRONDHEIM",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "SK STURM GRAZ",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "SCHACHTAR DONEZK",
+		"strength": [
+			74,
+			74,
+			74
+		]
+	},
+	{
+		"name": "SHELBOURNE FC",
+		"strength": [
+			74,
+			74,
+			74
+		]
+	},
+	{
+		"name": "SLOVAN LIBEREC",
+		"strength": [
+			73,
+			73,
+			73
+		]
+	},
+	{
+		"name": "SPORTING LISSABON",
+		"strength": [
+			73,
+			73,
+			73
+		]
+	},
+	{
+		"name": "TAMPERE UNITED",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "IA AKRANES",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "FC PORTO",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "FC MALAGA",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "LAZIO ROM",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "WISLA KRAKAU",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "BESIKTAS ISTANBUL",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "DENIZLISPOR",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "PANATHINAIKOS ATHEN",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "RSC ANDERLECHT",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "SLAVIA PRAG",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "FC FULHAM",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "GIRONDINS BORDEAUX",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "LEEDS UNITED",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "AMICA WRONKI",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "ANORTHOSIS FAMAGUSTA",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "BETIS SEVILLA",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "CELTA VIGO",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "DJURGARDENS IF",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "FC MIDTJYLLAND",
+		"strength": [
+			78,
+			78,
+			78
+		]
+	},
+	{
+		"name": "FC NATIONAL BUKAREST",
+		"strength": [
+			78,
+			78,
+			78
+		]
+	},
+	{
+		"name": "ROTER STERN BELGRAD",
+		"strength": [
+			78,
+			78,
+			78
+		]
+	},
+	{
+		"name": "FK VIKTORIA ZIZKOV",
+		"strength": [
+			78,
+			78,
+			78
+		]
+	},
+	{
+		"name": "FERENCVAROS BUDAPEST",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "HAPOEL TEL AVIV",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "IPSWICH TOWN",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "PAOK THESSALONIKI",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "PARIS SAINT-GERMAIN",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "BLACKBURN ROVERS",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "DEPORTIVO ALAVES",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "DINAMO ZAGREB",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "EXCELSIOR MOUSCRON",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "FC ABERDEEN",
+		"strength": [
+			74,
+			74,
+			74
+		]
+	},
+	{
+		"name": "FC DINAMO TIFLIS",
+		"strength": [
+			74,
+			74,
+			74
+		]
+	},
+	{
+		"name": "FC KOPENHAGEN",
+		"strength": [
+			74,
+			74,
+			74
+		]
+	},
+	{
+		"name": "FC KÄRNTEN",
+		"strength": [
+			73,
+			73,
+			73
+		]
+	},
+	{
+		"name": "FC LIVINGSTON",
+		"strength": [
+			73,
+			73,
+			73
+		]
+	},
+	{
+		"name": "FK AUSTRIA WIEN",
+		"strength": [
+			73,
+			73,
+			73
+		]
+	},
+	{
+		"name": "FK HOMEL",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "FK SARAJEVO",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "FK SARTID",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "FK SUDUVA",
+		"strength": [
+			71,
+			71,
+			71
+		]
+	},
+	{
+		"name": "FK VENTSPILS",
+		"strength": [
+			71,
+			71,
+			71
+		]
+	},
+	{
+		"name": "GRASSHOPPER ZÜRICH",
+		"strength": [
+			71,
+			71,
+			71
+		]
+	},
+	{
+		"name": "HAJDUK SPLIT",
+		"strength": [
+			70,
+			70,
+			70
+		]
+	},
+	{
+		"name": "LEIXOES SC",
+		"strength": [
+			70,
+			70,
+			70
+		]
+	},
+	{
+		"name": "LITEX LOWETSCH",
+		"strength": [
+			70,
+			70,
+			70
+		]
+	},
+	{
+		"name": "MACCABI TEL AVIV",
+		"strength": [
+			69,
+			69,
+			69
+		]
+	},
+	{
+		"name": "METALURH SAPORISCHSCHJ",
+		"strength": [
+			69,
+			69,
+			69
+		]
+	},
+	{
+		"name": "FK MATADOR PUCHOV",
+		"strength": [
+			69,
+			69,
+			69
+		]
+	},
+	{
+		"name": "NK PRIMORJE",
+		"strength": [
+			68,
+			68,
+			68
+		]
+	},
+	{
+		"name": "NK VARTEKS VARAZDIN",
+		"strength": [
+			68,
+			68,
+			68
+		]
+	},
+	{
+		"name": "NK SIROKI BRIJEG",
+		"strength": [
+			68,
+			68,
+			68
+		]
+	},
+	{
+		"name": "ODENSE BK",
+		"strength": [
+			67,
+			67,
+			67
+		]
+	},
+	{
+		"name": "AC PARMA",
+		"strength": [
+			67,
+			67,
+			67
+		]
+	},
+	{
+		"name": "POLONIA WARSCHAU",
+		"strength": [
+			67,
+			67,
+			67
+		]
+	},
+	{
+		"name": "RAPID BUKAREST",
+		"strength": [
+			66,
+			66,
+			66
+		]
+	},
+	{
+		"name": "SERVETTE GENF",
+		"strength": [
+			66,
+			66,
+			66
+		]
+	},
+	{
+		"name": "STABAEK IF",
+		"strength": [
+			66,
+			66,
+			66
+		]
+	},
+	{
+		"name": "VIKING STAVANGER",
+		"strength": [
+			66,
+			66,
+			66
+		]
+	},
+	{
+		"name": "ZSKA SOFIA",
+		"strength": [
+			65,
+			65,
+			65
+		]
+	},
+	{
+		"name": "ZENIT ST.PETERSBURG",
+		"strength": [
+			65,
+			65,
+			65
+		]
+	},
+	{
+		"name": "ZIMBRU CHISINAU",
+		"strength": [
+			65,
+			65,
+			65
+		]
+	},
+	{
+		"name": "UJPEST BUDAPEST",
+		"strength": [
+			64,
+			64,
+			64
+		]
+	},
+	{
+		"name": "AEL LIMASSOL",
+		"strength": [
+			64,
+			64,
+			64
+		]
+	},
+	{
+		"name": "AO XANTHI",
+		"strength": [
+			64,
+			64,
+			64
+		]
+	},
+	{
+		"name": "ARAKS ARARAT",
+		"strength": [
+			63,
+			63,
+			63
+		]
+	},
+	{
+		"name": "ATLANTAS KLAIPEDA",
+		"strength": [
+			63,
+			63,
+			63
+		]
+	},
+	{
+		"name": "BANGOR CITY",
+		"strength": [
+			63,
+			63,
+			63
+		]
+	},
+	{
+		"name": "BRANN BERGEN",
+		"strength": [
+			62,
+			62,
+			62
+		]
+	},
+	{
+		"name": "CS GREVENMACHER",
+		"strength": [
+			62,
+			62,
+			62
+		]
+	},
+	{
+		"name": "CHIEVO VERONA",
+		"strength": [
+			62,
+			62,
+			62
+		]
+	},
+	{
+		"name": "FC DUNDALK",
+		"strength": [
+			61,
+			61,
+			61
+		]
+	},
+	{
+		"name": "FC AVENIR BEGGEN",
+		"strength": [
+			61,
+			61,
+			61
+		]
+	},
+	{
+		"name": "FC BIRKIRKARA",
+		"strength": [
+			61,
+			61,
+			61
+		]
+	},
+	{
+		"name": "FC CHELSEA",
+		"strength": [
+			60,
+			60,
+			60
+		]
+	}
+]

@@ -54,3 +54,8 @@ func utf8ToCP437(s string) (string, error) {
 	}
 	return string(b), nil
 }
+
+// ToCP437 converts a UTF-8 name to code page 437, the encoding of the
+// names of a club database (Mana); characters CP437 does not have are an
+// error.
+func ToCP437(s string) (string, error) { return utf8ToCP437(s) }

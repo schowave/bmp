@@ -1,0 +1,74 @@
+tier,group,rank,club,label,won,drawn,lost,goals_for,goals_against
+1,Statistik,1,FC Bayern München,FC Bayern München,22,9,3,67,32
+1,Statistik,2,Werder Bremen,Werder Bremen,21,7,6,79,37
+1,Statistik,3,Hamburger SV,Hamburger SV,21,5,8,53,30
+1,Statistik,4,FC Schalke 04,FC Schalke 04,16,13,5,47,31
+1,Statistik,5,Bayer 04 Leverkusen,Bayer 04 Leverkusen,14,10,10,64,49
+1,Statistik,6,Hertha BSC,Hertha BSC,12,12,10,52,48
+1,Statistik,7,Borussia Dortmund,Borussia Dortmund,11,13,10,45,42
+1,Statistik,8,1. FC Nürnberg,1. FC Nürnberg,12,8,14,49,51
+1,Statistik,9,VfB Stuttgart,VfB Stuttgart,9,16,9,37,39
+1,Statistik,10,Borussia Mönchengladbach,Borussia Mönchengladbach,10,12,12,42,50
+1,Statistik,11,1. FSV Mainz 05,1. FSV Mainz 05,9,11,14,46,47
+1,Statistik,12,Hannover 96,Hannover 96,7,17,10,43,47
+1,Statistik,13,Arminia Bielefeld,Arminia Bielefeld,10,7,17,32,47
+1,Statistik,14,Eintracht Frankfurt,Eintracht Frankfurt,9,9,16,42,51
+1,Statistik,15,VfL Wolfsburg,VfL Wolfsburg,7,13,14,33,55
+1,Statistik,16,1. FC Kaiserslautern,1. FC Kaiserslautern,8,9,17,47,71
+1,Statistik,17,1. FC Köln,1. FC Köln,7,9,18,49,71
+1,Statistik,18,MSV Duisburg,MSV Duisburg,5,12,17,34,63
+2,Statistiken,1,VfL Bochum,VfL Bochum,19,9,6,55,26
+2,Statistiken,2,Alemannia Aachen,Alemannia Aachen,20,5,9,61,36
+2,Statistiken,3,Energie Cottbus,Energie Cottbus,16,10,8,49,33
+2,Statistiken,4,SC Freiburg,SC Freiburg,16,8,10,41,33
+2,Statistiken,5,SpVgg Greuther Fürth,SpVgg Greuther Fürth,15,9,10,51,42
+2,Statistiken,6,Karlsruher SC,Karlsruher SC,15,8,11,55,45
+2,Statistiken,7,FC Erzgebirge Aue,FC Erzgebirge Aue,13,9,12,38,36
+2,Statistiken,8,Wacker Burghausen,Wacker Burghausen,12,11,11,45,49
+2,Statistiken,9,SC Paderborn 07,SC Paderborn 07,13,7,14,46,40
+2,Statistiken,10,Hansa Rostock,Hansa Rostock,13,4,17,44,49
+2,Statistiken,11,Kickers Offenbach,Kickers Offenbach,12,7,15,42,53
+2,Statistiken,12,Eintracht Braunschweig,Eintracht Braunschweig,13,4,17,37,48
+2,Statistiken,13,TSV 1860 München,TSV 1860 München,11,9,14,41,44
+2,Statistiken,14,SpVgg Unterhaching,SpVgg Unterhaching,12,6,16,42,48
+2,Statistiken,15,Dynamo Dresden,Dynamo Dresden,11,8,15,39,45
+2,Statistiken,16,1. FC Saarbrücken,1. FC Saarbrücken,11,5,18,37,63
+2,Statistiken,17,Rot Weiss Ahlen,LR Ahlen,9,8,17,36,50
+2,Statistiken,18,Sportfreunde Siegen,Sportfreunde Siegen,8,7,19,35,54
+3,Nord,1,Rot-Weiss Essen,Rot-Weiss Essen,23,7,6,67,34
+3,Nord,2,FC Carl Zeiss Jena,FC Carl Zeiss Jena,22,6,8,58,32
+3,Nord,3,VfB Lübeck,VfB Lübeck,20,9,7,60,36
+3,Nord,4,Holstein Kiel,Holstein Kiel,19,9,8,64,42
+3,Nord,5,Fortuna Düsseldorf,Fortuna Düsseldorf,18,9,9,62,47
+3,Nord,6,FC St. Pauli,FC St. Pauli,17,10,9,53,38
+3,Nord,7,Hertha BSC,Hertha BSC II,16,7,13,54,44
+3,Nord,8,Wuppertaler SV,Wuppertaler SV Borussia,13,12,11,42,42
+3,Nord,9,Kickers Emden,Kickers Emden,14,7,15,50,45
+3,Nord,10,VfL Osnabrück,VfL Osnabrück,14,7,15,56,58
+3,Nord,11,Bayer 04 Leverkusen,Bayer 04 Leverkusen II,13,5,18,56,64
+3,Nord,12,Werder Bremen,Werder Bremen II,11,10,15,46,47
+3,Nord,13,Hamburger SV,Hamburger SV II,12,7,17,45,48
+3,Nord,14,FC Rot-Weiß Erfurt,FC Rot-Weiß Erfurt,11,9,16,40,48
+3,Nord,15,Preußen Münster,Preußen Münster,12,6,18,37,49
+3,Nord,16,SG Wattenscheid 09,SG Wattenscheid 09,10,9,17,50,65
+3,Nord,17,Rot-Weiß Oberhausen,Rot-Weiß Oberhausen,10,9,17,30,53
+3,Nord,18,1. FC Köln,1. FC Köln II,6,8,22,39,74
+3,Nord,19,Chemnitzer FC,Chemnitzer FC,5,6,25,35,78
+3,Süd,1,FC Augsburg,FC Augsburg,23,7,4,73,26
+3,Süd,2,TuS Koblenz,TuS Koblenz,18,12,4,55,31
+3,Süd,3,SV Wehen Wiesbaden,SV Wehen,17,6,11,63,46
+3,Süd,4,TSG 1899 Hoffenheim,TSG Hoffenheim,17,5,12,47,34
+3,Süd,5,SV Darmstadt 98,SV Darmstadt 98,16,6,12,57,44
+3,Süd,6,VfR Aalen,VfR Aalen,15,9,10,43,33
+3,Süd,7,VfB Stuttgart,VfB Stuttgart II,14,11,9,50,43
+3,Süd,8,Stuttgarter Kickers,Stuttgarter Kickers,12,12,10,46,39
+3,Süd,9,SV Elversberg,SV Elversberg,12,12,10,40,37
+3,Süd,10,SpVgg Bayreuth,SpVgg Bayreuth,11,13,10,51,54
+3,Süd,11,Karlsruher SC,Karlsruher SC II,12,6,16,41,51
+3,Süd,12,FC Bayern München,FC Bayern München II,11,9,14,34,44
+3,Süd,13,1. FC Kaiserslautern,1. FC Kaiserslautern II,12,5,17,39,44
+3,Süd,14,SC Pfullendorf,SC Pfullendorf,10,10,14,30,34
+3,Süd,15,TSV 1860 München,TSV 1860 München II,9,10,15,39,51
+3,Süd,16,Eintracht Trier,Eintracht Trier,9,9,16,41,58
+3,Süd,17,SSV Jahn Regensburg,SSV Jahn Regensburg,7,11,16,37,48
+3,Süd,18,1. FC Eschborn,1. FC Eschborn,1,7,26,15,84
