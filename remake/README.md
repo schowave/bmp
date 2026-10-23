@@ -406,14 +406,17 @@ ties). Deliberate differences:
   more clubs than places passes its last ones down, one with fewer takes
   the best of the tier below; the third league is the Oberliga until
   1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
-  second teams of professional clubs before 2008. Strengths come from the
+  second teams of professional clubs before 2008 unless the places cannot
+  be filled without them. Strengths come from the
   goals and points per game of the season ([ADR 0006](../docs/adr/0006-real-seasons-from-wikipedia.md)).
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
   from the fourth season on, as in the original's modern start.
 - In a real season a win counts 3 points from 1995/96 on, as in the real
   leagues (the original's variable D:0x2271); with the clubs of the
-  original it stays 2.
+  original it stays 2. The balance of the eternal table (points and minus
+  points) keeps counting by the 2-point rule, so that a game across
+  1995/96 adds up one kind of points.
 
 ## Legal
 

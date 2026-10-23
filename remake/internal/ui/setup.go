@@ -1,13 +1,13 @@
 package ui
 
 import (
-	"strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/assets"
 	"github.com/schowave/bmp/remake/internal/game"
+	"github.com/schowave/bmp/remake/internal/seasons"
 )
 
 // Setup is the start screen of a new game (f_08bc_2184): choose a club
@@ -305,6 +305,16 @@ func drawOptDigit(g *Gfx, dst *ebiten.Image, x, y, k int, on bool) {
 	g.TextMid(dst, FontNormal, x, x+24, y+11, itoa(k), c, ColBlack)
 }
 
+// seasonLabel is the row that replaces the historic start in a game of a
+// real season ("Saison 1995/96"), empty for the clubs of the original.
+func (o *setupOptions) seasonLabel() string {
+	s, err := seasons.ParseID(o.s.opts.Season)
+	if err != nil {
+		return ""
+	}
+	return "Saison " + s.Label()
+}
+
 var optLengths = []game.GameLength{game.Endless, game.OneYear, game.ThreeYears}
 
 func (o *setupOptions) Update(app *App) error {
@@ -324,10 +334,10 @@ func (o *setupOptions) Update(app *App) error {
 	}
 	// A real season has its own year: no historic start.
 	y := optLengthY + 3*18
-	if in.Clicked(optLeftX, y, 24, 17) && opt.Season == "" {
+	if in.Clicked(optLeftX, y, 24, 17) && o.seasonLabel() == "" {
 		opt.Historic = true
 	}
-	if in.Clicked(optRightX, y, 24, 17) && opt.Season == "" {
+	if in.Clicked(optRightX, y, 24, 17) && o.seasonLabel() == "" {
 		opt.Historic = false
 	}
 	if in.Right || in.Enter {
@@ -360,8 +370,8 @@ func (o *setupOptions) Draw(app *App, dst *ebiten.Image) {
 		drawOptSwitch(g, dst, optRightX, y, true, !on)
 	}
 	y := optLengthY + 3*18
-	if opt.Season != "" {
-		label(y, "Saison "+strings.Replace(opt.Season, "-", "/", 1))
+	if sl := o.seasonLabel(); sl != "" {
+		label(y, sl)
 		return
 	}
 	label(y, "Histor. Start")

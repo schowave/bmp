@@ -52,7 +52,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "bmp:", err)
 		os.Exit(1)
 	}
-	dir.AddPics(seasons.Pics())
+	dir.AddPics(seasons.Files())
 	gfx, err := ui.NewGfx(dir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "bmp:", err)

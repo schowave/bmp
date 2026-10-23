@@ -4,7 +4,6 @@
 package build
 
 import (
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"image"
@@ -18,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/seasons"
 	"github.com/schowave/bmp/remake/internal/seasons/source"
 )
 
@@ -36,26 +36,19 @@ type curated struct {
 	logo int
 }
 
-func readCSV(fsys fs.FS, p string) ([][]string, error) {
-	f, err := fsys.Open(p)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-	rows, err := csv.NewReader(f).ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", p, err)
-	}
-	if len(rows) == 0 {
-		return nil, nil
-	}
-	return rows[1:], nil
+// Config says what All builds.
+type Config struct {
+	Data     fs.FS  // the raw data (remake/data)
+	Orig     fs.FS  // the extract of the original: palettes, foreign clubs
+	Out      string // the output directory (internal/seasons/data)
+	From, To int    // the first and last season, by their first year
+	Log      func(format string, args ...any)
 }
 
-// All writes the seasons from..to that data holds into out. orig is the
-// extract of the original (palettes and foreign clubs).
-func All(data, orig fs.FS, out string, from, to int, logf func(string, ...any)) error {
-	dir, err := assets.OpenDir(orig)
+// All writes the seasons of cfg.Data from cfg.From to cfg.To into cfg.Out.
+func All(cfg Config) error {
+	data, out, logf := cfg.Data, cfg.Out, cfg.Log
+	dir, err := assets.OpenDir(cfg.Orig)
 	if err != nil {
 		return err
 	}
@@ -68,7 +61,7 @@ func All(data, orig fs.FS, out string, from, to int, logf func(string, ...any)) 
 		return err
 	}
 	cur := map[string]curated{}
-	rows, err := readCSV(data, "clubs.csv")
+	rows, err := source.ReadCSV(cfg.Data, "clubs.csv")
 	if err != nil {
 		return err
 	}
@@ -77,7 +70,7 @@ func All(data, orig fs.FS, out string, from, to int, logf func(string, ...any)) 
 		cur[r[0]] = curated{name: r[1], logo: logo}
 	}
 	images := map[string]string{} // logo file -> image in data/logos
-	if rows, err = readCSV(data, "logos/index.csv"); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	if rows, err = source.ReadCSV(cfg.Data, "logos/index.csv"); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	for _, r := range rows {
@@ -91,8 +84,8 @@ func All(data, orig fs.FS, out string, from, to int, logf func(string, ...any)) 
 	}
 	var all []built
 	keys := map[string]bool{}
-	for y := from; y <= to; y++ {
-		id := fmt.Sprintf("%d-%02d", y, (y+1)%100)
+	for y := cfg.From; y <= cfg.To; y++ {
+		id := seasons.ForYear(y).ID
 		sub, err := fs.Sub(data, path.Join("seasons", id))
 		if err != nil {
 			return err

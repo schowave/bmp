@@ -32,7 +32,7 @@ const UEFAPlaces = 4
 // real season gives 3 from 1995/96 on, when the German leagues took up the
 // 3-point rule; one with the clubs of the original keeps 2.
 func (s *State) PointsPerWin() int {
-	if s.Season != "" && s.StartYear >= 1995 {
+	if s.IsReal() && s.StartYear >= 1995 {
 		return 3
 	}
 	return 2

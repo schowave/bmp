@@ -22,7 +22,7 @@ type Options struct {
 	// Level as shown in the dialog, 0..5 (internally 5 - Level).
 	Level    int
 	Length   GameLength
-	Historic bool // start in 1963 instead of 1992
+	Historic bool // start in historicYear instead of modernYear
 	// Season is the real season whose clubs mana holds ("1995-96"), empty
 	// for the clubs of the original; Year is its first year.
 	Season string
@@ -39,6 +39,14 @@ type NewManager struct {
 	Team int
 	Face int
 }
+
+// Start years of the original (D:0x7e0 at a new game): the historic and the
+// modern one; lastEndYear is above the end year of every game that ends.
+const (
+	historicYear = 1963
+	modernYear   = 1992
+	lastEndYear  = 9999
+)
 
 // Constants of the person table (f_322b_035c).
 var (
@@ -126,10 +134,10 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 		s.EndYear = 22222
 	}
 	s.Modern = !opt.Historic
-	s.StartYear = 1963
+	s.StartYear = historicYear
 	if s.Modern {
 		s.EndYear += 29
-		s.StartYear = 1992
+		s.StartYear = modernYear
 	}
 	if opt.Season != "" {
 		// A real season starts in its own year; the end year keeps its
@@ -278,9 +286,14 @@ func (s *State) Length() GameLength {
 }
 
 // Endless reports whether the game has no end. The original encodes it as
-// an end year after 2000 (F:0x513c = 22222 or 22251); with real seasons
-// one- and three-year games end after 2000 too.
-func (s *State) Endless() bool { return s.EndYear > 10000 }
+// the end year 22222 (22251 in a modern game) and tests for a year after
+// 2000; with real seasons one- and three-year games end after 2000 too, so
+// the remake tests for a year no game reaches.
+func (s *State) Endless() bool { return s.EndYear > lastEndYear }
+
+// IsReal reports whether the game plays a real season (Season) instead of
+// the clubs of the original.
+func (s *State) IsReal() bool { return s.Season != "" }
 
 // AddManager adds a manager to a running game (NEU in the disk menu): he
 // gets club team (an id of the current table) and the start values of a new

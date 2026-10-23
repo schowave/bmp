@@ -18,7 +18,8 @@ func TestEmbeddedSeasonsMatchTheData(t *testing.T) {
 		t.Skip("no raw data in", data)
 	}
 	out := t.TempDir()
-	if err := All(os.DirFS(data), os.DirFS(filepath.Join("..", "..", "embedded", "data")), out, 1990, 2026, t.Logf); err != nil {
+	cfg := Config{Data: os.DirFS(data), Orig: os.DirFS(filepath.Join("..", "..", "embedded", "data")), Out: out, From: 1990, To: 2026, Log: t.Logf}
+	if err := All(cfg); err != nil {
 		t.Fatal(err)
 	}
 	want, got := os.DirFS(out), seasons.Files()

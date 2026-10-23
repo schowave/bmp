@@ -59,11 +59,29 @@ func TestListAndMana(t *testing.T) {
 	}
 }
 
-// TestBuiltInSeasonsLoad checks every season built into the remake.
+// TestBuiltInSeasonsLoad checks every season built into the remake: 64
+// German clubs with a logo and 136 foreign ones without, every one named
+// once.
 func TestBuiltInSeasonsLoad(t *testing.T) {
 	for _, s := range List() {
-		if _, err := Mana(s.ID); err != nil {
+		m, err := Mana(s.ID)
+		if err != nil {
 			t.Error(err)
+			continue
 		}
+		names := map[string]bool{}
+		for i, c := range m.Clubs {
+			if c.Name == "" || names[c.Name] {
+				t.Errorf("%s club %d: name %q missing or twice", s.ID, i, c.Name)
+			}
+			names[c.Name] = true
+			german := i < assets.NumGermanClubs
+			if german != (c.Logo > 0) {
+				t.Errorf("%s club %d (%s): logo %d", s.ID, i, c.Name, c.Logo)
+			}
+		}
+	}
+	if len(List()) != 37 {
+		t.Errorf("%d seasons, want 1990/91..2026/27", len(List()))
 	}
 }
