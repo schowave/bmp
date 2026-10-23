@@ -32,10 +32,14 @@ jobs:
         go-version-file: remake/go.mod
         cache-dependency-path: remake/go.sum
 
-    # Ebitengine needs the GL and X11 headers to build; the tests draw on
-    # offscreen images, xvfb gives them a display anyway.
+    # Ebitengine needs the GL and X11 headers to build (the list of its
+    # install docs, not the much larger xorg-dev); the tests draw on offscreen
+    # images, xvfb gives them a display anyway.
     - name: Install GL and X11 headers
-      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev xvfb
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libgl1-mesa-dev libxcursor-dev \
+          libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev xvfb
 
     - name: Vet
       run: go vet ./...
