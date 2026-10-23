@@ -499,8 +499,42 @@ func (md *MatchDay) startPeriod(from, to int) {
 	for mi := range md.humans {
 		md.humans[mi].played = [2]int{}
 	}
+	if md.leagueMask != 0 && !md.replay {
+		// f_0310_2303 plans the current matchday of all three leagues,
+		// also of those that do not play; only the draws remain of them.
+		for l := 0; l < NumLeagues; l++ {
+			if md.leagueMask&(1<<l) != 0 {
+				md.planFixtures(from, to, func(f *Fixture) bool { return f.League == l })
+			} else {
+				md.planIdle(l, from, to)
+			}
+		}
+		return
+	}
+	md.planFixtures(from, to, func(*Fixture) bool { return true })
+}
+
+// planIdle plans the current matchday of a league that does not play.
+func (md *MatchDay) planIdle(l, from, to int) {
+	s := md.s
+	row := s.Matchday[l] - 1
+	if row >= len(s.Results[l]) {
+		return // the original reads behind the result rows
+	}
+	for i, p := range Fixtures(l, s.Matchday[l]) {
+		if s.Results[l][row][i].Home == Postponed {
+			continue
+		}
+		f := &Fixture{League: l, MD: s.Matchday[l], Pair: i, Home: p.Home, Away: p.Away}
+		h, a := md.planChances(f, from, to)
+		md.assignMinutes(f, 0, h, from, to)
+		md.assignMinutes(f, 1, a, from, to)
+	}
+}
+
+func (md *MatchDay) planFixtures(from, to int, use func(*Fixture) bool) {
 	for _, f := range md.Fixtures {
-		if f.Forfeit != 0 {
+		if f.Forfeit != 0 || !use(f) {
 			continue
 		}
 		if f.League >= 0 {
