@@ -25,7 +25,7 @@ func (s *State) recordHistory(mi int) {
 	rec[0] = byte(c.Pos + 1 + FirstID[l])
 	if c.Pos == 0 && l == 0 {
 		m.Titles[0]++
-		s.notify(mi, s.Teams[m.Team].Name+" gewinnt die Deutsche Meisterschaft")
+		s.trophy(mi, 0)
 	}
 	rec[1] = byte(l)
 	rec[2] = byte(m.CupStatus[CupDFB] + 1)
@@ -123,20 +123,20 @@ func (s *State) seasonReport() {
 			h := m.History[len(m.History)-1]
 			pos = int(h[0]) - FirstID[h[1]]
 		}
-		s.notify(mi, "Saisonende: Sie beendeten Ihre Saison auf Platz "+itoa(pos)+" der "+LeagueNames[m.League]+".")
+		s.seasonScreen(mi, pos, m.League)
 		if m.SeasonFlags&1 != 0 {
 			if m.League == 0 {
 				m.Money += 1600000
-				s.notify(mi, "Gratulation zum Aufstieg (1.600.000 DM).")
+				s.seasonLine(mi, msgPromoted1)
 			} else {
 				m.Money += 800000
-				s.notify(mi, "Gratulation zum Aufstieg (800.000 DM).")
+				s.seasonLine(mi, msgPromoted2)
 			}
 			if m.TrikotMonths == 0 {
 				m.Ads[0] /= 10
 			} else {
 				m.TrikotMonths = 0
-				s.notify(mi, "Ihre Werbepartner erlauben es, die Verträge jederzeit zu kündigen. Die Einnahmen bleiben solange erhalten.")
+				s.seasonDialog(mi, msgAdsFree)
 			}
 			for b := 0; b < 6; b++ {
 				if m.BoardMonths[b] == 0 {
@@ -146,22 +146,29 @@ func (s *State) seasonReport() {
 			}
 		}
 		if m.SeasonFlags&2 != 0 {
-			s.notify(mi, "Ihr Abstieg erschüttert Millionen Fans.")
+			s.seasonLine(mi, msgRelegated)
 		}
 		if m.SeasonFlags&4 != 0 {
-			s.notify(mi, "DFB verweigert die Lizenz. Sie steigen ab.")
+			s.seasonLine(mi, msgNoLicence)
 		}
 		if m.SeasonFlags&8 != 0 {
-			s.notify(mi, "Sie beginnen neu mit 500.000 DM.")
+			s.seasonLine(mi, msgRestart)
 		}
 		if s.Loop.Scorer[mi] {
 			m.Money += 250000
-			s.notify(mi, "Torschützenkönig aus Ihrem Team (250.000 DM).")
+			s.seasonLine(mi, msgTopScorer)
 		}
 		if s.QualifiedForEurope(m.Team) {
-			s.notify(mi, "Sie sind für den Europapokal qualifiziert.")
+			s.seasonLine(mi, msgEurope)
 		}
 		s.youthPlayer(mi)
+		s.seasonDone(mi)
+		// The joke boxes over the report (only in the DM version, which
+		// this is).
+		if r.Between(0, 4) == 0 {
+			s.seasonDialog(mi, msgJoke1)
+			s.seasonDialog(mi, msgJoke2)
+		}
 		if mi == 0 {
 			s.agePlayers()
 		}
@@ -173,7 +180,6 @@ func (s *State) seasonReport() {
 			sl.Cards, sl.Goals, sl.Games = [3]int{}, [3]int{}, [3]int{}
 		}
 	}
-	_ = r
 }
 
 // LeagueNames are the texts of the original.
@@ -217,7 +223,7 @@ func (s *State) youthPlayer(mi int) {
 	sl := &s.Squads[mi][si]
 	sl.Salary = s.PlayerValue(mi, si, ValueSalary) * 50 / 100
 	sl.Years = r.Between(2, 3)
-	s.notify(mi, "Ein Jugendspieler steigt in den Kader auf: "+ps.Name+".")
+	s.seasonLine(mi, msgYouthPlayer)
 }
 
 // agePlayers makes everybody a year older and sends listed players back
@@ -295,7 +301,7 @@ func (s *State) retirePlayers(mi int) {
 			continue
 		}
 		if h >= 0 {
-			s.notify(mi, ps.Name+" hängt den Fußballjob im Alter von "+itoa(ps.Age)+" Jahren an den Nagel.")
+			s.seasonPopup(mi, msgRetires(ps.Name, ps.Age))
 			s.removeSlot(h, i, true, SquadMax)
 			ps.Owner = OwnerFree
 		}
@@ -330,7 +336,7 @@ func (s *State) ReleasePlayer(mi, si int) int64 {
 	name := s.Persons[s.Squads[mi][si].Person].Name
 	s.Managers[mi].Money += comp
 	s.removeSlot(mi, si, true, SquadMax)
-	s.notify(mi, name+" kehrt Ihrem Verein den Rücken... Sie erhalten eine Ablösesumme von "+FormatMoney(comp)+" DM.")
+	s.notify(mi, msgReleased(name, comp))
 	s.AutoLineup(mi)
 	return comp
 }
@@ -391,5 +397,6 @@ func (s *State) seasonEnd2() {
 	for c := 0; c < NumCups; c++ {
 		s.drawCup(c)
 	}
+	s.Draws = append(s.Draws, CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA)
 	s.beginEvent()
 }

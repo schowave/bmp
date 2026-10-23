@@ -378,7 +378,7 @@ func (s *State) goalMessages(mi int) {
 	if d.Month == 5 && d.Day == 13 && s.Matchday[l]-MatchdaysPerLeague[l] == 1 {
 		pos := s.Clubs[m.Team].Pos
 		if (l == 0 && pos == 15) || (l == 1 && pos == 2) {
-			s.notify(mi, "Ihre Mannschaft bestreitet das Relegationsspiel. Viel Glück.")
+			s.alert(mi, BackdropMenu, msgRelegation)
 			return
 		}
 	}
@@ -386,7 +386,7 @@ func (s *State) goalMessages(mi int) {
 		return
 	}
 	if d.Month == 11 && d.Day == 2 {
-		s.notify(mi, "Achtung ! Dies ist der letzte Spieltag vor der Winterpause.")
+		s.alert(mi, BackdropMenu, msgWinterBreak)
 	}
 	idx := [3][3]int{{0, 4, n - 4}, {0, 1, n - 5}, {0, 3, n - 5}}[l]
 	pts := func(t int) int { return s.Clubs[t].TotalPoints() }
@@ -407,7 +407,7 @@ func (s *State) goalMessages(mi int) {
 		if maxpts(me) < pts(ref) && m.GoalFlags&(1<<k) == 0 {
 			m.GoalFlags |= 1 << k
 			if show {
-				s.notify(mi, club+" hat die letzte Chance verspielt, "+lost[k])
+				s.alert(mi, BackdropMenu, msgGoalLost(m.Name, club, lost[k]))
 			}
 		}
 		best := 0
@@ -417,7 +417,7 @@ func (s *State) goalMessages(mi int) {
 		if best < pts(me) && m.GoalFlags&(1<<(k+3)) == 0 {
 			m.GoalFlags |= 1 << (k + 3)
 			if show {
-				s.notify(mi, club+" hat "+won[k]+" auf jeden Fall gesichert.")
+				s.alert(mi, BackdropMenu, msgGoalWon(m.Name, club, won[k]))
 			}
 		}
 	}

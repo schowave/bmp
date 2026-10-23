@@ -16,9 +16,6 @@ var (
 	BuildTitles = [8]string{"SITZPLÄTZE AUSBAUEN", "STEHPLÄTZE AUSBAUEN", "PLÄTZE ÜBERDACHEN",
 		"FLUTLICHTMASTEN AUSBAUEN", "ANZEIGETAFEL ERRICHTEN", "STADION RENOVIEREN", "KOMFORT VERBESSERN",
 		"EINTRITTSPREIS ÄNDERN"}
-	completionTexts = [NumStadiumItems]string{"Der Ausbau der Sitzplätze", "Der Ausbau der Stehplätze",
-		"Die Überdachung des Stadions", "Die Errichtung der neuen Flutlichtmasten",
-		"Die Errichtung der neuen Anzeigetafel", "Die Stadionrenovierung", "Die Verbesserung des Stadion-Komforts"}
 )
 
 // Capacity returns seats plus standing places.
@@ -40,7 +37,11 @@ func (s *State) constructionProgress(mi int) {
 		if m.BuildTimer[k] == 0 {
 			m.Stadium[k] += m.StadiumBuild[k]
 			m.StadiumBuild[k] = 0
-			s.notify(mi, completionTexts[k]+" ist abgeschlossen.")
+			if s.popupWindow() {
+				s.popup(mi, BackdropDesk, msgCompletion(k))
+			} else {
+				s.notify(mi, msgCompletion(k))
+			}
 		}
 	}
 }
@@ -288,7 +289,7 @@ func (s *State) stadiumEvents(mi int) {
 		dmg := (st[StSeats]/2 + 4*st[StStanding]) * int64(r.Between(2, 5)) / 1000 * 1000
 		m.Money -= dmg
 		m.RiotPending = false
-		s.notify(mi, "Randalierer im Stadion richteten einen Sachschaden von "+FormatMoney(dmg)+" DM an.")
+		s.notify(mi, msgRiot(dmg))
 		if st[StCondition] > 1 {
 			if m.Money > 2000000 && r.Between(0, 1) == 0 {
 				st[StCondition]--
@@ -299,7 +300,7 @@ func (s *State) stadiumEvents(mi int) {
 	}
 	if r.Between(0, int(442-52*st[StComfort])) == 0 && st[StComfort] > 1 && m.League == 0 {
 		st[StComfort]--
-		s.notify(mi, "In der neuen Komfortbewertung wird ihr Stadion um eine Note schlechter beurteilt.")
+		s.notify(mi, msgComfort())
 	}
 }
 

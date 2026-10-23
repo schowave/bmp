@@ -5,19 +5,29 @@ import (
 	"strings"
 )
 
-// Message is a note for a manager: the original shows them as message
-// boxes during the turn or keeps them in a mailbox.
+// Message is a note for a manager in the message panel of the main menu
+// (f_3091_0190): the day it was written and the text.
 type Message struct {
+	Day  int
 	Text string
 }
 
-// notify adds a message for manager mi.
+// MaxMessages is the length of a manager's message list (F:0x5524, 20 per
+// manager).
+const MaxMessages = 20
+
+// notify adds a message for manager mi at the front of the list; the panel
+// opens by itself at the next turn (F:0x56e2).
 func (s *State) notify(mi int, text string) {
 	if mi < 0 || mi >= len(s.Managers) {
 		return
 	}
 	m := s.Managers[mi]
-	m.Inbox = append(m.Inbox, Message{Text: text})
+	m.Inbox = append([]Message{{Day: s.Day, Text: text}}, m.Inbox...)
+	if len(m.Inbox) > MaxMessages {
+		m.Inbox = m.Inbox[:MaxMessages]
+	}
+	m.NewMessages = true
 }
 
 // notifyTeam adds a message for the manager of club id, if any.
@@ -32,7 +42,20 @@ func (s *State) TakeInbox(mi int) []Message {
 	m := s.Managers[mi]
 	msgs := m.Inbox
 	m.Inbox = nil
+	m.NewMessages = false
 	return msgs
+}
+
+// Messages returns the message list of manager mi, the newest first.
+func (s *State) Messages(mi int) []Message { return s.Managers[mi].Inbox }
+
+// TakeNewMessages reports whether manager mi got messages since the panel
+// was last shown, and clears the flag.
+func (s *State) TakeNewMessages(mi int) bool {
+	m := s.Managers[mi]
+	n := m.NewMessages
+	m.NewMessages = false
+	return n
 }
 
 // FormatMoney formats an amount with dots as thousands separators like

@@ -265,7 +265,7 @@ func (s *State) payCredits(mi int) {
 				if k < len(s.Managers) && k != LenderBank {
 					lender = s.Managers[k].Name
 				}
-				s.notify(mi, "Ihr Kredit von "+lender+" wurde heute fällig.")
+				s.alert(mi, BackdropDesk, msgCreditDue(lender))
 				m.Money -= c.Amount
 				if k != LenderBank && k < len(s.Managers) {
 					s.Managers[k].Money += c.Amount
@@ -434,21 +434,27 @@ func (s *State) ChangeAdSpending(mi int, up bool) {
 	}
 }
 
-// christmas runs the special dates (f_1a58_2a06): only Christmas costs
-// money.
+// specialDate runs the special dates (f_1a58_2a06): with chance 1/4 the
+// card of the date is shown (on the date that was just checked, s.Day-1);
+// only Christmas costs money, and only with chance 1/2 (the card then
+// shows the packages).
 func (s *State) specialDate(k int) {
 	if s.Rand.Between(0, 3) != 0 {
 		return
 	}
+	n := Notice{Kind: NoticeCard, Manager: -1, Day: s.Day - 1}
 	if k != 0 {
+		n.Title, n.Lines, n.Small, n.Birthday = msgBirthdayTitle, msgBirthday(k), msgBirthdayShame, true
+		s.AddNotice(n)
 		return
 	}
+	n.Title = msgChristmasTitle
 	if s.Rand.Between(0, 1) != 0 {
 		x := int64(s.Rand.Between(15, 85) * 10000)
-		for mi, m := range s.Managers {
+		for _, m := range s.Managers {
 			m.Money -= x / int64(m.League+1)
-			s.notify(mi, "Frohe Weihnachten! Ihre Spieler sind überwältigt von den Weihnachtspaketen: "+
-				FormatMoney(x/int64(m.League+1))+" DM.")
 		}
+		n.Lines, n.Small = msgChristmasLines[:], msgChristmasAmounts(x)
 	}
+	s.AddNotice(n)
 }

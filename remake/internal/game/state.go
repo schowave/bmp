@@ -15,8 +15,12 @@ type Team struct {
 	Base     [3]int
 	// Extra (+0x1e..0x20) are three more values in 45..55.
 	Extra [3]int
-	// Logo (+0x21) is the picture number of the club's logo, bit 7 a flag.
+	// Logo (+0x21) is the picture number of the club's logo.
 	Logo int
+	// Ticker is bit 7 of +0x21 in the original: the goals of the club are
+	// announced (ANZEIGEN in the club info). The remake keeps picture
+	// numbers up to 143 in Logo, so the flag has a field of its own.
+	Ticker bool `json:",omitempty"`
 }
 
 // Credit is a loan a manager has taken (M+0x243e + slot*0x12).
@@ -109,7 +113,8 @@ type Manager struct {
 	AutoLineup int
 	Subs       int // F:0x90c6: substitutions made in the current match
 
-	Inbox []Message
+	Inbox       []Message // newest first
+	NewMessages bool      // F:0x56e2: open the message panel at the turn
 }
 
 // ForfeitEffort marks a team with fewer than 8 players in the lineup.
@@ -161,7 +166,44 @@ type State struct {
 
 	Loop           Loop
 	RelegationLeg2 bool
-	mana           *assets.Mana `json:"-"`
+
+	Display Display
+	// Draws lists the cups whose new draw the screens still have to
+	// present (f_17c2_0006), in the order of the original.
+	Draws []int
+	mana  *assets.Mana `json:"-"`
+}
+
+// Display holds the toggles of the options screen (D:0x05fe..0x060c) and
+// the speed of the match days (D:0x063a). They only change what is shown.
+type Display struct {
+	HalfTime   [NumLeagues]bool // Halbzeitstände
+	Results    [NumLeagues]bool // Ergebnisse
+	Table      [NumLeagues]bool // Tabelle
+	GoalScenes bool             // Torszenen
+	DFB        bool             // DfB-Pokal
+	Europe     bool             // Europapokale
+	Replays    bool             // Nachholspiele
+	Newspaper  bool             // Zeitung
+	Fades      bool             // Blenden
+	Speed      int              // Spielgeschwindigkeit, 0..70
+}
+
+// DefaultDisplay is the setting of a new game: everything on but the fades.
+func DefaultDisplay() Display {
+	on := [NumLeagues]bool{true, true, true}
+	return Display{HalfTime: on, Results: on, Table: on, GoalScenes: true, DFB: true, Europe: true,
+		Replays: true, Newspaper: true, Speed: 40}
+}
+
+// TakeDraw returns the next cup draw to present, or false.
+func (s *State) TakeDraw() (int, bool) {
+	if len(s.Draws) == 0 {
+		return 0, false
+	}
+	c := s.Draws[0]
+	s.Draws = s.Draws[1:]
+	return c, true
 }
 
 // PostponedGame is a league game moved to a later date (F:0x5714).
