@@ -131,24 +131,35 @@ taken. The keys act on the manager who is on turn.
 | `g` | Adds 200,000 DM to the account |
 | `d`, `p` | Keys of the original without an effect in the remake, which has no state for them (`d` clears the table of loaded saves, `p` sets a flag) |
 
-One more key is the remake's own: with the tactics board open on the lineup
-screen, `o` sets the best lineup it finds (not on a match day). It tries the
-automatic lineups of the three formations, improves each by swapping players
-(also with the bench, never an injured or suspended one) or moving them to a
-free cell of their line, and takes the best. The rating is the expected
-points per match (2 for a win, 1 for a draw) that the engine of the original
-gives the lineup, so it weighs the goals scored against the goals let in as
-a result does: the strengths of the lineup as the original calculates them
-(`f_0f9d_0002`), the chances of a half (`f_0f9d_08e9`) and the odds of a goal
-(`f_0f9d_0c3b`), in `internal/game/lineupmodel.go`; a test checks it against
-a run of the dice of the engine. Cards, injuries, substitutions and the 9
-goals a side stops at are left out. Nobody is fielded out of place: the
-goalkeeper stays in goal and a field player in his own line or next to it. A
-tired player (Erschöpfung 130 or more) plays only if he is worth 0,05 points
-more than who would play for him: a match adds 7 to 10 to the Erschöpfung of
-a player in the team, and above 135 his training does little and an injury in
-training gets likelier. The rating in the message does not count this rule,
-so it can be lower than before when a tired player rests.
+The level selects the high-score table (`HIGH.<length><level>`), so a game
+whose level was changed here is entered in the table of the new level.
+
+The remake adds keys of its own, which the original does not have:
+
+| Where | Key | Effect |
+|---|---|---|
+| Tactics board of the lineup screen in a turn (not the substitution screen of a match) | `o` | Sets the lineup with the most expected points against the next opponent |
+| Training screen | `o` | Sets the training plan with the strongest eleven over the rest of the season |
+| Main menu of a turn | `o` | Both: the training, then the lineup |
+
+#### The lineup key
+
+It tries the automatic lineups of the three formations, improves each by
+swapping players (also with the bench, never an injured or suspended one) or
+moving them to a free cell of their line, and takes the best. The rating is
+the expected points per match (2 for a win, 1 for a draw) that the engine of
+the original gives the lineup, so it weighs the goals scored against the goals
+let in as a result does: the strengths of the lineup as the original
+calculates them (`f_0f9d_0002`), the chances of a half (`f_0f9d_08e9`) and the
+odds of a goal (`f_0f9d_0c3b`), in `internal/game/lineupmodel.go`; a test
+checks it against a run of the dice of the engine. Cards, injuries,
+substitutions and the 9 goals a side stops at are left out. Nobody is fielded
+out of place: the goalkeeper stays in goal and a field player in his own line
+or next to it. A tired player (Erschöpfung 130 or more) plays only if he is
+worth 0,05 points more than who would play for him: a match adds 7 to 10 to
+the Erschöpfung of a player in the team, and above 135 his training does
+little and an injury in training gets likelier. The rating in the message does
+not count this rule, so it can be lower than before when a tired player rests.
 
 - With a match today the rating is against the next opponent in his venue:
   the strengths of the clubs change before the turn and not again before the
@@ -167,32 +178,31 @@ so it can be lower than before when a tired player rests.
 The message gives the points with a decimal comma (`OPTIMAL 1,13`): the
 rating of the new lineup and the ratings of the automatic lineups of the three
 formations (`STAND.`: 4-4-2, 3-5-2, 3-4-3), against the same opponent or
-clubs. A change
-counts only if it raises the rating by 0,03 points (the model is not more
-exact), so the lineup is left alone where nothing is gained. The lineup stays
-automatic if the automatic one of the formation is already the best,
-otherwise it becomes manual. The original has no such key.
+clubs. A change counts only if it raises the rating by 0,03 points (the model
+is not more exact), so the lineup is left alone where nothing is gained. The
+lineup stays automatic if the automatic one of the formation is already the
+best, otherwise it becomes manual.
 
-On the training screen `o` sets the training plan whose best eleven are
-strongest over the rest of the season: the 20 training points, the
-intensity and the 10 position points. It plays the rest of the season with
-the training of the original (`develop`, the injuries in training and the
-Erschöpfung of the matches) on copies of the game for each plan it tries:
-every split of the training points at intensity 6 and 10 over a part of the
-season, then every intensity for the best splits and single moves of the
-position points over all of it (`internal/game/trainingopt.go`). The
-strength is that of the best goalkeeper and the ten best field players,
-(Kondition + Technik + Form) / 3 less the Erschöpfung as the lineup counts it;
-the message names it for the new plan and the old one (`OPTIMAL 41,0`,
-`BISHER 37,5`). Training camps and the youth work are left alone. The
-original has no such key.
+#### The training key
 
-On the main menu of a turn `o` does both: the optimal training, then the
-optimal lineup, and the message names the two ratings (`AUFSTELLUNG 1,13`,
-`TRAINING 41,0`) and the opponent.
+It sets the 20 training points, the intensity and the 10 position points. It
+plays the rest of the season with the training of the original (`develop`,
+the injuries in training and the Erschöpfung of the matches) on copies of the
+game for each plan it tries: every split of the training points at intensity
+6 and 10 over a part of the season, then every intensity for the best splits
+and single moves of the position points over all of it
+(`internal/game/trainingopt.go`). The strength is that of the best goalkeeper
+and the ten best field players, (Kondition + Technik + Form) / 3 less the
+Erschöpfung as the lineup counts it; the message names it for the new plan and
+the old one (`OPTIMAL 41,0`, `BISHER 37,5`). Training camps and the youth work
+are left alone. The plan looks to the end of the season, so pressing it again
+now and then is enough: after transfers or long injuries.
 
-The level selects the high-score table (`HIGH.<length><level>`), so a game
-whose level was changed here is entered in the table of the new level.
+#### The key of the main menu
+
+It runs the training key, then the lineup key, and the message names the two
+ratings (`AUFSTELLUNG 1,13`, `TRAINING 41,0`) and the opponent. While the
+panel with new messages is open, it takes the keys; close it first.
 
 ## Project layout
 
