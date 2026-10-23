@@ -181,6 +181,10 @@ f_14a4_1798 calls it with a *person* index as slot (bug, see §4.4).
    most 1000 rounds), it takes from every other range j, while j has listed persons left: a random
    still listed entry (`rand(0, count_j-1)`, at most 1001 tries), `team = f_0cb5_2987(k)`. Then it
    calls f_14a4_1798 again.
+   f_14a4_19fb (new game, after f_0f9d_0697(10) and srand(time)) calls f_14a4_1798, then for
+   p = 1..150 whose team has no human manager and is 0xff or F:0xa7a0 (the year, set by f_0310_1190,
+   still 0 in a new game) is not 0: for k = 0..2 with out[k] > 0, `team = f_0cb5_2987(k)`,
+   out[k]-- (so the last such k keeps p).
    f_0cb5_2987(k): k > 2 → `rand(D:0x2272[2k], 255)`; else loop { x = rand(0,3); if rand(0,1) x =
    rand(0,6); if rand(0,5)==0 x = rand(0,12); t = D:0x226e[k] + x } while t has a human manager.
 

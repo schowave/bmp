@@ -130,7 +130,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	}
 	s.driftBankRates()
 	s.driftStrengths(10)
-	s.reshufflePersons()
+	s.distributePersons()
 	s.drawCup(CupDFB)
 	s.Draws = []Cup{CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA}
 	s.Display = DefaultDisplay()
@@ -484,6 +484,26 @@ func (s *State) startSquad(mi, l0 int, short bool) {
 	}
 	for i := 0; i < s.countLineup(mi, 0); i++ {
 		s.Squads[mi][i].Salary = s.PlayerValue(mi, i, ValueSalary)
+	}
+}
+
+// distributePersons ends the setup of a new game (f_14a4_19fb): after a
+// reshuffle every person without a club joins a club of each league with
+// a share left, so the last of them keeps him. The original also does this
+// for persons with a club once the year (F:0xa7a0) is set, which it is not
+// yet in a new game.
+func (s *State) distributePersons() {
+	share := s.reshufflePersons()
+	for p := 1; p < NumPersons; p++ {
+		if s.Persons[p].Team != 0xff {
+			continue
+		}
+		for k := range share {
+			if share[k] != 0 {
+				s.Persons[p].Team = s.leagueTeam(k)
+				share[k]--
+			}
+		}
 	}
 }
 

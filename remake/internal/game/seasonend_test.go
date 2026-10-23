@@ -177,3 +177,20 @@ func TestHistoryYear(t *testing.T) {
 		t.Errorf("first record at the season end: %d", y)
 	}
 }
+
+// A new game puts the persons without a club into the leagues with a
+// share (f_14a4_19fb): here only the Bundesliga of the human has one.
+func TestDistributePersons(t *testing.T) {
+	s := personState()
+	for p := 100; p <= 110; p++ {
+		s.Persons[p].Team = 0xff
+	}
+	s.distributePersons()
+	// The share of the Bundesliga is larger than the persons without a
+	// club, so none is left.
+	for p := 1; p < NumPersons; p++ {
+		if s.Persons[p].Team == 0xff {
+			t.Errorf("person %d without a club", p)
+		}
+	}
+}
