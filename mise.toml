@@ -86,9 +86,9 @@ run = "rm -rf wasm/dist"
 # --- Go re-implementation (remake/) ------------------------------------------
 
 [tasks."remake:run"]
-description = "Run the Go re-implementation with the original files in bmp/"
+description = "Run the Go re-implementation"
 dir = "{{config_root}}/remake"
-run = "go run ./cmd/bmp -data ../bmp"
+run = "go run ./cmd/bmp"
 
 [tasks."remake:test"]
 description = "Test the Go re-implementation"
@@ -108,9 +108,9 @@ arg "[script]" help="Input script (internal/ui/script.go); without it the screen
 run = '''
 caffeinate -u -t 2 || true
 if [ -n "${usage_script:-}" ]; then
-  go run ./cmd/bmp -data ../bmp -scale 1 -demo "$usage_demo" -script "$usage_script"
+  go run ./cmd/bmp -scale 1 -demo "$usage_demo" -script "$usage_script"
 else
-  go run ./cmd/bmp -data ../bmp -scale 1 -demo "$usage_demo" -shot "$usage_out"
+  go run ./cmd/bmp -scale 1 -demo "$usage_demo" -shot "$usage_out"
 fi
 '''
 
@@ -119,12 +119,14 @@ description = "Disassemble and (with GHIDRA set) decompile BMMAIN.EXE into remak
 run = "remake/tools/re/run.sh"
 
 [tasks."remake:build"]
-description = "Build remake/bin/bmp with the original files from bmp/ built in"
+description = "Build remake/bin/bmp"
 dir = "{{config_root}}/remake"
-run = [
-  "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data",
-  "go build -tags embeddata -o bin/bmp ./cmd/bmp",
-]
+run = "go build -o bin/bmp ./cmd/bmp"
+
+[tasks."remake:extract"]
+description = "Extract the files the remake needs from bmp/ into remake/internal/embedded/data"
+dir = "{{config_root}}/remake"
+run = "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data"
 
 [tasks.hooks]
 description = "Use the hooks of .githooks (pre-commit builds and vets the staged remake)"

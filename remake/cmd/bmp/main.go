@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	data := flag.String("data", "", "directory of the original game (default: $BMP_DATA, the files built into the binary, ./bmp or ../bmp)")
+	data := flag.String("data", "", "directory of the original game instead of the files built into the binary (default: $BMP_DATA)")
 	scale := flag.Int("scale", 3, "window scale factor")
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")
@@ -84,18 +84,8 @@ func openGameDir(flagDir string) (*assets.Dir, error) {
 			return nil, firstErr
 		}
 	}
-	if fsys := embedded.FS(); fsys != nil {
-		if d := try(fsys, "embedded files"); d != nil {
-			return d, nil
-		}
-	}
-	for _, c := range []string{"bmp", filepath.Join("..", "bmp")} {
-		if d := try(os.DirFS(c), c); d != nil {
-			return d, nil
-		}
-	}
-	if firstErr == nil {
-		firstErr = fmt.Errorf("game directory not found, pass -data")
+	if d := try(embedded.FS(), "embedded files"); d != nil {
+		return d, nil
 	}
 	return nil, firstErr
 }

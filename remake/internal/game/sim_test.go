@@ -1,18 +1,18 @@
 package game
 
 import (
-	"os"
-	"path/filepath"
+	"io/fs"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/embedded"
 )
 
 func mana(t *testing.T) *assets.Mana {
 	t.Helper()
-	data, err := os.ReadFile(filepath.Join("..", "..", "..", "bmp", "MANA.DAT"))
+	data, err := fs.ReadFile(embedded.FS(), "MANA.DAT")
 	if err != nil {
-		t.Skip("MANA.DAT not found")
+		t.Fatal(err)
 	}
 	m, err := assets.ParseMana(data)
 	if err != nil {

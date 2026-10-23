@@ -1,10 +1,26 @@
-// Package embedded holds the files of the original game when the binary
-// is built with the tag "embeddata" (see the mise task remake:build). The
-// files are extracted from bmp/ by cmd/bmpextract into
-// internal/embedded/data, which git ignores.
+// Package embedded holds the files of the original game that the
+// re-implementation needs, built into every binary: the pictures, MANA.DAT,
+// the goal scenes and the fonts of BMMAIN.EXE. cmd/bmpextract extracts them
+// from bmp/ into internal/embedded/data (mise run remake:extract).
 package embedded
 
-import "io/fs"
+import (
+	"embed"
+	"io/fs"
+)
 
-// FS returns the embedded game files, or nil if the binary has none.
+//go:embed data
+var data embed.FS
+
+var files = mustSub(data)
+
+// FS returns the embedded game files.
 func FS() fs.FS { return files }
+
+func mustSub(f embed.FS) fs.FS {
+	sub, err := fs.Sub(f, "data")
+	if err != nil {
+		panic(err)
+	}
+	return sub
+}

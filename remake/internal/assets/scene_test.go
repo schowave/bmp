@@ -98,7 +98,7 @@ func TestSceneName(t *testing.T) {
 }
 
 func TestAllScenesParse(t *testing.T) {
-	d := gameDir(t)
+	d := dataDir(t)
 	c, err := d.SceneCounts()
 	if err != nil {
 		t.Fatal(err)
