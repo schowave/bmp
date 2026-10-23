@@ -273,3 +273,35 @@ func TestRedCardShowsThenSubstitutes(t *testing.T) {
 		t.Fatalf("after the card: %T, %d shows left", top(app), len(m.shows))
 	}
 }
+
+// The screens after a period follow each other at once: closing one opens
+// the next in the same tick, so the match screen does not flash between
+// them.
+func TestMatchEndScreensFollowAtOnce(t *testing.T) {
+	app, s, _, _, m := matchApp(t)
+	for l := range s.Display.Results {
+		s.Display.HalfTime[l], s.Display.Results[l], s.Display.Table[l] = true, true, true
+	}
+	shown := 0
+	for i := 0; i < 5000; i++ {
+		switch top(app).(type) {
+		case *MatchScreen:
+			step(t, app, click(160, 120))
+		case *ResultsScreen, *TableScreen, *CupScreen:
+			shown++
+			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
+			if top(app) == Scene(m) && len(m.end) > 0 {
+				t.Fatalf("match screen on top after screen %d", shown)
+			}
+		case *NewspaperScene:
+			shown++
+			step(t, app, click(160, 120))
+		default:
+			if shown < 3 {
+				t.Fatalf("only %d screens after the match day", shown)
+			}
+			return
+		}
+	}
+	t.Fatal("match day did not end")
+}

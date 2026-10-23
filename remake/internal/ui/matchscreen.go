@@ -22,10 +22,9 @@ type MatchScreen struct {
 	shows   []*matchShow
 	scene   bool // the scene window is open
 	sceneY  int
-	fast    bool   // left click: play the rest of the period at once
-	builder string // author of the last goal scene (right click)
-	end     []func(app *App)
-	closing bool
+	fast    bool             // left click: play the rest of the period at once
+	builder string           // author of the last goal scene (right click)
+	end     []func(app *App) // screens after a period, each opens the next
 
 	panels []matchPanel
 }
@@ -93,13 +92,7 @@ var chanceBlink = waitFrames(6)
 func (m *MatchScreen) Update(app *App) error {
 	in := &app.Input
 	if len(m.end) > 0 {
-		f := m.end[0]
-		m.end = m.end[1:]
-		f(app)
-		return nil
-	}
-	if m.closing {
-		app.Pop()
+		m.next(app)
 		return nil
 	}
 	if len(in.Chars) > 0 && in.Chars[0] == ' ' {
@@ -287,7 +280,7 @@ func (m *MatchScreen) periodEnd(to int) {
 			for c := game.CupDFB; c < game.NumCups; c++ {
 				if cups&(1<<c) != 0 {
 					c := c
-					m.end = append(m.end, func(app *App) { app.Push(NewCupRound(m.ss, c, to, nil)) })
+					m.end = append(m.end, func(app *App) { app.Push(NewCupRound(m.ss, c, to, m.next)) })
 				}
 			}
 		}
@@ -301,7 +294,7 @@ func (m *MatchScreen) periodEnd(to int) {
 			!md.Replays() && (to == 45 && s.Display.HalfTime[l] || to == 90 && s.Display.Results[l])
 		if show && resultsRound != nil {
 			l := l
-			m.end = append(m.end, func(app *App) { app.Push(resultsRound(m.ss, md, l, to)) })
+			m.end = append(m.end, func(app *App) { app.Push(resultsRound(m.ss, md, l, to, m.next)) })
 		}
 	}
 }
@@ -313,24 +306,38 @@ func (m *MatchScreen) matchDayEnd() {
 		for l := 0; l < game.NumLeagues; l++ {
 			if m.md.Leagues()&(1<<l) != 0 && s.Display.Table[l] && tableRound != nil {
 				l := l
-				m.end = append(m.end, func(app *App) { app.Push(tableRound(m.ss, l)) })
+				m.end = append(m.end, func(app *App) { app.Push(tableRound(m.ss, l, m.next)) })
 			}
 		}
 	}
 	// Then the newspaper of each manager (f_2e3a_23aa), then back.
 	m.end = append(m.end, func(app *App) {
-		PushNewspapers(app, m.ss, m.md, func(app *App) { m.closing = true })
+		PushNewspapers(app, m.ss, m.md, func(app *App) { app.Pop() })
 	})
 }
 
 // resultsRound and tableRound show the results of a league after a period
 // and the table after the match day; set by the league screens.
 var (
-	resultsRound = func(ss *Session, md *game.MatchDay, league, minute int) Scene {
-		return NewResultsRound(ss, league, minute, nil)
+	resultsRound = func(ss *Session, md *game.MatchDay, league, minute int, done func(*App)) Scene {
+		return NewResultsRound(ss, league, minute, done)
 	}
-	tableRound = func(ss *Session, league int) Scene { return NewTableRound(ss, league, nil) }
+	tableRound = func(ss *Session, league int, done func(*App)) Scene {
+		return NewTableRound(ss, league, done)
+	}
 )
+
+// next opens the next queued screen of m.end. Each screen calls it when it
+// closes, in the same tick, so that the match screen is not drawn for a
+// frame between two of them.
+func (m *MatchScreen) next(app *App) {
+	if len(m.end) == 0 {
+		return
+	}
+	f := m.end[0]
+	m.end = m.end[1:]
+	f(app)
+}
 
 func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
