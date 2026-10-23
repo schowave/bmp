@@ -50,20 +50,12 @@ func (s *State) recordHistory(mi int) {
 }
 
 // topScorerInTeam reports whether the best scorer of the manager's league
-// plays for his club (f_14a4_1ad5(1)).
+// plays for his club (f_14a4_1ad5(1)): the first of the top-scorer list,
+// which needs at least two goals.
 func (s *State) topScorerInTeam(mi int) bool {
 	m := s.Managers[mi]
-	best, bestGoals := -1, 0
-	for p := 1; p < NumPersons; p++ {
-		ps := &s.Persons[p]
-		if ps.Team == 0xff || ps.Team >= NumGerman || LeagueOf(ps.Team) != m.League {
-			continue
-		}
-		if ps.LeagueGoals > bestGoals {
-			best, bestGoals = p, ps.LeagueGoals
-		}
-	}
-	return best >= 0 && s.Persons[best].Team == m.Team
+	top := s.TopScorers(m.League, false)
+	return len(top) > 0 && s.Persons[top[0].Person].Team == m.Team
 }
 
 // seasonEnd1 runs the season end up to the contract talks.
