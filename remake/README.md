@@ -202,7 +202,8 @@ now and then is enough: after transfers or long injuries.
 #### The key of the main menu
 
 It runs the training key, then the lineup key, and the message names the two
-ratings (`AUFSTELLUNG 1,13`, `TRAINING 41,0`) and the opponent. While the
+ratings with their gain against the lineup and the plan before
+(`AUFSTELLUNG 1,13 +0,41`, `TRAINING 41,0 +3,5`) and the opponent. While the
 panel with new messages is open, it takes the keys; close it first.
 
 ## Project layout

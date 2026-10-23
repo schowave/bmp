@@ -414,6 +414,17 @@ func TestDecimalText(t *testing.T) {
 	}
 }
 
+func TestSignedDecimal(t *testing.T) {
+	for _, c := range []struct {
+		n, places int
+		want      string
+	}{{21, 2, "+0,21"}, {0, 2, "+0,00"}, {-5, 2, "-0,05"}, {35, 1, "+3,5"}} {
+		if got := signedDecimal(c.n, c.places); got != c.want {
+			t.Errorf("%d: %q, want %q", c.n, got, c.want)
+		}
+	}
+}
+
 func TestPointsText(t *testing.T) {
 	for n, want := range map[int]string{135: "1,35", 7: "0,07", 0: "0,00", -12: "-0,12", 200: "2,00"} {
 		if got := pointsText(n); got != want {
