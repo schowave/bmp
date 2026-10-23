@@ -126,7 +126,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	}
 	s.initPersons()
 	for mi := range s.Managers {
-		s.initManager(mi, opt.Length)
+		s.initManager(mi, opt.Length, false)
 	}
 	s.driftBankRates()
 	s.driftStrengths(10)
@@ -160,7 +160,7 @@ func (s *State) teamByName(name string) int {
 
 // placeClub moves the club of a manager into a slot of the start league
 // (f_08bc_2184 step 5).
-func (s *State) placeClub(mi, l0 int, short bool) {
+func (s *State) placeClub(mi, l0 int, short, late bool) {
 	r := &s.Rand
 	m := s.Managers[mi]
 	id := m.Team
@@ -187,7 +187,8 @@ func (s *State) placeClub(mi, l0 int, short bool) {
 		s.swapIdentity(id, x, false)
 		s.Clubs[id], s.Clubs[x] = s.Clubs[x], s.Clubs[id]
 	}
-	if short {
+	// Only a new 1-year game puts the club into the UEFA-Pokal.
+	if short && !late {
 		m.CupStatus[CupUEFA] = 1
 		x := pick(true)
 		y := m.Team
@@ -196,10 +197,14 @@ func (s *State) placeClub(mi, l0 int, short bool) {
 	}
 }
 
-// initManager gives manager mi of a new game, or one added later with NEU,
-// the start values of f_08bc_2184: club placement, stadium, squad, money.
-func (s *State) initManager(mi int, length GameLength) {
+// initManager gives manager mi of a new game, or one added later with NEU
+// (late), the start values of f_08bc_2184: club placement, stadium, squad,
+// money.
+func (s *State) initManager(mi int, length GameLength, late bool) {
 	m := s.Managers[mi]
+	if late {
+		s.lateSquad(mi)
+	}
 	endless := length == Endless
 	l0 := 0
 	if endless {
@@ -216,7 +221,7 @@ func (s *State) initManager(mi int, length GameLength) {
 		m.Money = 1900000
 	}
 	m.MinAudience = 99999
-	s.placeClub(mi, l0, short)
+	s.placeClub(mi, l0, short, late)
 	m.League = l0
 	m.TicketPrice = (boolInt(short)+8)*2 - 3*l0
 	m.Stadium[StStanding] = int64((5 - l0) * 4000)
@@ -273,10 +278,38 @@ func (s *State) AddManager(name string, team, face int) error {
 	m := &Manager{Name: name, Number: mi + 1, Team: team, Face: face, AutoLineup: 2}
 	m.CupStatus = [4]int{NotInCup, NotInCup, NotInCup, NotInCup}
 	s.Managers = append(s.Managers, m)
-	s.initManager(mi, s.Length())
+	s.initManager(mi, s.Length(), true)
 	s.AutoLineup(mi)
 	s.LineupStrength(mi, false)
 	return nil
+}
+
+var (
+	latePlayers = [4]int{2, 5, 8, 5}          // D:0x9438, players per position
+	latePersons = [5]int{1, 20, 64, 106, 151} // D:0x7a6, person ranges per position
+)
+
+// lateSquad gives a manager added with NEU his players: per position free
+// persons of its range (f_08bc_2184). The ranges end on the first person of
+// the next position, the last one on 151, behind the person table; the
+// remake takes that one as not free.
+func (s *State) lateSquad(mi int) {
+	for k := 0; k < 4; k++ {
+		for n := 0; n < latePlayers[k]; n++ {
+			p := 0
+			for try := 0; try < 1000; try++ {
+				p = s.Rand.Between(latePersons[k], latePersons[k+1])
+				if p < NumPersons && s.Persons[p].Owner == OwnerFree {
+					break
+				}
+			}
+			if p >= NumPersons {
+				continue
+			}
+			s.Persons[p].Owner = mi
+			_, _ = s.addPerson(mi, p, 1, 0, SquadMax)
+		}
+	}
 }
 
 // inCupDraw reports whether a club is drawn in cup c.
