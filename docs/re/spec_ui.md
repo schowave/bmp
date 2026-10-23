@@ -12,18 +12,27 @@ The original runs in the browser through the WASM image (js-dos). The tools
 are in `remake/tools/re/refgame/wasm` and `remake/tools/re/pixcmp`.
 
 ```sh
-remake/tools/re/refgame/wasm/serve.sh            # build wasm/dist, expose window.ci, serve :8000
 cd remake/tools/re/refgame/wasm && npm install && npx playwright install chromium
-node driver.mjs                                  # headless Chromium on :9333 (PORT=... for more)
-./cmd.sh '[["wait",15000],["click",160,120],["wait",2000],["shot","/abs/setup.png"]]'
+remake/tools/re/refgame/wasm/serve.sh --driver   # build wasm/dist, expose window.ci, serve :8000, driver on :9333
+./cmd.sh '[["newgame","TEST"],["shot","/abs/menu.png"]]'
 ```
+
+Without `--driver` serve.sh only serves :8000 (then `node driver.mjs` by
+hand); the driver port is `BMP_DRIVER_PORT` (default 9333), for a second
+driver. The driver says "ci ready" once BMMAIN runs: screenshots while DOSBox
+boots, or while the game builds the season after the start, crash the js-dos
+backend ("memory access out of bounds"), then restart serve.sh.
 
 Driver commands (one JSON array per request, run in order): `["click",x,y]`,
 `["rclick",x,y]`, `["move",x,y]` in game coordinates (320×240), `["type","TEXT"]`,
 `["press","Enter"]`, `["wait",ms]`, `["shot","/abs/file.png"]` (the canvas of
 the game, 2× = 640×480), `["eval","js"]` (e.g. `ci.sendMouseButton(0,true)` to
 hold the left button). The mouse goes through the js-dos command interface
-and lands exactly.
+and lands exactly. `["state"]` names the screen from a few pixels (title,
+setup, options, question, menu or unknown), `["waitfor","question/menu",ms]`
+waits for one of them, `["newgame","NAME"]` goes from the title or the setup
+to the main menu of a new game (the steps below), `["quit"]` stops the
+driver and, with `--driver`, the server.
 
 Into a game: wait ~15 s, click 160,120 (title), click the name field 40,229,
 type a name, Enter, click 40,135 (club in the middle of the strip), right
@@ -97,11 +106,27 @@ pointer. Texts are centred over box and shadow (x0=75+2, x1=75+157).
 ## 3. Mouse
 
 The left button selects. The right button does **not** leave screens: they
-close with HAUPT MENU or WEITER only (exceptions: the sponsor screen and the
-setup/options, where the right button confirms). In the main menu the right
-button closes the open group, on the manager tearing his hair it asks to quit. During a match day the left button plays the
-rest of the half at once, the right button shows the author of the last goal
-scene, the space bar opens the options.
+close with HAUPT MENU or WEITER only. The main menu does not react to
+hovering (s4, s5). Clicked on the original (shots in
+`remake/testdata/original`, see its README; – = not tried):
+
+| Element | Left | Right |
+|---|---|---|
+| setup: club strip (arrows, logos) | scrolls, middle logo puts the club into the next slot (o07–a4, b4) | options box, anywhere in the setup (c1) |
+| setup: name field | activates it, block cursor (b1) | – |
+| setup: options box | AN/AUS buttons | starts the game (d1) |
+| cup draw question | ABER KLAR / KEIN GEDANKE | – |
+| cup draw running | skips to the complete draw (d6) | – |
+| main menu: group (left and right column) | opens it (g1–g4, k0, u0) | closes the open group (w1) |
+| main menu: manager tearing his hair | nothing | quit question, red face (m1) |
+| main menu: calendar sheet 275,75 | ends the turn (the only way) | – |
+| main menu: middle area | message panel (q5, q6), X closes, arrows page (v3–v7) | – |
+| statistics, load screen | items | nothing (h1b, k3b) |
+| sponsor screen | items (i1) | back to the main menu (i1b) |
+| NEU | setup with the managers of the game (s2) | as in the setup (s3) |
+| match day | plays the rest of the half at once | author of the last goal scene (n6–n8, u1–u3) |
+
+During a match day the space bar opens the options (u4).
 
 ## 4. Screens
 

@@ -10,6 +10,8 @@ repository (`.gitignore`); take them again with `remake/tools/re/refgame/wasm`
 The game: one manager "TEST" with VfB Stuttgart, level 2, endless game (so
 Stuttgart plays in the Amateur-Oberliga), modern start (1992).
 
+Where a click led to the shot, the trigger is in brackets.
+
 | File | Screen and state |
 |---|---|
 | o03, o05 | title picture |
@@ -18,8 +20,8 @@ Stuttgart plays in the Amateur-Oberliga), modern start (1992).
 | b1 | setup, name field active (block cursor) |
 | b2, b3 | setup, name typed, after Enter |
 | b4 | setup, club put into slot 1 |
-| c1 | option box of the setup |
-| d1 | question for the DFB-Pokal draw |
+| c1 | option box of the setup (right click in the setup) |
+| d1 | question for the DFB-Pokal draw (right click in the option box) |
 | d3, d4, d5 | DFB draw running (plates coming out of the drum) |
 | d6 | DFB draw complete, "TASTE DRÜCKEN" |
 | e1 | DFB-Pokal round after the draw |
@@ -51,7 +53,7 @@ Stuttgart plays in the Amateur-Oberliga), modern start (1992).
 | k4a, k4 | main menu after leaving it; save screen |
 | k5 | high scores |
 | k6 | options |
-| m1 | quit question of the manager tearing his hair |
+| m1 | quit question (right click on the manager tearing his hair) |
 | m2 | match day: scoreboard and minute bar, 7th minute |
 | m3–m8 | match day with goal scenes (scene window) |
 | m9 | half-time results Bundesliga (45.MINUTE) |
@@ -63,7 +65,7 @@ Stuttgart plays in the Amateur-Oberliga), modern start (1992).
 | p7, p8, q1 | tables after the match day |
 | q2, q3 | newspaper "Sportnachrichten" |
 | q4 | main menu after the match day: curve of the table places, "Spielfrei" |
-| q5, q6 | message panel, "Keine Nachricht vorhanden." |
+| q5, q6 | message panel (left click in the middle area), "Keine Nachricht vorhanden." |
 | r1 | message panel while the turn cannot end |
 | r2, r3 | half-time of a European cup match day (both legs) |
 | s1 | main menu, matchday 2 |
