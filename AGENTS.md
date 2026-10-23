@@ -83,6 +83,7 @@ Use `gh` for pull requests and CI results, for example `gh pr create`,
   `remake/README.md` (layout, flags, deviations).
 - Rules and screens of the original: `docs/re/spec_*.md`.
 - Glossary: `docs/glossary.md`.
+- Review rules beyond the checks: `CODING_STANDARDS.md`.
 - Architecture decisions: `docs/adr/`.
 - Images: `README.md`, `wasm/README.md`, `vnc/bench/README.md`.
 
