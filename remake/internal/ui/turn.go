@@ -118,12 +118,5 @@ func optimizeTurn(app *App, ss *Session) {
 	s, mi := ss.S, ss.Mgr()
 	tr := s.OptimizeTraining(mi)
 	ln := s.OptimizeLineup(mi)
-	toast := newLineupToast(game.LineupError{
-		"AUFSTELLUNG " + pointsText(ln.After),
-		"TRAINING " + tenthsText(tr.After),
-	})
-	if ln.Opponent >= 0 {
-		toast.third = opponentLine(app, s.Teams[ln.Opponent].Name)
-	}
-	app.Push(toast)
+	app.Push(remakeToast(app, s, "AUFSTELLUNG "+pointsText(ln.After), "TRAINING "+tenthsText(tr.After), ln.Opponent))
 }

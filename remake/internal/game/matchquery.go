@@ -32,3 +32,6 @@ func (md *MatchDay) Over() bool { return md.period >= len(md.periods) }
 // Silent reports extra time without a match of a human team: the match
 // screen plays it without showing it (F:0x2e99 = 0).
 func (md *MatchDay) Silent() bool { return md.quietExtra && md.period >= 2 }
+
+// Relegation reports the relegation tie between the 1. and the 2. Liga.
+func (md *MatchDay) Relegation() bool { return md.relegation }

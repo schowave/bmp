@@ -172,9 +172,9 @@ type State struct {
 	// Draws lists the cups whose new draw the screens still have to
 	// present (f_17c2_0006), in the order of the original.
 	Draws []Cup
-	// Banners are the flags with a word (f_0310_01f2) the screens still
+	// Flags are the flags with a word (f_0310_01f2) the screens still
 	// have to show: WINTERPAUSE, SAISONENDE.
-	Banners []string
+	Flags []string
 	// Highscores are the entries of the managers at the last season end
 	// that the screens still have to put into the high-score table.
 	Highscores []HighscoreEntry
@@ -205,20 +205,20 @@ func DefaultDisplay() Display {
 	return Display{Results: on, Table: on, Newspaper: true, Speed: 70}
 }
 
-// TakeBanner returns the next flag to show, or false.
-func (s *State) TakeBanner() (string, bool) {
-	if len(s.Banners) == 0 {
+// TakeFlag returns the next flag to show, or false.
+func (s *State) TakeFlag() (string, bool) {
+	if len(s.Flags) == 0 {
 		return "", false
 	}
-	b := s.Banners[0]
-	s.Banners = s.Banners[1:]
+	b := s.Flags[0]
+	s.Flags = s.Flags[1:]
 	return b, true
 }
 
-// banner queues a flag, once: a run of days without a turn shows it once.
-func (s *State) banner(text string) {
-	if n := len(s.Banners); n == 0 || s.Banners[n-1] != text {
-		s.Banners = append(s.Banners, text)
+// flag queues a flag, once: a run of days without a turn shows it once.
+func (s *State) flag(text string) {
+	if n := len(s.Flags); n == 0 || s.Flags[n-1] != text {
+		s.Flags = append(s.Flags, text)
 	}
 }
 

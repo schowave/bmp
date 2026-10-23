@@ -277,7 +277,7 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 	if !in.Left {
 		return false
 	}
-	for f := 0; f < 3 && q.md == nil; f++ {
+	for f := 0; f < 3 && q.formationButtons(); f++ {
 		if lnIconHit(in, f*60+4, lnFormY) {
 			s.SetFormation(mi, f)
 			q.picked = -1
@@ -314,14 +314,19 @@ func (q *SquadScreen) optimize(app *App) {
 	res := s.OptimizeLineup(q.mi())
 	q.picked = -1
 	q.vac = game.BoardCell{}
-	toast := newLineupToast(game.LineupError{
-		"OPTIMAL " + pointsText(res.After),
-		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2]),
-	})
-	if res.Opponent >= 0 {
-		toast.third = opponentLine(app, s.Teams[res.Opponent].Name)
+	app.Push(remakeToast(app, s, "OPTIMAL "+pointsText(res.After),
+		"STAND. "+pointsText(res.Auto[0])+"/"+pointsText(res.Auto[1])+"/"+pointsText(res.Auto[2]), res.Opponent))
+}
+
+// remakeToast is a message of the remake's hidden keys: two lines and, for
+// an opponent (a club id, or -1), a third that names him.
+func remakeToast(app *App, s *game.State, l1, l2 string, opponent int) *lineupToast {
+	toast := newLineupToast(game.LineupError{l1, l2})
+	toast.wide = true
+	if opponent >= 0 {
+		toast.third = opponentLine(app, s.Teams[opponent].Name)
 	}
-	app.Push(toast)
+	return toast
 }
 
 // opponentLine is "GEGEN" and the name of the opponent, cut to fit the
@@ -340,16 +345,24 @@ func opponentLine(app *App, opponent string) string {
 const lnToastWidth = 148
 
 // pointsText writes n hundredths of a point with a decimal comma, "1,35".
-func pointsText(n int) string {
+func pointsText(n int) string { return decimalText(n, 2) }
+
+// decimalText writes n with places digits after a decimal comma:
+// decimalText(135, 2) is "1,35", decimalText(410, 1) "41,0".
+func decimalText(n, places int) string {
 	pre := ""
 	if n < 0 {
 		pre, n = "-", -n
 	}
-	frac := itoa(n % 100)
-	if len(frac) < 2 {
+	div := 1
+	for range places {
+		div *= 10
+	}
+	frac := itoa(n % div)
+	for len(frac) < places {
 		frac = "0" + frac
 	}
-	return pre + itoa(n/100) + "," + frac
+	return pre + itoa(n/div) + "," + frac
 }
 
 func (q *SquadScreen) setView(v int) {
@@ -620,27 +633,41 @@ var (
 
 func lnFormRect(f int) image.Rectangle { return image.Rect(0x79, f*0x18, 0x79+0x20, f*0x18+0x17) }
 
+// formationButtons tells whether the formation buttons are under the board:
+// during a match the formations do not apply, so the remake leaves them out
+// (the original draws them there too).
+func (q *SquadScreen) formationButtons() bool { return q.md == nil }
+
+// boardSlots are the slots of the players on the tactics board: the team
+// with a cell, but not the player taken out for a substitution, who has left
+// the board.
+func (q *SquadScreen) boardSlots() []int {
+	var out []int
+	for i := 0; i < game.SquadMax; i++ {
+		sl := &q.ss.S.Squads[q.mi()][i]
+		if sl.Empty() || sl.Lineup < 1 || sl.Lineup > 11 || sl.Col < 0 || i == q.out {
+			continue
+		}
+		out = append(out, i)
+	}
+	return out
+}
+
 // drawBoard draws the tactics board with the markers of the team and the
 // formation buttons (f_1ecd_26e6, f_1ecd_132a).
 func (q *SquadScreen) drawBoard(g *Gfx, dst *ebiten.Image) {
 	s := q.ss.S
 	mi := q.mi()
 	m := s.Managers[mi]
-	// During a match the formations do not apply, so the remake leaves their
-	// buttons out (the original draws them there too).
-	for f := 0; f < 3 && q.md == nil; f++ {
+	for f := 0; f < 3 && q.formationButtons(); f++ {
 		x := f*60 + 4
 		Draw(dst, g.Pic(24+lnB2i(m.AutoLineup-f == 2), false), x, lnFormY)
 		Draw(dst, g.Sub(6, lnFormRect(f)), x+9, lnFormY+9)
 	}
 	g.Window(dst, lnBoardX, lnBoardY, lnBoardX+0x84, lnBoardY+0x84, ColBlue)
 	Draw(dst, g.Sub(6, lnFieldRect), lnFieldX, lnFieldY)
-	for i := 0; i < game.SquadMax; i++ {
+	for _, i := range q.boardSlots() {
 		sl := &s.Squads[mi][i]
-		// The player taken out for a substitution has left the board.
-		if sl.Empty() || sl.Lineup < 1 || sl.Lineup > 11 || sl.Col < 0 || i == q.out {
-			continue
-		}
 		x, y := sl.Col*16+lnCellX, sl.Row*14+lnCellY
 		Draw(dst, g.SubKeyed(6, 0, lnMarkerRect), x, y)
 		g.TextMid(dst, FontSmall, x+1, x+lnMarkerSz, y+8, itoa(sl.Lineup), ColBeige, NoShadow)
@@ -667,8 +694,9 @@ func lnB2i(b bool) int {
 type lineupToast struct {
 	lines [2]string
 	// third is a line of the remake below the two of the original; it makes
-	// the box taller by lnToastLineH.
+	// the box taller by lnToastLineH. wide marks a message of the remake.
 	third string
+	wide  bool
 	auto  bool
 	frame int
 }
@@ -723,17 +751,39 @@ func (t *lineupToast) Draw(app *App, dst *ebiten.Image) {
 		fillIncl(dst, x+1, y+1, x+w-1, y+h-1, g.PalColor(ColDarkRed))
 		return
 	}
-	e := t.extraH()
-	fillIncl(dst, 165, 13, 319, 44+e, g.PalColor(ColOrange))
-	fillIncl(dst, 166, 14, 318, 43+e, g.PalColor(ColBlack))
-	fillIncl(dst, 167, 15, 317, 42+e, g.PalColor(ColDarkRed))
-	// The texts of the original fit 0xb9..0x12f; the band is as wide as the
-	// box with the same middle, for the longer ones of the remake.
+	lay := t.layout()
+	fillIncl(dst, 165, 13, 319, lay.bottom, g.PalColor(ColOrange))
+	fillIncl(dst, 166, 14, 318, lay.bottom-1, g.PalColor(ColBlack))
+	fillIncl(dst, 167, 15, 317, lay.bottom-2, g.PalColor(ColDarkRed))
+	for i, l := range lay.lines {
+		g.TextMid(dst, FontNormal, lay.x0, lay.x1, lay.ys[i], l, ColWhite, ColBlack)
+	}
+}
+
+// toastLayout is where the full message box puts its texts.
+type toastLayout struct {
+	lines  []string
+	ys     []int // baselines
+	x0, x1 int   // the band the lines are centred in
+	bottom int   // last row of the box
+}
+
+// layout places the lines of the full box: the two of the original centred
+// in 0xb9..0x12f; a message of the remake (wide) centred in the band as wide
+// as the box with the same middle, for its longer lines, and a third line
+// below them makes the box taller.
+func (t *lineupToast) layout() toastLayout {
+	lay := toastLayout{x0: 0xb9, x1: 0x12f, bottom: 44 + t.extraH()}
+	if t.wide {
+		lay.x0, lay.x1 = 169, 319
+	}
 	for i, l := range []string{t.lines[0], t.lines[1], t.third} {
 		if l != "" {
-			g.TextMid(dst, FontNormal, 169, 319, 0x1a+i*lnToastLineH, l, ColWhite, ColBlack)
+			lay.lines = append(lay.lines, l)
+			lay.ys = append(lay.ys, 0x1a+i*lnToastLineH)
 		}
 	}
+	return lay
 }
 
 // pressed is the icon shown pressed: the list one also while the board is

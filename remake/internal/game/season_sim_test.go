@@ -72,22 +72,22 @@ func TestOptimalLineupWinsPoints(t *testing.T) {
 
 // Within the winter break the loop queues the flag WINTERPAUSE once for a run
 // of days, outside it none; the season end queues SAISONENDE.
-func TestBanners(t *testing.T) {
+func TestFlags(t *testing.T) {
 	s := lineupState(t)
-	s.Banners = nil
+	s.Flags = nil
 	s.Day = 100
 	s.afterEvent()
-	if len(s.Banners) != 0 {
-		t.Fatalf("banners before the winter break: %v", s.Banners)
+	if len(s.Flags) != 0 {
+		t.Fatalf("flags before the winter break: %v", s.Flags)
 	}
 	s.Day = 140
 	s.afterEvent()
 	s.afterEvent()
-	if b, ok := s.TakeBanner(); !ok || b != "WINTERPAUSE" || len(s.Banners) != 0 {
-		t.Fatalf("winter break: %q %v, left %v", b, ok, s.Banners)
+	if b, ok := s.TakeFlag(); !ok || b != "WINTERPAUSE" || len(s.Flags) != 0 {
+		t.Fatalf("winter break: %q %v, left %v", b, ok, s.Flags)
 	}
 	s.seasonEnd1()
-	if b, ok := s.TakeBanner(); !ok || b != "SAISONENDE" {
+	if b, ok := s.TakeFlag(); !ok || b != "SAISONENDE" {
 		t.Fatalf("season end: %q %v", b, ok)
 	}
 }

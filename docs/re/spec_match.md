@@ -554,7 +554,13 @@ closes; no other strength recomputation follows the injury. A red or yellow-red 
 `f_1a58_1f75` passes `N = D:0x664[m]` to `f_1ecd_1560`: 11 less the players sent off
 (§10.2 decrements it), not the players on the pitch. After an injury the team has `N-1`
 players, so a click on a reserve player puts him into the team without one taken out
-(spec_players §4.2: a player goes in while the team has fewer than `N`).
+(spec_players §4.2: a player goes in while the team has fewer than `N`). He goes in as a
+player not nominated does outside a match: number 11, then the team renumbered 1..n in
+slot order (`f_1ecd_24cd`), on the cell the last player taken out on the screen left, or
+else on the first free cell of the row of his position (`f_1ecd_1266`). The injury took
+the injured player off in the match engine, not on the screen, so no cell is left over and
+the second applies. A substitution on the screen takes a player out first, and the one who
+comes on gets that cell.
 
 ### 10.5 Re-planning after red card / injury / user substitution – `f_0310_347f`
 ```

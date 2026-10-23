@@ -403,6 +403,17 @@ func TestLineupOptimalKeyLongName(t *testing.T) {
 	}
 }
 
+func TestDecimalText(t *testing.T) {
+	for _, c := range []struct {
+		n, places int
+		want      string
+	}{{135, 2, "1,35"}, {7, 2, "0,07"}, {410, 1, "41,0"}, {-12, 1, "-1,2"}, {5, 3, "0,005"}} {
+		if got := decimalText(c.n, c.places); got != c.want {
+			t.Errorf("%d, %d places: %q, want %q", c.n, c.places, got, c.want)
+		}
+	}
+}
+
 func TestPointsText(t *testing.T) {
 	for n, want := range map[int]string{135: "1,35", 7: "0,07", 0: "0,00", -12: "-0,12", 200: "2,00"} {
 		if got := pointsText(n); got != want {
@@ -511,22 +522,55 @@ func TestMatchLineupSubstitutesByName(t *testing.T) {
 
 // Before the matches the flag names the competition for f_3930_01e7(0x32),
 // then the matches open.
-func TestEventBanner(t *testing.T) {
+func TestFlagScreen(t *testing.T) {
 	app, _, _, md, _ := matchApp(t)
-	if got := bannerText(md); got != "Ligaspiel" {
-		t.Errorf("banner %q, want Ligaspiel", got)
+	if got := flagText(md); got != "Ligaspiel" {
+		t.Errorf("flag %q, want Ligaspiel", got)
 	}
 	opened := false
-	b := newEventBanner("Ligaspiel", func(*App) { opened = true })
+	b := newFlagScreen("Ligaspiel", func(*App) { opened = true })
 	app.Push(b)
 	for i := 1; i < waitFrames(0x32); i++ {
 		step(t, app, click(160, 120))
 		if opened || top(app) != Scene(b) {
-			t.Fatalf("frame %d: banner gone early", i)
+			t.Fatalf("frame %d: flag gone early", i)
 		}
 	}
 	step(t, app, Input{})
 	if !opened || top(app) == Scene(b) {
-		t.Fatal("the matches did not open after the banner")
+		t.Fatal("the matches did not open after the flag")
+	}
+}
+
+// The board leaves out the player taken out for a substitution, and during a
+// match the formation buttons.
+func TestBoardDecisions(t *testing.T) {
+	app, _, ss, md, _ := matchApp(t)
+	q := NewMatchLineup(ss, md, 0)
+	app.Push(q)
+	if q.formationButtons() {
+		t.Error("formation buttons during a match")
+	}
+	all := q.boardSlots()
+	q.out = all[0]
+	if got := q.boardSlots(); len(got) != len(all)-1 || got[0] == all[0] {
+		t.Errorf("board %v, taken out %d", got, all[0])
+	}
+	if !NewSquadScreen(ss).formationButtons() {
+		t.Error("no formation buttons outside a match")
+	}
+}
+
+// A message of the original keeps its band and box; one of the remake is
+// centred in the band as wide as the box, and a third line makes it taller.
+func TestToastLayout(t *testing.T) {
+	orig := newLineupToast(game.ErrNoSubs).layout()
+	if orig.x0 != 0xb9 || orig.x1 != 0x12f || orig.bottom != 44 || len(orig.lines) != 2 {
+		t.Errorf("original %+v", orig)
+	}
+	r := &lineupToast{lines: [2]string{"A", "B"}, third: "C", wide: true}
+	lay := r.layout()
+	if lay.x0 != 169 || lay.x1 != 319 || lay.bottom != 44+lnToastLineH || len(lay.ys) != 3 || lay.ys[2] != 0x1a+2*lnToastLineH {
+		t.Errorf("remake %+v", lay)
 	}
 }
