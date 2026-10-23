@@ -285,10 +285,14 @@ func (s *State) reschedule(l, p, rec int) bool {
 		if v := s.Events[slot]; v != 0 && v != EvReplay {
 			continue
 		}
-		conflict := false
+		// f_0310_05f1: a date takes at most 8 games, and a team plays once.
+		conflict, games := false, 0
 		for _, q := range s.Postponed {
 			if q.Slot != slot || q.Matchday == 0 {
 				continue
+			}
+			if games++; games == 9 {
+				conflict = true
 			}
 			o := Fixtures(q.League, q.Matchday)[q.Pair]
 			if o.Home == pair.Home || o.Home == pair.Away || o.Away == pair.Home || o.Away == pair.Away {
