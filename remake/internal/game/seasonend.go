@@ -6,10 +6,13 @@ func (s *State) recordHistory(mi int) {
 	m := s.Managers[mi]
 	c := &s.Clubs[m.Team]
 	for h := 0; h < 2; h++ {
-		m.EtPoints[h] += c.Points[h]
-		// The minus points of the 2-point rule; under the 3-point rule the
-		// points lost.
-		m.EtMinus[h] += s.PointsPerWin()*c.Games[h] - c.Points[h]
+		// The balance of the eternal table counts by the 2-point rule, also
+		// in seasons of the 3-point rule, so that a game across 1995/96 adds
+		// up one kind of points. For the original it is its formula
+		// (points, 2*games - points).
+		draws := c.Games[h] - c.Wins[h] - c.Losses[h]
+		m.EtPoints[h] += 2*c.Wins[h] + draws
+		m.EtMinus[h] += 2*c.Losses[h] + draws
 		m.EtGoals[h] += c.Goals[h]
 		m.EtAgainst[h] += c.Against[h]
 		m.EtGames[h] += c.Games[h]
@@ -213,10 +216,20 @@ func (s *State) LeagueNameIn(l, year int) string { return LeagueName(l, s.NameYe
 // original always 1992, whose names are those of the original (Zweite
 // Liga, Am.-Oberliga).
 func (s *State) NameYear(year int) int {
-	if s.Season == "" {
-		return 1992
+	if !s.IsReal() {
+		return modernYear
 	}
 	return year
+}
+
+// HistoryBaseYear is the year the history screen shows for the first
+// record: the original counts from 1963, and in a modern game from 1991,
+// one year before its first season (f_262f_390e).
+func (s *State) HistoryBaseYear() int {
+	if s.Modern {
+		return s.FirstYear - 1
+	}
+	return s.FirstYear
 }
 
 // HistoryYear is the year in which the season of history record r of

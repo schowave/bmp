@@ -107,14 +107,14 @@ func groupArticles(overview, s, kind string) []string {
 	return out
 }
 
-// squadArticles are the squad articles of a season by tier.
-func squadArticles(year int) map[int]string {
+// squadArticles are the squad articles of a season, by tier.
+func squadArticles(year int) []string {
 	s := SeasonTitle(year)
-	m := map[int]string{1: "Kader der deutschen Fußball-Bundesliga " + s, 2: "Kader der 2. Fußball-Bundesliga " + s}
+	arts := []string{"Kader der deutschen Fußball-Bundesliga " + s, "Kader der 2. Fußball-Bundesliga " + s}
 	if year >= 2008 {
-		m[3] = "Kader der 3. Fußball-Liga " + s
+		arts = append(arts, "Kader der 3. Fußball-Liga "+s)
 	}
-	return m
+	return arts
 }
 
 // euroArticles are the European cups of year.
@@ -149,10 +149,23 @@ func euroArticles(year int) map[int]string {
 // FetchSeason fetches the season that starts in year.
 func (c *Client) FetchSeason(year int) (*Season, error) {
 	out := &Season{Year: year, Squads: map[string][]Player{}, Logos: map[string]string{}, Colors: map[string]string{}}
-	arts, err := c.tierArticles(year)
-	if err != nil {
-		return nil, err
+	steps := []func(*Season) error{c.fetchTables, c.fetchSquadArticles, c.canonicalClubs, c.fetchWikidataSquads,
+		c.fetchRunningSquads, c.fetchInfoboxes, c.fetchEurope}
+	for _, step := range steps {
+		if err := step(out); err != nil {
+			return nil, err
+		}
 	}
+	return out, nil
+}
+
+// fetchTables reads the tables of the four tiers.
+func (c *Client) fetchTables(out *Season) error {
+	arts, err := c.tierArticles(out.Year)
+	if err != nil {
+		return err
+	}
+	season := SeasonTitle(out.Year)
 	for tier := 1; tier <= 4; tier++ {
 		// Index loop: an overview appends the articles of its groups.
 		for i := 0; i < len(arts[tier]); i++ {
@@ -163,24 +176,24 @@ func (c *Client) FetchSeason(year int) (*Season, error) {
 				continue
 			}
 			if err != nil {
-				return nil, err
+				return err
 			}
 			out.Articles = append(out.Articles, a)
 			rows := Table(text)
-			group := ""
-			if len(arts[tier]) > 1 {
-				group = strings.TrimSpace(strings.TrimSuffix(a, SeasonTitle(year)))
-			}
 			if len(rows) == 0 && len(arts[tier]) == 1 && tier >= 3 {
 				// An overview of groups with an article each (the
 				// Regionalliga from 2012 on).
-				if groups := groupArticles(text, SeasonTitle(year), "Regionalliga"); len(groups) > 0 {
+				if groups := groupArticles(text, season, "Regionalliga"); len(groups) > 0 {
 					arts[tier] = append(arts[tier], groups...)
 					continue
 				}
 			}
 			if len(rows) == 0 {
 				out.Missing = append(out.Missing, "no table: "+a)
+			}
+			group := ""
+			if len(arts[tier]) > 1 {
+				group = strings.TrimSpace(strings.TrimSuffix(a, season))
 			}
 			for _, r := range rows {
 				if group != "" {
@@ -190,14 +203,18 @@ func (c *Client) FetchSeason(year int) (*Season, error) {
 			}
 		}
 	}
-	// Squads: the squad articles, then Wikidata for the clubs without.
-	for _, a := range squadArticles(year) {
+	return nil
+}
+
+// fetchSquadArticles reads the squads and logos of the squad articles.
+func (c *Client) fetchSquadArticles(out *Season) error {
+	for _, a := range squadArticles(out.Year) {
 		text, err := c.Raw(a)
 		if errors.Is(err, ErrNotFound) {
 			continue
 		}
 		if err != nil {
-			return nil, err
+			return err
 		}
 		out.Articles = append(out.Articles, a)
 		for _, sq := range Squads(text) {
@@ -207,23 +224,23 @@ func (c *Client) FetchSeason(year int) (*Season, error) {
 			}
 		}
 	}
-	// One name per club: the article the title redirects to.
-	var titles []string
-	for _, r := range out.Tables {
-		titles = append(titles, r.Club)
-	}
+	return nil
+}
+
+// canonicalClubs names every club by the article its title redirects to,
+// so that tables and squads agree. Second teams keep their title: their
+// articles redirect to their club's.
+func (c *Client) canonicalClubs(out *Season) error {
+	titles := clubsOf(out.Tables)
 	for club := range out.Squads {
 		titles = append(titles, club)
 	}
 	canon, err := c.Resolve(unique(titles))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	name := func(t string) string {
-		if IsSecondTeam(t) {
-			return t // not the club its article redirects to
-		}
-		if n := canon[t]; n != "" {
+		if n := canon[t]; n != "" && !IsSecondTeam(t) {
 			return n
 		}
 		return t
@@ -239,41 +256,34 @@ func (c *Client) FetchSeason(year int) (*Season, error) {
 		logos[name(club)] = l
 	}
 	out.Squads, out.Logos = squads, logos
-	var without []string
-	for _, r := range out.Tables {
-		if len(out.Squads[r.Club]) < 11 && !IsSecondTeam(r.Club) {
-			without = append(without, r.Club)
+	return nil
+}
+
+// thinSquads are the clubs of the tables with fewer than n players.
+func thinSquads(out *Season, n int) []string {
+	var thin []string
+	for _, club := range unique(clubsOf(out.Tables)) {
+		if len(out.Squads[club]) < n && !IsSecondTeam(club) {
+			thin = append(thin, club)
 		}
 	}
-	without = unique(without)
-	if len(without) > 0 {
-		wd, err := c.WikidataSquads(without, year)
-		if err != nil {
-			return nil, err
-		}
-		for club, ps := range wd {
-			if len(ps) > len(out.Squads[club]) {
-				out.Squads[club] = ps
-			}
-		}
+	return thin
+}
+
+// fetchWikidataSquads takes the squads of Wikidata for the clubs without
+// one, and notes those that stay thin.
+func (c *Client) fetchWikidataSquads(out *Season) error {
+	without := thinSquads(out, 11)
+	if len(without) == 0 {
+		return nil
 	}
-	// The running season: the squad in the club article, unless a squad
-	// article has one.
-	if year >= RunningSeason() {
-		for _, club := range unique(clubsOf(out.Tables)) {
-			if len(out.Squads[club]) >= 18 || IsSecondTeam(club) {
-				continue
-			}
-			text, err := c.Raw(club)
-			if errors.Is(err, ErrNotFound) {
-				continue
-			}
-			if err != nil {
-				return nil, err
-			}
-			if ps := CurrentSquad(text, SeasonTitle(year)); len(ps) > len(out.Squads[club]) {
-				out.Squads[club] = ps
-			}
+	wd, err := c.WikidataSquads(without, out.Year)
+	if err != nil {
+		return err
+	}
+	for club, ps := range wd {
+		if len(ps) > len(out.Squads[club]) {
+			out.Squads[club] = ps
 		}
 	}
 	for _, club := range without {
@@ -281,25 +291,44 @@ func (c *Client) FetchSeason(year int) (*Season, error) {
 			out.Missing = append(out.Missing, fmt.Sprintf("squad of %s: %d players", club, len(out.Squads[club])))
 		}
 	}
-	// The current logo and the colours from the infobox of the club.
-	var clubs []string
-	for _, r := range out.Tables {
-		clubs = append(clubs, r.Club)
+	return nil
+}
+
+// fetchRunningSquads takes, in the running season, the squad of the club
+// article for the clubs a squad article does not cover.
+func (c *Client) fetchRunningSquads(out *Season) error {
+	if out.Year < RunningSeason() {
+		return nil
 	}
-	for _, club := range unique(clubs) {
+	for _, club := range thinSquads(out, 18) {
+		text, err := c.Raw(club)
+		if errors.Is(err, ErrNotFound) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if ps := CurrentSquad(text, SeasonTitle(out.Year)); len(ps) > len(out.Squads[club]) {
+			out.Squads[club] = ps
+		}
+	}
+	return nil
+}
+
+// fetchInfoboxes takes the current logo, where the season has none, and
+// the colours from the infobox of each club.
+func (c *Client) fetchInfoboxes(out *Season) error {
+	for _, club := range unique(clubsOf(out.Tables)) {
 		info, err := c.ClubInfobox(club)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if out.Logos[club] == "" {
 			out.Logos[club] = info.Logo
 		}
 		out.Colors[club] = info.Colors
 	}
-	if err := c.fetchEurope(out); err != nil {
-		return nil, err
-	}
-	return out, nil
+	return nil
 }
 
 // fetchEurope collects the foreign clubs of the European cups.

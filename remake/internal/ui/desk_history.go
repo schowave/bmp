@@ -75,12 +75,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 		g.TextMid(dst, FontSmall, 0, 0x140, 0x1d, "NOCH HABEN SIE KEINE HISTORISCH SONDERLICH WICHTIGEN ERFOLGE ERZIELT...", ColLight, ColGrey7)
 		return
 	}
-	// The original counts from 1963, or from 1991 in a modern game: one
-	// year before the first season.
-	base := s.FirstYear
-	if s.Modern {
-		base--
-	}
+	base := s.HistoryBaseYear()
 	y := 0x1d
 	for r := h.page * 16; r < n && r < (h.page+1)*16; r++ {
 		e := m.History[r]

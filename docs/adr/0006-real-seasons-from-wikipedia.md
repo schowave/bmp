@@ -30,8 +30,9 @@ clubs, 20 players per club.
   Bundesliga; 1991–93: 24 in the 2. Bundesliga; from 1994: 18) pass their
   last clubs down or take the best of the tier below; the third league is
   the Oberliga (until 1993/94), the Regionalliga (until 2007/08) or the 3.
-  Liga, its groups merged by place. Second teams of professional clubs are
-  left out of the amateur tiers. Strengths come from the goals and points
+  Liga, its groups merged by place. Second teams of professional clubs come
+  into the amateur tiers before 2008 only when the places cannot be filled
+  without them. Strengths come from the goals and points
   per game, spread over the ranges of the original.
 - Squads of small clubs are incomplete; their empty slots get random names
   like in the original.

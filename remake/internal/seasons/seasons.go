@@ -37,11 +37,16 @@ type Season struct {
 // Label is the season as the game shows it: "1995/96".
 func (s Season) Label() string { return strings.Replace(s.ID, "-", "/", 1) }
 
+// ForYear is the season that starts in year.
+func ForYear(year int) Season {
+	return Season{ID: fmt.Sprintf("%d-%02d", year, (year+1)%100), Year: year}
+}
+
 // ParseID reads a season id "YYYY-YY".
 func ParseID(id string) (Season, error) {
-	y, rest, ok := strings.Cut(id, "-")
+	y, _, ok := strings.Cut(id, "-")
 	year, err := strconv.Atoi(y)
-	if !ok || err != nil || len(y) != 4 || rest != fmt.Sprintf("%02d", (year+1)%100) {
+	if !ok || err != nil || len(y) != 4 || id != ForYear(year).ID {
 		return Season{}, fmt.Errorf("season %q: want YYYY-YY", id)
 	}
 	return Season{ID: id, Year: year}, nil
@@ -80,9 +85,15 @@ func mana(fsys fs.FS, id string) (*assets.Mana, error) {
 	return m, nil
 }
 
-// Files returns the built-in files: the seasons and pic/.
-func Files() fs.FS { return files }
+// ManaOr returns the clubs of season id, or orig, the clubs of the
+// original, when id is empty: the clubs a saved game was started with.
+func ManaOr(orig *assets.Mana, id string) (*assets.Mana, error) {
+	if id == "" {
+		return orig, nil
+	}
+	return Mana(id)
+}
 
-// Pics returns the logos of the clubs of the seasons, as pic/N.png for
-// assets.Dir.AddPics.
-func Pics() fs.FS { return files }
+// Files returns the built-in files: the seasons and the logos of their
+// clubs as pic/N.png (for assets.Dir.AddPics).
+func Files() fs.FS { return files }

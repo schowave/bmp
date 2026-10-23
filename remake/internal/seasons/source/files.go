@@ -43,7 +43,8 @@ func writeCSV(path string, header []string, rows [][]string) error {
 	return f.Close()
 }
 
-func readCSV(fsys fs.FS, path string) ([][]string, error) {
+// ReadCSV reads the CSV file path of fsys without its header line.
+func ReadCSV(fsys fs.FS, path string) ([][]string, error) {
 	f, err := fsys.Open(path)
 	if err != nil {
 		return nil, err
@@ -113,7 +114,7 @@ func WriteSeason(dir string, s *Season) error {
 func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 	s := &Season{Year: year, Squads: map[string][]Player{}, Logos: map[string]string{}, Colors: map[string]string{}}
 	atoi := func(v string) int { n, _ := strconv.Atoi(strings.TrimSpace(v)); return n }
-	rows, err := readCSV(fsys, tablesFile)
+	rows, err := ReadCSV(fsys, tablesFile)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +125,7 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 		s.Tables = append(s.Tables, TierRow{Tier: atoi(r[0]), Row: Row{Group: r[1], Rank: atoi(r[2]), Club: r[3], Label: r[4],
 			Won: atoi(r[5]), Drawn: atoi(r[6]), Lost: atoi(r[7]), GoalsFor: atoi(r[8]), GoalsAgainst: atoi(r[9])}})
 	}
-	if rows, err = readCSV(fsys, squadsFile); err != nil {
+	if rows, err = ReadCSV(fsys, squadsFile); err != nil {
 		return nil, err
 	}
 	for i, r := range rows {
@@ -139,7 +140,7 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 		}
 		s.Squads[r[0]] = append(s.Squads[r[0]], Player{Name: r[1], Surname: r[2], Pos: pos, Games: atoi(r[4]), Since: atoi(r[5]), Source: r[6]})
 	}
-	if rows, err = readCSV(fsys, logosFile); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	if rows, err = ReadCSV(fsys, logosFile); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return nil, err
 	}
 	for i, r := range rows {
@@ -148,7 +149,7 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 		}
 		s.Logos[r[0]], s.Colors[r[0]] = r[1], r[2]
 	}
-	if rows, err = readCSV(fsys, europeFile); err != nil {
+	if rows, err = ReadCSV(fsys, europeFile); err != nil {
 		return nil, err
 	}
 	for i, r := range rows {

@@ -43,6 +43,11 @@ func seasonLabel(s seasons.Season) string {
 	return "SAISON " + s.Label()
 }
 
+// seasonCell is the top-left corner of the row of entry i.
+func seasonCell(i int) (x, y int) {
+	return seasonLeftX + i/seasonRows*seasonColW, seasonTopY + i%seasonRows*fileRowH
+}
+
 // hover returns the entry under the pointer, or -1.
 func (c *SeasonChoice) hover(in *Input) int {
 	if in.X < seasonLeftX || in.X >= seasonLeftX+3*seasonColW || in.Y < seasonTopY || in.Y >= seasonTopY+seasonRows*fileRowH {
@@ -53,6 +58,31 @@ func (c *SeasonChoice) hover(in *Input) int {
 		return -1
 	}
 	return i
+}
+
+// seasonRow is an entry as the screen shows it.
+type seasonRow struct {
+	x, y   int
+	text   string
+	colour int
+	bar    bool // under the pointer: drawn with the XOR bar of the file screen
+}
+
+// rows lays out the entries, with entry h under the pointer.
+func (c *SeasonChoice) rows(h int) []seasonRow {
+	out := make([]seasonRow, len(c.entries))
+	for i, s := range c.entries {
+		x, y := seasonCell(i)
+		r := seasonRow{x: x, y: y, text: seasonLabel(s), colour: ColLight, bar: i == h}
+		if s.ID == "" {
+			r.colour = ColOrange
+		}
+		if r.bar {
+			r.colour ^= 31
+		}
+		out[i] = r
+	}
+	return out
 }
 
 func (c *SeasonChoice) Update(app *App) error {
@@ -68,7 +98,7 @@ func (c *SeasonChoice) Update(app *App) error {
 	}
 	m, err := seasons.Mana(s.ID)
 	if err != nil {
-		app.Push(NewMessage("An Alle:", err.Error()))
+		app.Push(NewMessage("An Alle:", "Die Saison "+s.Label()+" ist nicht lesbar."))
 		return nil
 	}
 	app.Replace(NewSeasonSetup(c.mana, m, c.saveDir, s.ID, s.Year))
@@ -76,17 +106,15 @@ func (c *SeasonChoice) Update(app *App) error {
 }
 
 // LoadGame restores a saved game with the clubs it was started with: those
-// of the original (orig) or of a real season.
+// of the original (orig) or of its real season.
 func LoadGame(data []byte, orig *assets.Mana) (*game.State, error) {
 	id, err := game.SaveSeason(data)
 	if err != nil {
 		return nil, err
 	}
-	m := orig
-	if id != "" {
-		if m, err = seasons.Mana(id); err != nil {
-			return nil, err
-		}
+	m, err := seasons.ManaOr(orig, id)
+	if err != nil {
+		return nil, err
 	}
 	return game.Load(data, m)
 }
@@ -96,20 +124,11 @@ func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 	g.Background(dst)
 	g.TextMid(dst, FontBig, 0, 320, 20, "WELCHE SAISON", ColBeige, ColBlack)
 	g.Window(dst, 6, 33, 314, 172, ColBlue)
-	h := c.hover(&app.Input)
-	for i, s := range c.entries {
-		col, row := i/seasonRows, i%seasonRows
-		x, y := seasonLeftX+col*seasonColW, seasonTopY+row*fileRowH
-		fg := ColLight
-		if s.ID == "" {
-			fg = ColOrange
+	for _, r := range c.rows(c.hover(&app.Input)) {
+		if r.bar {
+			FillRect(dst, r.x-2, r.y, seasonColW-4, 5, g.PalColor(ColBlue^31))
 		}
-		if i == h {
-			// The bar under the pointer like the file screen (XOR).
-			FillRect(dst, x-2, y, seasonColW-4, 5, g.PalColor(ColBlue^31))
-			fg ^= 31
-		}
-		g.TextAt(dst, FontSmall, x, y+4, seasonLabel(s), fg, NoShadow)
+		g.TextAt(dst, FontSmall, r.x, r.y+4, r.text, r.colour, NoShadow)
 	}
 	g.TextMid(dst, FontNormal, 0, 320, 196, "Mit welchen Vereinen wird gespielt?", ColBeige, ColBlack)
 }

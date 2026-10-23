@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/schowave/bmp/remake/internal/seasons"
 	"github.com/schowave/bmp/remake/internal/seasons/build"
 	"github.com/schowave/bmp/remake/internal/seasons/source"
 )
@@ -43,7 +44,7 @@ func main() {
 		c := &source.Client{Dir: *cache, Delay: *delay, Log: logf}
 		err = fetch(c, *data, *from, *to)
 	case "build":
-		err = build.All(os.DirFS(*data), os.DirFS(*orig), *out, *from, *to, logf)
+		err = build.All(build.Config{Data: os.DirFS(*data), Orig: os.DirFS(*orig), Out: *out, From: *from, To: *to, Log: logf})
 	default:
 		usage()
 	}
@@ -62,7 +63,7 @@ func logf(format string, args ...any) { fmt.Fprintf(os.Stderr, format+"\n", args
 
 // seasonDir is the directory of the raw data of the season of year.
 func seasonDir(data string, year int) string {
-	return filepath.Join(data, "seasons", fmt.Sprintf("%d-%02d", year, (year+1)%100))
+	return filepath.Join(data, "seasons", seasons.ForYear(year).ID)
 }
 
 func fetch(c *source.Client, data string, from, to int) error {
@@ -91,7 +92,7 @@ func fetch(c *source.Client, data string, from, to int) error {
 		return err
 	}
 	for _, p := range all {
-		rows, err := readRows(filepath.Join(data, p))
+		rows, err := source.ReadCSV(os.DirFS(data), p)
 		if err != nil {
 			return err
 		}
@@ -102,19 +103,6 @@ func fetch(c *source.Client, data string, from, to int) error {
 		}
 	}
 	return fetchLogos(c, filepath.Join(data, "logos"), files)
-}
-
-func readRows(p string) ([][]string, error) {
-	f, err := os.Open(p)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-	rows, err := csv.NewReader(f).ReadAll()
-	if err != nil || len(rows) == 0 {
-		return nil, err
-	}
-	return rows[1:], nil
 }
 
 // fetchLogos downloads a PNG rendering of each logo file, 76 pixels wide,

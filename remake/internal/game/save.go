@@ -48,9 +48,9 @@ func Load(data []byte, mana *assets.Mana) (*State, error) {
 	}
 	if s.FirstYear == 0 {
 		// Saved before games kept their first year.
-		s.FirstYear = 1963
+		s.FirstYear = historicYear
 		if s.Modern {
-			s.FirstYear = 1992
+			s.FirstYear = modernYear
 		}
 	}
 	s.mana = mana

@@ -9,6 +9,9 @@ import (
 // TestRealSeasonsPlay plays one season with the clubs of real seasons of
 // each era: the Oberliga, the Regionalliga, the 3. Liga, the running one.
 func TestRealSeasonsPlay(t *testing.T) {
+	if testing.Short() {
+		t.Skip("plays whole seasons")
+	}
 	for _, s := range seasons.List() {
 		if s.Year != 1990 && s.Year != 1995 && s.Year != 2008 && s.Year != 2026 {
 			continue

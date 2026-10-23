@@ -110,7 +110,7 @@ func placeClubs(year int, tables []source.TierRow) ([]placed, error) {
 			if len(mine) < sizes[l] {
 				mine = append(mine, r)
 				used[r.Club] = true
-			} else if l < 2 && len(down) < len(list) {
+			} else if l < 2 {
 				down = append(down, r)
 			}
 		}

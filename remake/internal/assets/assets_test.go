@@ -192,7 +192,7 @@ func TestCP437RoundTrip(t *testing.T) {
 	for c := 1; c < 256; c++ {
 		all = append(all, byte(c))
 	}
-	got, err := utf8ToCP437(cp437ToUTF8(string(all)))
+	got, err := ToCP437(cp437ToUTF8(string(all)))
 	if err != nil || got != string(all) {
 		t.Fatalf("round trip: %v", err)
 	}

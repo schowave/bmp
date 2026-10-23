@@ -90,3 +90,19 @@ func TestSaveKeepsTheSeason(t *testing.T) {
 		t.Fatalf("old save season %q, %v", id, err)
 	}
 }
+
+// The eternal balance counts by the 2-point rule in every season.
+func TestEternalBalanceKeepsTwoPoints(t *testing.T) {
+	for _, season := range []string{"", "1995-96"} {
+		s := seasonGame(t, season, 1995, Endless)
+		m := s.Managers[0]
+		c := &s.Clubs[m.Team]
+		c.Games, c.Wins, c.Losses = [2]int{17, 17}, [2]int{10, 5}, [2]int{2, 6}
+		c.Points = [2]int{3*10 + 5, 3*5 + 6} // the table under the 3-point rule
+		m.EtPoints, m.EtMinus = [2]int{}, [2]int{}
+		s.recordHistory(0)
+		if m.EtPoints != [2]int{25, 16} || m.EtMinus != [2]int{9, 18} {
+			t.Errorf("%q: points %v, minus %v", season, m.EtPoints, m.EtMinus)
+		}
+	}
+}

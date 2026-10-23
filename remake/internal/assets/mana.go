@@ -149,7 +149,7 @@ func DecodeClubs(data []byte) (*Mana, error) {
 			}
 			continue
 		}
-		if cj.Logo <= 0 {
+		if cj.Logo <= 0 || cj.Logo > maxLogo {
 			return nil, fmt.Errorf("club %d (%s): logo %d", i, cj.Name, cj.Logo)
 		}
 		if cj.Players == nil {
@@ -171,10 +171,14 @@ func DecodeClubs(data []byte) (*Mana, error) {
 	return m, nil
 }
 
+// maxLogo is the highest picture number of a logo: the original uses
+// 80..143, the real seasons (internal/seasons) number theirs from 1000.
+const maxLogo = 9999
+
 // manaName converts a name to CP437 and checks that it fits a slot of size
 // bytes of MANA.DAT, with its NUL.
 func manaName(s string, size int) (string, error) {
-	b, err := utf8ToCP437(s)
+	b, err := ToCP437(s)
 	if err != nil {
 		return "", err
 	}
