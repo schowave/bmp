@@ -1,137 +1,216 @@
 package ui
 
 import (
-	"sort"
+	"image"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// slider is a value with - and + buttons.
-type slider struct {
-	label    string
-	value    *int
-	min, max int
-	canUp    func() bool
+// tsMenuHit reports a click on the HAUPT MENU button (the team screens are
+// not left with the right button) or Escape.
+func tsMenuHit(in *Input) bool {
+	return in.Clicked(MenuButton.X, MenuButton.Y, MenuButton.W, MenuButton.H) || in.Escape
 }
 
-// TrainingScreen sets training points, intensity and youth work
-// (f_112a_274c).
+// TrainingScreen sets the training (f_112a_274c): rows of footballs for
+// Kondition, Spiel, Schuss, Taktik (20 points) and Tor, Abwehr,
+// Mittelfeld, Angriff (10 points), the intensity, the points left in the
+// bars at the sides, the K-T-E meter of the team and the JUGEND meter.
 type TrainingScreen struct {
-	ss      *Session
-	sliders []slider
+	ss *Session
 }
 
 // NewTrainingScreen creates the training screen.
-func NewTrainingScreen(ss *Session) *TrainingScreen {
-	m := ss.M()
-	sum := func(v *[4]int) int { return v[0] + v[1] + v[2] + v[3] }
-	t := &TrainingScreen{ss: ss}
-	for i, n := range []string{"Kondition", "Spiel", "Schuss", "Taktik"} {
-		t.sliders = append(t.sliders, slider{n, &m.Training[i], 0, 20, func() bool { return sum(&m.Training) < 20 }})
-	}
-	for i, n := range []string{"Tor", "Abwehr", "Mittelfeld", "Angriff"} {
-		t.sliders = append(t.sliders, slider{n, &m.PosTraining[i], 0, 10, func() bool { return sum(&m.PosTraining) < 10 }})
-	}
-	t.sliders = append(t.sliders,
-		slider{"Intensität", &m.Intensity, 1, 10, nil},
-		slider{"Jugendarbeit", &m.Youth, 0, 34, nil})
-	return t
-}
+func NewTrainingScreen(ss *Session) *TrainingScreen { return &TrainingScreen{ss: ss} }
 
-func (t *TrainingScreen) rowY(i int) int {
-	y := 26 + i*15
-	if i >= 4 {
-		y += 6
-	}
-	if i >= 8 {
-		y += 6
-	}
-	return y
-}
+var (
+	tsTrainLeft  = [4]string{"Kondition", "Spiel", "Schuss", "Taktik"}
+	tsTrainRight = [4]string{"Tor", "Abwehr", "Mittelfeld", "Angriff"}
+)
+
+func tsSum(v [4]int) int { return v[0] + v[1] + v[2] + v[3] }
 
 func (t *TrainingScreen) Update(app *App) error {
 	in := &app.Input
-	for i, s := range t.sliders {
-		y := t.rowY(i)
-		if in.Clicked(180, y, 14, 12) && *s.value > s.min {
-			*s.value--
-		}
-		if in.Clicked(290, y, 14, 12) && *s.value < s.max && (s.canUp == nil || s.canUp()) {
-			*s.value++
-		}
-	}
-	if MenuButtonHit(in) {
+	m := t.ss.M()
+	if tsMenuHit(in) {
 		app.Pop()
+		return nil
+	}
+	if !in.Left {
+		return nil
+	}
+	x, y := in.X, in.Y
+	// The JUGEND meter.
+	if x > 0xd0 && x < 0x105 && y > 0xc0 && y < 0xe9 {
+		m.Youth = min(max(x-0xd9, 0), 0x22)
+		return nil
+	}
+	for i := 0; i < 4; i++ {
+		if !((y > i*0x25+0x21 && y < i*0x25+0x33) || (y > 0xbc && y < 0xce && x < 0xbe)) {
+			continue
+		}
+		row := (y - 0x21) / 0x25
+		if x >= 0x1f && x <= 0xbd {
+			n := (x-0x1e)/16 + 1
+			if row > 3 {
+				m.Intensity = n
+			} else if m.Training[row]-n+20-tsSum(m.Training) >= 0 {
+				m.Training[row] = n
+			}
+		} else if x > 0xd1 && x < 0x121 && row < 4 {
+			n := (x-0xd1)/16 + 1
+			if m.PosTraining[row]-n+10-tsSum(m.PosTraining) >= 0 {
+				m.PosTraining[row] = n
+			}
+		}
+		break
 	}
 	return nil
 }
 
 func (t *TrainingScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
-	s := t.ss.S
+	m := t.ss.M()
 	g.Background(dst)
-	g.Panel(dst, 10, 6, 300, 186)
-	g.Panel(dst, 10, 196, 250, 14)
-	g.Heading(dst, 16, 10, "TRAINING")
-	g.Text(dst, FontSmall, 100, 12, "PUNKTE: "+itoa(20-sumOf(t.ss.M().Training))+" / "+itoa(10-sumOf(t.ss.M().PosTraining)), g.C(ColLight))
-	for i, sl := range t.sliders {
-		y := t.rowY(i)
-		g.Text(dst, FontNormal, 20, y+2, sl.label, g.C(ColWhite))
-		g.Text(dst, FontNormal, 182, y+2, "-", g.C(ColYellow))
-		FillRect(dst, 196, y+2, 92, 8, g.C(ColBlack))
-		FillRect(dst, 197, y+3, (*sl.value-sl.min)*90/(sl.max-sl.min), 6, g.C(ColRed))
-		g.Text(dst, FontNormal, 292, y+2, "+", g.C(ColYellow))
-		g.TextRight(dst, FontSmall, 176, y+3, itoa(*sl.value), g.C(ColLight))
-	}
-	g.Text(dst, FontSmall, 16, 200, "JUGENDARBEIT KOSTET "+Money(int64((t.ss.M().Youth+1)*625))+" PRO MONAT", g.C(ColLight))
-	_ = s
 	g.DrawMenuButton(dst)
+	pic := func(r image.Rectangle, x, y int) { Draw(dst, g.Sub(1, r), x, y) }
+	bar := image.Rect(0, 0, 0x15, 0xa5)
+	pic(bar, 3, 0xe)
+	pic(bar, 0x12a, 0xe)
+	long, cont := image.Rect(0x15, 0, 0x15+0x54, 0x15), image.Rect(0x17, 0, 0x17+0x52, 0x15)
+	for i := 0; i < 4; i++ {
+		y := i*0x25 + 0x22
+		pic(long, 0x1e, y)
+		pic(cont, 0x70, y)
+		g.TextMid(dst, FontNormal, 0x1d, 0xbf, i*0x25+0x3e, tsTrainLeft[i], ColBeige, ColBlack)
+		pic(long, 0xd1, y)
+		g.TextMid(dst, FontNormal, 0xd0, 0x122, i*0x25+0x3e, tsTrainRight[i], ColBeige, ColBlack)
+	}
+	pic(long, 0x1e, 0xbc)
+	pic(cont, 0x70, 0xbc)
+	g.TextMid(dst, FontNormal, 0x1d, 0xc1, 0xd7, "Intensität", ColBeige, ColBlack)
+
+	ball := g.SubKeyed(1, 0, image.Rect(0x15, 0x15, 0x15+15, 0x15+15))
+	row := func(x0, y, n int) {
+		for k := 0; k < n; k++ {
+			Draw(dst, ball, x0+k*16, y+1)
+		}
+	}
+	for i := 0; i < 4; i++ {
+		row(0x1f, i*0x25+0x23, m.Training[i])
+		row(0xd2, i*0x25+0x23, m.PosTraining[i])
+	}
+	row(0x1f, 0xbd, m.Intensity)
+	// The points left, stacked from the bottom of the side bars.
+	for k := 1; k <= 20-tsSum(m.Training); k++ {
+		Draw(dst, ball, 5, 0xb1-16*k)
+	}
+	for k := 1; k <= 10-tsSum(m.PosTraining); k++ {
+		Draw(dst, ball, 0x12c, 0xb1-16*k)
+	}
+	t.drawKTE(g, dst)
+	// JUGEND: the length of the line is the youth work, below its cost.
+	Draw(dst, g.Sub(0x25, image.Rect(0, 0x36, 0x32, 0x36+0x29)), 0xd1, 0xc1)
+	FillRect(dst, 0xd9, 0xd4, m.Youth+1, 2, g.C(ColWhite))
+	g.TextMid(dst, FontSmall, 0xd3, 0x105, 0xdf, itoa64(int64(m.Youth+1)*10000/16), ColWhite, NoShadow)
 }
 
-func sumOf(v [4]int) int { return v[0] + v[1] + v[2] + v[3] }
+// drawKTE draws the meter of the team (f_0f9d_1122): Kondition and Technik
+// of the players in the team and their Erschöpfung.
+func (t *TrainingScreen) drawKTE(g *Gfx, dst *ebiten.Image) {
+	s := t.ss.S
+	mi := t.ss.Mgr()
+	var k, te, e, n int
+	for i := 0; i < s.SquadSize(mi); i++ {
+		sl := &s.Squads[mi][i]
+		if sl.Lineup != 0 && sl.Lineup < 12 {
+			n++
+			k += sl.Skill[0]
+			te += sl.Skill[1]
+			e += sl.Fatigue
+		}
+	}
+	n = max(n, 1)
+	FillRect(dst, 3, 0xb7, 0x16-3+1, 0xe8-0xb7+1, g.C(ColGrey7))
+	FrameRect(dst, 3, 0xb7, 0x16-3+1, 0xe8-0xb7+1, g.C(ColLight))
+	vals := [3]int{k / n, te / n, e/n - 0x32}
+	for i, l := range [3]string{"K", "T", "E"} {
+		g.TextAt(dst, FontSmall, i*6+5, 0xe6, l, i+13, NoShadow)
+		top := min(0x26-vals[i]*0x26/100, 0x26) + 0xb9
+		x := i*6 + 5
+		FillRect(dst, x, top, 4, 0xdf-top+1, g.C(i+13))
+		FrameRect(dst, x, top, 4, 0xdf-top+1, g.C(ColBlack))
+	}
+}
 
-// CampScreen books a training camp (f_112a_0145, PIC 5).
+// CampScreen books a training camp (f_112a_0145): the eight camps of
+// PIC/5.VGA with their ratings, a cobweb over the closed ones, and the
+// text under the pointer at the bottom.
 type CampScreen struct {
-	ss    *Session
-	hover int
+	ss     *Session
+	booked int // frames left of the picture shown after booking, -1 = none
 }
 
 // NewCampScreen creates the training camp screen.
-func NewCampScreen(ss *Session) *CampScreen { return &CampScreen{ss: ss, hover: -1} }
+func NewCampScreen(ss *Session) *CampScreen { return &CampScreen{ss: ss, booked: -1} }
 
-// Camp picture cells in PIC/5.VGA: 2 columns of buildings, 4 rows.
-func campRect(i int) (x, y, w, h int) {
-	col, row := i/4, i%4
-	return 30 + 47 + col*85, 20 + row*39, 82, 37
+var tsRatingColor = [5]int{24, 1, 15, 19, 18} // D:0x5278
+
+// hover returns what is under the pointer: a rating letter (0..4) or a
+// camp (5 + camp), -1 for nothing.
+func (c *CampScreen) hover(x, y int) int {
+	for row := 0; row < 4; row++ {
+		if y <= row*0x34+8 || y >= row*0x34+0x2a {
+			continue
+		}
+		if (x > 5 && x < 0x2d) || (x > 0xde && x < 0x106) {
+			return ((x - 6) % 0xd9) >> 3
+		}
+		if (x > 0x33 && x < 0x83) || (x > 0x88 && x < 0xd9) {
+			col := 0
+			if x > 0x88 {
+				col = 1
+			}
+			return 5 + col*4 + row
+		}
+	}
+	return -1
 }
 
 func (c *CampScreen) Update(app *App) error {
 	in := &app.Input
-	c.hover = -1
-	for i := 0; i < 8; i++ {
-		x, y, w, h := campRect(i)
-		if in.In(x, y, w, h) {
-			c.hover = i
-			if in.Left {
-				mi := c.ss.Mgr()
-				if err := c.ss.S.BookCamp(mi, i); err != nil {
-					msg := err.Error()
-					if err == game.ErrCampClosed {
-						msg = game.CampNames[i] + " " + msg
-					}
-					app.Push(NewMessage(c.ss.M().Name+":", msg))
-				} else {
-					app.Pop()
-					app.Push(NewMessage(c.ss.M().Name+":", "Ihre Mannschaft fährt ins Trainingslager "+game.CampNames[i]+"."))
-				}
-				return nil
-			}
+	if c.booked >= 0 {
+		c.booked--
+		if c.booked < 0 {
+			app.Pop()
 		}
+		return nil
 	}
-	if MenuButtonHit(in) {
+	if tsMenuHit(in) {
 		app.Pop()
+		return nil
+	}
+	h := c.hover(in.X, in.Y)
+	if !in.Left || h < 5 {
+		return nil
+	}
+	camp := h - 5
+	s := c.ss.S
+	switch err := s.BookCamp(c.ss.Mgr(), camp); err {
+	case nil:
+		c.booked = 100
+	case game.ErrCampClosed:
+		app.Push(newTsToast(game.CampNames[camp], "hat nicht geöffnet...", nil))
+	case game.ErrCampMoney:
+		app.Push(newTsToast("Keine finanzielle", "Möglichkeit gegeben...", nil))
+	case game.ErrCampTooSoon:
+		app.Push(newTsToast("Einmal pro Woche", "reicht doch...", nil))
+	default:
+		app.Push(newTsToast(err.Error(), "", nil))
 	}
 	return nil
 }
@@ -140,213 +219,132 @@ func (c *CampScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	s := c.ss.S
 	g.Background(dst)
-	Draw(dst, g.Pic(5, false), 30, 20)
 	for i := 0; i < 8; i++ {
-		x, y, w, h := campRect(i)
+		col, row := i/4, i%4
+		Draw(dst, g.Sub(5, rectWH(col*0x82, row*0x27, 0x82, 0x27)), col*0x84+4, row*0x34+7)
 		if !s.CampOpen(i) {
-			FillRect(dst, x+30, y+14, 22, 9, g.C(ColBlack))
-			g.TextCentered(dst, FontSmall, x, y+15, w, "ZU", g.C(ColRed))
+			Draw(dst, g.SubKeyed(0x2b, 0, rectWH(0, 0, 0x50, 0x21)), col*0x56+0x34, row*0x34+9)
 		}
-		if i == c.hover {
-			FrameRect(dst, x, y, w, h, g.C(ColYellow))
+		y := row*0x34 + 0x33
+		g.TextMid(dst, FontSmall, col*0x56+0x2f, col*0x56+0x8d, y, strings.ToUpper(game.CampNames[i]), ColWhite, ColBlack)
+		for k := 0; k < 5; k++ {
+			g.TextAt(dst, FontSmall, col*0xd9+k*8+8, y, "EFPRV"[k:k+1], tsRatingColor[k], ColBlack)
 		}
-	}
-	g.Panel(dst, 4, 182, 260, 54)
-	if c.hover >= 0 {
-		i := c.hover
-		g.Text(dst, FontNormal, 8, 185, game.CampNames[i]+": "+Money(s.CampPrice(c.ss.Mgr(), i))+"/Woche", g.C(ColWhite))
-		for k, n := range game.CampRatingNames {
-			g.Text(dst, FontSmall, 8+(k%3)*85, 197+(k/3)*9, n+" "+itoa(game.CampRatings[i][k]), g.C(ColLight))
-		}
-		if !s.CampOpen(i) {
-			g.Text(dst, FontSmall, 8, 216, game.CampNames[i]+" hat nicht geöffnet...", g.C(ColRed))
-		}
-	} else {
-		g.Text(dst, FontSmall, 8, 186, "Wählen Sie ein Trainingslager.", g.C(ColLight))
-		g.Text(dst, FontSmall, 8, 196, "Kontostand: "+Money(c.ss.M().Money), g.C(ColLight))
 	}
 	g.DrawMenuButton(dst)
-}
-
-// ContractScreen negotiates contracts (f_2277_2a8f). At the season end it
-// handles the expiring contracts and continues the game when closed.
-type ContractScreen struct {
-	ss        *Session
-	seasonEnd bool
-	table     *TableView
-	rows      []int
-	done      Button
-}
-
-// NewContractScreen creates the contract screen.
-func NewContractScreen(ss *Session, seasonEnd bool) *ContractScreen {
-	cols := []Column{{"NAME", 2, 80, Left}, {"ALTER", 84, 24, Right}, {"STÄRKE", 110, 30, Right},
-		{"LIGASP.", 142, 30, Right}, {"VERTRAG", 174, 34, Right}, {"GEHALT", 210, 54, Right}, {"STATUS", 266, 46, Left}}
-	c := &ContractScreen{ss: ss, seasonEnd: seasonEnd, table: NewTableView(2, 24, 316, 168, cols)}
-	c.done = Button{X: 200, Y: 210, W: 60, H: 14, Label: "FERTIG"}
-	return c
-}
-
-func (c *ContractScreen) refresh() {
-	s := c.ss.S
-	mi := c.ss.Mgr()
-	c.table.Rows = c.table.Rows[:0]
-	c.rows = c.rows[:0]
-	if c.seasonEnd {
-		c.rows = append(c.rows, s.ExpiringContracts()...)
-	} else {
-		for i := 0; i < s.SquadSize(mi); i++ {
-			c.rows = append(c.rows, i)
+	if h := c.hover(app.Input.X, app.Input.Y); h >= 0 && c.booked < 0 {
+		var t string
+		if h < 5 {
+			t = game.CampRatingNames[h]
+		} else {
+			t = game.CampNames[h-5] + ", " + itoa64(s.CampPrice(c.ss.Mgr(), h-5)) + " DM/Woche."
 		}
+		g.TextMid(dst, FontNormal, 0, 0x10a, 0xe1, t, ColLight, ColBlack)
 	}
-	for _, i := range c.rows {
-		sl := &s.Squads[mi][i]
-		p := &s.Persons[sl.Person]
-		st := ""
-		switch {
-		case sl.Loan != 0:
-			st = "LEIHE"
-		case sl.Nego&0x80 != 0:
-			st = "HÖRT AUF"
-		case sl.Nego >= 100:
-			st = "WILL " + itoa(sl.Nego-100) + " J."
-		case sl.Nego > 0:
-			st = "WARTEN"
-		}
-		c.table.Rows = append(c.table.Rows, Row{Cells: []string{p.Name, itoa(p.Age), itoa(sl.Strength()),
-			itoa(sl.Games[0]), itoa(sl.Years) + " J.", formatMoney(sl.Salary), st}})
+	if c.booked >= 0 && c.booked < 100 {
+		// The team leaves for the camp (f_112a_072d, PIC/28.VGA).
+		g.Window(dst, 0x84, 0x4e, 0x84+0x39, 0x4e+0x3a, ColGrey7)
+		Draw(dst, g.Sub(0x1c, rectWH(0, 0, 0x37, 0x38)), 0x85, 0x4f)
 	}
 }
 
-func (c *ContractScreen) Update(app *App) error {
-	s := c.ss.S
-	mi := c.ss.Mgr()
+// ScorerScreen is "Die Besten der Liga" (f_14a4_1ad5): the best scorers
+// of the league of the manager, with LIGA (all) and SPIELER (only the
+// players of the human managers).
+type ScorerScreen struct {
+	ss      *Session
+	players bool
+	rows    []game.Scorer
+}
+
+// NewScorerScreen creates the scorer list.
+func NewScorerScreen(ss *Session) Scene {
+	sc := &ScorerScreen{ss: ss}
+	sc.refresh()
+	return sc
+}
+
+func (sc *ScorerScreen) refresh() {
+	sc.rows = sc.ss.S.TopScorers(sc.ss.M().League, sc.players)
+	if len(sc.rows) > 20 {
+		sc.rows = sc.rows[:20]
+	}
+}
+
+func (sc *ScorerScreen) Update(app *App) error {
 	in := &app.Input
-	c.refresh()
-	left, right := c.table.Update(in)
-	if right >= 0 {
-		app.Push(NewPlayerInfo(c.ss, mi, c.rows[right]))
-		return nil
-	}
-	if left >= 0 {
-		c.negotiate(app, c.rows[left])
-		return nil
-	}
-	if c.seasonEnd {
-		if c.done.Hit(in) || in.Escape {
-			s.ContractsDone()
-			app.Pop()
-		}
-		return nil
-	}
-	if MenuButtonHit(in) {
+	if tsMenuHit(in) {
 		app.Pop()
+		return nil
+	}
+	if tsButtonHit(in, 0x36, 0xaf) || tsButtonHit(in, 0xd4, 0xaf) {
+		sc.players = !sc.players
+		sc.refresh()
+		return nil
+	}
+	if (in.Left || in.Right) && in.X > 0x23 && in.X < 0x11d && in.Y > 0x1d && in.Y < 0x22+7*len(sc.rows)-7 {
+		if r := (in.Y - 0x1e) / 7; r < len(sc.rows) {
+			sc.info(app, sc.rows[r].Person)
+		}
 	}
 	return nil
 }
 
-// negotiate runs the dialog for one player: years, then salary.
-func (c *ContractScreen) negotiate(app *App, si int) {
-	s := c.ss.S
-	mi := c.ss.Mgr()
-	name := c.ss.M().Name + ":"
-	forced := 0
-	if !c.seasonEnd {
-		f, err := s.NegotiateCheck(mi, si)
-		if err != nil {
-			app.Push(NewMessage(name, err.Error()))
-			return
-		}
-		forced = f
-	}
-	sl := &s.Squads[mi][si]
-	pname := s.Persons[sl.Person].Name
-	years := int64(max(1, sl.Years))
-	if forced != 0 {
-		years = int64(forced)
-	}
-	app.Push(NewNumberInput(pname, "VERTRAGSDAUER (IN SAISONS)", years, func(app *App, y int64, ok bool) {
-		if !ok {
-			return
-		}
-		hint := s.ContractHint(mi, si, int(y))
-		app.Push(NewNumberInput(pname, "GEHALT PRO MONAT (IN DM), WUNSCH ca. "+formatMoney(hint), hint,
-			func(app *App, sal int64, ok bool) {
-				if !ok {
-					return
-				}
-				if err := s.NegotiateContract(mi, si, int(y), sal, forced); err != nil {
-					app.Push(NewMessage(name, err.Error()))
-					return
-				}
-				app.Push(NewMessage(name, "Ihr Angebot wurde angenommen !"))
-			}))
-	}))
-}
-
-func (c *ContractScreen) Draw(app *App, dst *ebiten.Image) {
-	g := app.Gfx
-	g.Background(dst)
-	g.Panel(dst, 4, 3, 312, 17)
-	title := "VERTRAGSVERHANDLUNGEN"
-	if c.seasonEnd {
-		title = "AUSLAUFENDE VERTRÄGE - " + c.ss.M().Name
-	}
-	g.TextCentered(dst, FontNormal, 4, 7, 312, title, g.C(ColBeige))
-	c.refresh()
-	c.table.Draw(g, dst)
-	if c.seasonEnd {
-		g.Text(dst, FontSmall, 4, 196, "Spieler ohne neuen Vertrag verlassen den Verein (Ablöse: halber Marktwert).", g.C(ColLight))
-		c.done.Draw(g, dst, app.Input.In(c.done.X, c.done.Y, c.done.W, c.done.H))
-		return
-	}
-	g.Text(dst, FontSmall, 4, 196, "LINKS: VERHANDELN   RECHTS: INFO", g.C(ColLight))
-	g.DrawMenuButton(dst)
-}
-
-// ScorerScreen shows the best scorers of the manager's league
-// (f_14a4_1ad5, "Die Besten der Liga").
-func NewScorerScreen(ss *Session) Scene {
-	s := ss.S
-	l := ss.M().League
-	cols := []Column{{"PL.", 4, 14, Right}, {"SPIELER", 24, 100, Left}, {"VEREIN", 130, 110, Left},
-		{"TORE", 244, 26, Right}, {"T/SP", 276, 30, Right}}
-	t := NewTableView(4, 24, 312, 168, cols)
-	t.RowH = 8
-	var ps []int
-	for p := 1; p < game.NumPersons; p++ {
-		pp := &s.Persons[p]
-		if pp.Team >= game.NumGerman || pp.Team == 0xff || game.LeagueOf(pp.Team) != l || pp.LeagueGoals == 0 {
+// info opens the player info if the player plays for a human manager or
+// is on the transfer market.
+func (sc *ScorerScreen) info(app *App, p int) {
+	s := sc.ss.S
+	for m := 0; m <= game.MarketIndex; m++ {
+		if m < game.MarketIndex && m >= len(s.Managers) {
 			continue
 		}
-		ps = append(ps, p)
-	}
-	sort.SliceStable(ps, func(a, b int) bool { return s.Persons[ps[a]].LeagueGoals > s.Persons[ps[b]].LeagueGoals })
-	for i, p := range ps {
-		if i >= 20 {
-			break
+		for i := 0; i < s.SquadSize(m); i++ {
+			if s.Squads[m][i].Person == p {
+				app.Push(NewPlayerInfo(sc.ss, m, i))
+				return
+			}
 		}
-		pp := &s.Persons[p]
-		ratio := "-"
-		if pp.LeagueGames > 0 {
-			r := pp.LeagueGoals * 100 / pp.LeagueGames
-			ratio = itoa(r/100) + "." + pad2(r%100)
-		}
-		row := Row{Cells: []string{itoa(i+1) + ".", pp.Name, s.Teams[pp.Team].Name, itoa(pp.LeagueGoals), ratio}}
-		if s.ManagerOf(pp.Team) != nil {
-			row.Color = ColYellow
-		}
-		t.Rows = append(t.Rows, row)
 	}
-	if len(t.Rows) == 0 {
-		t.Rows = append(t.Rows, Row{Cells: []string{"", "NOCH KEINE EINTRÄGE VORHANDEN..."}})
-	}
-	return &ListScreen{Title: "Die Besten der " + game.LeagueNames[l], Table: t}
 }
 
-func pad2(n int) string {
-	if n < 10 {
-		return "0" + itoa(n)
+func (sc *ScorerScreen) Draw(app *App, dst *ebiten.Image) {
+	g := app.Gfx
+	s := sc.ss.S
+	g.Background(dst)
+	g.Window(dst, 0x23, 8, 0x23+0xfa, 8+0xb5, ColBlue)
+	g.DrawMenuButton(dst)
+	FillRect(dst, 0x24, 0x1a, 0x11c-0x24+1, 1, g.C(ColLight))
+	title := "Die Besten der Liga"
+	if sc.players {
+		title = "Die Besten der Spieler"
 	}
-	return itoa(n)
+	g.TextMid(dst, FontNormal, 0x23, 0x11d, 0x10, title, ColLight, ColGrey7)
+	g.TextAt(dst, FontSmall, 0x26, 0x18, "PL. SPIELER                 VEREIN", ColLight, NoShadow)
+	g.TextAt(dst, FontSmall, 0xd2, 0x18, "TORE       TORE/SPIEL", ColLight, NoShadow)
+	for i, r := range sc.rows {
+		y := 0x22 + i*7
+		ps := &s.Persons[r.Person]
+		c := ColLight
+		if s.ManagerOf(ps.Team) != nil {
+			c = ColBeige
+		}
+		g.TextAt(dst, FontSmall, 0x26, y, tsPad(int64(r.Rank), 2)+". "+ps.Name, c, NoShadow)
+		g.TextAt(dst, FontSmall, 0x72, y, s.Teams[ps.Team].Name, c, NoShadow)
+		g.TextAt(dst, FontSmall, 0xd4, y, tsPad(int64(r.Goals), 2), c, NoShadow)
+		q := r.Goals * 10
+		if r.Games != 0 {
+			q /= r.Games
+		}
+		g.TextAt(dst, FontSmall, 0xfc, y, itoa(q/10)+"."+itoa(q%10), c, NoShadow)
+	}
+	if len(sc.rows) == 0 {
+		g.TextMid(dst, FontSmall, 0x23, 0x11d, 0x28, "NOCH KEINE EINTRÄGE VORHANDEN...", ColLight, ColBlack)
+	}
+	sel := [2]int{17, 10}
+	p := 0
+	if sc.players {
+		p = 1
+	}
+	tsButton(g, dst, 0x36, 0xaf, "LIGA", sel[p])
+	tsButton(g, dst, 0xd4, 0xaf, "SPIELER", sel[1-p])
 }
