@@ -173,3 +173,13 @@ func TestCurrentSquadVariants(t *testing.T) {
 		t.Fatalf("SortKeyName: %+v", p)
 	}
 }
+
+func TestSquadLogoIsNoPhoto(t *testing.T) {
+	text := "=== [[FC Bayern München]] ===\n[[Datei:Lewandowski.jpg|mini|Robert Lewandowski]]\n" +
+		"[[Datei:FC Bayern München logo.svg|140px]]\n{|\n|-\n| [[Manuel Neuer]] || Tor || 30\n" +
+		"[[Datei:Other.svg|100px]]\n|}\n"
+	got := Squads(text)
+	if len(got) != 1 || got[0].Logo != "Datei:FC Bayern München logo.svg" {
+		t.Fatalf("got %+v", got)
+	}
+}

@@ -317,6 +317,7 @@ func Squads(text string) []Squad {
 	var out []Squad
 	var cur *Squad
 	var row []string
+	inTable := false // the logo stands before the table
 	flush := func() {
 		if cur != nil && len(row) > 0 {
 			if p, ok := squadRow(strings.Join(row, "\n")); ok {
@@ -328,7 +329,7 @@ func Squads(text string) []Squad {
 	for _, line := range strings.Split(text, "\n") {
 		if _, n, ok := heading(line); ok {
 			flush()
-			cur = nil
+			cur, inTable = nil, false
 			if n >= 2 {
 				club, label := firstLink(line)
 				if club == "" {
@@ -346,12 +347,13 @@ func Squads(text string) []Squad {
 		if cur == nil {
 			continue
 		}
-		if cur.Logo == "" {
-			if m := linkRE.FindStringSubmatch(line); m != nil && isFileLink(strings.TrimSpace(m[1])) {
-				cur.Logo = "Datei:" + strings.TrimSpace(strings.SplitN(m[1], ":", 2)[1])
-			}
-		}
 		t := strings.TrimSpace(line)
+		if strings.HasPrefix(t, "{|") {
+			inTable = true
+		}
+		if cur.Logo == "" && !inTable {
+			cur.Logo = logoFile(line)
+		}
 		switch {
 		case strings.HasPrefix(t, "|-") || strings.HasPrefix(t, "|}"):
 			flush()
@@ -368,6 +370,22 @@ func Squads(text string) []Squad {
 		}
 	}
 	return squads
+}
+
+// fileLinkRE matches a file link with its parameters.
+var fileLinkRE = regexp.MustCompile(`\[\[\s*(?i:Datei|File|Bild|Image)\s*:([^|\]]+)((?:\|[^\]]*)?)\]\]`)
+
+// logoFile returns the file of a logo in line ("Datei:..."), or "": a
+// framed thumbnail (mini, thumb) is a photo of a player or coach.
+func logoFile(line string) string {
+	for _, m := range fileLinkRE.FindAllStringSubmatch(line, -1) {
+		opts := strings.ToLower(m[2])
+		if strings.Contains(opts, "|mini") || strings.Contains(opts, "|thumb") || strings.Contains(opts, "|hochkant") {
+			continue
+		}
+		return "Datei:" + strings.TrimSpace(m[1])
+	}
+	return ""
 }
 
 // squadRow reads a table row of a squad article.
