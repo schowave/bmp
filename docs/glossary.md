@@ -17,7 +17,8 @@ _Avoid_: team when the id is meant
 
 **League** (Liga):
 1. Liga (18 clubs, 34 matchdays), 2. Liga (20, 38) or Amateur-Oberliga (20, 38),
-index 0..2.
+index 0..2. The remake names the third league after the season: Regionalliga
+from 1994/95, 3. Liga from 2008/09.
 
 **Matchday** (Spieltag):
 One round of league matches; each league counts its own.

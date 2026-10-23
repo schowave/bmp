@@ -151,7 +151,7 @@ func (s *State) popup(mi int, b Backdrop, text string) {
 // seasonScreen starts the season report of manager mi.
 func (s *State) seasonScreen(mi, pos, league int) {
 	s.AddNotice(Notice{Kind: NoticeSeasonEnd, Manager: mi, Backdrop: BackdropDesk,
-		Title: msgSeasonHead, Heading: msgSeasonEvents, Lines: []string{msgSeasonPlace(pos, league)}})
+		Title: msgSeasonHead, Heading: msgSeasonEvents, Lines: []string{msgSeasonPlace(pos, league, s.StartYear)}})
 }
 
 // seasonLine adds an event line to the season report of manager mi.
@@ -207,11 +207,11 @@ func SampleNotices(s *State) []Notice {
 	club := s.Teams[m.Team].Name
 	card := Notice{Kind: NoticeCard, Manager: -1, Title: msgChristmasTitle, Day: 148} // 24 December
 	full := card
-	full.Lines, full.Small = msgChristmasLines[:], msgChristmasAmounts(450000)
+	full.Lines, full.Small = msgChristmasLines[:], msgChristmasAmounts(450000, s.StartYear)
 	bday := Notice{Kind: NoticeCard, Manager: -1, Title: msgBirthdayTitle, Lines: msgBirthday(1),
-		Small: msgBirthdayShame, Day: 113, Birthday: true} // 19 November
+		Small: msgBirthdayShame, Day: 106, Birthday: true} // 12 November
 	season := Notice{Kind: NoticeSeasonEnd, Manager: 0, Backdrop: BackdropDesk, Title: msgSeasonHead,
-		Heading: msgSeasonEvents, Lines: []string{msgSeasonPlace(1, 1), msgPromoted2},
+		Heading: msgSeasonEvents, Lines: []string{msgSeasonPlace(1, 1, s.StartYear), msgPromoted2},
 		Dialogs: []NoticeDialog{{At: 2, Lines: lines(msgAdsFree)}}}
 	season.Lines = append(season.Lines, msgTopScorer, msgEurope, msgYouthPlayer)
 	season.Dialogs = append(season.Dialogs, NoticeDialog{At: 5, Lines: lines(msgJoke1)}, NoticeDialog{At: 5, Lines: lines(msgJoke2)})

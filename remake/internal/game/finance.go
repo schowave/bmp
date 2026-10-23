@@ -454,7 +454,7 @@ func (s *State) specialDate(k int) {
 		for _, m := range s.Managers {
 			m.Money -= x / int64(m.League+1)
 		}
-		n.Lines, n.Small = msgChristmasLines[:], msgChristmasAmounts(x)
+		n.Lines, n.Small = msgChristmasLines[:], msgChristmasAmounts(x, s.StartYear)
 	}
 	s.AddNotice(n)
 }

@@ -195,6 +195,33 @@ ties). Deliberate differences:
 - When a 1- or 3-year game is over, ENDE under the high scores returns to the
   title screen, where a new game can start; the original quits the program
   (`f_076b_114c` in `f_1a58_3176`).
+- The third league is called after the real third tier of the season:
+  Am.-Oberliga until 1993/94, Regionalliga from 1994/95, 3. Liga from
+  2008/09. The original always says Am.-Oberliga.
+- Bugs of the match engine that the remake leaves out:
+  - In cup matches the original checks the minutes of the chances against
+    the person table instead of the chances (`f_0310_12fe`) and draws again
+    on a hit; the remake takes every minute at once, like in the leagues.
+  - In extra time the original gives cards and injuries in the
+    Europapokal to no human team and in the DFB-Pokal only to the home team
+    (`f_17c2_1226`); the remake gives them to every human team of a tied
+    match.
+  - When manager 0 has fewer than 8 players, the original has no cards and
+    injuries for any human that day, and a team with fewer than 4 players
+    on the pitch ends the events of all matches of the minute
+    (`f_0310_2ee5`); the remake decides per match.
+  - When the away manager of a match of two humans comes first by index and
+    forfeits, the original returns before the home manager
+    (`f_1a58_20b2`); the remake still books his gate money.
+- When a player is sold to an offer for a squad player, the buyer and the
+  strength boost come from the sold player; the original reads the next
+  slot after removing him (`f_2277_04a5`).
+- A manager added with NEU has no history before he joined; the original
+  fills it with empty seasons that lower his rating. His start players come
+  from persons 1..150; the original can draw 151, behind the person table.
+- The high scores at the game end take a manager once, are sorted stably
+  and highlight his row; the original can enter him twice
+  (`f_1a58_3176`) and highlights row 18 in the menu.
 
 ## Legal
 

@@ -138,3 +138,37 @@ func TestTopScorerInTeam(t *testing.T) {
 		t.Error("the scorer of the other club with fewer games loses")
 	}
 }
+
+// The third league takes the name of the real third tier of its season.
+func TestLeagueName(t *testing.T) {
+	for _, c := range []struct {
+		l, year int
+		want    string
+	}{
+		{2, 1963, "Am.-Oberliga"}, {2, 1993, "Am.-Oberliga"}, {2, 1994, "Regionalliga"},
+		{2, 2007, "Regionalliga"}, {2, 2008, "3. Liga"}, {1, 2010, "Zweite Liga"}, {0, 2010, "Bundesliga"},
+	} {
+		if got := LeagueName(c.l, c.year); got != c.want {
+			t.Errorf("league %d in %d: %q, want %q", c.l, c.year, got, c.want)
+		}
+	}
+	if got := msgChristmasAmounts(300000, 1993)[1]; got != "AMATEUR-OBERLIGA: 100.000 DM (INCL. MWST.)" {
+		t.Errorf("christmas 1993: %q", got)
+	}
+	if got := msgChristmasAmounts(300000, 1995)[1]; got != "REGIONALLIGA: 100.000 DM (INCL. MWST.)" {
+		t.Errorf("christmas 1995: %q", got)
+	}
+}
+
+// History record r belongs to the season that started r seasons after
+// the oldest kept one; the last is the season just over.
+func TestHistoryYear(t *testing.T) {
+	s := &State{Managers: []*Manager{{History: make([][4]byte, 3)}}, StartYear: 1995}
+	if y := s.HistoryYear(0, 2); y != 1994 {
+		t.Errorf("last record in the new season: %d", y)
+	}
+	s.Loop.Phase = PhaseContracts
+	if y := s.HistoryYear(0, 0); y != 1993 {
+		t.Errorf("first record at the season end: %d", y)
+	}
+}
