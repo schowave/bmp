@@ -80,14 +80,3 @@ func deskMenuHit(in *Input) bool {
 	return MenuButton.Hit(in) || in.Escape
 }
 
-// deskMid is f_06c7_087c exactly: the text starts at
-// x0 + (x1-x0)/2 - w/2 (C division), the shadow one pixel to the right.
-// TextMid rounds differently when x1-x0 is odd and the width even.
-func (g *Gfx) deskMid(dst *ebiten.Image, font string, x0, x1, y int, s string, c, shadow int) {
-	w := g.TextWidth(font, s)
-	x := x0 + (x1-x0)/2 - w/2 + 1
-	if x+w > 0x13f || x < 0 {
-		x = 1
-	}
-	g.TextAt(dst, font, x-1, y, s, c, shadow)
-}

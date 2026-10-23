@@ -276,7 +276,7 @@ func (b *BankScreen) Draw(app *App, dst *ebiten.Image) {
 	// the account
 	line6(dst, 0x97, 0x84, 0x102, 0x84, g.C(ColGrey6))
 	line6(dst, 0x97, 0x9f, 0x102, 0x9f, g.C(ColGrey6))
-	mid := func(y int, t string) { g.deskMid(dst, FontNormal, 0x97, 0x103, y, t, ColLight, ColBlack) }
+	mid := func(y int, t string) { g.TextMid(dst, FontNormal, 0x97, 0x103, y, t, ColLight, ColBlack) }
 	mid(0x72, "Kontostand:")
 	mid(0x7e, numText(m.Money, 1, false)+" DM")
 	mid(0x8d, "Gesamtschulden:")
@@ -356,7 +356,7 @@ func (d *deskMsg4) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Window(dst, 0x3c, 0x6e, 0x3c+0xb9, 0x6e+0x41, ColDarkRed)
 	for i, l := range d.lines {
-		g.deskMid(dst, FontNormal, 0x3c, 0xf5, 0x7b+i*10, l, ColSand, -1)
+		g.TextMid(dst, FontNormal, 0x3c, 0xf5, 0x7b+i*10, l, ColSand, -1)
 	}
 	g.deskButton(dst, 0xb2, 0xa0, "OKAY", 0x1a)
 }
