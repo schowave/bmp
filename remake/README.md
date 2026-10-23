@@ -332,6 +332,8 @@ ties). Deliberate differences:
   anywhere in a row of the list substitutes, also on the name; the original
   takes it only on the number and the position. The player taken out leaves
   the board at once (not checked against the original).
+- In the squad list of the transfer screen a player a club made an offer for
+  is drawn white; the original draws him in the colour of his position.
 - The key `o` on the training screen sets an optimal training plan, on the
   stadium screen an optimal ticket price, on the main menu all of them with the
   lineup (see *Hidden keys*).

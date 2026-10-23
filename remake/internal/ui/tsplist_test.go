@@ -40,3 +40,20 @@ func TestMarketPricesDrawOnce(t *testing.T) {
 		t.Error("a new mode keeps the old prices")
 	}
 }
+
+// In the squad list of the transfer screen a player with an offer of a club
+// is white; in the contract list he keeps his colour.
+func TestOfferRowWhite(t *testing.T) {
+	_, ss := tsTestSession(t)
+	s := ss.S
+	sl := &s.Squads[ss.Mgr()][3]
+	squad, contracts := &tsList{m: ss.Mgr(), mode: 0}, &tsList{m: ss.Mgr(), mode: 3}
+	plain := squad.rowColor(s, sl)
+	sl.Status |= 0x40
+	if got := squad.rowColor(s, sl); got != ColWhite || plain == ColWhite {
+		t.Errorf("colour %d with an offer, %d without", got, plain)
+	}
+	if got := contracts.rowColor(s, sl); got == ColWhite {
+		t.Error("the contract list marks the offer too")
+	}
+}

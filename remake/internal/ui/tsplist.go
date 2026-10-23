@@ -146,9 +146,14 @@ func (l *tsList) draw(g *Gfx, dst *ebiten.Image, s *game.State, cur, hover int) 
 	FillRect(dst, l.x, l.foot, l.right-l.x+1, 1, g.PalColor(ColBeige))
 }
 
-// rowColor is the colour of the texts of a row.
+// rowColor is the colour of the texts of a row. In the squad list of the
+// transfer screen a player a club made an offer for is white, so that the
+// offer is found (the remake's; the original draws him like the others).
 func (l *tsList) rowColor(s *game.State, sl *game.Slot) int {
 	c := tsPosColor[s.Persons[sl.Person].Position()]
+	if l.mode == 0 && sl.Status&0x40 != 0 {
+		return ColWhite
+	}
 	if l.mode == 3 {
 		if sl.Nego > 0 && sl.Nego < 100 {
 			c = ColGrey3
