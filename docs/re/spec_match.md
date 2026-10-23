@@ -544,6 +544,11 @@ then the substitution screen `f_1ecd_1560` (`f_1a58_1f75`), which runs `f_0f9d_0
 closes; no other strength recomputation follows the injury. A red or yellow-red card runs
 `f_0f9d_0002(team,1)` once and opens no substitution screen.
 
+`f_1a58_1f75` passes `N = D:0x664[m]` to `f_1ecd_1560`: 11 less the players sent off
+(§10.2 decrements it), not the players on the pitch. After an injury the team has `N-1`
+players, so a click on a reserve player puts him into the team without one taken out
+(spec_players §4.2: a player goes in while the team has fewer than `N`).
+
 ### 10.5 Re-planning after red card / injury / user substitution – `f_0310_347f`
 ```
 f_0f9d_08e9(lg, idx, home, away, from, to, 0)       // new totals for the whole period -> N[0..1]
@@ -611,6 +616,9 @@ On tie: `H += 10`; if a human plays: `F:0x1d14[m] = 1`, `F:0x2e99 = 1`; if shoot
 `f_0310_356d(c, idx, mask, human)`. Returns whether any tie was found.
 First call after 90 min (shootout=0) -> periods 91-105 and 106-120; second call
 (shootout=1) after 120 min handles still-tied matches.
+`f_0310_15db` clears `F:0x2e99` before the first call, so the extra time is shown (minutes,
+delays, scenes) only when a tie of a human team goes to it; otherwise periods 91-120 run
+without display, also for a human match that was decided after 90 minutes.
 
 ### 12.2 Shoot-out – `f_0310_356d(c, idx, mask)`
 * No human: repeat `H=rnd(2,5); A=rnd(2,5)` until H != A; `H += 20`.

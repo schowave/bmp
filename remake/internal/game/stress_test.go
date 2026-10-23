@@ -34,6 +34,7 @@ func TestStressRandomManagers(t *testing.T) {
 						if rnd.Intn(200) == 0 {
 							mi := rnd.Intn(len(s.Managers))
 							_ = md.Substitute(mi, rnd.Intn(SquadMax), rnd.Intn(SquadMax))
+							_ = md.SubstituteIn(mi, rnd.Intn(SquadMax))
 						}
 					}
 				}

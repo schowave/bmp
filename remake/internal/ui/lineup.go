@@ -238,8 +238,9 @@ func (q *SquadScreen) Update(app *App) error {
 		}
 		return nil
 	}
-	// The number and the position take the clicks.
-	if col > 1 {
+	// The number and the position take the clicks; during a match the whole
+	// row does, so that a click on the name substitutes too (the remake's).
+	if col > 1 && q.md == nil {
 		return nil
 	}
 	if q.md != nil {
@@ -284,6 +285,9 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 		app.Push(newLineupToast(game.ErrAutoDisabled))
 	}
 	at := s.PlayerAt(mi, q.cursorCol, q.cursorRow)
+	if at == q.out && at >= 0 {
+		at = -1 // he is not on the board any more
+	}
 	switch {
 	case q.picked < 0:
 		q.picked = at
@@ -310,7 +314,8 @@ func (q *SquadScreen) substitute(app *App, i int) {
 		case sl.Lineup <= 11:
 			q.out = i
 		case q.out < 0:
-			err = game.LineupError{"Nicht mehr als " + itoa(s.CountOnPitch(mi)), "Spieler einsetzen !"}
+			// Nobody taken out: after an injury the team has a place free.
+			err = q.md.SubstituteIn(mi, i)
 		default:
 			err = q.md.Substitute(mi, q.out, i)
 			q.out = -1
@@ -567,7 +572,9 @@ func (q *SquadScreen) drawBoard(g *Gfx, dst *ebiten.Image) {
 	s := q.ss.S
 	mi := q.mi()
 	m := s.Managers[mi]
-	for f := 0; f < 3; f++ {
+	// During a match the formations do not apply, so the remake leaves their
+	// buttons out (the original draws them there too).
+	for f := 0; f < 3 && q.md == nil; f++ {
 		x := f*60 + 4
 		Draw(dst, g.Pic(24+lnB2i(m.AutoLineup-f == 2), false), x, lnFormY)
 		Draw(dst, g.Sub(6, lnFormRect(f)), x+9, lnFormY+9)
@@ -576,7 +583,8 @@ func (q *SquadScreen) drawBoard(g *Gfx, dst *ebiten.Image) {
 	Draw(dst, g.Sub(6, lnFieldRect), lnFieldX, lnFieldY)
 	for i := 0; i < game.SquadMax; i++ {
 		sl := &s.Squads[mi][i]
-		if sl.Empty() || sl.Lineup < 1 || sl.Lineup > 11 || sl.Col < 0 {
+		// The player taken out for a substitution has left the board.
+		if sl.Empty() || sl.Lineup < 1 || sl.Lineup > 11 || sl.Col < 0 || i == q.out {
 			continue
 		}
 		x, y := sl.Col*16+lnCellX, sl.Row*14+lnCellY
