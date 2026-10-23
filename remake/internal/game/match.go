@@ -458,11 +458,14 @@ func (md *MatchDay) assignMinutes(f *Fixture, side, cnt, from, to int) {
 }
 
 // Step plays the next minute. It returns false when the match day is over.
+// The step after the last minute ends the match day, so that what is shown
+// after the last period still sees the cups before the winners advance.
 func (md *MatchDay) Step() bool {
 	if md.Done {
 		return false
 	}
 	if md.period >= len(md.periods) {
+		md.ended = 0
 		md.finish()
 		return false
 	}
@@ -483,10 +486,7 @@ func (md *MatchDay) Step() bool {
 		}
 	}
 	md.Minute++
-	if md.period >= len(md.periods) {
-		md.finish()
-	}
-	return !md.Done
+	return true
 }
 
 // Run plays the whole match day.
