@@ -57,8 +57,12 @@ type humanMatch struct {
 	booked       []int
 	keeperSubs   int
 	fieldSubs    int
-	planned      [2]int
-	played       [2]int
+	// allowed is D:0x664[m]: the players the team may have on the pitch, 11
+	// less the sent-off ones. After an injury the team has one less, and a
+	// player from the bench comes on for him.
+	allowed int
+	planned [2]int
+	played  [2]int
 }
 
 // MatchDay plays all matches of one event of the calendar: a league
@@ -79,6 +83,10 @@ type MatchDay struct {
 	humans     []humanMatch
 	extra      bool
 	pens       bool
+	// quietExtra is F:0x2e99 = 0 for extra time: no human match is in it,
+	// so it is played without being shown (f_17c2_1226 sets the flag only
+	// for a tie of a human team).
+	quietExtra bool
 	onFinish   func()
 	started    int // number of periods started
 	ended      int // last minute of the period the last Step ended, 0 = none
@@ -344,13 +352,17 @@ func (md *MatchDay) squadBeforeMatch(mi, comp int) {
 		hm.yellowBudget, hm.redPossible = 6, true
 	}
 	hm.keeperSubs, hm.fieldSubs = 1, 2
+	hm.allowed = 11
 	hm.booked = nil
 }
 
 // strengthAt is S(t, kind, minute) of f_0310_1468: the Technik part wears
 // off during the match.
 func (s *State) strengthAt(t, kind, minute int) int {
-	tm := &s.Teams[t]
+	return teamStrengthAt(&s.Teams[t], kind, minute)
+}
+
+func teamStrengthAt(tm *Team, kind, minute int) int {
 	v := 0
 	for i := 0; i < 3; i++ {
 		b := tm.Base[i]
@@ -918,6 +930,7 @@ func (md *MatchDay) sendOff(fi, mi, p, minute int, yellowRed bool) {
 	sl.Lineup = 0
 	sl.Status |= 1
 	sl.Rating -= 10
+	md.humans[mi].allowed--
 	md.Events = append(md.Events, MatchEvent{Minute: minute, Fixture: fi, Kind: kind,
 		Side: md.humans[mi].side, Player: s.Persons[sl.Person].Name, Manager: mi})
 	s.LineupStrength(mi, true)
@@ -994,13 +1007,91 @@ func (md *MatchDay) Substitute(mi, out, in int) error {
 		}
 		return ErrInjuredShort
 	}
+	n.Lineup, o.Lineup = o.Lineup, 0
+	n.Row, n.Col = o.Row, o.Col
+	md.comeOn(mi, n, keeper)
+	return nil
+}
+
+// injuredCell returns the cell a player who comes on after an injury takes:
+// the cell the injured player left, if it is still free, else the first free
+// cell from the left in the row above the goal row or the rows above it.
+func (s *State) injuredCell(mi int) (col, row int) {
+	for i := 0; i < SquadMax; i++ {
+		sl := &s.Squads[mi][i]
+		if !sl.Empty() && sl.Lineup == 0 && sl.Status&2 != 0 && sl.Col >= 0 && s.PlayerAt(mi, sl.Col, sl.Row) < 0 {
+			return sl.Col, sl.Row
+		}
+	}
+	for _, row := range []int{6, 5, 4, 3, 2, 1, 0, 7} {
+		for col := 0; col < BoardCols; col++ {
+			if s.PlayerAt(mi, col, row) < 0 {
+				return col, row
+			}
+		}
+	}
+	return 0, BoardRows - 2
+}
+
+// Allowed returns the players manager mi may have on the pitch: 11 less
+// the sent-off ones (D:0x664).
+func (md *MatchDay) Allowed(mi int) int { return md.humans[mi].allowed }
+
+// SubstituteIn brings a player from the bench onto the pitch when the team
+// has fewer players than allowed, after an injury (f_1ecd_1560 with N =
+// D:0x664[m]: a player may go into the team while it has fewer than N). He
+// takes the cell the injured player left (injuredCell).
+// The incoming player decides whether the substitution is the goalkeeper's.
+func (md *MatchDay) SubstituteIn(mi, in int) error {
+	s := md.s
+	hm := &md.humans[mi]
+	if !hm.plays || md.Done {
+		return ErrNotOnPitch
+	}
+	n := &s.Squads[mi][in]
+	if n.Empty() || n.Lineup >= 1 && n.Lineup <= 11 {
+		return ErrNotOnPitch
+	}
+	if s.CountOnPitch(mi) >= hm.allowed {
+		return LineupError{"Nicht mehr als " + itoa(hm.allowed), "Spieler einsetzen !"}
+	}
+	if !s.available(n) {
+		if n.Status&3 == 1 {
+			return ErrSuspendedShort
+		}
+		return ErrInjuredShort
+	}
+	keeper := s.Persons[n.Person].Position() == PosKeeper
+	if !md.subsLeft(mi, keeper) {
+		return ErrNoSubs
+	}
+	used := map[int]bool{}
+	for i := 0; i < SquadMax; i++ {
+		if sl := &s.Squads[mi][i]; !sl.Empty() && sl.Lineup >= 1 && sl.Lineup <= 11 {
+			used[sl.Lineup] = true
+		}
+	}
+	for k := 1; k <= 11; k++ {
+		if !used[k] {
+			n.Lineup = k
+			break
+		}
+	}
+	n.Col, n.Row = s.injuredCell(mi)
+	md.comeOn(mi, n, keeper)
+	return nil
+}
+
+// comeOn books a player who came on: a substitution of its kind, fatigue,
+// the appearance, and the new strength of the team.
+func (md *MatchDay) comeOn(mi int, n *Slot, keeper bool) {
+	s := md.s
+	hm := &md.humans[mi]
 	if keeper {
 		hm.keeperSubs--
 	} else {
 		hm.fieldSubs--
 	}
-	n.Lineup, o.Lineup = o.Lineup, 0
-	n.Row, n.Col = o.Row, o.Col
 	n.Fatigue += s.Rand.Between(2, 4) + 4
 	comp := 0
 	if f := md.Fixtures[hm.fixture]; f.League < 0 {
@@ -1011,7 +1102,6 @@ func (md *MatchDay) Substitute(mi, out, in int) error {
 	s.Managers[mi].Subs++
 	s.LineupStrength(mi, true)
 	md.replan(mi, md.Minute)
-	return nil
 }
 
 func (md *MatchDay) endPeriod(to int) {
@@ -1155,6 +1245,12 @@ func (md *MatchDay) afterRegularTime() {
 		}
 		if any {
 			md.periods = append(md.periods, [2]int{91, 105}, [2]int{106, 120})
+			md.quietExtra = true
+			for i, f := range md.Fixtures {
+				if f.Watched && md.ExtraTime(i) {
+					md.quietExtra = false
+				}
+			}
 		}
 		return
 	}

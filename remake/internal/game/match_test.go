@@ -180,3 +180,87 @@ func TestInjuryWaitsForSubstitution(t *testing.T) {
 		t.Errorf("next minute: injured %v, replan %d", md.injured, md.replanMi)
 	}
 }
+
+// After an injury the team has a place free: a player from the bench comes
+// on without one taken out, on the cell of the injured player; a full team,
+// or one with a sent-off player, takes nobody in.
+func TestSubstituteInAfterInjury(t *testing.T) {
+	s, md, f := twoManagerTie(t)
+	md.prepare(0, f)
+	if !md.humans[0].plays || md.Allowed(0) != 11 {
+		t.Fatalf("humans %+v", md.humans[0])
+	}
+	field, bench := -1, -1
+	for i := 0; i < SquadMax; i++ {
+		sl := &s.Squads[0][i]
+		if sl.Empty() || s.Persons[sl.Person].Position() == PosKeeper {
+			continue
+		}
+		switch {
+		case sl.Lineup >= 1 && sl.Lineup <= 11 && field < 0:
+			field = i
+		case sl.Lineup >= 12 && s.available(sl) && bench < 0:
+			bench = i
+		}
+	}
+	if field < 0 || bench < 0 {
+		t.Fatal("no field player or no reserve")
+	}
+	if err := md.SubstituteIn(0, bench); err == nil {
+		t.Fatal("a full team took a player in")
+	}
+	inj := &s.Squads[0][field]
+	col, row, number := inj.Col, inj.Row, inj.Lineup
+	s.injure(inj)
+	if err := md.SubstituteIn(0, bench); err != nil {
+		t.Fatal(err)
+	}
+	in := &s.Squads[0][bench]
+	if in.Lineup != number || in.Col != col || in.Row != row || s.CountOnPitch(0) != 11 || md.humans[0].fieldSubs != 1 {
+		t.Errorf("came on as %d at %d,%d (want %d at %d,%d), %d on the pitch, %d field subs left",
+			in.Lineup, in.Col, in.Row, number, col, row, s.CountOnPitch(0), md.humans[0].fieldSubs)
+	}
+	// A sent-off player is not replaced.
+	other := -1
+	for i := 0; i < SquadMax; i++ {
+		if sl := &s.Squads[0][i]; i != bench && sl.Lineup >= 12 && s.available(sl) {
+			other = i
+			break
+		}
+	}
+	md.sendOff(0, 0, bench, 30, false)
+	if md.Allowed(0) != 10 {
+		t.Errorf("allowed %d after a red card", md.Allowed(0))
+	}
+	if other >= 0 {
+		if err := md.SubstituteIn(0, other); err == nil {
+			t.Error("a sent-off player was replaced")
+		}
+	}
+}
+
+// Extra time is shown only for a tie of a human team: with the human match
+// decided after 90 minutes the extra time of the other ties is silent.
+func TestExtraTimeSilentWithoutHumanTie(t *testing.T) {
+	for _, humanTied := range []bool{false, true} {
+		s, md, f := twoManagerTie(t)
+		f.Watched, f.Pair = true, 0
+		ai := &Fixture{League: -1, Cup: CupDFB, Pair: 2, Home: 30, Away: 31}
+		md.Fixtures = append(md.Fixtures, ai)
+		md.cupMask = 1
+		md.periods = [][2]int{{1, 45}, {46, 90}}
+		s.Cups.Result[CupDFB][0], s.Cups.Result[CupDFB][1] = 3, 0
+		if humanTied {
+			s.Cups.Result[CupDFB][1] = 3
+		}
+		s.Cups.Result[CupDFB][2], s.Cups.Result[CupDFB][3] = 1, 1
+		md.period = 2
+		md.afterRegularTime()
+		if len(md.periods) != 4 {
+			t.Fatalf("human tied %v: periods %v", humanTied, md.periods)
+		}
+		if md.Silent() == humanTied {
+			t.Errorf("human tied %v: silent %v", humanTied, md.Silent())
+		}
+	}
+}

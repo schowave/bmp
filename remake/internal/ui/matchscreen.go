@@ -162,8 +162,9 @@ func (m *MatchScreen) Update(app *App) error {
 	}
 }
 
-// quiet reports a match day without a match of a human team.
-func (m *MatchScreen) quiet() bool { return len(m.panels) == 0 }
+// quiet reports a match day without a match of a human team, or extra time
+// without one (MatchDay.Silent).
+func (m *MatchScreen) quiet() bool { return len(m.panels) == 0 || m.md.Silent() }
 
 // Passing implements passer: without a human match the screen shows nothing
 // and only plays on to the next screen.

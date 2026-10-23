@@ -28,3 +28,7 @@ func (md *MatchDay) Replays() bool { return md.replay }
 // Over reports whether every period is played, extra time included: the
 // next Step finishes the match day.
 func (md *MatchDay) Over() bool { return md.period >= len(md.periods) }
+
+// Silent reports extra time without a match of a human team: the match
+// screen plays it without showing it (F:0x2e99 = 0).
+func (md *MatchDay) Silent() bool { return md.quietExtra && md.period >= 2 }
