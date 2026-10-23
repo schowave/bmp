@@ -86,6 +86,16 @@ The settings of the training screen: the 20 training points, the 10 position
 points and the intensity. The remake's hidden key `o` sets the one with the
 strongest eleven over the rest of the season.
 
+**Ticket price** (Eintrittspreis):
+The price a manager asks at his home matches, 5..25 DM; with the attendance it
+gives the gate money. The remake's hidden key `o` on the stadium screen sets
+the one with the most gate money at the next home match.
+
+**Timed message**:
+A message of the panel with a lifetime (an injury in training, riot damage,
+the comfort downgrade, a finished construction, a retirement announcement):
+it goes after three turns; at most ten wait per manager.
+
 **Original**:
 The DOS game, `BMMAIN.EXE` in `bmp/`; its functions are named `f_SSSS_OOOO`
 after their address in the unpacked image.
