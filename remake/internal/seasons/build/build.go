@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image"
 	"io/fs"
+	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -331,7 +332,7 @@ func pickForeign(europe []source.EuroClub, orig *assets.Mana, german map[string]
 			p = 1 - float64(rank[e.Cup])/float64(perCup[e.Cup]-1)
 		}
 		rank[e.Cup]++
-		v := lo + int(p*float64(hi-lo)+0.5)
+		v := lo + int(math.Round(float64(p*float64(hi-lo)))) // float64(): no fused multiply-add
 		out = append(out, assets.ClubRecord{Name: cp, Strength: [3]int{v, v, v}})
 	}
 	for _, c := range orig.Clubs[numGerman:] {
