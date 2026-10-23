@@ -30,21 +30,28 @@ The original files are copyrighted by Software 2000. A binary built with
 
 ## Playing
 
-The controls follow the original: the left mouse button selects, the right
-mouse button confirms or goes back.
+The controls follow the original: the left mouse button selects; the right
+mouse button confirms in some places (setup, lineup reserves, sponsors) but
+does not leave screens, which close with the HAUPT MENU or WEITER button.
 
-1. **Setup:** click the name field below a face and type a name, scroll the
-   logo strip and click the empty field above the face to give that manager
-   the club in the middle of the strip. Up to four managers. Right click
-   opens the options (level, game length, historic start), right click again
-   starts the game.
-2. **Main menu:** the icons on the left open the desk (statistics, eternal
+1. **Setup:** click the name field below a face and type the name, click
+   left or right of the middle of the logo strip to scroll it (hold the
+   button to keep it moving) and click the empty field above the face to
+   give that manager the club in the middle. Up to four managers. Right
+   click opens the options (level, game length, historic start), right
+   click again starts the game. NEU in the disk menu adds managers later.
+2. **Cup draws** ask whether to watch them ("ABER KLAR" shows the draw).
+3. **Main menu:** the icons on the left open the desk (statistics, eternal
    table, history, stadium, bank, sponsors), the leagues (tables, results,
-   strengths) and the team (lineup, contracts, transfer market, training,
-   training camp, top scorers). On the right: cups, save/load/high scores,
-   and the manager tearing his hair ends the turn.
-3. **Match days** run live; *TEMPO* changes the speed, the right mouse
-   button jumps to the end, *AUSWECHSELN* substitutes players.
+   strengths) and the team (lineup with the pitch to place the players,
+   contracts, transfer market, training, training camp, top scorers). On
+   the right: cups and the disk menu (load, save, high scores, options,
+   NEU). A click on the calendar sheet ends the turn; the manager tearing
+   his hair quits the game. A click in the middle opens the messages.
+4. **Match days** run live with the goal scenes; the left button plays the
+   rest of the half at once, the space bar opens the options, 'r' or 'w'
+   after a scene replays it, the right button names the author of the last
+   scene.
 
 ## Layout
 
@@ -73,8 +80,7 @@ The engine follows the original including several of its bugs (for example
 the shared popularity value after a season, the penalty score in two-legged
 ties). Deliberate differences:
 
-- No newspaper and no animated goal scenes; the match report is a list.
-- The statistics screen has no series and records tables.
+- The best series of the statistics screen start again every season.
 - Prices of the training camps use the squad of the manager who asks.
 - Original bugs that read uninitialised or stale memory are replaced by the
   intended behaviour. This includes the season-end return of listed
