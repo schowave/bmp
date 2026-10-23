@@ -22,6 +22,7 @@ func main() {
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")
 	demo := flag.String("demo", "", "show a development demo scene")
+	script := flag.String("script", "", "play the input of this development script (see ui.ParseScript) and quit")
 	saves := flag.String("saves", defaultSaveDir(), "directory for save games and high scores")
 	flag.Parse()
 
@@ -49,6 +50,17 @@ func main() {
 	}
 	app := ui.NewApp(gfx, first)
 	app.ShotPath, app.ShotFrame = *shot, *shotFrame
+	if *script != "" {
+		f, err := os.Open(*script)
+		if err == nil {
+			app.Script, err = ui.ParseScript(f)
+			f.Close()
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "bmp:", err)
+			os.Exit(1)
+		}
+	}
 	if err := ebiten.RunGame(app); err != nil {
 		fmt.Fprintln(os.Stderr, "bmp:", err)
 		os.Exit(1)
