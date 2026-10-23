@@ -46,9 +46,18 @@ func (d *Driver) Update(app *App) error {
 		ShowNotices(app, d.ss, nil)
 		return nil
 	}
-	if c, ok := s.TakeDraw(); ok {
-		app.Push(NewDrawShow(d.ss, c))
-		return nil
+	// A draw whose screens are switched off in the options is skipped here,
+	// not by a show that closes again: a run of them would take more passes
+	// than a tick has.
+	for {
+		c, ok := s.TakeDraw()
+		if !ok {
+			break
+		}
+		if drawShown(s, c) {
+			app.Push(NewDrawShow(d.ss, c))
+			return nil
+		}
 	}
 	switch s.Loop.Phase {
 	case game.PhaseTurn:
