@@ -41,12 +41,11 @@ func NewTurnMenu(ss *Session) *MainMenu {
 		{IconContracts, push(func() Scene { return NewSquadContracts(ss) })},
 		{IconTransfers, push(func() Scene { return NewTransferScreen(ss) })},
 		{IconTraining, push(func() Scene { return NewTrainingScreen(ss) })},
-		{IconCamp, nil},
+		// The camp shows the cobweb from the booking until CampDays runs out.
+		{IconCamp, push(func() Scene { return NewCampScreen(ss) })},
 		{IconPlayerInfo, push(func() Scene { return NewScorerScreen(ss) })},
 	}}
-	if ss.M().CampDays == 0 {
-		m.Left[2].Items[4].Open = push(func() Scene { return NewCampScreen(ss) })
-	}
+	m.Left[2].Shut = func(k int) bool { return k == 4 && ss.M().CampDays != 0 }
 	m.Right[0] = MenuGroup{Icon: IconCompetitions, Items: [9]MenuItem{
 		{IconDFBPokal, push(func() Scene { return NewCupScreen(ss, game.CupDFB) })},
 		{IconLandesmeister, push(func() Scene { return NewCupScreen(ss, game.CupLandesmeister) })},

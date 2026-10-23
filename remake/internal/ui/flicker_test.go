@@ -82,8 +82,8 @@ func visitMenus(t *testing.T, app *App, m *MainMenu, frame func(Input), idle fun
 	rows := []int{0, 1, 2, 0, 1}
 	leave := []Input{click(MenuButton.X+10, MenuButton.Y+10), {Escape: true}, {Enter: true}, rclick()}
 	for gi, gr := range groups {
-		for k, it := range gr.g.Items {
-			if it.Open == nil || gi == 4 && k != 2 && k != 3 {
+		for k := range gr.g.Items {
+			if !gr.g.available(k) || gi == 4 && k != 2 && k != 3 {
 				continue
 			}
 			frame(click(gr.x+10, menuRowsY[rows[gi]]+10))

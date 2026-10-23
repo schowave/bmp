@@ -31,6 +31,9 @@ type MenuItem struct {
 type MenuGroup struct {
 	Icon  Icon
 	Items [9]MenuItem // 3x3, column by column
+	// Shut, if set, reports whether item k shows the cobweb for now
+	// although it has an Open; it is asked on every draw and click.
+	Shut func(k int) bool
 	// RightAction runs on a right click on the icon instead of a submenu
 	// (the manager tearing his hair); done ends its alert state.
 	RightAction func(app *App, done func())
@@ -51,6 +54,11 @@ type Header struct {
 	// drawn as a curve in the box under the matchday; Chart turns it on.
 	Places []int
 	Chart  bool
+}
+
+// available reports whether item k opens, at the moment of asking.
+func (g *MenuGroup) available(k int) bool {
+	return g.Items[k].Open != nil && (g.Shut == nil || !g.Shut(k))
 }
 
 // MainMenu is the hub of a manager's turn.
@@ -134,7 +142,7 @@ func (m *MainMenu) Update(app *App) error {
 		for k, it := range m.open.Items {
 			x, y := submenuCols[k/3], submenuRowsY[k%3]
 			if in.Clicked(x, y, ButtonW, ButtonH) {
-				if it.Open != nil {
+				if m.open.available(k) {
 					m.pressed = nil
 					it.Open(app)
 				}
@@ -171,7 +179,7 @@ func (m *MainMenu) Draw(app *App, dst *ebiten.Image) {
 	} else if m.open != nil {
 		for k, it := range m.open.Items {
 			icon := it.Icon
-			if it.Open == nil {
+			if !m.open.available(k) {
 				icon = IconCobweb
 			}
 			g.DrawIconButton(dst, icon, submenuCols[k/3], submenuRowsY[k%3])

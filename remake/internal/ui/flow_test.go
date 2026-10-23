@@ -150,8 +150,8 @@ func openAllMenus(t *testing.T, app *App, m *MainMenu) {
 	rows := []int{0, 1, 2, 0, 1}
 	for gi, gr := range groups {
 		step(t, app, click(gr.x+10, menuRowsY[rows[gi]]+10))
-		for k, it := range gr.g.Items {
-			if it.Open == nil {
+		for k := range gr.g.Items {
+			if !gr.g.available(k) {
 				continue
 			}
 			step(t, app, click(submenuCols[k/3]+10, submenuRowsY[k%3]+10))
