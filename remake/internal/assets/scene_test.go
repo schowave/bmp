@@ -1,6 +1,9 @@
 package assets
 
 import (
+	"io/fs"
+	"path"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -85,6 +88,37 @@ func TestParseSceneCounts(t *testing.T) {
 	}
 }
 
+func TestSceneJSONRoundTrip(t *testing.T) {
+	s, err := ParseScene(sceneBytes([]SceneFrame{{ScrollX: 3, ScrollY: 4, Objects: [SceneObjects]SceneObject{{X: 300, Y: 7, ID: 1001}}}}, "J]RGEN KRAHE"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := EncodeScene(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := DecodeScene(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got, s) {
+		t.Fatalf("got %+v, want %+v", got, s)
+	}
+	if _, err := DecodeScene([]byte(`{"builder": "", "sounds": [0,0,0,0], "frames": [], "extra": 1}`)); err == nil {
+		t.Fatal("unknown field accepted")
+	}
+}
+
+func TestSceneCountsJSONRoundTrip(t *testing.T) {
+	data, err := EncodeSceneCounts(DefaultSceneCounts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c, err := DecodeSceneCounts(data); err != nil || c != DefaultSceneCounts {
+		t.Fatalf("got %+v, %v", c, err)
+	}
+}
+
 func TestSceneName(t *testing.T) {
 	for _, c := range []struct {
 		n                   int
@@ -106,17 +140,19 @@ func TestAllScenesParse(t *testing.T) {
 	if c != DefaultSceneCounts {
 		t.Errorf("counts %+v", c)
 	}
+	files, err := fs.Glob(d.fsys, sceneDir+"/*.*.json")
+	if err != nil {
+		t.Fatal(err)
+	}
 	n := 0
-	for upper := range d.names {
-		if !strings.HasPrefix(upper, "TORE/") || strings.HasSuffix(upper, "ANZAHL") {
-			continue
-		}
-		s, err := d.Scene(strings.TrimPrefix(upper, "TORE/"))
+	for _, file := range files {
+		name := strings.TrimSuffix(path.Base(file), ".json")
+		s, err := d.Scene(name)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if len(s.Frames) < 10 || s.Builder == "" {
-			t.Errorf("%s: %d frames, builder %q", upper, len(s.Frames), s.Builder)
+			t.Errorf("%s: %d frames, builder %q", name, len(s.Frames), s.Builder)
 		}
 		n++
 	}

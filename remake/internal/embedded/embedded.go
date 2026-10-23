@@ -1,7 +1,9 @@
 // Package embedded holds the files of the original game that the
-// re-implementation needs, built into every binary: the pictures, MANA.DAT,
-// the goal scenes and the fonts of BMMAIN.EXE. cmd/bmpextract extracts them
-// from bmp/ into internal/embedded/data (mise run remake:extract).
+// re-implementation needs, built into every binary, in open formats: the
+// club database (clubs.json), the pictures as indexed PNGs (pic/), the
+// palettes, the goal scenes (scenes/) and the fonts of BMMAIN.EXE.
+// cmd/bmpextract extracts them from bmp/ into internal/embedded/data (mise
+// run remake:extract); assets.Dir reads them.
 package embedded
 
 import (

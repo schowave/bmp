@@ -1,7 +1,6 @@
 package game
 
 import (
-	"io/fs"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/assets"
@@ -10,11 +9,11 @@ import (
 
 func mana(t *testing.T) *assets.Mana {
 	t.Helper()
-	data, err := fs.ReadFile(embedded.FS(), "MANA.DAT")
+	dir, err := assets.OpenDir(embedded.FS())
 	if err != nil {
 		t.Fatal(err)
 	}
-	m, err := assets.ParseMana(data)
+	m, err := dir.Mana()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	data := flag.String("data", "", "directory of the original game instead of the files built into the binary (default: $BMP_DATA)")
+	data := flag.String("data", "", "directory of an extract of the game (bmpextract) instead of the files built into the binary (default: $BMP_DATA)")
 	scale := flag.Int("scale", 3, "window scale factor")
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")

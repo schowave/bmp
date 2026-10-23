@@ -74,7 +74,7 @@ func (p *preview) Draw(screen *ebiten.Image) {
 func (p *preview) Layout(w, h int) (int, int) { return ui.ScreenW, ui.ScreenH }
 
 func main() {
-	data := flag.String("data", "", "directory of the original game instead of the files built into the binary")
+	data := flag.String("data", "", "directory of an extract of the game (bmpextract) instead of the files built into the binary")
 	name := flag.String("scene", "10.T", "scene file in TORE/")
 	mirror := flag.Bool("mirror", false, "mirrored (chance of the away team)")
 	out := flag.String("out", "", "save every picture as PNG into this directory")
