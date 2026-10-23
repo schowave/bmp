@@ -85,3 +85,48 @@ func TestIdleLeaguesArePlanned(t *testing.T) {
 		t.Error("the leagues are planned out of order")
 	}
 }
+
+// twoManagerTie is a DFB-Pokal tie of two human managers; the away
+// manager has the lower index.
+func twoManagerTie(t *testing.T) (*State, *MatchDay, *Fixture) {
+	t.Helper()
+	s, err := NewGame(mana(t), Options{Managers: []NewManager{{Name: "GAST", Team: 9}, {Name: "HEIM", Team: 4}}, Level: 2, Seed: 11})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Cups.Round[CupDFB] = 1
+	f := &Fixture{League: -1, Cup: CupDFB, Home: s.Managers[1].Team, Away: s.Managers[0].Team}
+	md := &MatchDay{s: s, Fixtures: []*Fixture{f}, humans: make([]humanMatch, 2)}
+	return s, md, f
+}
+
+// f_1a58_20b2 goes through the managers by index: the away manager who
+// comes first gets the estimate for an AI home team as his share.
+func TestTieManagersInIndexOrder(t *testing.T) {
+	s, md, f := twoManagerTie(t)
+	r0, money := s.Rand, s.Managers[0].Money
+	price := AITicket[bucket(f.Home)] + s.Rand.Between(0, 1)
+	want := money + int64(price)*s.Attendance(0, f.Home, f.Away, 1, true, price)/2
+	s.Rand = r0
+	md.prepare(0, f)
+	if got := s.Managers[0].Money; got != want {
+		t.Errorf("away share %d, want %d", got-money, want-money)
+	}
+	if !md.humans[0].plays || !md.humans[1].plays || md.humans[0].side != 1 {
+		t.Errorf("humans %+v", md.humans)
+	}
+}
+
+// When the away manager forfeits, the home manager still gets his gate.
+func TestAwayForfeitKeepsHomeGate(t *testing.T) {
+	s, md, f := twoManagerTie(t)
+	s.Managers[0].Effort = ForfeitEffort
+	home := s.Managers[1].Money
+	md.prepare(0, f)
+	if f.Forfeit != 2 || f.Watched || md.humans[0].plays || md.humans[1].plays {
+		t.Fatalf("forfeit %d watched %v humans %+v", f.Forfeit, f.Watched, md.humans)
+	}
+	if s.Managers[1].Money <= home || f.Attendance == 0 {
+		t.Errorf("home manager got %d for %d spectators", s.Managers[1].Money-home, f.Attendance)
+	}
+}
