@@ -167,7 +167,9 @@ f_14a4_1798 calls it with a *person* index as slot (bug, see §4.4).
    order: s1 then s2). Count `F` = persons with `64 <= team != 0xff`.
 2. `n = rand(5,15)`; repeat n times: loop { `p = rand(1,150)`, `t0 = team(p)`;
    if `F > 4` and t0 foreign: `F--`, `team(p) = f_14a4_24bf(p, f_2277_25de(p,0)/10000, 0)`, mark done }
-   until t0 not a human team and (done or F <= 4); if not done: `team(p) = f_14a4_24bf(...)` likewise.
+   until t0 not a human team and p not done and F <= 4 (listing 14a4:18ee-1912); then
+   `team(p) = f_14a4_24bf(...)` likewise. So the first round moves every foreign person beyond 4
+   to a German club, and each round moves one more non-human person.
    (f_2277_25de is called with the person index as slot index of the current manager – original bug;
    value is effectively garbage-ish.)
 3. Writes a 3-int result `out[k] = cnt_k*100/F2*G/100` (cnt_k = squad sizes of humans in league k,

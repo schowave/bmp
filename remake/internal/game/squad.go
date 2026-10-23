@@ -12,7 +12,17 @@ var valueWeights = [2][6]int64{{58, 4, 4, 5, 4, 25}, {70, 8, 7, 5, 8, 2}}
 // PlayerValue returns the market value or the monthly salary of the
 // player in slot sl of squad m (f_2277_25de).
 func (s *State) PlayerValue(m, sl, flags int) int64 {
-	slot := &s.Squads[m][sl]
+	return s.slotValue(&s.Squads[m][sl], flags)
+}
+
+// personValue is the market value of person p without a squad slot: his
+// skills, no games, goals or cards.
+func (s *State) personValue(p int) int64 {
+	slot := Slot{Person: p, Skill: s.Persons[p].Skill}
+	return s.slotValue(&slot, 0)
+}
+
+func (s *State) slotValue(slot *Slot, flags int) int64 {
 	p := &s.Persons[slot.Person]
 	w := valueWeights[flags&1]
 	v := int64((slot.Skill[0]+slot.Skill[1])/2) * w[0] / 100

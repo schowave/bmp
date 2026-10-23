@@ -488,7 +488,10 @@ func (s *State) startSquad(mi, l0 int, short bool) {
 }
 
 // reshufflePersons lets the skills of all persons drift and moves some
-// foreign players to German clubs (f_14a4_1798).
+// foreign players to German clubs (f_14a4_1798). Each of the n rounds draws
+// persons until one is neither moved by the draw nor at a human club while
+// at most 4 foreign players are left, and moves him too; so the first round
+// brings home all foreign players beyond 4.
 func (s *State) reshufflePersons() {
 	r := &s.Rand
 	foreign := 0
@@ -502,26 +505,23 @@ func (s *State) reshufflePersons() {
 	}
 	n := r.Between(5, 15)
 	foreignTeam := func(t int) bool { return t >= NumGerman && t != 0xff }
+	// The original passes the person index as a slot index to f_2277_25de
+	// and so reads some slot; the remake takes the person's value.
 	move := func(p int) {
-		ps := &s.Persons[p]
-		x := (ps.Skill[0] + ps.Skill[1]) / 2 * 58 / 100
-		ps.Team = s.chooseBuyer(x, false)
+		s.Persons[p].Team = s.chooseBuyer(int(s.personValue(p)/10000), false)
 	}
 	for i := 0; i < n; i++ {
 		for tries := 0; tries < 10000; tries++ {
 			p := r.Between(1, 150)
 			t0 := s.Persons[p].Team
-			done := false
 			if foreign > 4 && foreignTeam(t0) {
 				foreign--
 				move(p)
-				done = true
+				continue
 			}
 			human := t0 != 0xff && t0 < NumTeams && s.ManagerOf(t0) != nil
-			if !human && (done || foreign <= 4) {
-				if !done {
-					move(p)
-				}
+			if !human && foreign <= 4 {
+				move(p)
 				break
 			}
 		}
