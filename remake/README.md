@@ -409,9 +409,10 @@ ties). Deliberate differences:
   goals and points per game of the season ([ADR 0006](../docs/adr/0006-real-seasons-from-wikipedia.md)).
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
-  from the fourth season on, as in the original's modern start. A win
-  counts 3 points from 1995/96 on (the original's variable D:0x2271);
-  games with the clubs of the original keep the 2-point rule.
+  from the fourth season on, as in the original's modern start.
+- A win counts 3 points from 1995/96 on, as in the real leagues, also in a
+  game with the clubs of the original that reaches that season; the
+  original always gives 2 (its variable D:0x2271).
 
 ## Legal
 
