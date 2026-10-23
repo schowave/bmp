@@ -35,7 +35,6 @@ func (s *State) swapIdentity(a, b int, holders bool) {
 	}
 	s.Teams[a], s.Teams[b] = s.Teams[b], s.Teams[a]
 	s.Clubs[a], s.Clubs[b] = s.Clubs[b], s.Clubs[a]
-	s.Stats.swap(a, b)
 }
 
 // shuffleIDs gives every club a random id inside its league, so that the

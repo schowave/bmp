@@ -31,11 +31,11 @@ type HighscoreEntry struct {
 	GameID  uint32 // D:0x668, which the original never sets
 }
 
-// HighscoreEntry returns the entry of manager mi.
+// HighscoreEntry returns the entry of manager mi as the file stores it.
 func (s *State) HighscoreEntry(mi int) HighscoreEntry {
 	m := s.Managers[mi]
-	return HighscoreEntry{Manager: m.Name, Club: s.Teams[m.Team].Name,
-		Titles: [3]int{m.Titles[0], m.Titles[1], m.Titles[2] + m.Titles[3] + m.Titles[4]}, Score: s.Score(mi)}
+	return storedHighscore(HighscoreEntry{Manager: m.Name, Club: s.Teams[m.Team].Name,
+		Titles: [3]int{m.Titles[0], m.Titles[1], m.Titles[2] + m.Titles[3] + m.Titles[4]}, Score: s.Score(mi)})
 }
 
 // HighscoreFile returns the name of the high-score table of the game:
@@ -79,6 +79,7 @@ func DecodeHighscores(data []byte) ([]HighscoreEntry, error) {
 func EncodeHighscores(hs []HighscoreEntry) []byte {
 	data := make([]byte, HighscoreRows*highscoreLen)
 	for i, e := range hs[:min(len(hs), HighscoreRows)] {
+		e = storedHighscore(e)
 		b := data[i*highscoreLen : (i+1)*highscoreLen]
 		copy(b[:highscoreName-1], ToCP437(e.Manager))
 		copy(b[highscoreName:highscoreName+highscoreClub-1], ToCP437(e.Club))
@@ -89,6 +90,22 @@ func EncodeHighscores(hs []HighscoreEntry) []byte {
 		binary.LittleEndian.PutUint32(b[highscoreGameID:], e.GameID)
 	}
 	return data
+}
+
+// storedHighscore returns e as EncodeHighscores writes it: the names in
+// CP437 and cut to their fields, titles and score in their bytes.
+func storedHighscore(e HighscoreEntry) HighscoreEntry {
+	field := func(s string, n int) string {
+		b := ToCP437(s)
+		return FromCP437(cString(b[:min(len(b), n-1)]))
+	}
+	e.Manager = field(e.Manager, highscoreName)
+	e.Club = field(e.Club, highscoreClub)
+	for k := range e.Titles {
+		e.Titles[k] = clamp(e.Titles[k], 0, 0xff)
+	}
+	e.Score = clamp(e.Score, -0x8000, 0x7fff)
+	return e
 }
 
 func cString(b []byte) string {
@@ -103,6 +120,9 @@ func cString(b []byte) string {
 // has more points, and sorts the table. It returns the table and the row
 // of e (-1 when it did not get in).
 func EnterHighscore(hs []HighscoreEntry, e HighscoreEntry) ([]HighscoreEntry, int) {
+	// Compare and store e as it reads back from the file, or a name the
+	// file cannot hold would never find its row again.
+	e = storedHighscore(e)
 	hs = append([]HighscoreEntry(nil), hs...)
 	at := -1
 	for i := range hs {

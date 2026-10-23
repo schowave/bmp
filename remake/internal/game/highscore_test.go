@@ -77,3 +77,30 @@ func TestSeasonEndHighscores(t *testing.T) {
 		t.Fatalf("%+v", hs)
 	}
 }
+
+// TestEnterHighscoreStoredName finds the row of a manager whose name the
+// file cannot hold as it is.
+func TestEnterHighscoreStoredName(t *testing.T) {
+	e := storedHighscore(HighscoreEntry{Manager: "René Müller", Club: "X", Score: 10})
+	hs, err := DecodeHighscores(EncodeHighscores([]HighscoreEntry{e}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, row := EnterHighscore(hs, HighscoreEntry{Manager: "René Müller", Club: "X", Score: 20})
+	if row != 0 || len(got) != 1 || got[0].Manager != "Ren? Müller" {
+		t.Fatalf("row %d %+v", row, got)
+	}
+}
+
+// TestHighscoreClamp keeps titles and points that do not fit their bytes
+// at the limit instead of wrapping them.
+func TestHighscoreClamp(t *testing.T) {
+	e := HighscoreEntry{Manager: "A", Club: "X", Titles: [3]int{1, 2, 300}, Score: 70000}
+	hs, err := DecodeHighscores(EncodeHighscores([]HighscoreEntry{e}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hs) != 1 || hs[0].Titles != [3]int{1, 2, 255} || hs[0].Score != 0x7fff {
+		t.Fatalf("%+v", hs)
+	}
+}

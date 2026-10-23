@@ -13,6 +13,9 @@ func (s *State) performance(mi int) int {
 			p += int64(2 * b)
 		}
 	}
+	// Like the original: n is the number of finished seasons (D:0x7e2),
+	// which the season end counts up only after the score is taken, so
+	// the season just recorded is not part of it yet.
 	n := min(s.Seasons, 50)
 	for i := 0; i < n && i < len(m.History); i++ {
 		r := m.History[i]

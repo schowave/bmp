@@ -28,6 +28,8 @@ func (s *State) recordHistory(mi int) {
 		s.trophy(mi, 0)
 	}
 	rec[1] = byte(l)
+	// Unlike the European cups the original does not skip NotInCup here:
+	// the record gets 0x1f, which performance counts as round 7.
 	rec[2] = byte(m.CupStatus[CupDFB] + 1)
 	if s.Cups.Holder[CupDFB] == m.Team+1 {
 		rec[2] += 0x80

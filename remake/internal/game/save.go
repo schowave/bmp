@@ -31,19 +31,23 @@ func (s *State) Save() ([]byte, error) {
 
 // Load restores a game saved with Save.
 func Load(data []byte, mana *assets.Mana) (*State, error) {
-	var f saveFile
+	var f struct {
+		Version int
+		State   json.RawMessage
+	}
 	if err := json.Unmarshal(data, &f); err != nil {
 		return nil, err
 	}
-	if f.Version != saveVersion || f.State == nil {
+	if f.Version != saveVersion || len(f.State) == 0 || string(f.State) == "null" {
 		return nil, ErrSaveVersion
 	}
-	f.State.mana = mana
-	if f.State.Display == (Display{}) {
-		// saved before the options existed
-		f.State.Display = DefaultDisplay()
+	// A game saved before the options existed keeps the defaults.
+	s := &State{Display: DefaultDisplay()}
+	if err := json.Unmarshal(f.State, s); err != nil {
+		return nil, err
 	}
-	return f.State, nil
+	s.mana = mana
+	return s, nil
 }
 
 // MatchdayDay returns the season day on which matchday md of league l is
