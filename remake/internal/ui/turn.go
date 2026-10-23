@@ -38,7 +38,7 @@ func NewTurnMenu(ss *Session) *MainMenu {
 	}
 	m.Left[2] = MenuGroup{Icon: IconTeam, Items: [9]MenuItem{
 		{IconLineup, push(func() Scene { return NewSquadScreen(ss) })},
-		{IconContracts, push(func() Scene { return NewContractScreen(ss, false) })},
+		{IconContracts, push(func() Scene { return NewSquadContracts(ss) })},
 		{IconTransfers, push(func() Scene { return NewTransferScreen(ss) })},
 		{IconTraining, push(func() Scene { return NewTrainingScreen(ss) })},
 		{IconCamp, nil},
