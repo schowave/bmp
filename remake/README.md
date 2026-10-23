@@ -135,7 +135,8 @@ taken. The keys act on the manager who is on turn.
 The level selects the high-score table (`HIGH.<length><level>`), so a game
 whose level was changed here is entered in the table of the new level.
 
-The remake adds keys of its own, which the original does not have:
+The remake adds keys of its own, which the original does not have (why they
+rate by the engine of the original: [ADR 0006](../docs/adr/0006-rate-lineups-by-the-engine-of-the-original.md)):
 
 | Where | Key | Effect |
 |---|---|---|
@@ -248,6 +249,8 @@ the panel with new messages is open, it takes the keys, so close it first.
 mise run remake:test       # go vet, gofmt -l and go test -short -timeout 300s
 mise run remake:test-long  # all tests, also those that play whole seasons (CI)
 ```
+
+Why the season tests are not in `check`: [ADR 0007](../docs/adr/0007-season-tests-outside-check.md).
 
 The tests compare constant tables with the original executable, check the
 start finances against the original, play several seasons with random
