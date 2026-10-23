@@ -15,17 +15,15 @@ import (
 // a list of levels for the other items, then the question "NA KLAR !" /
 // "ACH NEE...". The right button ends a number input or leaves a list.
 type StadiumScreen struct {
-	ss     *Session
-	hover  int // row of the status line, -1 none
-	mode   int
-	row    int // the row (1..8) of the order
-	value  int64
-	num    deskNumber
-	list   int // highlighted level, -1 none
-	lim    game.BuildLimit
-	order  game.BuildOrder
-	listN  int // last row index of the level list
-	pressd bool
+	ss    *Session
+	hover int // row of the status line, -1 none
+	mode  int
+	row   int // the row (1..8) of the order
+	num   deskNumber
+	list  int // highlighted level, -1 none
+	lim   game.BuildLimit
+	order game.BuildOrder
+	listN int // last row index of the level list
 }
 
 const (

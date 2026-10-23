@@ -391,7 +391,7 @@ func (s *State) initPersons() {
 				ps.Owner = mi
 				ps.Age = r.Between(19, 31)
 				ps.Team = m.Team
-				s.addPerson(mi, p, 2, 0, SquadMax)
+				_, _ = s.addPerson(mi, p, 2, 0, SquadMax)
 				ps.Team = m.Team
 			}
 		}

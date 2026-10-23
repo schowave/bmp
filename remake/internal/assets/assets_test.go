@@ -202,12 +202,15 @@ func TestEmbeddedFilesMatchTheOriginal(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := 0
-	fs.WalkDir(got, ".", func(path string, e fs.DirEntry, err error) error {
+	err = fs.WalkDir(got, ".", func(path string, e fs.DirEntry, err error) error {
 		if err == nil && !e.IsDir() {
 			m++
 		}
 		return err
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if m != n {
 		t.Errorf("embedded %d files, the extract has %d", m, n)
 	}

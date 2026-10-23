@@ -16,10 +16,10 @@ import (
 // the app ticks by the clock. The mode is deprecated but has no successor
 // that waits in the run loop.
 func pace(app *ui.App) {
-	ebiten.SetFPSMode(ebiten.FPSModeVsyncOffMinimum)
+	ebiten.SetFPSMode(ebiten.FPSModeVsyncOffMinimum) //nolint:staticcheck // deprecated without a successor, see above
 	go func() {
 		for range time.Tick(time.Second / ui.TPS) {
-			ebiten.ScheduleFrame()
+			ebiten.ScheduleFrame() //nolint:staticcheck // belongs to FPSModeVsyncOffMinimum
 		}
 	}()
 	app.Paced = true

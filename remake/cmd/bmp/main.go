@@ -87,7 +87,7 @@ func main() {
 		f, err := os.Open(*script)
 		if err == nil {
 			app.Script, err = ui.ParseScript(f)
-			f.Close()
+			_ = f.Close()
 		}
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "bmp:", err)

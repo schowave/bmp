@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Readiness</title>
+<style>
+  :root {
+    --bg: #f6f6f3; --surface: #ffffff; --surface-2: #fafaf8; --text: #1d1d1b; --muted: #6b6b66;
+    --line: #e2e2dc; --accent: #2f5bd3; --accent-bg: #e8eefc; --pass: #18703d; --fail: #c4372d;
+    --skip: #5f5f59; --pass-bg: #e6f4ec; --fail-bg: #fbe9e7; --skip-bg: #efefeb;
+    --warn: #8a5200; --warn-bg: #fdf1dc; --on-accent: #ffffff; --shadow: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413; --surface: #1d1d1b; --surface-2: #232321; --text: #ecece8; --muted: #9a9a93;
+      --line: #33332f; --accent: #7d9bff; --accent-bg: #1f2740; --pass: #4cc483; --fail: #ff7a6e;
+      --skip: #8a8a82; --pass-bg: #17301f; --fail-bg: #3a1d1a; --skip-bg: #262624;
+      --warn: #f0b45a; --warn-bg: #3a2c14; --on-accent: #10131c; --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413; --surface: #1d1d1b; --surface-2: #232321; --text: #ecece8; --muted: #9a9a93;
+    --line: #33332f; --accent: #7d9bff; --accent-bg: #1f2740; --pass: #4cc483; --fail: #ff7a6e;
+    --skip: #8a8a82; --pass-bg: #17301f; --fail-bg: #3a1d1a; --skip-bg: #262624;
+    --warn: #f0b45a; --warn-bg: #3a2c14; --on-accent: #10131c; --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--accent); }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .key { color: var(--muted); font-size: 12px; }
+
+  header.top { position: sticky; top: 0; z-index: 5; background: var(--surface);
+    border-bottom: 1px solid var(--line); }
+  .top-inner { max-width: 1120px; margin: 0 auto; padding: 12px 16px 0; }
+  .title-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 20px; margin: 0; }
+  .meta { color: var(--muted); font-size: 13px; }
+  nav.tabs { display: flex; gap: 2px; overflow-x: auto; margin-top: 8px; scrollbar-width: none; }
+  nav.tabs a { padding: 8px 12px; font-size: 14px; color: var(--muted); text-decoration: none;
+    border-bottom: 2px solid transparent; white-space: nowrap; }
+  nav.tabs a:hover { color: var(--text); }
+  nav.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  nav.tabs .count { font-size: 11px; background: var(--skip-bg); border-radius: 999px; padding: 0 6px; margin-left: 4px; }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+  h2 { font-size: 20px; margin: 0 0 4px; }
+  h3 { font-size: 16px; margin: 28px 0 10px; }
+  .lead { color: var(--muted); margin: 0 0 20px; max-width: 70ch; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px;
+    box-shadow: var(--shadow); }
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .muted { color: var(--muted); }
+  .empty { color: var(--muted); font-style: italic; }
+  ul.plain { list-style: none; margin: 0; padding: 0; }
+
+  /* Hero and ladder */
+  .hero { display: flex; gap: 24px; align-items: flex-start; }
+  .hero-text { flex: 1; min-width: 0; }
+  .headline { font-size: 17px; margin: 6px 0 16px; max-width: 62ch; }
+  .hero .big { font-size: 52px; font-weight: 750; line-height: 1; letter-spacing: -.02em; }
+  .hero .name { font-size: 20px; font-weight: 650; }
+  .ladder { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
+  .step { text-align: left; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px;
+    background: var(--surface-2); cursor: pointer; font-size: 13px; position: relative; }
+  .step:hover { border-color: var(--accent); }
+  .step.cleared { background: var(--pass-bg); border-color: transparent; }
+  .step.na { background: transparent; border-style: dashed; }
+  .step.next { border: 2px dashed var(--accent); }
+  .step[aria-selected="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .step b { display: block; font-size: 14px; }
+  .step .state { font-size: 12px; color: var(--muted); }
+  .meter { position: relative; height: 6px; background: var(--line); border-radius: 3px; margin-top: 8px; overflow: visible; }
+  .meter > span { display: block; height: 100%; border-radius: 3px; background: var(--pass); }
+  .meter > i { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--text); opacity: .55; }
+
+  .banner { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: space-between;
+    background: var(--pass-bg); border-radius: 12px; padding: 14px 20px; margin-top: 24px; color: var(--text); text-decoration: none; }
+  .banner:hover { outline: 2px solid var(--pass); }
+  .banner b, .banner .go { color: var(--pass); }
+  .banner .go { font-weight: 600; }
+  .attention { display: grid; gap: 0; padding: 4px 20px; }
+  .attention button { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; text-align: left; border: 0;
+    border-bottom: 1px solid var(--line); background: transparent; padding: 10px 0; cursor: pointer; min-height: 44px; }
+  .attention button:last-child { border-bottom: 0; }
+  .attention button:hover b { color: var(--accent); }
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .section-head a { font-size: 14px; }
+  .gain { margin: 12px 0 0; }
+  .agent-use { margin: 10px 0 0; max-width: 62ch; }
+  .agent-use .label { display: block; font-size: 11px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .agent-use .text { display: block; margin-top: 2px; font-size: 17px; font-weight: 550; line-height: 1.4; }
+  .agent-use.locked .label, .agent-use.locked .text { color: var(--muted); }
+  .agent-use.locked .text { font-weight: 450; }
+  .hero .headline { margin-top: 14px; }
+  .persp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 20px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .persp .row-head { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+  .persp .row-head span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .persp .bar { height: 4px; background: var(--line); border-radius: 2px; margin-top: 6px; }
+  .persp a { display: block; color: inherit; text-decoration: none; border-radius: 6px; margin: -4px -6px; padding: 4px 6px; }
+  .persp a:hover, .persp a:focus-visible { background: var(--accent-bg); }
+  .persp a:hover .row-head span:first-child { color: var(--accent); }
+  .tag-persp { border-color: var(--muted); color: var(--muted); }
+  .persp .bar > span { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+  @media (max-width: 600px) { .persp { grid-template-columns: 1fr; } }
+
+  /* Criterion items */
+  .item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line);
+    border-radius: 10px; background: var(--surface); cursor: pointer; text-align: left; width: 100%; }
+  .item:hover { border-color: var(--accent); }
+  .item + .item { margin-top: 8px; }
+  .grid > .item + .item { margin-top: 0; }
+  .item .body { flex: 1; min-width: 0; }
+  .item .name { font-weight: 600; }
+  .item .fix { font-size: 13.5px; margin-top: 4px; }
+  .item .why { font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+  .item .tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+  .item .note { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .item.clamp .why { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  div.item { cursor: default; }
+  .link { border: 0; background: transparent; padding: 0 2px; color: var(--accent); cursor: pointer; font-size: 13px; }
+  .link:hover { text-decoration: underline; }
+  .item input[type="checkbox"] { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); }
+  .num { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-bg); color: var(--accent);
+    display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    white-space: nowrap; border: 1px solid transparent; }
+  .pass { background: var(--pass-bg); color: var(--pass); }
+  .fail { background: var(--fail-bg); color: var(--fail); }
+  .skipped { background: var(--skip-bg); color: var(--skip); }
+  .e-trivial { background: var(--pass-bg); color: var(--pass); }
+  .e-small { background: var(--accent-bg); color: var(--accent); }
+  .e-medium { background: var(--warn-bg); color: var(--warn); }
+  .e-large { background: var(--fail-bg); color: var(--fail); }
+  .e-none { background: var(--skip-bg); color: var(--skip); }
+  .tag-prio { border-color: var(--accent); color: var(--accent); }
+  .tag-critical { border-color: var(--fail); color: var(--fail); font-weight: 600; }
+  .tag-lvl { background: var(--skip-bg); color: var(--muted); }
+  .tag-waived { border-color: var(--muted); color: var(--muted); border-style: dashed; }
+  .tag-review { background: var(--warn-bg); color: var(--warn); }
+  .tag-new { background: var(--accent-bg); color: var(--accent); }
+  .tag-strength { background: var(--pass-bg); color: var(--pass); }
+
+  /* Level detail */
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .seg button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px;
+    cursor: pointer; font-size: 14px; }
+  .seg button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .seg button .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--skip); }
+  .seg button .dot.ok { background: var(--pass); }
+  .level-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .bigmeter { height: 12px; margin-top: 12px; }
+  .legend { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .cols { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 12px; align-items: start; }
+  .col h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  details.more { margin-top: 16px; }
+  details.more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 3px 10px;
+    font-size: 13px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .chip[class*="ch-"]::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    margin-right: 6px; vertical-align: 1px; }
+  .chip.ch-pass::before { background: var(--pass); }
+  .chip.ch-fail::before { background: var(--fail); }
+  .chip.ch-skip::before { background: var(--skip); }
+  .chip.ch-warn::before { background: var(--warn); }
+  .drop { color: var(--fail); font-weight: 600; }
+
+  /* Heat matrix */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  .heat td.c { text-align: center; padding: 4px; }
+  .heat button { width: 100%; border: 0; border-radius: 6px; padding: 6px 4px; cursor: pointer; font-size: 13px; }
+  .heat .none { color: var(--muted); }
+  .heat th.c { text-align: center; }
+  .heat .h-pass { background: var(--pass-bg); color: var(--pass); }
+  .heat .h-warn { background: var(--warn-bg); color: var(--warn); }
+  .heat .h-fail { background: var(--fail-bg); color: var(--fail); }
+  .heat .h-skip { background: var(--skip-bg); color: var(--skip); }
+  .heat button[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .scroll { overflow-x: auto; }
+
+  /* Filters */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .filters select, .filters input, .filters button { font-size: 13px; padding: 6px 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+  .filters input { flex: 1; min-width: 180px; }
+  .filters button { cursor: pointer; }
+  .filters button .n { margin-left: 6px; font-size: 12px; opacity: .75; }
+  .filters .plus { border-style: dashed; }
+  .filters .plus[aria-pressed="true"] { border-style: solid; }
+  .filters .link { border: 0; background: transparent; color: var(--accent); padding: 6px 4px; }
+  .preset-caption { font-size: 13px; margin: -6px 0 12px; }
+  .filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .group-title { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 18px 0 8px; }
+
+  /* Plan */
+  .prompt { width: 100%; min-height: 110px; font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 12px;
+    border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); resize: vertical; }
+  .btn { display: inline-flex; align-items: center; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent);
+    border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; }
+  .btn.ghost { background: transparent; color: var(--accent); }
+  .btn-lg { padding: 10px 18px; font-size: 15px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .route { margin-bottom: 18px; }
+  details.group { margin-top: 14px; }
+  details.group > summary { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; cursor: pointer; padding: 6px 0;
+    list-style: none; font-size: 13px; }
+  details.group > summary::-webkit-details-marker { display: none; }
+  details.group > summary::before { content: "▸"; color: var(--muted); }
+  details.group[open] > summary::before { content: "▾"; }
+  details.group > summary .group-title { margin: 0; }
+  .plan-row + .plan-row { margin-top: 8px; }
+  .plan-row.waiving .item { border-style: dashed; }
+  .plan-row.waiving .item .name { color: var(--muted); }
+  .switch { flex: none; align-self: center; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+    border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; min-height: 32px; }
+  .switch:hover { border-color: var(--warn); color: var(--warn); }
+  .switch[aria-pressed="true"] { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); font-weight: 600; }
+  .waive-fields { display: grid; gap: 8px; margin: 6px 0 4px 40px; font-size: 13px; }
+  .waive-fields[hidden], .decider[hidden], .prompt-panel[hidden] { display: none; }
+  .waive-fields label { display: grid; gap: 4px; color: var(--muted); }
+  .waive-fields textarea, .waive-fields input, .decider input { font: inherit; font-size: 14px; color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .waive-fields textarea { min-height: 56px; resize: vertical; }
+  .waive-fields input[type="date"] { justify-self: start; }
+  .decider { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 0 0 4px; }
+  .actionbar { position: sticky; bottom: 0; z-index: 4; margin: 24px -16px 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 16px rgba(0,0,0,.08); }
+  .bar-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .bar-info { display: grid; gap: 2px; font-size: 14px; min-width: 0; }
+  .bar-info .hint, .bar-info [role="status"] { font-size: 13px; }
+  .hint { color: var(--warn); }
+  .hint:empty, .bar-info [role="status"]:empty { display: none; }
+  .prompt-panel { margin-bottom: 10px; }
+
+  /* Pager */
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 40px; padding-top: 16px;
+    border-top: 1px solid var(--line); }
+  .pager a { text-decoration: none; font-weight: 600; }
+  .pager small { display: block; color: var(--muted); font-weight: 400; }
+
+  /* Dialog */
+  dialog { border: 1px solid var(--line); border-radius: 14px; padding: 0; width: min(720px, calc(100vw - 32px));
+    background: var(--surface); color: var(--text); box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(0,0,0,.35); }
+  .dlg-head { padding: 18px 20px 12px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; justify-content: space-between; }
+  .dlg-body { padding: 4px 20px 20px; max-height: 70vh; overflow: auto; }
+  .dlg-body h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 18px 0 6px; }
+  .dlg-body p { margin: 0; }
+  .ev div + div { margin-top: 6px; }
+  .close:focus:not(:focus-visible) { outline: none; }
+  .close { border: 0; background: transparent; font-size: 22px; line-height: 1; cursor: pointer; color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .g2, .g3, .cols { grid-template-columns: 1fr; }
+    .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    nav.tabs { mask-image: linear-gradient(to right, #000 85%, transparent); }
+    .seg button, .filters select, .filters input, .filters button, .btn { min-height: 44px; }
+    .switch { min-height: 44px; }
+    .bar-row .row { width: 100%; }
+    .bar-row .row .btn:last-child { flex: 1; justify-content: center; }
+  }
+  @media (max-width: 600px) {
+    .hero { gap: 14px; }
+    .headline { font-size: 15.5px; }
+    .item:has(.switch) { flex-wrap: wrap; }
+    .item:has(.switch) .body { flex: 1 1 200px; }   /* the switch wraps below the text instead of squeezing it */
+    .item .switch { margin-left: auto; }
+    nav.tabs a { padding: 8px 9px; }
+    .waive-fields { margin-left: 0; }
+    .hero .big { font-size: 40px; }
+    .ladder { grid-template-columns: 1fr; gap: 6px; }
+    .step { display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-items: baseline; }
+    .step .state { grid-column: 2; grid-row: 1; }
+    .step > .muted, .step .meter { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<header class="top"><div class="top-inner" id="top"></div></header>
+<main id="app"></main>
+<dialog id="detail"></dialog>
+<script type="application/json" id="start-data">{"min_reason": 10, "served": false}</script>
+<script type="application/json" id="report-data">{"schema_version": 1, "skill_version": "0.38.2", "date": "2026-10-23", "repository": {"name": "bmp", "commit": "a2f21af", "worktree": true, "default_branch": "main", "latest_commit_date": "2026-10-23"}, "profile": {"languages": ["Go", "Shell", "HTML/JavaScript (pages)", "Python (reverse-engineering tools)"], "build_tools": ["Go modules", "Docker/Podman", "mise (tasks)", "npm (vnc/bench only)"], "ci": "GitHub Actions", "hosting": "GitHub", "hosting_cli": "gh (authenticated as schowave)", "monorepo": true, "products": "VNC image (vnc/), WASM image with save server (wasm/server.go), Go remake (remake/)", "deployed_service": "operated", "frontend_bundle": false, "database": "none (save files on a volume)", "orm": "none", "api": "internal save API of the WASM image (GET/PUT /api/saves/{name})", "personal_data": "no", "assessed_branch": "remake at a2f21af plus the uncommitted harness-build changes (--worktree); default branch is main"}, "results": [{"key": "formatter", "name": "Formatter", "category": "style-validation", "level": 1, "perspective": "agent", "critical": false, "why": "Style churn disappears from diffs and the agent matches house style for free.", "passes_when": "an auto-formatter is configured in the repo.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "mise.toml:101-104", "detail": "gofmt -l in remake:test"}, {"type": "file", "ref": "mise.toml:85-88", "detail": "gofmt -l in wasm:test"}, {"type": "file", "ref": ".githooks/pre-commit:14-17", "detail": "gofmt on staged remake"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "lint_config", "name": "Lint Config", "category": "style-validation", "level": 1, "perspective": "agent", "critical": false, "why": "The agent sees its own mistakes in seconds instead of in review.", "passes_when": "a linter configuration for the language of the main application code is committed; a linter that only covers other files (Markdown, YAML, skill files) does not count.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".golangci.yml", "detail": "golangci-lint standard linters"}, {"type": "file", "ref": "mise.toml:141-143", "detail": "lint task over remake/ and wasm/"}, {"type": "file", "ref": "mise.toml:5-6", "detail": "golangci-lint 2.14.0 pinned"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "strict_typing", "name": "Strict Typing", "category": "style-validation", "level": 1, "perspective": "agent", "critical": false, "why": "Strict types reject plausible-but-wrong edits before they run.", "passes_when": "the strictest common type setting is on.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "profile", "ref": "languages", "detail": "Go is strict by default"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "type_check", "name": "Type Check", "category": "style-validation", "level": 1, "perspective": "agent", "critical": false, "why": "Types are the cheapest correctness signal an agent can verify itself.", "passes_when": "the code is statically typed or a type checker is configured.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "profile", "ref": "languages", "detail": "Go is statically typed and compiled"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "large_file_detection", "name": "Large File Detection", "category": "style-validation", "level": 2, "perspective": "agent", "critical": false, "why": "Small files fit the agent's context and stay quick to read.", "passes_when": "something stops oversized files from landing.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files | grep gitattributes", "detail": "no .gitattributes, no size check in .githooks/pre-commit or ci.yml"}], "fix": "Add a size check for new files (a few lines in .githooks/pre-commit and CI), with an allowlist for the original game files in bmp/ and remake/internal/embedded/data.", "effort": "small", "waiver": null, "cost_rank": 14}, {"key": "naming_consistency", "name": "Naming Consistency", "category": "style-validation", "level": 2, "perspective": "agent", "critical": false, "why": "Predictable names let the agent find code and guess intent.", "passes_when": "naming conventions are written down (agent guide, CONTRIBUTING, style guide) or enforced by lint rules (pep8-naming, ESLint naming-convention, Checkstyle), and a sample of three modules follows them. Consistent but undocumented, unenforced naming fails.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:61-62", "detail": "English identifiers written down"}, {"type": "command", "ref": "git grep -n immerNachfragen wasm/server.go", "detail": "the save server does not follow it yet"}], "fix": "Rename the German identifiers in wasm/server.go (immerNachfragen, dateien) to English and enforce Go naming with revive in .golangci.yml.", "effort": "trivial", "waiver": null, "cost_rank": 4}, {"key": "pre_commit_hooks", "name": "Pre-commit Hooks", "category": "style-validation", "level": 3, "perspective": "agent", "critical": false, "why": "Mistakes surface at commit time, while the change is still fresh.", "passes_when": "a commit-time hook framework is configured.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".githooks/pre-commit", "detail": ""}, {"type": "file", "ref": "mise.toml:149-151", "detail": "mise run hooks"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "code_modularization", "name": "Code Modularization", "category": "style-validation", "level": 3, "perspective": "architecture", "critical": false, "why": "Enforced boundaries keep each agent edit inside one module.", "passes_when": "module or layer boundaries are enforced by a tool.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/internal/", "detail": "Go internal/ packages: assets, game, ui, embedded"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "cyclomatic_complexity", "name": "Cyclomatic Complexity", "category": "style-validation", "level": 4, "perspective": "agent", "critical": false, "why": "Small functions are ones an agent can change safely.", "passes_when": "a complexity limit is configured.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files | grep golangci", "detail": "no complexity limit configured"}], "fix": "Enable gocyclo or gocognit in the golangci-lint config with a threshold at today's maximum and lower it over time.", "effort": "small", "waiver": null, "cost_rank": 15}, {"key": "dead_code_detection", "name": "Dead Code Detection", "category": "style-validation", "level": 4, "perspective": "agent", "critical": false, "why": "Without dead paths, the agent spends its effort only on code that runs.", "passes_when": "a dedicated dead-code tool runs in CI over the main application code. Lint rules for unused imports or variables alone do not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:46-56", "detail": "CI runs vet, gofmt and tests only"}], "fix": "Run golang.org/x/tools/cmd/deadcode (or golangci-lint unused) in the CI remake job.", "effort": "small", "waiver": null, "cost_rank": 19}, {"key": "duplicate_code_detection", "name": "Duplicate Code Detection", "category": "style-validation", "level": 4, "perspective": "agent", "critical": false, "why": "Each behaviour lives in one place, so the agent changes it once.", "passes_when": "duplicate-code detection runs in CI.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:46-56", "detail": "no duplication check"}], "fix": "Enable the dupl linter in golangci-lint with a sensible threshold.", "effort": "small", "waiver": null, "cost_rank": 20}, {"key": "tech_debt_tracking", "name": "Tech Debt Tracking", "category": "style-validation", "level": 4, "perspective": "agent", "critical": false, "why": "Linked TODOs give the agent a readable list of known gaps.", "passes_when": "debt markers follow a machine-readable convention that links to a ticket, enforced by a lint rule or scanner. Without such a rule the criterion fails, even if the code has no TODOs today.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -cE 'TODO|FIXME' -- '*.go'", "detail": "no TODOs, but no rule"}], "fix": "Require an issue reference on TODO/FIXME via the godox linter in golangci-lint (today the Go code has no TODOs, so it passes at once).", "effort": "trivial", "waiver": null, "cost_rank": 5}, {"key": "n_plus_one_detection", "name": "N+1 Detection", "category": "style-validation", "level": 5, "perspective": "agent", "critical": false, "why": "N+1 queries an agent introduces are caught before they reach production.", "passes_when": "N+1 queries in the main application code are caught automatically: query-count assertions in tests, an N+1 detector, or ORM settings that raise on lazy loading (`raise_on_sql`, `strict_loading`).", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "profile", "ref": "orm", "detail": "no ORM or database"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "deps_pinned", "name": "Dependencies Pinned", "category": "build-system", "level": 1, "perspective": "agent", "critical": false, "why": "The agent, the team, and CI resolve the same versions.", "passes_when": "a lockfile pins exact dependency versions and is committed.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/go.sum", "detail": ""}, {"type": "file", "ref": "vnc/bench/package-lock.json", "detail": ""}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "toolchain_pinned", "name": "Toolchain Pinned", "category": "build-system", "level": 1, "perspective": "agent", "critical": false, "why": "The agent, the team, and CI run the same runtime versions, so every failure the agent sees is one everyone can reproduce.", "passes_when": "the runtime of the main application code (Node, Python, JDK, .NET SDK, Go …) and its package manager are pinned in a committed file that local setup and CI both read. A CI step that installs either of them unpinned fails the criterion; pinning further tools is welcome but not required.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/go.mod:3", "detail": "go 1.27.2"}, {"type": "file", "ref": "wasm/go.mod:3", "detail": "go 1.27.2"}, {"type": "file", "ref": ".github/workflows/ci.yml:31-33", "detail": "setup-go reads go.mod"}, {"type": "file", "ref": "mise.toml:5-6", "detail": "golangci-lint pinned, installed by mise-action in CI"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "build_cmd_doc", "name": "Documented Build Commands", "category": "build-system", "level": 1, "perspective": "agent", "critical": false, "why": "With the canonical command written down, the agent can verify its own work.", "passes_when": "build and run commands are written in the README, CONTRIBUTING, or the agent guide, or in an in-repo doc one link away from them.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:7-8", "detail": ""}, {"type": "file", "ref": "README.md:136-142", "detail": "task table"}, {"type": "file", "ref": "remake/README.md:35-45", "detail": ""}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "vcs_cli_tools", "name": "Git Hosting CLI", "category": "build-system", "level": 1, "perspective": "agent", "critical": false, "why": "The agent can open PRs and read CI results without a browser.", "passes_when": "scripts or docs for working on this repo use a scriptable hosting CLI; a mention in product content does not count.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:35-38", "detail": "gh for pull requests and CI results"}, {"type": "file", "ref": "mise.toml:158-161", "detail": "release task uses gh"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "single_command_setup", "name": "Single Command Setup", "category": "build-system", "level": 1, "perspective": "agent", "critical": false, "why": "One setup command gets the agent past the step where it most often gets stuck.", "passes_when": "one documented command takes a fresh clone, with its stated prerequisites installed (Docker, mise …), to a state where the tests run. A script that chains several steps counts; several commands listed in the docs do not. A devcontainer counts only when the docs present it as the complete setup path. If the tests need gitignored files (a local config, test data), the setup or the agent tool's environment setup provides them, so a fresh agent worktree gets there too.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/README.md:24-31", "detail": "prerequisites: Go, mise, Linux GL/X11 headers"}, {"type": "file", "ref": "remake/README.md:119-123", "detail": "mise run remake:test runs from a fresh clone; go fetches modules, test data is committed"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "check_command", "name": "Check Command", "category": "build-system", "level": 2, "perspective": "agent", "critical": false, "why": "One command after every change is the agent's tightest feedback loop and tells it exactly which checks matter.", "passes_when": "a single documented command runs all fast checks (format, lint, types, unit tests), is named in the agent guide, and stops with a non-zero exit code on the first failure (a task runner target, a script with `set -e`, or a build tool goal).", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "mise.toml:145-147", "detail": "check: lint, remake:test, wasm:test"}, {"type": "file", "ref": "AGENTS.md:12-15", "detail": "named in the agent guide"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agentic_development", "name": "Agentic Development", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "Existing agent config and skills are something to build on.", "passes_when": "the repo shows traces of working with agents: a committed configuration or instruction file of an agent tool, agent skills or commands, or agent co-author trailers in the history.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md", "detail": ""}, {"type": "file", "ref": ".claude/", "detail": "skills"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "automated_pr_review", "name": "Automated PR Review", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "Agent-written PRs get a consistent first pass before a human.", "passes_when": "pull requests get an automated first-pass review: feedback on the code change, from an AI reviewer or a bot with rules on the diff (Danger, Reviewdog), and the project-specific review rules it applies are versioned in the repo. A generic AI reviewer without the project's rules fails: it does not know what this project gets wrong. Checks of the template, labels, or title alone do not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "ls .github/workflows", "detail": "ci.yml and release.yml only; no reviewer, no review rules"}], "fix": "Run an AI or rule-based reviewer on pull requests fed by a committed REVIEW.md (for example the claude-code-action with the project's review rules).", "effort": "small", "waiver": null, "cost_rank": 21}, {"key": "fast_ci_feedback", "name": "Fast CI Feedback", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "Short CI keeps the agent's edit-verify loop tight.", "passes_when": "CI runs on pull/merge requests and runs the same checks as the documented check command (or, without one, the documented lint, type, and test commands), ideally by calling it, so local and CI results cannot drift apart.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:12", "detail": "runs on pull_request"}, {"type": "file", "ref": ".github/workflows/ci.yml:53-54", "detail": "calls mise run check"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "feature_flag_infrastructure", "name": "Feature Flag Infrastructure", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "Agent changes can ship dark instead of all-or-nothing.", "passes_when": "a flag system switches behaviour at runtime per environment, tenant, or user (a flag SDK, OpenFeature, or a flag module with targeting). Plain config booleans or `*_ENABLED` variables do not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -niE 'feature.?flag|openfeature'", "detail": "nothing found"}], "fix": "Introduce a small flag mechanism (OpenFeature or a flag file read at start) for behaviour that should ship dark, or waive this for a single-user game.", "effort": "medium", "waiver": null, "cost_rank": 42}, {"key": "release_automation", "name": "Release Automation", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "An automated release is one the agent can carry through to the end.", "passes_when": "CI publishes versioned releases (tags, versioned packages or images, release entries). Continuous deployment without versions counts for `deployment_frequency`, not here.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/release.yml", "detail": "versioned tags, images and GitHub releases"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "infrastructure_as_code", "name": "Infrastructure as Code", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "Infrastructure the agent can read and validate is infrastructure it can change, and the plan shows reviewers what the change will do before anything is applied.", "passes_when": "the infrastructure the team runs is defined as code in this repo or one the agent guide links, and every change to it is validated before merge: format, validate, and lint locally or in CI, and the plan or diff against the target environment shows on the pull/merge request. Infrastructure set up by hand in a console fails.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "vnc/docker-compose.yml", "detail": "the operated setup is defined as compose"}, {"type": "file", "ref": ".github/workflows/ci.yml", "detail": "no validation of the compose files"}], "fix": "Validate both compose files in CI (`docker compose -f vnc/docker-compose.yml config`, same for wasm) and show the image/compose diff on the pull request.", "effort": "small", "waiver": null, "cost_rank": 22}, {"key": "generated_code_marked", "name": "Generated Code Marked", "category": "build-system", "level": 3, "perspective": "agent", "critical": false, "why": "A hand edit to generated code is lost on the next generator run; the agent avoids it only when it can tell generated files apart and CI catches drift.", "passes_when": "committed generator output (API clients, contract types, catalogs, lockstep copies) is recognisable as such, by a header, `linguist-generated` in `.gitattributes`, or a list in the agent guide naming the generator command, and CI regenerates it and fails when the result differs from what is committed. Large generated or vendored trees the agent has no reason to read are kept out of its search, by `.gitignore` or a deny rule in the shared agent tool configuration.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:71-72", "detail": "generator named"}, {"type": "command", "ref": "git ls-files | grep gitattributes", "detail": "no .gitattributes, no deny rule"}], "fix": "Mark remake/internal/embedded/data as linguist-generated in .gitattributes and deny it in a shared .claude/settings.json; AGENTS.md already names remake:extract.", "effort": "trivial", "waiver": null, "cost_rank": 9}, {"key": "build_performance_tracking", "name": "Build Performance Tracking", "category": "build-system", "level": 4, "perspective": "agent", "critical": false, "why": "Tracked build times keep every agent loop fast as the codebase grows.", "passes_when": "builds are cached or their timing is visible.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:96", "detail": "Docker layer cache in GHA"}, {"type": "file", "ref": ".github/workflows/ci.yml:34", "detail": "Go module cache"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agent_outcome_tracking", "name": "Agent Outcome Tracking", "category": "build-system", "level": 4, "perspective": "governance", "critical": false, "why": "Whether agents help shows in the numbers: lead time, rework, human interventions.", "passes_when": "the team regularly collects at least two measures of agent contributions (share of agent pull requests, revert or rework rate, review rounds per pull request, lead time) and keeps them in the repo or links them from it.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git log -200 --format='%(trailers:key=Co-Authored-By)'", "detail": "no agent markers to measure"}], "fix": "Mark agent commits (see agent_change_traceability) and add a small script that reports agent share and reverts from git log.", "effort": "small", "waiver": null, "cost_rank": 23}, {"key": "deployment_frequency", "name": "Deployment Frequency", "category": "build-system", "level": 4, "perspective": "agent", "critical": false, "why": "Small, frequent deploys match the size of agent changes.", "passes_when": "deployments run automatically and regularly.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/release.yml:9-15", "detail": "workflow_dispatch only"}], "fix": "Release automatically (for example on every push to main that passes CI, or on a schedule) instead of only by manual dispatch; Watchtower then deploys.", "effort": "small", "waiver": null, "cost_rank": 24}, {"key": "post_deploy_verification", "name": "Post-Deploy Verification", "category": "build-system", "level": 4, "perspective": "agent", "critical": false, "why": "A smoke suite against the deployed environment tells the agent whether its change works where it runs, not just in tests.", "passes_when": "after every automated deployment a smoke or synthetic test suite runs against that environment, and a failure stops promotion to the next stage (test → integration → production) or triggers a rollback. Health checks alone do not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "README.md:68", "detail": "Watchtower pulls new images, nothing verifies them"}], "fix": "After Watchtower updates the NAS container, run the smoke/bench check against it (a small scheduled job or a Watchtower post-update hook) and roll back on failure.", "effort": "medium", "waiver": null, "cost_rank": 43}, {"key": "release_notes_automation", "name": "Release Notes Automation", "category": "build-system", "level": 4, "perspective": "agent", "critical": false, "why": "Generated notes give commits a format the agent can follow.", "passes_when": "release notes are generated.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/release.yml:155-159", "detail": "generate_release_notes: true"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "unused_dependencies_detection", "name": "Unused Dependencies Detection", "category": "build-system", "level": 4, "perspective": "agent", "critical": false, "why": "A lean dependency graph is less for the agent to understand.", "passes_when": "unused dependencies are detected in CI.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/go.mod:5-12", "detail": "all requirements marked // indirect, so go.mod is not tidy"}], "fix": "Add a CI step `go mod tidy && git diff --exit-code go.mod go.sum` in remake/; it would already flag that every requirement in go.mod is marked // indirect.", "effort": "trivial", "waiver": null, "cost_rank": 10}, {"key": "dead_feature_flag_detection", "name": "Dead Feature Flag Detection", "category": "build-system", "level": 5, "perspective": "agent", "critical": false, "why": "Removing stale flags keeps every branch the agent reads a live one.", "passes_when": "stale feature flags are detected automatically.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "criterion", "ref": "feature_flag_infrastructure", "detail": "`feature_flag_infrastructure` fails"}], "fix": null, "effort": null, "waiver": null, "cost_rank": 53}, {"key": "heavy_dependency_detection", "name": "Heavy Dependency Detection", "category": "build-system", "level": 5, "perspective": "agent", "critical": false, "why": "Size budgets keep the code lean when an agent reaches for a library to save a few lines.", "passes_when": "shipped bundles have size budgets.", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "profile", "ref": "frontend_bundle", "detail": "static pages; js-dos is loaded from a CDN (wasm/index.html:42), no bundler"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "monorepo_tooling", "name": "Monorepo Tooling", "category": "build-system", "level": 5, "perspective": "agent", "critical": false, "why": "The task graph shows the agent what a change affects across packages.", "passes_when": "the monorepo uses workspace-aware build tooling. A system split over several repos passes when a committed workspace manifest lets the agent check out and update all of them with one command.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "mise.toml:145-147", "detail": "check spans remake and the save server, not the images"}], "fix": "Let `mise run check` (or a `check:all`) also depend on wasm:smoke and vnc:bench so one task graph spans all three products.", "effort": "small", "waiver": null, "cost_rank": 25}, {"key": "progressive_rollout", "name": "Progressive Rollout", "category": "build-system", "level": 5, "perspective": "agent", "critical": false, "why": "A regression an agent introduced reaches few users first.", "passes_when": "deployments roll out progressively.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/release.yml:149-153", "detail": "latest moves for every host at once"}], "fix": "Release to a canary tag first (for example `next`) that one instance follows before `latest` moves, or waive this for a single-host deployment.", "effort": "medium", "waiver": null, "cost_rank": 44}, {"key": "rollback_automation", "name": "Rollback Automation", "category": "build-system", "level": 5, "perspective": "agent", "critical": false, "why": "Cheap rollback makes shipping agent changes low-risk.", "passes_when": "rollback is one command or automatic.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n -i rollback", "detail": "no rollback command or workflow"}], "fix": "Add a workflow (or mise task) that moves `latest`/`wasm` back to a given earlier version with `docker buildx imagetools create`, and document it.", "effort": "small", "waiver": null, "cost_rank": 26}, {"key": "version_drift_detection", "name": "Version Drift Detection", "category": "build-system", "level": 5, "perspective": "agent", "critical": false, "why": "One version per dependency across packages keeps agent changes compatible.", "passes_when": "shared dependency versions are kept aligned across packages.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/go.mod:3", "detail": "go 1.27.2"}, {"type": "file", "ref": "wasm/Dockerfile:5", "detail": "golang:1.27-alpine, not tied to go.mod"}], "fix": "Check in CI that the golang image of wasm/Dockerfile matches go.mod (one line of shell).", "effort": "trivial", "waiver": null, "cost_rank": 11}, {"key": "unit_tests_exist", "name": "Unit Tests Exist", "category": "testing", "level": 1, "perspective": "agent", "critical": true, "why": "Tests are the strongest signal an agent can check its change against.", "passes_when": "unit tests exist in the stack's standard layout.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/internal/game/sim_test.go", "detail": "remake: unit tests in assets, game, ui"}, {"type": "file", "ref": "wasm/server_test.go", "detail": "save server: httptest unit tests"}, {"type": "profile", "ref": "products", "detail": "the VNC image has no code of its own beyond the start script of a third-party emulator, covered by the bench"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "test_naming_conventions", "name": "Test Naming Conventions", "category": "testing", "level": 2, "perspective": "agent", "critical": false, "why": "The agent finds and extends the right tests by convention.", "passes_when": "test names and placement are consistent across the suite.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "wasm/server_test.go", "detail": "*_test.go next to the code, Test<Behaviour> names"}, {"type": "file", "ref": "remake/internal/ui/flow_test.go", "detail": "same layout in remake"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "unit_tests_runnable", "name": "Unit Tests Runnable", "category": "testing", "level": 2, "perspective": "agent", "critical": false, "why": "Tests the agent can run itself let it verify every change.", "passes_when": "one documented command runs the unit tests; in a repo with several products, one command per product is enough.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:12-15", "detail": "mise run check runs all unit tests"}, {"type": "file", "ref": "README.md:140", "detail": "documented in the README"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "test_stage_rules", "name": "Test Stage Rules", "category": "testing", "level": 2, "perspective": "agent", "critical": false, "why": "Named test stages tell the agent when to run the slower suites, so CI confirms its work instead of surprising it.", "passes_when": "for every check outside the fast checks (the check command, or without one the documented lint, type, and unit test commands), such as integration, end-to-end, contract, or performance suites, the agent guide says when it is required, for example \"end-to-end tests when routes or the UI change\".", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:17-26", "detail": "vnc:bench, wasm:smoke and screen comparison with the change that requires them"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "integration_tests_exist", "name": "Integration Tests Exist", "category": "testing", "level": 3, "perspective": "agent", "critical": false, "why": "They catch the cross-module breakage unit tests miss.", "passes_when": "integration or end-to-end tests cover real flows.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "vnc/bench/bench.mjs", "detail": "Playwright run against the VNC image with --check"}, {"type": "file", "ref": "wasm/smoke.sh", "detail": "page, bundle and save API of the WASM image"}, {"type": "file", "ref": "remake/internal/ui/flow_test.go", "detail": "screens driven headless"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "test_isolation", "name": "Test Isolation", "category": "testing", "level": 3, "perspective": "agent", "critical": false, "why": "Isolated tests give the agent pass/fail signals it can trust.", "passes_when": "the main unit suite runs in parallel (configured, or the framework's default as in Go or Vitest) without shared mutable fixtures. A parallel end-to-end suite alone does not count.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "profile", "ref": "languages", "detail": "go test runs packages in parallel by default"}, {"type": "file", "ref": "wasm/server_test.go", "detail": "each test gets its own temporary data directory"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "flaky_test_detection", "name": "Flaky Test Detection", "category": "testing", "level": 4, "perspective": "agent", "critical": false, "why": "Stable tests keep red meaningful, so the agent takes every failure seriously.", "passes_when": "flaky tests are recorded where people can see them over time: a quarantine list, a flaky-test report or dashboard, retry telemetry, or a tracking label. Retries alone do not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n -i flaky", "detail": "nothing tracks flaky tests"}], "fix": "Record failed-then-passed CI runs (for example a weekly job running `go test -count=3` that files an issue on a flaky test).", "effort": "medium", "waiver": null, "cost_rank": 45}, {"key": "test_coverage_thresholds", "name": "Test Coverage Thresholds", "category": "testing", "level": 4, "perspective": "agent", "critical": false, "why": "A gate pushes the agent to test what it changes.", "passes_when": "coverage is measured in CI and published or gated by a threshold. A coverage configuration that only runs locally does not count.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "mise.toml:101-104", "detail": "tests run without coverage"}], "fix": "Run `go test -coverprofile` in the check, publish it in CI and fail below the measured value.", "effort": "small", "waiver": null, "cost_rank": 16}, {"key": "mutation_testing", "name": "Mutation Testing", "category": "testing", "level": 4, "perspective": "agent", "critical": false, "why": "Coverage shows the code ran, not that a test would notice it breaking; mutation testing catches the assertion-free tests an agent writes to turn a gate green.", "passes_when": "mutation testing runs in CI over the main application code, in full or on the changed code, and its score is published or gated. A run that only happens locally does not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n -i mutat -- .github", "detail": "no mutation testing"}], "fix": "Run a Go mutation tester (for example go-mutesting or gremlins) on changed packages in a CI job and publish the score.", "effort": "medium", "waiver": null, "cost_rank": 46}, {"key": "test_performance_tracking", "name": "Test Performance Tracking", "category": "testing", "level": 4, "perspective": "agent", "critical": false, "why": "Tracked test times keep the suite and the agent's loop fast.", "passes_when": "test suite timing is tracked over time.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:53-54", "detail": "no timing report"}], "fix": "Upload `go test -json` timings from CI (or `gotestsum --junitfile`) and watch the slowest tests.", "effort": "small", "waiver": null, "cost_rank": 27}, {"key": "gate_ratchet", "name": "Gate Ratchet", "category": "testing", "level": 4, "perspective": "agent", "critical": false, "why": "Gates that only tighten keep \"green\" meaningful, even when weakening a test would be the agent's quickest way out.", "passes_when": "weakening a gate is visible: coverage floors only rise (a ratchet, or per-module floors at the measured value), skip and ignore markers need a reference (enforced by lint), and a change to test, lint, or CI configuration cannot land without owner review that the platform enforces: CODEOWNERS with code-owner approval required on the default branch (GitHub branch protection or a ruleset; GitLab Premium or higher), a path-based required-reviewer policy in Azure DevOps, or GitLab approval rules, while nobody pushes to the default branch directly, since a direct push skips the review. Where the platform cannot enforce owner review (GitLab Free, direct pushes), a CI check that fails when a gate is weaker than on the base commit does the same. A CODEOWNERS file alone does not count.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/CODEOWNERS", "detail": "covers only the agent setup"}, {"type": "command", "ref": "gh api repos/schowave/bmp/branches/main/protection", "detail": "404 Branch not protected"}], "fix": "Add CODEOWNERS entries for .golangci.yml, mise.toml, .github/ and *_test.go, require code-owner review on main, and pin a coverage floor.", "effort": "medium", "waiver": null, "cost_rank": 41}, {"key": "readme", "name": "README", "category": "documentation", "level": 1, "perspective": "agent", "critical": false, "why": "It is the agent's first orientation in the repo.", "passes_when": "the root README says what the project is, how to set it up and run it (or that there is nothing to build), and where the main parts live, directly or by linking docs inside the repo. A README that only links to an external website fails; a link to the rendered site of docs kept in this repo counts as a doc inside the repo when the evidence names their source folder.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "README.md:9", "detail": "points to the remake"}, {"type": "file", "ref": "README.md:122-133", "detail": "layout with remake/, docs and AGENTS.md"}, {"type": "file", "ref": "README.md:136-142", "detail": "commands incl. mise run check"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agents_md", "name": "Agent Guide", "category": "documentation", "level": 2, "perspective": "agent", "critical": false, "why": "An agent guide is the single most effective readiness artifact.", "passes_when": "an agent guide exists. Presence only; the next criteria grade content.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md", "detail": "agent guide"}, {"type": "file", "ref": "CLAUDE.md", "detail": "imports AGENTS.md"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agents_md_size", "name": "Agent Guide Substance", "category": "documentation", "level": 2, "perspective": "agent", "critical": false, "why": "A guide with substance but no bulk teaches the agent the essentials and leaves room for the code.", "passes_when": "the guide is more than a stub and still fits comfortably in context (roughly 20 to 300 lines, a guideline from 2026 context sizes; encyclopedic parts are linked out).", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "command", "ref": "wc -l AGENTS.md", "detail": "90 lines"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "documentation_freshness", "name": "Documentation Freshness", "category": "documentation", "level": 2, "perspective": "agent", "critical": false, "why": "Current docs lead the agent along paths that still exist.", "passes_when": "the newest commit touching any core doc (README, CONTRIBUTING, agent guide, `docs/`) is at most 180 days older than the repo's latest commit.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "command", "ref": "git log -1 --format=%cs -- README* docs remake/CLAUDE.md", "detail": "2026-10-23, same day as the latest commit"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agents_md_content", "name": "Agent Guide Completeness", "category": "documentation", "level": 3, "perspective": "agent", "critical": false, "why": "A guide that names the test command lets the agent verify every change.", "passes_when": "the guide covers the test command, build/run commands, repo layout, the architecture style when the code follows one (hexagonal, layered …), conventions, and which docs to update with which kind of change (a definition of done); it leaves out what code and config already state, and nothing in it is contradicted by the configuration (for example a strict mode the config does not enable).", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:7-8", "detail": "run commands"}, {"type": "file", "ref": "AGENTS.md:12-26", "detail": "check command and slower stages"}, {"type": "file", "ref": "AGENTS.md:51-65", "detail": "conventions incl. the game/ui layering"}, {"type": "file", "ref": "AGENTS.md:40-49", "detail": "definition of done"}, {"type": "file", "ref": "AGENTS.md:80-87", "detail": "layout and docs"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agents_md_freshness", "name": "Agent Guide Freshness", "category": "documentation", "level": 3, "perspective": "agent", "critical": false, "why": "Agents trust the guide, and a current guide earns that trust.", "passes_when": "the agent guide was changed within about six months of the repo's latest commit.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "command", "ref": "git log -1 --format=%cs -- AGENTS.md", "detail": "uncommitted, changed 2026-10-23"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agent_boundaries", "name": "Agent Boundaries", "category": "documentation", "level": 3, "perspective": "agent", "critical": false, "why": "What an agent may not decide alone it has to know before it acts, not after.", "passes_when": "the agent guide names what an agent does not change without asking (for example public interfaces, database migrations, dependencies, security configuration) and when it stops and asks (escalation rules). This is the stated intent; `agent_action_guardrails` grades whether the tool configuration enforces it.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:67-79", "detail": "ask before releases, CI changes, dependencies, bmp/; stop when spec and decompilation disagree"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "scoped_agent_guides", "name": "Scoped Agent Guides", "category": "documentation", "level": 3, "perspective": "agent", "critical": false, "why": "In a large repo the context belongs where the work happens; one guide for everything grows too long or too vague.", "passes_when": "each subproject or main module has its own short agent guide covering only its area, with test and lint commands scoped to it (running the whole suite after a change to one subproject costs time and context), and the root guide points to them.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/CLAUDE.md", "detail": "scoped guide for remake/"}, {"type": "command", "ref": "git ls-files -co --exclude-standard | grep -E '(AGENTS|CLAUDE).md'", "detail": "none for wasm/ or vnc/"}], "fix": "Give wasm/ and vnc/ a short scoped guide each (build, smoke/bench command, ports) and link them from AGENTS.md; remake/CLAUDE.md is one already.", "effort": "small", "waiver": null, "cost_rank": 17}, {"key": "api_schema_docs", "name": "API Schema Docs", "category": "documentation", "level": 3, "perspective": "architecture", "critical": false, "why": "A machine-readable schema lets the agent call APIs correctly.", "passes_when": "machine-readable API schemas are committed or generated.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "wasm/server.go:121", "detail": "save API registered without a schema"}], "fix": "Commit a short OpenAPI file for /api/saves/{name} (GET/PUT, name pattern, 4 MB limit, status codes) next to wasm/server.go.", "effort": "small", "waiver": null, "cost_rank": 28}, {"key": "automated_doc_generation", "name": "Automated Doc Generation", "category": "documentation", "level": 3, "perspective": "agent", "critical": false, "why": "Generated docs cannot drift, so the agent can trust them.", "passes_when": "reference docs are generated from source in a pipeline.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:57-66", "detail": "go doc -all of the remake packages uploaded as remake-godoc"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "service_flow_documented", "name": "Service Flow Documented", "category": "documentation", "level": 3, "perspective": "architecture", "critical": false, "why": "Flows give the cross-service picture code alone does not.", "passes_when": "architecture or service flows are documented, ideally as diagrams.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "README.md:42-52", "detail": "architecture diagram of the VNC image"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "target_architecture", "name": "Target Architecture", "category": "documentation", "level": 3, "perspective": "architecture", "critical": false, "why": "Agents copy what they find in the code; in grown code that is often a pattern nobody wants any more.", "passes_when": "the target architecture and the known deviations of the current code from it are documented: which patterns or modules are deprecated and what to use instead. The agent guide links to it directly or through a doc it links. A diagram of today's flows alone is `service_flow_documented`.", "harness_build": true, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "statement", "ref": "user, 2026-10-23", "detail": "The code follows one style throughout, with no legacy patterns to avoid."}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "domain_docs", "name": "Domain Docs", "category": "documentation", "level": 3, "perspective": "architecture", "critical": false, "why": "Domain language and past decisions let the agent build solutions that fit the whole system, not just the file in front of it.", "passes_when": "a glossary of domain terms and architecture decision records live in the repo, and the agent guide links to them directly or through a doc it links.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "docs/glossary.md", "detail": "glossary"}, {"type": "file", "ref": "docs/adr/0001-record-architecture-decisions.md", "detail": "ADRs 0001-0004"}, {"type": "file", "ref": "AGENTS.md:85-86", "detail": "linked from the guide"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "skills", "name": "Skills", "category": "documentation", "level": 3, "perspective": "agent", "critical": false, "why": "Skills turn repeated workflows into something the agent runs the same way every time.", "passes_when": "agent skills or commands with frontmatter for working on this repo exist in a folder the agent tool loads; skills the repo ships as its product (for example under `plugins/`) do not count.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".claude/skills/compare-screen/SKILL.md", "detail": ""}, {"type": "file", "ref": ".claude/skills/query-original/SKILL.md", "detail": ""}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agent_rules_enforced", "name": "Agent Rules Enforced", "category": "documentation", "level": 4, "perspective": "agent", "critical": false, "why": "A rule enforced by a hook, linter, or CI check holds every time, even when an agent skips an instruction in the guide.", "passes_when": "the rules the agent guide states as mandatory (run the check command, forbidden commands, version pinning, protected paths, required documentation updates) are each backed by a hook, lint rule, or CI check; rules that cannot be checked are the exception and say so.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:67-79", "detail": "hard limits"}, {"type": "command", "ref": "git ls-files .claude/settings.json", "detail": "no agent permissions or hooks"}], "fix": "Back the hard limits with .claude/settings.json: ask before `mise run release`, `gh workflow run`, `git push` to main and `podman push`; a Stop hook that runs `mise run check`.", "effort": "small", "waiver": null, "cost_rank": 29}, {"key": "agents_md_validation", "name": "Agent Guide Structure", "category": "documentation", "level": 4, "perspective": "agent", "critical": false, "why": "Sections let the agent jump to what it needs.", "passes_when": "the guide is split into clearly headed sections.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:10", "detail": "sections: Verify your work, Working with the platform, Definition of done, Conventions, Hard limits, Where to find context"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "env_template", "name": "Env Template", "category": "dev-environment", "level": 2, "perspective": "agent", "critical": false, "why": "A complete template makes every required variable visible at setup.", "passes_when": "a committed template documents every required environment variable.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/README.md:58-62", "detail": "BMP_DATA documented; the only variable the application code reads (remake/cmd/bmp/main.go:92)"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "database_schema", "name": "Database Schema", "category": "dev-environment", "level": 2, "perspective": "agent", "critical": false, "why": "A declared schema lets the agent reason about data and migrations.", "passes_when": "the schema is managed by migrations or a schema tool.", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "profile", "ref": "database", "detail": "no database"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "local_services_setup", "name": "Local Services Setup", "category": "dev-environment", "level": 2, "perspective": "agent", "critical": false, "why": "The agent can run the app end to end.", "passes_when": "local dependencies start with one command.", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "profile", "ref": "database", "detail": "no external services; remake runs standalone, the images are self-contained"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "test_data_reproducible", "name": "Reproducible Test Data", "category": "dev-environment", "level": 2, "perspective": "agent", "critical": false, "why": "An agent can only verify what it can run against known data.", "passes_when": "the data for local and integration tests is created by a documented command or versioned in the repo (seeds, fixtures, factories, anonymised dumps), and no test suite needs a shared or production database. `local_services_setup` grades whether the services start, this criterion what they hold.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/internal/embedded/data/", "detail": "test data versioned"}, {"type": "file", "ref": "remake/README.md:125-128", "detail": "tests run against the committed original files"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "devcontainer", "name": "Devcontainer", "category": "dev-environment", "level": 3, "perspective": "agent", "critical": false, "why": "A known-good workspace removes environment guesswork.", "passes_when": "a devcontainer configuration exists.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files .devcontainer", "detail": "none"}], "fix": "Add .devcontainer/devcontainer.json with Go, mise and the GL/X11 headers plus xvfb.", "effort": "small", "waiver": null, "cost_rank": 30}, {"key": "agent_app_verification", "name": "Agent App Verification", "category": "dev-environment", "level": 3, "perspective": "agent", "critical": false, "why": "An agent that can start the application and use it like a user verifies behaviour, not just tests.", "passes_when": "the docs for working on this repo say how to start the application locally, and the agent has a way to exercise it: for a web UI, browser automation set up in the agent tool configuration or documented for the agent (Playwright, a browser MCP server or CLI); for an API, documented example calls (`.http` files, a collection, curl lines); for a CLI, documented invocations.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/CLAUDE.md:6", "detail": "remake:shot with input scripts to drive and screenshot screens"}, {"type": "file", "ref": "remake/README.md:58-68", "detail": "-demo, -shot, -script flags"}, {"type": "file", "ref": "vnc/bench/README.md", "detail": "Playwright drives the VNC image"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "symbol_navigation", "name": "Symbol Navigation", "category": "dev-environment", "level": 3, "perspective": "agent", "critical": false, "why": "In a large or multi-language codebase, text search for a common name returns thousands of matches; navigation by symbol finds the one definition and its real references.", "passes_when": "the shared agent tool configuration gives the agent symbol-level navigation (go to definition, find references) for each language of the main application code, through a language server or a code intelligence tool, and the setup command or the agent guide installs what it needs.", "harness_build": true, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "command", "ref": "report.py --scan", "detail": "Go is the one main language, 121 .go files (< 500)"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "devcontainer_runnable", "name": "Devcontainer Runnable", "category": "dev-environment", "level": 4, "perspective": "agent", "critical": false, "why": "A devcontainer that starts gives the agent a working environment in one step.", "passes_when": "the devcontainer declares something runnable: `image`, `build`, `dockerFile`, or `dockerComposeFile`. Declaration only; nothing is built.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "criterion", "ref": "devcontainer", "detail": "`devcontainer` fails"}], "fix": null, "effort": null, "waiver": null, "cost_rank": 54}, {"key": "parallel_workspaces", "name": "Parallel Workspaces", "category": "dev-environment", "level": 4, "perspective": "agent", "critical": false, "why": "Several agents working side by side need workspaces that start fast and do not step on each other's ports, databases, or containers.", "passes_when": "a fresh worktree reaches a state where the tests run with one documented, fast command that reuses caches and installed dependencies, several worktrees can run their tests at the same time (no fixed ports, per-worktree database or container project names), and the agent guide says to work in a worktree of its own.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "remake/CLAUDE.md", "detail": "worktrees for remake screens only"}, {"type": "file", "ref": "mise.toml:9-12", "detail": "fixed CONTAINER_NAME and PORT"}], "fix": "Say in AGENTS.md that agents work in their own worktree (remake/CLAUDE.md does for screens), and derive the container name and ports of vnc:run/wasm:run-docker from the worktree.", "effort": "small", "waiver": null, "cost_rank": 31}, {"key": "health_checks", "name": "Health Checks", "category": "observability", "level": 2, "perspective": "agent", "critical": false, "why": "A definitive is-it-up signal after a change.", "passes_when": "services expose a liveness and a readiness endpoint; one endpoint that also checks required dependencies counts for both. Liveness alone fails.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "wasm/Dockerfile:29-30", "detail": "liveness only: GET version.txt"}, {"type": "file", "ref": "vnc/Dockerfile:63-64", "detail": "liveness only"}], "fix": "Add a readiness check that also checks dependencies: for WASM a /healthz that writes and removes a probe in /data, for VNC one that checks Xvnc and DOSBox run; point HEALTHCHECK at it.", "effort": "small", "waiver": null, "cost_rank": 32}, {"key": "metrics_collection", "name": "Metrics Collection", "category": "observability", "level": 2, "perspective": "agent", "critical": false, "why": "The agent can confirm the runtime effect of a change.", "passes_when": "runtime metrics are collected.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n prometheus", "detail": "none"}], "fix": "Expose a few Prometheus metrics from wasm/server.go (saves written, errors, request durations), or waive for a home deployment.", "effort": "medium", "waiver": null, "cost_rank": 47}, {"key": "structured_logging", "name": "Structured Logging", "category": "observability", "level": 2, "perspective": "agent", "critical": false, "why": "Parseable logs are evidence the agent can debug from.", "passes_when": "a structured logging library is in use.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "wasm/server.go:123", "detail": "slog JSON handler"}, {"type": "file", "ref": "docs/adr/0004-structured-logs-with-slog.md", "detail": ""}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "alerting_configured", "name": "Alerting Configured", "category": "observability", "level": 3, "perspective": "agent", "critical": false, "why": "Regressions after a merge get noticed while the change is still fresh.", "passes_when": "alert rules live under version control.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files | grep -iE 'alert|monitor'", "detail": "none"}], "fix": "Define an alert on the container health (Synology notifications or an Uptime Kuma monitor) as code in the repo, or waive.", "effort": "medium", "waiver": null, "cost_rank": 48}, {"key": "deployment_observability", "name": "Deployment Observability", "category": "observability", "level": 3, "perspective": "agent", "critical": false, "why": "Ties a change to what happened when it rolled out.", "passes_when": "each deployment leaves a marker in monitoring: an annotation, a deploy event, or a release in the error tracker. Deploy logs that exist only in the CI system do not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/release.yml:149-153", "detail": "no deploy marker"}], "fix": "Have the release workflow (or Watchtower notifications) record each deploy in whatever monitoring is used.", "effort": "medium", "waiver": null, "cost_rank": 49}, {"key": "distributed_tracing", "name": "Distributed Tracing", "category": "observability", "level": 3, "perspective": "agent", "critical": false, "why": "The agent can follow a request across services.", "passes_when": "requests are traced across services.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n -i otel", "detail": "none"}], "fix": "Add a request ID to the logs of wasm/server.go (full OpenTelemetry is overkill here), or waive.", "effort": "small", "waiver": null, "cost_rank": 33}, {"key": "error_tracking_contextualized", "name": "Error Tracking", "category": "observability", "level": 3, "perspective": "agent", "critical": false, "why": "Contextual errors point straight at the failing path.", "passes_when": "errors are tracked with context.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "wasm/server.go:51", "detail": "errors only logged"}], "fix": "Report server errors with the release version (Sentry or similar), or waive.", "effort": "medium", "waiver": null, "cost_rank": 50}, {"key": "profiling_instrumentation", "name": "Profiling Instrumentation", "category": "observability", "level": 3, "perspective": "agent", "critical": false, "why": "Performance problems become diagnosable, not just correctness.", "passes_when": "a profiler can be attached to the running service: a continuous profiler, a profiling endpoint, or JFR/async-profiler configured for deployment. A debugger port alone does not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n pprof", "detail": "none"}], "fix": "Register net/http/pprof on a local-only port in wasm/server.go.", "effort": "trivial", "waiver": null, "cost_rank": 12}, {"key": "circuit_breakers", "name": "Circuit Breakers", "category": "observability", "level": 4, "perspective": "agent", "critical": false, "why": "A failure an agent change causes stays contained instead of cascading.", "passes_when": "outbound calls of the main application code use a resilience library or explicitly configured timeouts plus retries with backoff. Library defaults nobody configured do not count.", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "command", "ref": "git grep -nE 'http\\.(Get|Post)|http\\.Client|net\\.Dial' -- '*.go'", "detail": "no outbound calls in the Go code"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "code_quality_metrics", "name": "Code Quality Metrics", "category": "observability", "level": 4, "perspective": "agent", "critical": false, "why": "Trends show that agent work keeps the codebase healthy, or when it starts not to.", "passes_when": "code quality trends are tracked.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:55-56", "detail": "tests without coverage"}], "fix": "Upload `go test -coverprofile` results per pull request (Codecov or a job summary).", "effort": "small", "waiver": null, "cost_rank": 34}, {"key": "runbooks_documented", "name": "Runbooks Documented", "category": "observability", "level": 4, "perspective": "agent", "critical": false, "why": "The human playbook for incidents, readable by the agent too.", "passes_when": "runbooks cover incidents: how to diagnose, restart, or roll back. Development how-tos and agent skills count only where they cover incidents.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "README.md:168-183", "detail": "troubleshooting for one case, no restart or rollback steps"}], "fix": "Write a short RUNBOOK.md: container unhealthy, saves fail, roll back to the previous image; the save-permission section of the README is a start.", "effort": "small", "waiver": null, "cost_rank": 35}, {"key": "gitignore_comprehensive", "name": "Comprehensive .gitignore", "category": "security", "level": 1, "perspective": "governance", "critical": true, "why": "Secrets and build noise stay out of what the agent commits.", "passes_when": "`.gitignore` excludes secrets (`.env*`), build output, and editor files.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".gitignore", "detail": "build output, .idea/.vscode, .env*, *.pem, *.key"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "branch_protection", "name": "Branch Protection", "category": "security", "level": 2, "perspective": "governance", "critical": true, "why": "Every agent change reaches main through review.", "passes_when": "changes reach the default branch only through pull/merge requests with at least one human approval. Check practice too: most of the last 40 first-parent commits on the default branch should be pull/merge request merges. A practice without pull/merge requests is a `fail` even when the setting cannot be read; a practice with them is no proof of the rule, so without the setting or a human statement the result is `not_assessable`.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "gh api repos/schowave/bmp/branches/main/protection", "detail": "404 Branch not protected; rulesets: []"}, {"type": "command", "ref": "git log main --first-parent -40", "detail": "1 merge, 0 pull-request commits in the last 40"}], "fix": "Protect main with a ruleset: pull requests required, CI checks required (one approval for outside contributors; as sole maintainer you may allow yourself to bypass).", "effort": "trivial", "waiver": null, "cost_rank": 0}, {"key": "codeowners", "name": "CODEOWNERS", "category": "security", "level": 2, "perspective": "governance", "critical": false, "why": "Routes each change to the people who must review it.", "passes_when": "a CODEOWNERS file maps paths to owners; on Azure Repos, which has no CODEOWNERS file, a required-reviewer policy on paths does the same.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/CODEOWNERS", "detail": ""}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "secrets_management", "name": "Secrets Management", "category": "security", "level": 2, "perspective": "governance", "critical": true, "why": "Credentials stay out of the code the agent reads and writes.", "passes_when": "no credentials are committed and code reads secrets from the environment or a secret manager. Committed secret files pass only when encrypted with keys managed outside the repo; password-protected vaults or archives committed to the repo fail.", "harness_build": false, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/release.yml:75-78", "detail": "Docker Hub credentials from GitHub secrets"}, {"type": "command", "ref": "git grep -nIE 'PRIVATE KEY|AKIA|ghp_|password='", "detail": "no hits"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agent_usage_agreement", "name": "Agent Usage Agreement", "category": "security", "level": 2, "perspective": "governance", "critical": false, "why": "Which agent tools may see which code and data is settled with the client before the agent acts.", "passes_when": "a document in the repo, or one the agent guide links to, records which agent tools and models are allowed and which data they may see. A human statement naming where the agreement lives (a contract, the client's AI policy) also counts. In a public open-source repo, a contribution policy that says which agent use is allowed is enough; the data question does not arise. A record that still holds placeholders fails (fix: fill them in); `not_assessable` is only for a record that may exist outside the repo and no one could point to.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "statement", "ref": "user, 2026-10-23", "detail": "Nothing is written down about which agent tools may be used."}], "fix": "Add a short note on agent use (allowed tools, whether agent-made contributions are welcome) to the README or a CONTRIBUTING.md and link it from AGENTS.md.", "effort": "trivial", "waiver": null, "cost_rank": 1}, {"key": "agent_setup_owner", "name": "Agent Setup Owner", "category": "security", "level": 2, "perspective": "governance", "critical": false, "why": "Without an owner, the agent setup drifts into what each developer happens to know, and nobody removes what no longer helps.", "passes_when": "a named person or team owns the agent setup (agent guide, shared agent tool configuration, approved skills and plugins) and must review changes to it: CODEOWNERS entries for those paths, or the agent guide or agreement record naming the owner.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": "AGENTS.md:89-90", "detail": "owner named"}, {"type": "file", "ref": ".github/CODEOWNERS", "detail": "agent setup paths owned by @schowave"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "agent_secret_access", "name": "Agent Secret Access", "category": "security", "level": 3, "perspective": "governance", "critical": true, "why": "Secrets out of the agent's reach stay out of its context, its logs, and its output.", "passes_when": "the agent tool configuration denies reading every secret-bearing file in the repo (`.env*`, token and key files, files helper scripts write tokens to), and the gap deny rules leave (commands that open files indirectly) is closed by a sandbox or by keeping tokens off the disk.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files .claude", "detail": "no shared agent configuration"}], "fix": "Commit .claude/settings.json denying Read of .env*, *.pem, *.key and similar, and enable the sandbox.", "effort": "small", "waiver": null, "cost_rank": 18}, {"key": "agent_action_guardrails", "name": "Agent Action Guardrails", "category": "security", "level": 3, "perspective": "governance", "critical": true, "why": "What the agent may do is decided beforehand, not at the moment of execution.", "passes_when": "the agent tool configuration requires approval for destructive and production-facing commands (force push, deploy, infrastructure apply, database migrations against shared environments), and no production credentials are reachable from the working tree. A CLI session logged in with production rights (`az`, `aws`, `kubectl` contexts) counts as reachable unless the agent configuration asks before commands that use it.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files .claude", "detail": "no shared agent configuration"}, {"type": "file", "ref": "mise.toml:140-143", "detail": "mise run release starts a production release"}], "fix": "In .claude/settings.json, put `gh workflow run`, `mise run release`, `git push --force`, `docker push`/`podman push` under ask.", "effort": "small", "waiver": null, "cost_rank": 13}, {"key": "agent_change_traceability", "name": "Agent Change Traceability", "category": "security", "level": 3, "perspective": "governance", "critical": false, "why": "Agent changes nobody can recognise can be neither reviewed with care nor evaluated.", "passes_when": "a documented rule makes agent changes recognisable (a co-author trailer, a pull request label, a bot account, a field in the pull request template), and the recent history follows it. Traces of agents alone are `agentic_development`.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git log -200 --format='%(trailers:key=Co-Authored-By)'", "detail": "no trailers in the last 200 commits"}], "fix": "Pick a marking rule (Co-Authored-By trailer or an `agent` PR label), write it in the agent guide and follow it.", "effort": "trivial", "waiver": null, "cost_rank": 6}, {"key": "dependency_update_automation", "name": "Dependency Update Automation", "category": "security", "level": 3, "perspective": "governance", "critical": false, "why": "Keeps the dependencies the agent reasons about current.", "passes_when": "dependency updates are automated.", "harness_build": true, "status": "pass", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/dependabot.yml", "detail": "actions, npm and docker; gomod for remake/ missing"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "automated_security_review", "name": "Automated Security Review", "category": "security", "level": 4, "perspective": "governance", "critical": false, "why": "Vulnerabilities an agent introduces are caught before release.", "passes_when": "a security scanner runs on changes.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "gh api repos/schowave/bmp/code-scanning/default-setup", "detail": "state: not-configured"}], "fix": "Enable CodeQL default setup (Go, JavaScript, Actions) on the repository.", "effort": "trivial", "waiver": null, "cost_rank": 3}, {"key": "license_compliance", "name": "License Compliance", "category": "security", "level": 4, "perspective": "governance", "critical": false, "why": "An agent adds dependencies without asking; a license check stops one the project may not use before it ships.", "passes_when": "the allowed licenses are written down and CI checks the dependencies against them. An SBOM alone does not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files | grep -i licen", "detail": "no policy, no check"}], "fix": "Write the allowed licenses down and add go-licenses (or dependency-review-action with allow-licenses) to CI.", "effort": "small", "waiver": null, "cost_rank": 36}, {"key": "log_scrubbing", "name": "Log Scrubbing", "category": "security", "level": 4, "perspective": "governance", "critical": false, "why": "Agent-written log lines stay free of secrets and personal data.", "passes_when": "a configured redaction list or masking filter covers tokens, credentials, and personal data. Masking a single field name does not count.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": "wasm/server.go:53", "detail": "no redaction"}], "fix": "Add a ReplaceAttr to the slog handler that redacts tokens and request bodies; today the server logs save names and errors only.", "effort": "small", "waiver": null, "cost_rank": 37}, {"key": "pii_handling", "name": "PII Handling", "category": "security", "level": 4, "perspective": "governance", "critical": false, "why": "Tells the agent which data is sensitive.", "passes_when": "personal data is explicitly marked and handled by rules.", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "profile", "ref": "personal_data", "detail": "no personal data processed"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "secret_scanning", "name": "Secret Scanning", "category": "security", "level": 4, "perspective": "governance", "critical": false, "why": "A leaked credential is stopped before it leaves the machine.", "passes_when": "secret scanning or push protection is active.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "gh api repos/schowave/bmp --jq .security_and_analysis", "detail": "secret_scanning and push_protection disabled"}], "fix": "Enable secret scanning and push protection in the repository settings (free for public repos).", "effort": "trivial", "waiver": null, "cost_rank": 2}, {"key": "dast_scanning", "name": "DAST Scanning", "category": "security", "level": 5, "perspective": "governance", "critical": false, "why": "Finds runtime vulnerabilities static checks miss.", "passes_when": "running endpoints are scanned dynamically.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "file", "ref": ".github/workflows/ci.yml:119-142", "detail": "image started, not scanned"}], "fix": "Run a ZAP baseline scan against the WASM image in CI (it is already started for the smoke test).", "effort": "small", "waiver": null, "cost_rank": 38}, {"key": "privacy_compliance", "name": "Privacy Compliance", "category": "security", "level": 5, "perspective": "governance", "critical": false, "why": "Written down, these are rules the agent can follow; it cannot infer them from the code.", "passes_when": "privacy and compliance controls are documented: what is collected, why, how long it is kept.", "harness_build": false, "status": "skipped", "skip_reason": "not_applicable", "evidence": [{"type": "profile", "ref": "personal_data", "detail": "no personal data processed"}], "fix": null, "effort": null, "waiver": null, "cost_rank": null}, {"key": "backlog_health", "name": "Backlog Health", "category": "task-discovery", "level": 2, "perspective": "agent", "critical": false, "why": "A healthy backlog is a queue of work an agent can pick up.", "passes_when": "in a sample of up to 30 open issues, at least two thirds carry a label and a description of the expected outcome.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "gh issue list -R schowave/bmp --state open", "detail": "[] no open issues"}], "fix": "Track planned work (remake screens still to port, known deviations) as labelled GitHub issues with expected outcomes.", "effort": "small", "waiver": null, "cost_rank": 39}, {"key": "issue_labeling_system", "name": "Issue Labeling System", "category": "task-discovery", "level": 2, "perspective": "agent", "critical": false, "why": "Labels let the agent filter and prioritise.", "passes_when": "labels follow a consistent taxonomy, ideally defined as code, and a label or a written definition of ready marks the issues an agent can take on: small, clearly bounded, and checkable.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "gh label list -R schowave/bmp", "detail": "GitHub default labels plus Dependabot labels; no definition of ready"}], "fix": "Define labels as code (labels.yml with a sync action) including one for agent-sized issues, e.g. `agent-ready`.", "effort": "small", "waiver": null, "cost_rank": 40}, {"key": "issue_templates", "name": "Issue Templates", "category": "task-discovery", "level": 2, "perspective": "agent", "critical": false, "why": "Well-formed issues are well-formed agent tasks.", "passes_when": "templates exist for the common request types.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files .github/ISSUE_TEMPLATE", "detail": "none"}], "fix": "Add bug and feature templates under .github/ISSUE_TEMPLATE/.", "effort": "trivial", "waiver": null, "cost_rank": 7}, {"key": "pr_templates", "name": "PR Templates", "category": "task-discovery", "level": 2, "perspective": "agent", "critical": false, "why": "Agent PRs get a consistent shape with test evidence.", "passes_when": "a pull/merge request template exists, or a committed skill or command for working on this repo writes pull request descriptions in a fixed shape.", "harness_build": true, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git ls-files .github", "detail": "no PR template"}], "fix": "Add .github/pull_request_template.md asking for summary, checks run, screenshots for screen changes.", "effort": "trivial", "waiver": null, "cost_rank": 8}, {"key": "error_to_insight_pipeline", "name": "Error-to-Insight Pipeline", "category": "product-analytics", "level": 5, "perspective": "agent", "critical": false, "why": "Production signals become agent tasks.", "passes_when": "production errors automatically become tracked issues.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -n -i sentry", "detail": "none"}], "fix": "Have the health check or an error tracker open a GitHub issue on repeated failures, or waive.", "effort": "medium", "waiver": null, "cost_rank": 51}, {"key": "product_analytics_instrumentation", "name": "Product Analytics Instrumentation", "category": "product-analytics", "level": 5, "perspective": "agent", "critical": false, "why": "Real usage lets changes be prioritised by impact.", "passes_when": "product analytics are instrumented.", "harness_build": false, "status": "fail", "skip_reason": null, "evidence": [{"type": "command", "ref": "git grep -niE 'posthog|matomo|analytics'", "detail": "none"}], "fix": "Count game starts and saves in the WASM server (privacy-friendly, no personal data), or waive for a hobby project.", "effort": "medium", "waiver": null, "cost_rank": 52}], "questions": [{"key": "target_architecture", "question": "Does the code follow one style throughout with no legacy patterns to avoid?", "answer": "Yes, one style, no legacy (user, 2026-10-23)."}, {"key": "agent_usage_agreement", "question": "Is there a record of which agent tools may be used here?", "answer": "No, nothing written (user, 2026-10-23)."}], "notes": ["Assessed the branch `remake` at a2f21af with the uncommitted harness-build changes (--worktree).", "deployed_service is `operated` on the user's statement: the maintainer runs the images on a Synology NAS through Watchtower; others self-host the same images.", "Dependabot covers Actions, npm and Docker but not the Go module in remake/ (no `gomod` entry).", "Several operations criteria (flags, canary, metrics, analytics) fit a one-host hobby deployment poorly; they are candidates for waivers rather than work.", "remake/go.mod marks every requirement // indirect, a sign that `go mod tidy` has not run."], "waivers": [], "scoring": {"level": 3, "level_name": "Agent-ready", "target_level": 4, "level_cleared": true, "overall": {"passed": 44, "evaluated": 99, "rate": 0.44}, "levels": [{"level": 1, "name": "Baseline", "total": 12, "evaluated": 12, "passed": 12, "cleared": true, "failed_condition": null, "needed": 0, "clears_at": 6, "summary": "has formatter, linter, types, and unit tests running locally.", "agent_use": "Analyse code, write docs and tests; a human reviews every change.", "state": "achieved"}, {"level": 2, "name": "Documented", "total": 25, "evaluated": 23, "passed": 13, "cleared": true, "failed_condition": null, "needed": 0, "clears_at": 12, "summary": "writes its workflows down: agent guide, env template, schema, ownership.", "agent_use": "Develop features with an agent, a human steering closely.", "state": "achieved"}, {"level": 3, "name": "Agent-ready", "total": 33, "evaluated": 31, "passed": 16, "cleared": true, "failed_condition": null, "needed": 0, "clears_at": 16, "summary": "enforces its standards through automation: CI, hooks, tracing, releases.", "agent_use": "Agents implement clearly bounded tickets on their own, reviewed by pull request.", "state": "achieved"}, {"level": 4, "name": "Optimized", "total": 27, "evaluated": 25, "passed": 3, "cleared": false, "failed_condition": "pass_rate", "needed": 10, "clears_at": 13, "summary": "measures its feedback loops: coverage gates, flaky tests, build times.", "agent_use": "Several agents work in parallel in separate workspaces.", "state": "next"}, {"level": 5, "name": "Autonomous", "total": 11, "evaluated": 8, "passed": 0, "cleared": false, "failed_condition": "pass_rate", "needed": 4, "clears_at": 4, "summary": "feeds production signals back into the loop: canaries, rollback, error-to-issue.", "agent_use": "Agents react to production signals: error, issue, fix pull request.", "state": "locked"}], "categories": [{"id": "style-validation", "name": "Style & Validation", "total": 13, "evaluated": 12, "passed": 6}, {"id": "build-system", "name": "Build System", "total": 25, "evaluated": 24, "passed": 11}, {"id": "testing", "name": "Testing", "total": 11, "evaluated": 11, "passed": 6}, {"id": "documentation", "name": "Documentation", "total": 16, "evaluated": 15, "passed": 12}, {"id": "dev-environment", "name": "Dev Environment", "total": 9, "evaluated": 6, "passed": 3}, {"id": "observability", "name": "Debugging & Observability", "total": 11, "evaluated": 10, "passed": 1}, {"id": "security", "name": "Security", "total": 17, "evaluated": 15, "passed": 5}, {"id": "task-discovery", "name": "Task Discovery", "total": 4, "evaluated": 4, "passed": 0}, {"id": "product-analytics", "name": "Product & Analytics", "total": 2, "evaluated": 2, "passed": 0}], "perspectives": [{"id": "agent", "total": 85, "evaluated": 79, "passed": 36}, {"id": "architecture", "total": 5, "evaluated": 4, "passed": 3}, {"id": "governance", "total": 18, "evaluated": 16, "passed": 5}], "blockers": {"level": 4, "keys": ["secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "cyclomatic_complexity", "test_coverage_thresholds", "dead_code_detection", "duplicate_code_detection", "agent_outcome_tracking", "deployment_frequency", "test_performance_tracking", "agent_rules_enforced", "parallel_workspaces", "code_quality_metrics", "runbooks_documented", "license_compliance", "log_scrubbing", "gate_ratchet", "post_deploy_verification", "flaky_test_detection", "mutation_testing", "devcontainer_runnable"], "needed": 10, "note": null}, "priorities": [{"key": "branch_protection", "why": "main takes direct pushes, so nothing the agent guide or CI asks for stops a change from landing."}, {"key": "agent_action_guardrails", "why": "The guide says to ask before `mise run release` and pushes, but no agent configuration makes the agent wait."}, {"key": "agent_usage_agreement", "why": "A public repo with an agent guide but no word on which agent use is welcome; one paragraph closes it."}, {"key": "secret_scanning", "why": "Free for public repos and one setting; the cheapest step towards level 4."}, {"key": "automated_security_review", "why": "CodeQL default setup covers Go, JavaScript and the workflows with one setting."}], "strengths": [{"key": "check_command", "why": "One mise task runs lint and every unit test, locally and in CI."}, {"key": "integration_tests_exist", "why": "Both images are exercised end to end in CI and the remake's screens are driven headless."}, {"key": "skills", "why": "Screen comparison with the original and decompilation lookups are written down as skills."}, {"key": "domain_docs", "why": "Glossary and ADRs give the game terms and the reasons behind embedding and the C random generator."}, {"key": "release_automation", "why": "Releases tag and publish only once both images exist."}], "critical_gaps": ["branch_protection", "agent_secret_access", "agent_action_guardrails"], "quick_wins": ["branch_protection", "agent_usage_agreement", "naming_consistency", "issue_templates", "pr_templates", "agent_change_traceability", "generated_code_marked", "profiling_instrumentation", "secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "version_drift_detection"], "build": {"groups": [{"id": "target", "levels": [4, 4], "keys": ["secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "cyclomatic_complexity", "test_coverage_thresholds", "dead_code_detection", "duplicate_code_detection", "agent_outcome_tracking", "deployment_frequency", "test_performance_tracking", "agent_rules_enforced", "parallel_workspaces", "code_quality_metrics", "runbooks_documented", "license_compliance", "log_scrubbing", "gate_ratchet", "post_deploy_verification", "flaky_test_detection", "mutation_testing", "devcontainer_runnable"]}, {"id": "below", "levels": [1, 3], "keys": ["branch_protection", "agent_usage_agreement", "naming_consistency", "issue_templates", "pr_templates", "large_file_detection", "health_checks", "backlog_health", "issue_labeling_system", "metrics_collection", "agent_change_traceability", "generated_code_marked", "profiling_instrumentation", "agent_action_guardrails", "scoped_agent_guides", "agent_secret_access", "automated_pr_review", "infrastructure_as_code", "api_schema_docs", "devcontainer", "distributed_tracing", "feature_flag_infrastructure", "alerting_configured", "deployment_observability", "error_tracking_contextualized"]}, {"id": "later", "levels": [5, 5], "keys": ["version_drift_detection", "monorepo_tooling", "rollback_automation", "dast_scanning", "progressive_rollout", "error_to_insight_pipeline", "product_analytics_instrumentation", "dead_feature_flag_detection"]}], "selections": {"up_to_target": ["branch_protection", "agent_usage_agreement", "naming_consistency", "issue_templates", "pr_templates", "large_file_detection", "health_checks", "backlog_health", "issue_labeling_system", "metrics_collection", "agent_change_traceability", "generated_code_marked", "profiling_instrumentation", "agent_action_guardrails", "scoped_agent_guides", "agent_secret_access", "automated_pr_review", "infrastructure_as_code", "api_schema_docs", "devcontainer", "distributed_tracing", "feature_flag_infrastructure", "alerting_configured", "deployment_observability", "error_tracking_contextualized", "secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "cyclomatic_complexity", "test_coverage_thresholds", "dead_code_detection", "duplicate_code_detection", "agent_outcome_tracking", "deployment_frequency", "test_performance_tracking", "agent_rules_enforced", "parallel_workspaces", "code_quality_metrics", "runbooks_documented", "license_compliance", "log_scrubbing", "gate_ratchet", "post_deploy_verification", "flaky_test_detection", "mutation_testing", "devcontainer_runnable"], "target": ["secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "cyclomatic_complexity", "test_coverage_thresholds", "dead_code_detection", "duplicate_code_detection", "agent_outcome_tracking", "deployment_frequency", "test_performance_tracking", "agent_rules_enforced", "parallel_workspaces", "code_quality_metrics", "runbooks_documented", "license_compliance", "log_scrubbing", "gate_ratchet", "post_deploy_verification", "flaky_test_detection", "mutation_testing", "devcontainer_runnable"], "below": ["branch_protection", "agent_usage_agreement", "naming_consistency", "issue_templates", "pr_templates", "large_file_detection", "health_checks", "backlog_health", "issue_labeling_system", "metrics_collection", "agent_change_traceability", "generated_code_marked", "profiling_instrumentation", "agent_action_guardrails", "scoped_agent_guides", "agent_secret_access", "automated_pr_review", "infrastructure_as_code", "api_schema_docs", "devcontainer", "distributed_tracing", "feature_flag_infrastructure", "alerting_configured", "deployment_observability", "error_tracking_contextualized"], "quick_wins": ["branch_protection", "agent_usage_agreement", "naming_consistency", "issue_templates", "pr_templates", "agent_change_traceability", "generated_code_marked", "profiling_instrumentation", "secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "version_drift_detection"], "all": ["branch_protection", "agent_usage_agreement", "naming_consistency", "issue_templates", "pr_templates", "large_file_detection", "health_checks", "backlog_health", "issue_labeling_system", "metrics_collection", "agent_change_traceability", "generated_code_marked", "profiling_instrumentation", "agent_action_guardrails", "scoped_agent_guides", "agent_secret_access", "automated_pr_review", "infrastructure_as_code", "api_schema_docs", "devcontainer", "distributed_tracing", "feature_flag_infrastructure", "alerting_configured", "deployment_observability", "error_tracking_contextualized", "secret_scanning", "automated_security_review", "tech_debt_tracking", "unused_dependencies_detection", "cyclomatic_complexity", "test_coverage_thresholds", "dead_code_detection", "duplicate_code_detection", "agent_outcome_tracking", "deployment_frequency", "test_performance_tracking", "agent_rules_enforced", "parallel_workspaces", "code_quality_metrics", "runbooks_documented", "license_compliance", "log_scrubbing", "gate_ratchet", "post_deploy_verification", "flaky_test_detection", "mutation_testing", "devcontainer_runnable", "version_drift_detection", "monorepo_tooling", "rollback_automation", "dast_scanning", "progressive_rollout", "error_to_insight_pipeline", "product_analytics_instrumentation", "dead_feature_flag_detection"]}, "default": "up_to_target"}, "build_command": "/swa-harness:harness-build Close these gaps from the agent-readiness report 2026-10-23: ", "waived": [], "waivers_to_review": [], "waive_command": "/swa-harness:harness-audit Update the waivers of the agent-readiness report 2026-10-23.", "comparison": {"previous_date": "2026-10-23", "skill_version_before": "0.38.2", "level_before": 1, "newly_passed": ["lint_config", "check_command", "unit_tests_exist", "test_naming_conventions", "unit_tests_runnable", "test_stage_rules", "test_isolation", "readme", "agents_md", "agents_md_size", "agents_md_content", "agents_md_freshness", "agent_boundaries", "automated_doc_generation", "domain_docs", "skills", "agents_md_validation", "structured_logging", "gitignore_comprehensive", "codeowners", "agent_setup_owner"], "newly_failed": [], "newly_skipped": [], "newly_assessed": [], "catalog_changes": [], "newly_waived": [], "waivers_ended": []}}}</script>
+<script>
+(function () {
+  const app = document.getElementById("app");
+  const top = document.getElementById("top");
+  const dialog = document.getElementById("detail");
+  let data;
+  try {
+    data = JSON.parse(document.getElementById("report-data").textContent);
+  } catch (e) {
+    app.textContent = "No report data embedded: the placeholder was not replaced with the report JSON.";
+    return;
+  }
+
+  // Served by `report.py --serve`: the Build tab can send its selection to the waiting agent
+  let start = null;
+  try { start = JSON.parse(document.getElementById("start-data").textContent); } catch (e) { /* the page then only copies */ }
+  start = start || { served: false, min_reason: 10 };
+  const served = !!start.served;
+
+  // ---------- Data ----------
+  const s = data.scoring;
+  const results = data.results;
+  const byKey = Object.fromEntries(results.map(r => [r.key, r]));
+  const catName = Object.fromEntries(s.categories.map(c => [c.id, c.name]));
+  const prio = Object.fromEntries((s.priorities || []).map((p, i) => [p.key, { ...p, rank: i + 1 }]));
+  const strong = Object.fromEntries((s.strengths || []).map(x => [x.key, x]));
+  const EFFORTS = ["trivial", "small", "medium", "large", null];
+  const EFFORT_LABEL = { trivial: "Trivial effort", small: "Small effort", medium: "Medium effort", large: "Large effort", null: "Not estimated" };
+  const fails = results.filter(r => r.status === "fail");
+  const pursued = fails.filter(r => !r.waiver);   // waived gaps count in the level but are not planned
+  const waived = (s.waived || []).map(k => byKey[k]).filter(Boolean);
+  const hasEffort = fails.some(r => r.effort);
+  // Level states, needed passes, cost order, quick wins and the build command come from report.py; this view only renders them.
+  const applies = l => l.state !== "not_applicable";
+  const target = s.levels.find(l => l.state === "next") || null;
+  const neededAt = l => l.needed;   // null when the level fails on coverage
+  const byCost = (a, b) => a.cost_rank - b.cost_rank;
+  const openQuestions = (data.questions || []).filter(q => q.answer == null);
+  const criticalGaps = (s.critical_gaps || []).map(k => byKey[k]).filter(Boolean);
+  const PERSPECTIVE_LABEL = { agent: "Agent-ready", architecture: "Architecture-ready", governance: "Governance-ready" };
+
+  // ---------- Helpers ----------
+  function el(tag, attrs, ...children) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") n.className = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of children.flat(Infinity)) {
+      if (c == null || c === false) continue;
+      n.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    }
+    return n;
+  }
+  // Text with `code` spans
+  const rich = text => String(text || "").split(/(`[^`]+`)/).map(part =>
+    part.startsWith("`") && part.endsWith("`") && part.length > 1 ? el("code", {}, part.slice(1, -1)) : part);
+  const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+  const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+  const statusPill = r => el("span", { class: "pill " + r.status },
+    r.status === "skipped" ? (r.skip_reason === "not_assessable" ? "not assessed" : "not applicable") : r.status);
+  const effortPill = r => r.status === "fail" && hasEffort
+    ? el("span", { class: "pill e-" + (r.effort || "none") }, r.effort ? r.effort + " effort" : "effort n/a") : null;
+  const prioPill = r => prio[r.key] ? el("span", { class: "pill tag-prio" }, "Priority " + prio[r.key].rank) : null;
+  const levelPill = r => el("span", { class: "pill tag-lvl" }, "L" + r.level);
+  // Only the two smaller perspectives get a tag: most criteria are agent ones, and a tag on every card is noise
+  const perspPill = r => r.perspective && r.perspective !== "agent"
+    ? el("span", { class: "pill tag-persp", title: PERSPECTIVE_LABEL[r.perspective] || r.perspective }, r.perspective) : null;
+  const criticalPill = r => r.critical ? el("span", { class: "pill tag-critical", title: "A high level does not make up for this gap" }, "critical") : null;
+  const waiverPill = r => !r.waiver ? null : r.waiver.review
+    ? el("span", { class: "pill tag-review", title: "Waived; review this waiver" }, "review waiver")
+    : el("span", { class: "pill tag-waived", title: "Waived: " + r.waiver.reason }, "waived");
+
+  // What a level lets agents do: the answer teams look for first, so it stands out
+  const agentUse = (text, label, locked) => text ? el("div", { class: "agent-use" + (locked ? " locked" : "") },
+    el("span", { class: "label" }, label), el("span", { class: "text" }, text)) : null;
+
+  // Pass rate per perspective: across all levels, beside the level, never changing it
+  function perspectives() {
+    const ps = (s.perspectives || []).filter(p => p.total);
+    if (!ps.length) return null;
+    return el("div", { class: "persp", title: "Perspectives cut across levels and do not change the level" },
+      ps.map(p => el("a", { href: "#criteria/" + p.id, title: "Show the " + (PERSPECTIVE_LABEL[p.id] || p.id) + " criteria" },
+        el("div", { class: "row-head" }, el("span", {}, PERSPECTIVE_LABEL[p.id] || p.id), el("span", {}, p.passed + " / " + p.evaluated)),
+        el("div", { class: "bar", role: "img", "aria-label": (PERSPECTIVE_LABEL[p.id] || p.id) + ": " + p.passed + " of " + p.evaluated + " assessed pass" },
+          el("span", { style: "width:" + pct(p.passed, p.evaluated) + "%" })))));
+  }
+
+  function meter(l, big) {
+    const threshold = l.evaluated ? l.clears_at / l.evaluated * 100 : 50;
+    return el("div", { class: "meter" + (big ? " bigmeter" : ""), title: l.passed + " of " + l.evaluated + " passed; " +
+      l.clears_at + " needed to clear" },
+      el("span", { style: "width:" + pct(l.passed, l.evaluated) + "%" }),
+      el("i", { style: "left:calc(" + threshold + "% - 1px)" }));
+  }
+
+  // A criterion card: name, one line of why or gain, the fix where you act, at most a few tags.
+  // opts: {fix, why, number, check, extra, note, showLevel, status, isNew, strength, clamp}
+  function item(r, opts) {
+    opts = opts || {};
+    const why = opts.why || (prio[r.key] && prio[r.key].why) || (strong[r.key] && strong[r.key].why);
+    // A card with its own controls cannot be one big button; it gets a Details button instead
+    const tag = opts.check ? "label" : opts.extra ? "div" : "button";
+    const details = tag === "button" ? null : el("button", { type: "button", class: "link",
+      onclick: e => { e.preventDefault(); e.stopPropagation(); openDetail(r.key); } }, "Details");
+    return el(tag, { class: "item" + (opts.clamp ? " clamp" : ""), type: tag === "button" ? "button" : null,
+        onclick: tag === "button" ? () => openDetail(r.key) : null },
+      opts.check || null,
+      opts.number ? el("span", { class: "num", title: "Step " + opts.number + " of the cheapest route" }, opts.number) : null,
+      el("div", { class: "body" },
+        el("div", {}, el("span", { class: "name" }, r.name), " ", el("code", { class: "key" }, r.key)),
+        why && opts.why !== false ? el("div", { class: "why" }, rich(why)) : null,
+        opts.fix !== false && r.fix ? el("div", { class: "fix" }, "→ ", rich(r.fix)) : null,
+        opts.note ? el("div", { class: "note" }, opts.note) : null,
+        el("div", { class: "tags" }, opts.showLevel !== false ? levelPill(r) : null, opts.status ? statusPill(r) : null,
+          effortPill(r), r.status === "fail" ? criticalPill(r) : null, perspPill(r), waiverPill(r), opts.isNew ? el("span", { class: "pill tag-new" }, "new") : null,
+          opts.strength ? el("span", { class: "pill tag-strength" }, "strength") : null, details)),
+      opts.extra || null);
+  }
+  const list = (rs, opts) => rs.length ? el("div", {}, rs.map((r, i) => item(r, typeof opts === "function" ? opts(r, i) : opts)))
+    : el("p", { class: "empty" }, "None.");
+  const chip = r => el("button", { type: "button", class: "chip", title: r.name, onclick: () => openDetail(r.key) },
+    r.name);
+
+  // ---------- Detail dialog ----------
+  function openDetail(key) {
+    const r = byKey[key];
+    if (!r) return;
+    const rows = [];
+    if (r.waiver) rows.push(el("h4", {}, "Not pursued"), el("p", {}, rich(r.waiver.reason)),
+      el("p", { class: "muted", style: "font-size:13px" }, "Waived by " + r.waiver.decided_by + " on " + r.waiver.date +
+        "; review by " + r.waiver.review_by + ". Graded as usual and counted in the level." +
+        (r.waiver.review ? (r.status === "pass" ? " It passes now: the waiver can go." : " The review date has passed.") : "")));
+    if (prio[key]) rows.push(el("h4", {}, "Why it is a priority here"), el("p", {}, rich(prio[key].why)));
+    if (strong[key]) rows.push(el("h4", {}, "Why it is a strength"), el("p", {}, rich(strong[key].why)));
+    if (r.fix) rows.push(el("h4", {}, "Suggested fix"), el("p", {}, rich(r.fix)),
+      el("p", { class: "muted", style: "font-size:13px" }, "A direction, not a decision: check it against your stack and conventions before adopting a tool or library, and prefer a deterministic check over an instruction."));
+    if (r.why) rows.push(el("h4", {}, "Why it matters for agents"), el("p", {}, rich(r.why)));
+    if (r.passes_when) rows.push(el("h4", {}, "Passes when"), el("p", {}, rich(r.passes_when)));
+    rows.push(el("h4", {}, "Evidence"), (r.evidence || []).length
+      ? el("div", { class: "ev" }, r.evidence.map(e => el("div", {},
+          el("span", { class: "pill skipped" }, e.type), " ", el("code", {}, e.ref), e.detail ? el("div", { class: "muted" }, rich(e.detail)) : null)))
+      : el("p", { class: "empty" }, "None recorded."));
+    const q = (data.questions || []).filter(x => x.key === key);
+    if (q.length) rows.push(el("h4", {}, "Question"), q.map(x => el("p", {}, x.question,
+      el("div", { class: "muted" }, x.answer == null ? "Open" : "Answer: " + x.answer))));
+    if (r.status === "fail" && !r.waiver) rows.push(el("h4", {}, "Build"),
+      el("p", {}, "harness-build plans this gap with you, then builds what you chose. ",
+        el("a", { href: "#plan", onclick: () => dialog.close() }, "Add it to the plan →")));
+    dialog.replaceChildren(
+      el("div", { class: "dlg-head" },
+        el("div", {},
+          el("div", { class: "meta" }, catName[r.category] + " · L" + r.level + " " + (s.levels[r.level - 1] || {}).name +
+            " · " + (PERSPECTIVE_LABEL[r.perspective] || r.perspective)),
+          el("h2", {}, r.name), el("code", { class: "key" }, r.key),
+          el("div", { class: "tags", style: "display:flex;gap:6px;margin-top:8px;flex-wrap:wrap" },
+            statusPill(r), effortPill(r), criticalPill(r), prioPill(r), waiverPill(r))),
+        el("button", { class: "close", type: "button", "aria-label": "Close", onclick: () => dialog.close() }, "×")),
+      el("div", { class: "dlg-body" }, rows));
+    dialog.showModal();
+  }
+  dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
+
+  // ---------- Views ----------
+  // Five views, one question each: where we stand, what we do next, what each level lacks, every criterion, how it was graded
+  const hasPlan = pursued.length > 0 || waived.length > 0;
+  const VIEWS = [
+    { id: "overview", title: "Overview", render: viewOverview },
+    { id: "levels", title: "Levels", render: viewLevels },
+    hasPlan ? { id: "plan", title: "Plan", render: viewPlan, count: () => selectedCount(), countTitle: "gaps selected to build" } : null,
+    { id: "criteria", title: "Criteria", render: viewCriteria },
+    { id: "context", title: "Context", render: viewContext, count: openQuestions.length || null },
+  ].filter(Boolean);
+  // Links from earlier versions of the page keep working
+  const ALIASES = { achieved: "levels", next: "plan", build: "plan", categories: "criteria" };
+
+  const repo = data.repository || {};
+  function renderTop(current) {
+    top.replaceChildren(
+      el("div", { class: "title-row" },
+        el("h1", {}, "Agent Readiness: " + (repo.name || "repository")),
+        el("span", { class: "meta" }, [data.date, repo.commit && "commit " + repo.commit + (repo.worktree ? " with uncommitted changes" : ""),
+          repo.default_branch && "branch " + repo.default_branch, "skill " + data.skill_version].filter(Boolean).join(" · "))),
+      el("nav", { class: "tabs", "aria-label": "Report sections" }, VIEWS.map(v =>
+        el("a", { href: "#" + v.id, "aria-current": v.id === current ? "page" : null }, v.title,
+          countOf(v) ? el("span", { class: "count", title: v.countTitle || null }, countOf(v)) : null))));
+  }
+
+  const countOf = v => typeof v.count === "function" ? v.count() : v.count;
+  // The Plan tab counts the gaps selected to build, also before the Plan view was opened
+  const selectedCount = () => [...(buildSelection || s.build.selections[s.build.default])].filter(k => !waiveSelection.has(k)).length;
+  const refreshPlanCount = () => {
+    const a = document.querySelector('nav.tabs a[href="#plan"]');
+    if (!a) return;
+    const n = selectedCount();
+    let c = a.querySelector(".count");
+    if (!n) { if (c) c.remove(); return; }
+    if (!c) { c = el("span", { class: "count", title: "gaps selected to build" }); a.append(c); }
+    c.textContent = n;
+  };
+
+  function pager(current) {
+    const i = VIEWS.findIndex(v => v.id === current);
+    const prev = VIEWS[i - 1], next = VIEWS[i + 1];
+    return el("div", { class: "pager" },
+      prev ? el("a", { href: "#" + prev.id }, el("small", {}, "Back"), "← " + prev.title) : el("span"),
+      next ? el("a", { href: "#" + next.id, style: "text-align:right" }, el("small", {}, "Next"), next.title + " →") : el("span"));
+  }
+
+  function ladder(selected) {
+    return el("div", { class: "ladder", role: "tablist", "aria-label": "Levels" }, s.levels.map(l => el("button", {
+        type: "button", role: "tab", "aria-selected": selected === l.level ? "true" : "false",
+        class: "step" + (l.cleared ? " cleared" : "") + (applies(l) ? "" : " na") + (target && l.level === target.level ? " next" : ""),
+        onclick: () => go("levels/" + l.level) },
+      el("b", {}, "L" + l.level + " " + l.name),
+      el("span", { class: "state" }, l.cleared ? "cleared ✓" : !applies(l) ? "does not apply" : l.failed_condition === "coverage" ? "too few assessed"
+        : neededAt(l) + " more to clear"),
+      applies(l) ? meter(l) : null)));
+  }
+
+  const passing = results.filter(r => r.status === "pass");
+  const sinceLast = s.comparison ? (s.comparison.newly_passed || []).filter(k => byKey[k]) : [];
+  const isNew = new Set(sinceLast);
+  const toReview = (s.waivers_to_review || []).map(k => byKey[k]).filter(Boolean);
+  const blockerKeys = s.blockers ? s.blockers.keys : [];
+  // The cheapest way to the next level: the first `needed` blockers, numbered on the plan
+  const route = target && target.failed_condition !== "coverage" ? blockerKeys.slice(0, neededAt(target)) : [];
+  const routeNo = Object.fromEntries(route.map((k, i) => [k, i + 1]));
+
+  function headline() {
+    if (!target) return pursued.length
+      ? "Every level that applies clears. " + plural(pursued.length, "gap is", "gaps are") + " still open; they make the levels sturdier."
+      : "Every level that applies clears, and nothing is open.";
+    if (target.failed_condition === "coverage")
+      return "Level " + target.level + " cannot be scored yet: too few of its criteria could be assessed. Answer the open questions first.";
+    return plural(neededAt(target), "more passing criterion clears", "more passing criteria clear") + " level " + target.level +
+      " " + target.name + ". Plan them with harness-build, and it builds what you chose.";
+  }
+
+  function viewOverview() {
+    const c = s.comparison;
+    const attention = [
+      ...toReview.map(r => ({ r, text: r.status === "pass" ? "passes now, so its waiver can go" : "its waiver is due for review" })),
+      ...openQuestions.map(q => ({ r: byKey[q.key], text: "open question: " + q.question })),
+      ...((c && c.newly_failed) || []).map(k => ({ r: byKey[k], text: "no longer passes" })),
+    ].filter(a => a.r);
+    const topFixes = (s.priorities || []).map(p => byKey[p.key]).filter(Boolean).slice(0, 3);
+    return [
+      el("div", { class: "card" },
+        el("div", { class: "hero" },
+          el("div", { class: "big" }, "L" + s.level),
+          el("div", { class: "hero-text" },
+            el("div", { class: "name" }, s.level_name,
+              el("span", { class: "muted" }, s.level_cleared === false ? " · not yet cleared" : " · reached")),
+            agentUse(s.levels[s.level - 1].agent_use, "Agents may now"),
+            el("p", { class: "headline" }, headline()),
+            el("div", { class: "row" },
+              hasPlan && pursued.length ? el("a", { class: "btn btn-lg", href: "#plan" }, "Plan the next step →") : null,
+              target ? el("a", { class: "btn ghost btn-lg", href: "#levels/" + target.level }, "What level " + target.level + " still lacks") : null),
+            c ? el("div", { class: "meta", style: "margin-top:12px" }, "Since " + c.previous_date + ": level " + c.level_before + " → " + s.level +
+              (sinceLast.length ? " · " + plural(sinceLast.length, "criterion", "criteria") + " newly passing" : "") +
+              ((c.newly_failed || []).length ? " · " + c.newly_failed.length + " no longer passing" : "")) : null)),
+        ladder(null),
+        el("div", { class: "legend" }, "Overall " + s.overall.passed + " of " + s.overall.evaluated + " assessed criteria pass. " +
+          "A level clears when its bar passes the tick and every level below has cleared."),
+        perspectives()),
+      criticalGaps.length ? [el("div", { class: "section-head" }, el("h3", {}, "Critical gaps (" + criticalGaps.length + ")")),
+        el("p", { class: "muted" }, "A high level does not make up for these: close them first."),
+        el("div", { class: "grid g3" }, criticalGaps.map(r => item(r, { clamp: true })))] : null,
+      attention.length ? [el("h3", {}, "Needs attention (" + attention.length + ")"),
+        el("div", { class: "card attention" }, attention.map(a => el("button", { type: "button", onclick: () => openDetail(a.r.key) },
+          el("b", {}, a.r.name), el("span", { class: "muted" }, a.text))))] : null,
+      topFixes.length ? [el("div", { class: "section-head" }, el("h3", {}, "Top fixes"),
+          hasPlan ? el("a", { href: "#plan" }, "All gaps in the plan →") : null),
+        el("div", { class: "grid g3" }, topFixes.map((r, i) => item(r, { number: i + 1, clamp: true })))] : null,
+      passing.length ? el("a", { class: "banner", href: "#levels" + (target ? "/" + target.level : "") },
+        el("span", {}, el("b", {}, plural(passing.length, "criterion", "criteria")), " in place" +
+          ((s.strengths || []).length ? ", " + plural(s.strengths.length, "of them a strength", "of them strengths") : "")),
+        el("span", { class: "go" }, "See what they give you →")) : null,
+    ];
+  }
+
+  function viewLevels(arg) {
+    const lv = Number(arg) || (target ? target.level : s.level || 1);
+    const l = s.levels[lv - 1];
+    const here = results.filter(r => r.level === lv);
+    const failing = here.filter(r => r.status === "fail").sort(byCost);
+    const inPlace = here.filter(r => r.status === "pass").sort((a, b) => (strong[b.key] ? 1 : 0) - (strong[a.key] ? 1 : 0));
+    const skipped = here.filter(r => r.status === "skipped");
+    const state = l.state === "cleared" ? "clears on its own, but a level below does not"
+      : l.cleared ? "cleared"
+      : !applies(l) ? "does not apply: every criterion here is not applicable to this repository"
+      : l.failed_condition === "coverage" ? "not cleared: too few criteria assessed"
+      : "not cleared: " + plural(neededAt(l), "more passing criterion", "more passing criteria") + " needed";
+    const gain = applies(l) && l.summary ? (l.cleared ? "The repo " : "Clearing it means the repo ") + l.summary : null;
+    const use = applies(l) && l.agent_use ? agentUse(l.agent_use, l.state === "achieved" ? "Agents may" : "Unlocks for agents", l.state !== "achieved") : null;
+    const usedEfforts = ["trivial", "small", "medium", "large"].filter(e => failing.some(r => r.effort === e));
+    const missing = !failing.length ? el("p", { class: "empty" }, "Nothing fails at this level.") : hasEffort
+      ? [el("div", { class: "cols", style: "--n:" + Math.max(usedEfforts.length, 1) }, usedEfforts.map(e => el("div", { class: "col" },
+          el("h4", {}, EFFORT_LABEL[e] + " (" + failing.filter(r => r.effort === e).length + ")"),
+          list(failing.filter(r => r.effort === e), { showLevel: false, why: false })))),
+        failing.some(r => !r.effort) ? list(failing.filter(r => !r.effort), { showLevel: false, why: false }) : null]
+      : list(failing, { showLevel: false, why: false });
+    const newHere = inPlace.filter(r => isNew.has(r.key));
+    return [
+      el("div", { class: "seg", role: "tablist", "aria-label": "Levels" }, s.levels.map(x => el("button", { type: "button", role: "tab",
+          "aria-selected": x.level === lv ? "true" : "false", onclick: () => go("levels/" + x.level) },
+        el("span", { class: "dot" + (x.cleared ? " ok" : "") }), "L" + x.level + " " + x.name))),
+      el("div", { class: "card" },
+        el("div", { class: "level-head" },
+          el("div", {}, el("h2", {}, "Level " + lv + " – " + l.name), el("div", { class: "muted" }, state), use),
+          applies(l) ? el("div", { style: "text-align:right" }, el("b", {}, l.passed + " / " + l.evaluated + " passed"),
+            el("div", { class: "muted", style: "font-size:13px" }, l.evaluated + " of " + l.total + " assessed")) : null),
+        applies(l) ? meter(l, true) : null,
+        gain ? el("p", { class: "gain" }, gain) : null,
+        newHere.length ? el("p", { class: "muted", style: "margin:8px 0 0;font-size:13px" },
+          plural(newHere.length, "criterion passes", "criteria pass") + " here since " + s.comparison.previous_date + ", marked new below.") : null),
+      el("div", { class: "section-head" }, el("h3", {}, "What is missing (" + failing.length + ")"),
+        failing.length && hasPlan ? el("a", { href: "#plan" }, "Plan these →") : null),
+      missing,
+      el("h3", {}, "In place (" + inPlace.length + ")"),
+      inPlace.length ? el("div", { class: "grid g2" }, inPlace.map(r => item(r, { showLevel: false, fix: false,
+          why: (strong[r.key] && strong[r.key].why) || r.why, isNew: isNew.has(r.key), strength: !!strong[r.key] })))
+        : el("p", { class: "empty" }, "Nothing passes at this level yet."),
+      skipped.length ? el("details", { class: "more", open: skipped.some(r => r.skip_reason === "not_assessable") ? true : null },
+        el("summary", {}, "Not assessed or not applicable (" + skipped.length + ")"),
+        el("div", { style: "margin-top:10px" }, list(skipped, { showLevel: false, status: true, fix: false }))) : null,
+    ];
+  }
+
+  // Plan: the route to the next level, the gaps to build, and the ones the team will not pursue, in one list.
+  // The choice is kept in the browser, so a closed or reloaded tab comes back as it was.
+  const storeKey = "harness-build:" + (repo.name || "") + ":" + data.date;
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storeKey) || "{}") || {}; } catch (e) { saved = {}; }
+  const openKeys = new Set(pursued.map(r => r.key)), waivedKeys = new Set(waived.map(r => r.key));
+  // Every open gap can go to harness-build, which plans it with the team
+  const buildableKeys = s.build.selections.all;
+  let buildSelection = Array.isArray(saved.build) ? new Set(saved.build.filter(k => buildableKeys.includes(k))) : null;
+  const waiveSelection = new Set((saved.waive || []).filter(k => openKeys.has(k)));
+  const endSelection = new Set((saved.end || []).filter(k => waivedKeys.has(k)));
+  const waiveInfo = saved.info && typeof saved.info === "object" ? saved.info : {};   // key → { reason, review_by }
+  let decidedBy = typeof saved.decided_by === "string" ? saved.decided_by : (start.decided_by || "");
+  let sent = false;
+  const save = () => {
+    try {
+      localStorage.setItem(storeKey, JSON.stringify({ build: [...buildSelection], waive: [...waiveSelection],
+        end: [...endSelection], info: waiveInfo, decided_by: decidedBy }));
+    } catch (e) { /* no storage: the choice lasts as long as the tab */ }
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  const defaultReview = () => {
+    if (start.review_by) return start.review_by;
+    const d = new Date(); d.setMonth(d.getMonth() + 6); return d.toISOString().slice(0, 10);
+  };
+  const infoOf = k => waiveInfo[k] || (waiveInfo[k] = { reason: "", review_by: defaultReview() });
+
+  function viewPlan() {
+    const b = s.build, sel = b.selections, tl = target ? target.level : null;
+    if (buildSelection == null) buildSelection = new Set(sel[b.default]);
+    const buildable = new Set(buildableKeys);
+    const rows = {};   // key → { box, toggle, fields, node }
+    const prompt = el("textarea", { class: "prompt", readonly: true, "aria-label": "Prompt for the agent session" });
+    const counter = el("b", {});
+    const hint = el("span", { class: "hint" });
+    const status = el("span", { class: "muted", role: "status" });
+    const chosen = () => ({
+      build: buildableKeys.filter(k => buildSelection.has(k) && !waiveSelection.has(k)),
+      waive: pursued.map(r => r.key).filter(k => waiveSelection.has(k)),
+      end: waived.map(r => r.key).filter(k => endSelection.has(k)),
+    });
+    // What keeps a waiver from being recorded: a reason too short, a review date not after today, nobody who decided
+    const problems = c => {
+      const out = [];
+      const short = c.waive.filter(k => infoOf(k).reason.trim().length < start.min_reason);
+      const late = c.waive.filter(k => !(infoOf(k).review_by > today));
+      if (short.length) out.push("a reason of at least " + start.min_reason + " characters for " + short.map(k => byKey[k].name).join(", "));
+      if (late.length) out.push("a review date after today for " + late.map(k => byKey[k].name).join(", "));
+      if (served && c.waive.length && !decidedBy.trim()) out.push("who decided");
+      return out;
+    };
+    const waiveLine = c => {
+      if (!c.waive.length && !c.end.length) return null;
+      const record = c.waive.map(k => k + " – \"" + infoOf(k).reason.trim() + "\" (review by " + infoOf(k).review_by + ")");
+      return s.waive_command + (record.length ? " Record: " + record.join("; ") + "." + (decidedBy.trim() ? " Decided by " + decidedBy.trim() + "." : "") : "") +
+        (c.end.length ? " End: " + c.end.join(", ") + "." : "");
+    };
+
+    // One row per open gap: a box to build it (when harness-build covers it) and a switch to not pursue it
+    const row = r => {
+      const info = infoOf(r.key);
+      const fields = el("div", { class: "waive-fields", hidden: true },
+        el("label", {}, "Why the team does not pursue it",
+          el("textarea", { rows: 2, required: true, minlength: start.min_reason, "aria-label": "Reason for not pursuing " + r.name,
+            oninput: e => { info.reason = e.target.value; update(); } }, info.reason)),
+        el("label", {}, "Review by",
+          el("input", { type: "date", required: true, value: info.review_by, min: today, "aria-label": "Review date for " + r.name,
+            oninput: e => { info.review_by = e.target.value; update(); } })));
+      const box = buildable.has(r.key) ? el("input", { type: "checkbox", "aria-label": "Build " + r.name,
+        onchange: e => { e.target.checked ? buildSelection.add(r.key) : buildSelection.delete(r.key); update(); } }) : null;
+      const toggle = el("button", { type: "button", class: "switch", "aria-pressed": "false", title: "The team decides not to pursue this gap",
+        onclick: () => {
+          waiveSelection.has(r.key) ? waiveSelection.delete(r.key) : waiveSelection.add(r.key);
+          update();
+          if (waiveSelection.has(r.key)) fields.querySelector("textarea").focus();
+        } }, "Don't pursue");
+      const node = el("div", { class: "plan-row" },
+        item(r, { check: box, extra: toggle, why: false, number: routeNo[r.key],
+          note: box ? null : "Older report: open it again with report.py --render to plan this gap." }), fields);
+      rows[r.key] = { box, toggle, fields, node };
+      return node;
+    };
+    const sorted = pursued.slice().sort((a, b) => a.level - b.level || byCost(a, b));
+    // One group per level, so every gap shows the level it belongs to; the next and the reached levels say so
+    const groups = s.levels.map(l => ({
+      title: "Level " + l.level + " – " + l.name + (tl === l.level ? " · next level" : tl && l.level < tl ? " · reached" : ""),
+      rs: sorted.filter(r => r.level === l.level), open: true,
+    })).filter(g => g.rs.length);
+    const groupNodes = groups.map(g => {
+      const nodes = g.rs.map(row);
+      const touched = g.rs.some(r => buildSelection.has(r.key) || waiveSelection.has(r.key));
+      return el("details", { class: "group", open: g.open || touched ? true : null },
+        el("summary", {}, el("span", { class: "group-title" }, g.title),
+          el("span", { class: "muted" }, plural(g.rs.length, "gap", "gaps"))),
+        nodes);
+    });
+    const endRows = waived.map(r => {
+      const box = el("input", { type: "checkbox", "aria-label": "Pursue " + r.name + " again",
+        onchange: e => { e.target.checked ? endSelection.add(r.key) : endSelection.delete(r.key); update(); } });
+      rows["end:" + r.key] = { box };
+      return item(r, { check: box, fix: false, why: r.waiver.reason });
+    });
+
+    // Preselection: one base (cheapest route, all of the next level, quick wins, everything) and, for the first
+    // two, "+ reached levels" on top. Which base and whether the plus is on follow from the selection itself.
+    const range = (a, b) => a === b ? "L" + a : "L" + a + "–L" + b;
+    const same = keys => keys.length === buildSelection.size && keys.every(k => buildSelection.has(k));
+    const union = (...lists) => [...new Set(lists.flat())];
+    const routeKeys = route.filter(k => buildable.has(k)), levelKeys = sel.target, reachedKeys = sel.below;
+    const bases = [
+      ["route", routeKeys, tl && "Cheapest route to L" + tl, true],
+      ["level", levelKeys, tl && "All of L" + tl, true],
+      ["quick", sel.quick_wins, "Quick wins", false],
+      ["all", sel.all, "Everything", false],
+    ].filter(([, keys, label]) => label && keys.length);
+    let plusOn = reachedKeys.length > 0;   // remembered while the selection is picked by hand
+    const current = () => {
+      for (const [id, keys, , plusable] of bases) {
+        if (same(keys)) return { id, plus: false };
+        if (plusable && reachedKeys.length && same(union(keys, reachedKeys))) return { id, plus: true };
+      }
+      return null;
+    };
+    const choose = id => () => {
+      const [, keys, , plusable] = bases.find(b => b[0] === id);
+      buildSelection = new Set(plusable && plusOn ? union(keys, reachedKeys) : keys);
+      update();
+    };
+    const togglePlus = () => {
+      plusOn = !plusOn;
+      const c = current(), base = c && bases.find(b => b[0] === c.id && b[3]) ? c.id : "level";
+      choose(bases.some(b => b[0] === base) ? base : bases[0][0])();
+    };
+    const count = n => el("span", { class: "n" }, n);
+    const baseBtns = bases.map(([id, keys, label]) => [id,
+      el("button", { type: "button", "aria-pressed": "false", onclick: choose(id) }, label, count(keys.length))]);
+    const plusBtn = tl > 1 && reachedKeys.length ? el("button", { type: "button", class: "plus", "aria-pressed": "false",
+      title: "Add the open gaps in " + range(1, tl - 1) + ", the levels already reached", onclick: togglePlus },
+      "+ reached levels", count(reachedKeys.length)) : null;
+    const clear = el("button", { type: "button", class: "link", onclick: () => { buildSelection = new Set(); update(); } }, "Clear");
+    const presetCaption = el("p", { class: "muted preset-caption" });
+    const caption = () => {
+      const n = buildSelection.size;
+      if (!n) return "Nothing selected; pick an option or tick the gaps one by one.";
+      const head = plural(n, "gap", "gaps") + " selected";
+      if (!routeKeys.length) return head + ".";
+      if (routeKeys.every(k => buildSelection.has(k)))
+        return head + (same(routeKeys) ? ": the cheapest way to clear L" + tl + "."
+          : "; the " + (routeKeys.length === 1 ? "numbered one is" : routeKeys.length + " numbered ones are") + " enough to clear L" + tl + ".");
+      return head + "; to clear L" + tl + ", include the numbered ones.";
+    };
+    const filters = el("div", {},
+      el("div", { class: "filters", role: "group", "aria-label": "Select gaps to build" },
+        baseBtns.filter(([id]) => bases.find(b => b[0] === id)[3]).map(([, btn]) => btn), plusBtn,
+        baseBtns.filter(([id]) => !bases.find(b => b[0] === id)[3]).map(([, btn]) => btn), clear),
+      presetCaption);
+
+    const decider = served ? el("label", { class: "decider", hidden: true }, "Waivers decided by",
+      el("input", { type: "text", value: decidedBy, "aria-label": "Who decided not to pursue these gaps",
+        oninput: e => { decidedBy = e.target.value; update(); } })) : null;
+    const copyTo = async btn => {
+      try { await navigator.clipboard.writeText(prompt.value); }
+      catch (e) { promptPanel.hidden = false; prompt.select(); document.execCommand("copy"); }
+      btn.textContent = "Copied ✓";
+      setTimeout(() => { btn.textContent = "Copy prompt"; }, 1600);
+    };
+    const copy = el("button", { class: served ? "btn ghost" : "btn", type: "button", "aria-live": "polite", onclick: () => copyTo(copy) }, "Copy prompt");
+    // Start build hands the selection to the agent waiting in `report.py --serve`; it runs once, then the agent takes over
+    const send = async () => {
+      const c = chosen();
+      const waive = c.waive.map(k => ({ key: k, reason: infoOf(k).reason.trim(), review_by: infoOf(k).review_by, decided_by: decidedBy.trim() }));
+      startBtn.disabled = true;
+      try {
+        const res = await fetch("/start", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: start.token, build: c.build, waive, end: c.end }) });
+        const answer = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error((answer.errors || []).join("; ") || "HTTP " + res.status);
+        sent = true;
+        try { localStorage.removeItem(storeKey); } catch (e) { /* nothing stored */ }
+        startBtn.textContent = "Sent ✓";
+        status.textContent = (c.waive.length || c.end.length ? "Waivers recorded in docs/agent-readiness/waivers.json. " : "") +
+          (c.build.length ? "Back to the agent session: it plans the build and asks before changing anything." : "Back to the agent session.");
+      } catch (e) {
+        startBtn.disabled = false;
+        status.textContent = "The agent is no longer waiting (" + e.message + "). Copy the prompt into the agent session instead.";
+      }
+    };
+    const startBtn = served ? el("button", { class: "btn", type: "button", onclick: send }, "Start build") : null;
+    const promptPanel = el("div", { class: "prompt-panel", hidden: true }, prompt);
+    const promptToggle = el("button", { type: "button", class: "btn ghost", "aria-expanded": "false",
+      onclick: e => { promptPanel.hidden = !promptPanel.hidden; e.currentTarget.setAttribute("aria-expanded", String(!promptPanel.hidden)); } }, "Prompt");
+
+    function update() {
+      const c = chosen(), missing = problems(c);
+      // The waiver line comes first: harness-audit records the waivers, then starts harness-build on the line after it.
+      const lines = [waiveLine(c), c.build.length ? s.build_command + c.build.join(", ") : null];
+      prompt.value = lines.filter(Boolean).join("\n") || "Select at least one gap.";
+      counter.textContent = plural(c.build.length, "gap", "gaps") + " to build" +
+        (c.waive.length ? " · " + c.waive.length + " not pursued" : "") + (c.end.length ? " · " + c.end.length + " pursued again" : "");
+      hint.textContent = missing.length ? "Still needed: " + missing.join("; ") + "." : "";
+      const off = (!c.build.length && !c.waive.length && !c.end.length) || missing.length > 0;
+      copy.disabled = off;
+      if (startBtn && !sent) startBtn.disabled = off;
+      for (const [k, x] of Object.entries(rows)) {
+        if (k.startsWith("end:")) { x.box.checked = endSelection.has(k.slice(4)); continue; }
+        const waiving = waiveSelection.has(k);
+        x.node.classList.toggle("waiving", waiving);
+        x.toggle.setAttribute("aria-pressed", String(waiving));
+        x.toggle.textContent = waiving ? "Not pursued ✓" : "Don't pursue";
+        x.fields.hidden = !waiving;
+        if (x.box) { x.box.disabled = waiving; x.box.checked = buildSelection.has(k) && !waiving; }
+      }
+      if (decider) decider.hidden = !c.waive.length;
+      const cur = current();
+      if (cur && bases.find(b => b[0] === cur.id)[3]) plusOn = cur.plus;
+      baseBtns.forEach(([id, btn]) => btn.setAttribute("aria-pressed", String(!!cur && cur.id === id)));
+      if (plusBtn) {
+        const plusable = !cur || bases.find(b => b[0] === cur.id)[3];
+        plusBtn.setAttribute("aria-pressed", String(!!cur && cur.plus));
+        plusBtn.disabled = !plusable;
+        plusBtn.title = plusable ? "Add the open gaps in " + range(1, tl - 1) + ", the levels already reached"
+          : "Quick wins and everything already include the reached levels";
+      }
+      presetCaption.textContent = caption();
+      refreshPlanCount();
+      if (!sent) save();
+    }
+    update();
+
+    return [
+      el("h2", {}, "Plan the next step"),
+      el("p", { class: "lead" }, served
+        ? "Tick the gaps harness-build should close, mark the ones the team will not pursue, and press Start build. harness-build plans first and asks before changing anything; it commits nothing."
+        : "Tick the gaps harness-build should close and mark the ones the team will not pursue. Copy the prompt into the agent session that ran the audit; harness-build plans first and asks before changing anything."),
+      target ? el("div", { class: "card route" },
+        el("div", { class: "level-head" },
+          el("b", {}, "Level " + target.level + " – " + target.name),
+          el("span", { class: "muted" }, target.failed_condition === "coverage" ? target.evaluated + " of " + target.total + " assessed"
+            : target.passed + " of " + target.clears_at + " passing · " + neededAt(target) + " more to go")),
+        meter(target, true),
+        el("p", { class: "muted", style: "margin:10px 0 0;font-size:13.5px" }, target.failed_condition === "coverage"
+          ? "Too few criteria at this level could be assessed; answer the open questions on the Context view first."
+          : route.length === 1 ? "The gap numbered 1 is the cheapest route: it alone clears the level."
+            : "The numbered gaps are the cheapest route: these " + route.length + " together clear the level.")) : null,
+      filters,
+      decider,
+      groupNodes,
+      waived.length ? el("details", { class: "group" },
+        el("summary", {}, el("span", { class: "group-title" }, "Already not pursued"), el("span", { class: "muted" }, "tick one to pursue it again")),
+        endRows) : null,
+      el("div", { class: "actionbar" },
+        promptPanel,
+        el("div", { class: "bar-row" },
+          el("div", { class: "bar-info" }, counter, hint, status),
+          el("div", { class: "row" }, promptToggle, copy, startBtn))),
+    ];
+  }
+
+  const EMPTY_FILTER = { status: "", level: "", category: "", perspective: "", effort: "", query: "" };
+  let criteriaFilter = { ...EMPTY_FILTER };
+  function viewCriteria(arg) {
+    if (arg && PERSPECTIVE_LABEL[arg]) criteriaFilter = { ...EMPTY_FILTER, perspective: arg };
+    const f = criteriaFilter;
+    const listBox = el("div");
+    const countBox = el("span", { class: "muted" });
+    const cells = [];
+    // Category × level: passed of assessed, as report.py counts; a cell filters the list below
+    const cell = (cat, lv) => {
+      const rs = results.filter(r => r.category === cat.id && (lv == null || r.level === lv) && (!f.perspective || r.perspective === f.perspective));
+      const ev = rs.filter(r => r.status === "pass" || r.status === "fail");
+      const p = ev.filter(r => r.status === "pass").length;
+      if (!rs.length) return el("td", { class: "c" }, el("span", { class: "none" }, "·"));
+      const rate = ev.length ? p / ev.length : null;
+      const tone = rate == null ? "skip" : rate >= 0.75 ? "pass" : rate >= 0.5 ? "warn" : "fail";
+      const btn = el("button", { type: "button", class: "h-" + tone, "aria-pressed": "false",
+        title: cat.name + (lv ? " · L" + lv : "") + ": " + p + " of " + ev.length + " assessed pass",
+        onclick: () => {
+          const same = f.category === cat.id && f.level === (lv == null ? "" : String(lv));
+          f.category = same ? "" : cat.id; f.level = same || lv == null ? "" : String(lv);
+          syncSelects(); rerender();
+        } }, p + " / " + ev.length);
+      cells.push([btn, cat.id, lv == null ? "" : String(lv)]);
+      return el("td", { class: "c" }, btn);
+    };
+    const matrix = el("div", { class: "card scroll" });
+    // The table follows the perspective filter, so it shows where that perspective's gaps sit
+    const buildMatrix = () => {
+      cells.length = 0;
+      matrix.replaceChildren(el("table", { class: "heat" },
+        el("thead", {}, el("tr", {}, el("th", {}, "Category"), s.levels.map(l => el("th", { class: "c" }, "L" + l.level)), el("th", { class: "c" }, "All"))),
+        el("tbody", {}, s.categories.filter(cat => results.some(r => r.category === cat.id && (!f.perspective || r.perspective === f.perspective))).map(cat =>
+          el("tr", {}, el("td", {}, cat.name), s.levels.map(l => cell(cat, l.level)), cell(cat, null))))));
+    };
+    const selects = {};
+    const sel = (key, label, options) => {
+      const n = el("select", { "aria-label": label, onchange: e => { f[key] = e.target.value; rerender(); } },
+        el("option", { value: "" }, label), options.map(([v, t]) => el("option", { value: v }, t)));
+      selects[key] = n;
+      return n;
+    };
+    const syncSelects = () => { for (const [k, n] of Object.entries(selects)) n.value = f[k]; };
+    function rerender() {
+      const rs = results.filter(r => (!f.status || r.status === f.status) && (!f.level || String(r.level) === f.level) &&
+        (!f.category || r.category === f.category) && (!f.perspective || r.perspective === f.perspective) && (!f.effort || (r.effort || "none") === f.effort) &&
+        (!f.query || (r.name + " " + r.key + " " + (r.fix || "") + " " + (r.evidence || []).map(e => e.ref + " " + (e.detail || "")).join(" "))
+          .toLowerCase().includes(f.query)));
+      countBox.textContent = rs.length + " of " + results.length;
+      cells.forEach(([btn, cat, lv]) => btn.setAttribute("aria-pressed", String(f.category === cat && f.level === lv)));
+      listBox.replaceChildren(...s.categories.flatMap(cat => {
+        const inCat = rs.filter(r => r.category === cat.id).sort((a, b) => a.level - b.level);
+        return inCat.length ? [el("div", { class: "group-title" }, cat.name + " (" + inCat.length + ")"),
+          list(inCat, { status: true, why: false })] : [];
+      }));
+      if (!rs.length) listBox.append(el("p", { class: "empty" }, "No criterion matches these filters. ",
+        el("button", { type: "button", class: "btn ghost", onclick: () => { criteriaFilter = { ...EMPTY_FILTER }; go("criteria"); } }, "Reset filters")));
+    }
+    const statusButtons = [["", "All"], ["fail", "Failing"], ["pass", "Passing"], ["skipped", "Skipped"]].map(([v, t]) =>
+      el("button", { type: "button", "aria-pressed": f.status === v ? "true" : "false", onclick: e => {
+        f.status = v; statusButtons.forEach(b => b.setAttribute("aria-pressed", String(b === e.currentTarget))); rerender(); } }, t));
+    const search = el("input", { type: "search", placeholder: "Search name, key, fix, evidence…", "aria-label": "Search criteria",
+      value: f.query, oninput: e => { f.query = e.target.value.toLowerCase(); rerender(); } });
+    const perspButtons = (s.perspectives ? [["", "All perspectives"], ...s.perspectives.map(p => [p.id, PERSPECTIVE_LABEL[p.id] || p.id])] : []).map(([v, t]) =>
+      el("button", { type: "button", "aria-pressed": f.perspective === v ? "true" : "false", onclick: e => {
+        f.perspective = v; perspButtons.forEach(b => b.setAttribute("aria-pressed", String(b === e.currentTarget)));
+        history.replaceState(null, "", "#criteria" + (v ? "/" + v : "")); buildMatrix(); rerender(); } }, t));
+    const filters = el("div", { class: "filters" }, statusButtons,
+      sel("level", "All levels", s.levels.map(l => [String(l.level), "L" + l.level + " " + l.name])),
+      sel("category", "All categories", s.categories.map(c => [c.id, c.name])),
+      hasEffort ? sel("effort", "Any effort", [["trivial", "Trivial"], ["small", "Small"], ["medium", "Medium"], ["large", "Large"]]) : null,
+      search, countBox);
+    syncSelects();
+    buildMatrix();
+    rerender();
+    return [
+      el("h2", {}, "Criteria"),
+      el("p", { class: "lead" }, "Every criterion with its result. The table counts passed of assessed criteria per category and level; " +
+        "green from 75 %, amber from 50 %. Click a cell to filter the list, a criterion for its evidence. " +
+        "Tags mark the architecture and governance perspectives; untagged criteria belong to the agent perspective."),
+      perspButtons.length ? el("div", { class: "filters", role: "group", "aria-label": "Perspective" }, perspButtons) : null,
+      matrix,
+      el("div", { style: "margin-top:16px" }, filters),
+      listBox,
+    ];
+  }
+
+  function viewContext() {
+    const prof = data.profile || {};
+    const val = v => Array.isArray(v) ? v.join(", ") : typeof v === "boolean" ? (v ? "yes" : "no") : String(v);
+    const c = s.comparison;
+    // A coloured dot per kind of change; the label says it too, so colour is never the only signal
+    const changed = (label, keys, kind) => keys && keys.length ? el("div", { style: "margin-top:8px" }, el("b", {}, label + ": "),
+      el("div", { class: "chips" }, keys.map(k => {
+        const n = byKey[k] ? chip(byKey[k]) : el("span", { class: "chip" }, k);
+        if (kind) n.classList.add("ch-" + kind);
+        return n;
+      }))) : null;
+    return [
+      el("h2", {}, "Context"),
+      el("p", { class: "lead" }, "What the assessment knew about the repository, and what is still open."),
+      openQuestions.length ? [el("h3", {}, "Open questions"), el("p", { class: "lead" }, "Answering these lets the next run assess the criteria behind them."),
+        el("div", {}, openQuestions.map(q => item(byKey[q.key] || { key: q.key, name: q.key, level: "?" },
+          { why: q.question, fix: false })))] : null,
+      (data.questions || []).some(q => q.answer != null) ? [el("h3", {}, "Answered questions"), el("div", { class: "card" },
+        el("ul", { style: "margin:0;padding-left:18px" }, data.questions.filter(q => q.answer != null).map(q =>
+          el("li", {}, q.question, " ", el("code", { class: "key" }, q.key), el("div", { class: "muted" }, "Answer: " + q.answer)))))] : null,
+      c ? [el("h3", {}, "Changes since " + c.previous_date), el("div", { class: "card" },
+        el("p", { style: "margin:0" }, "Level " + c.level_before + " → " + s.level,
+          s.level < c.level_before ? el("span", { class: "drop" }, " · level dropped") : null),
+        c.skill_version_before && c.skill_version_before !== data.skill_version
+          ? el("p", { class: "muted" }, "Skill version changed (" + c.skill_version_before + " → " + data.skill_version +
+              "); some differences may come from the catalog, not the repo.") : null,
+        changed("Newly passed", c.newly_passed, "pass"), changed("Newly failed", c.newly_failed, "fail"),
+        changed("Newly skipped", c.newly_skipped, "skip"), changed("Newly assessed and failing", c.newly_assessed, "fail"),
+        changed("Catalog changes", c.catalog_changes), changed("Newly waived", c.newly_waived, "warn"),
+        changed("Waivers ended", c.waivers_ended))] : null,
+      waived.length ? [el("h3", {}, "Not pursued"), el("p", { class: "lead" }, "Waived by the team: graded as usual and counted in the level, but left out of the priorities, quick wins, and the build."),
+        el("div", {}, waived.map(r => item(r, { why: r.waiver.reason + " (" + r.waiver.decided_by + ", " + r.waiver.date +
+          "; review by " + r.waiver.review_by + ")", fix: false, status: true })))] : null,
+      (data.notes || []).length ? [el("h3", {}, "Notes"), el("div", { class: "card" },
+        el("ul", { style: "margin:0;padding-left:18px" }, data.notes.map(n => el("li", {}, rich(n)))))] : null,
+      el("h3", {}, "Repository profile"),
+      el("div", { class: "card scroll" }, el("table", {}, el("tbody", {},
+        Object.entries(prof).map(([k, v]) => el("tr", {}, el("th", { style: "width:220px" }, k.replace(/_/g, " ")), el("td", {}, val(v))))))),
+    ];
+  }
+
+  // ---------- Routing ----------
+  function go(route, anchor) {
+    const hash = "#" + route;
+    pendingAnchor = anchor || null;
+    if (location.hash === hash) render(); else location.hash = hash;
+  }
+  let pendingAnchor = null;
+  function render() {
+    const [id, arg] = (location.hash.slice(1) || "overview").split("/");
+    const alias = ALIASES[id] || (id === "plan" && !hasPlan ? "overview" : null);
+    if (alias) { location.replace("#" + alias + (arg && alias === "levels" ? "/" + arg : "")); return; }
+    const view = VIEWS.find(v => v.id === id) || VIEWS[0];
+    renderTop(view.id);
+    app.replaceChildren(...[view.render(arg || pendingAnchor)].flat(Infinity).filter(Boolean), pager(view.id));
+    if (!pendingAnchor) window.scrollTo(0, 0);
+    pendingAnchor = null;
+  }
+  window.addEventListener("hashchange", render);
+  render();
+})();
+</script>
+</body>
+</html>

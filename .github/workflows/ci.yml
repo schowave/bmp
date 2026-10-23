@@ -2,8 +2,9 @@ name: CI
 
 # Builds both images, runs the VNC benchmark against the VNC image and a smoke test
 # against the WASM image, so a broken image shows up on the push instead of after the
-# release. The remake job vets and tests the Go re-implementation. The release workflow
-# calls this as its first job.
+# release. The remake job runs `mise run check`, the check command of AGENTS.md, over
+# the Go re-implementation and the save server. The release workflow calls this as its
+# first job.
 
 on:
   push:
@@ -43,17 +44,26 @@ jobs:
         packages: libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev xvfb
         version: 1
 
-    - name: Vet
-      run: go vet ./...
+    # Installs the tools pinned in mise.toml (golangci-lint); Go comes from go.mod above.
+    - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5.2.2
 
-    - name: Format
-      run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+    # The same command as locally: lint, then vet, format and tests of remake/ and
+    # wasm/. The remake tests compare the files built into the remake and the
+    # constant tables with the original in bmp/ of the repository.
+    - name: Check
+      run: xvfb-run -a mise run check
 
-    # The tests compare the files built into the remake and the constant tables
-    # with the original in bmp/ of the repository. The timeout
-    # turns a screen that never closes into a failure instead of a hang.
-    - name: Test
-      run: xvfb-run -a go test -timeout 300s ./...
+    # Reference docs of the remake packages, generated from the source.
+    - name: Package docs
+      run: |
+        mkdir -p godoc
+        for p in $(go list ./internal/...); do go doc -all "$p" > "godoc/$(basename "$p").txt"; done
+
+    - name: Upload package docs
+      uses: actions/upload-artifact@v7
+      with:
+        name: remake-godoc
+        path: remake/godoc/
 
     # Every demo screen as a PNG, to look at what a change did to the screens.
     - name: Screenshots

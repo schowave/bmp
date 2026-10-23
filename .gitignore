@@ -22,5 +22,15 @@ remake/testdata/original/*.png
 # Demo screens rendered by remake/tools/shots.sh
 remake/shots/
 
+# Package docs generated in CI
+remake/godoc/
+
 # Python bytecode of the tools
 __pycache__/
+
+# Secrets and editor settings
+.env
+.env.*
+*.pem
+*.key
+.vscode/

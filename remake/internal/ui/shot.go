@@ -16,6 +16,9 @@ func savePNG(screen *ebiten.Image, path string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	return png.Encode(f, rgba)
+	if err := png.Encode(f, rgba); err != nil {
+		_ = f.Close()
+		return err
+	}
+	return f.Close()
 }
