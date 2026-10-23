@@ -20,6 +20,9 @@ The slower stages, which CI runs on every pull request and push to `main`:
   VNC image with podman, then checks picture, clicks and idle pausing).
 - Changes to `wasm/`, `web/` or `bmp/`: run `mise run wasm:smoke` (builds the
   WASM image, then checks page, bundle and the save API).
+- Changes to the rules in `remake/internal/game`: run
+  `mise run remake:test-long`, the tests that play whole seasons (`check`
+  runs the tests with `-short`).
 - Changes to a screen in `remake/internal/ui`: render it with
   `mise run remake:shot` and compare it with the original as
   `docs/re/spec_ui.md` §1 describes (skill `compare-screen`).
@@ -28,9 +31,10 @@ When a check fails, fix the code. Changing a test's expectation, skipping a
 test, or loosening `.golangci.yml` needs a reason in the commit message (not
 enforced).
 
-Enforced by: the CI job `remake` (`mise run check`), the jobs `vnc` and `wasm`
-(bench and smoke test), and the pre-commit hook of `mise run hooks` (build, vet
-and gofmt of the staged remake).
+Enforced by: the CI job `remake` (`mise run check`, `mise run
+remake:test-long`), the jobs `vnc` and `wasm` (bench and smoke test), and the
+pre-commit hook of `mise run hooks` (build, vet and gofmt of the staged
+remake).
 
 ## Working with the platform
 
