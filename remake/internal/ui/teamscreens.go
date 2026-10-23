@@ -42,7 +42,7 @@ func (t *TrainingScreen) Update(app *App) error {
 	for _, c := range in.Chars {
 		if c == 'o' {
 			res := t.ss.S.OptimizeTraining(t.ss.Mgr())
-			app.Push(remakeToast(app, t.ss.S, "OPTIMAL "+tenthsText(res.After), "BISHER "+tenthsText(res.Before), -1))
+			app.Push(remakeToast(app, t.ss.S, -1, "OPTIMAL "+tenthsText(res.After), "BISHER "+tenthsText(res.Before)))
 			return nil
 		}
 	}

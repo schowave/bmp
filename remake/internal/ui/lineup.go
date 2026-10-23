@@ -307,24 +307,25 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 
 // optimize sets the best lineup (game.State.OptimizeLineup) and tells what
 // it is worth, as expected points per match: the new lineup and the
-// automatic lineups of the three formations, against the next opponent, who is named in a third line, or
+// automatic lineups of the three formations, against the next opponent, who is named in a last line, or
 // else against the clubs of the league.
 func (q *SquadScreen) optimize(app *App) {
 	s := q.ss.S
 	res := s.OptimizeLineup(q.mi())
 	q.picked = -1
 	q.vac = game.BoardCell{}
-	app.Push(remakeToast(app, s, "OPTIMAL "+pointsText(res.After),
-		"STAND. "+pointsText(res.Auto[0])+"/"+pointsText(res.Auto[1])+"/"+pointsText(res.Auto[2]), res.Opponent))
+	app.Push(remakeToast(app, s, res.Opponent, "OPTIMAL "+pointsText(res.After),
+		"STAND. "+pointsText(res.Auto[0])+"/"+pointsText(res.Auto[1])+"/"+pointsText(res.Auto[2])))
 }
 
-// remakeToast is a message of the remake's hidden keys: two lines and, for
-// an opponent (a club id, or -1), a third that names him.
-func remakeToast(app *App, s *game.State, l1, l2 string, opponent int) *lineupToast {
-	toast := newLineupToast(game.LineupError{l1, l2})
+// remakeToast is a message of the remake's hidden keys: its lines and, for
+// an opponent (a club id, or -1), a last one that names him.
+func remakeToast(app *App, s *game.State, opponent int, lines ...string) *lineupToast {
+	toast := newLineupToast(game.LineupError{lines[0], lines[1]})
 	toast.wide = true
+	toast.extra = append(toast.extra, lines[2:]...)
 	if opponent >= 0 {
-		toast.third = opponentLine(app, s.Teams[opponent].Name)
+		toast.extra = append(toast.extra, opponentLine(app, s.Teams[opponent].Name))
 	}
 	return toast
 }
@@ -701,9 +702,9 @@ func lnB2i(b bool) int {
 // as long. It takes no input.
 type lineupToast struct {
 	lines [2]string
-	// third is a line of the remake below the two of the original; it makes
+	// extra are lines of the remake below the two of the original; each makes
 	// the box taller by lnToastLineH. wide marks a message of the remake.
-	third string
+	extra []string
 	wide  bool
 	auto  bool
 	frame int
@@ -716,12 +717,7 @@ func newLineupToast(e game.LineupError) *lineupToast {
 // lnToastLineH is the distance of the lines of the message box.
 const lnToastLineH = 13
 
-func (t *lineupToast) extraH() int {
-	if t.third == "" {
-		return 0
-	}
-	return lnToastLineH
-}
+func (t *lineupToast) extraH() int { return len(t.extra) * lnToastLineH }
 
 const lnToastSteps = 16
 
@@ -778,14 +774,14 @@ type toastLayout struct {
 
 // layout places the lines of the full box: the two of the original centred
 // in 0xb9..0x12f; a message of the remake (wide) centred in the band as wide
-// as the box with the same middle, for its longer lines, and a third line
+// as the box with the same middle, for its longer lines, and each extra line
 // below them makes the box taller.
 func (t *lineupToast) layout() toastLayout {
 	lay := toastLayout{x0: 0xb9, x1: 0x12f, bottom: 44 + t.extraH()}
 	if t.wide {
 		lay.x0, lay.x1 = 169, 319
 	}
-	for i, l := range []string{t.lines[0], t.lines[1], t.third} {
+	for i, l := range append([]string{t.lines[0], t.lines[1]}, t.extra...) {
 		if l != "" {
 			lay.lines = append(lay.lines, l)
 			lay.ys = append(lay.ys, 0x1a+i*lnToastLineH)

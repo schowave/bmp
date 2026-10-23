@@ -141,7 +141,8 @@ The remake adds keys of its own, which the original does not have:
 |---|---|---|
 | Tactics board of the lineup screen in a turn (not the substitution screen of a match) | `o` | Sets the lineup with the most expected points against the next opponent |
 | Training screen | `o` | Sets the training plan with the strongest eleven over the rest of the season |
-| Main menu of a turn | `o` | Both: the training, then the lineup |
+| Stadium screen | `o` | Sets the ticket price with the most gate money at the next home match |
+| Main menu of a turn | `o` | All three: the training, the lineup, the ticket price |
 
 #### The lineup key
 
@@ -199,11 +200,23 @@ the old one (`OPTIMAL 41,0`, `BISHER 37,5`). Training camps and the youth work
 are left alone. The plan looks to the end of the season, so pressing it again
 now and then is enough: after transfers or long injuries.
 
+#### The ticket price key
+
+It tries every price of the screen (5..25 DM) and keeps the one with the most
+expected gate money, attendance × price, at the next home match: today's if
+it is at home, else the next home match of the league. The attendance is that
+of the original (`f_0f9d_11e0`, `internal/game/ticketopt.go`), the mean of 32
+fixed series of its dice. The message names the price, its gain against the
+price before and the gate money (`EINTRITT 12 +12.157`,
+`EINNAHME 132.157`) and the opponent; without a home match left the price
+stays. The price changes nothing else in the original.
+
 #### The key of the main menu
 
-It runs the training key, then the lineup key, and the message names the two
-ratings with their gain against the lineup and the plan before
-(`AUFSTELLUNG 1,13 +0,41`, `TRAINING 41,0 +3,5`) and the opponent. While the
+It runs the training key, the lineup key and the ticket price key, and the
+message names the ratings with their gain against the ones before
+(`AUFSTELLUNG 1,13 +0,41`, `TRAINING 41,0 +3,5`, `EINTRITT 12 +12.157`) and the
+opponent of the lineup. While the
 panel with new messages is open, it takes the keys; close it first.
 
 ## Project layout
@@ -307,10 +320,11 @@ ties). Deliberate differences:
   - When the away manager of a match of two humans comes first by index and
     forfeits, the original returns before the home manager
     (`f_1a58_20b2`); the remake still books his gate money.
-- A new game starts with the half-time scores of all leagues, the goal scenes,
-  the cup screens (DfB-Pokal, Europapokale) and the results of the replays
-  (Nachholspiele) off and the speed of the match days at the maximum (70); the
-  original starts with them on and speed 40. With the cup screens off the
+- A new game starts with only the newspaper on: the half-time scores, results
+  and tables of all leagues, the goal scenes, the cup screens (DfB-Pokal,
+  Europapokale) and the results of the replays (Nachholspiele) off, and the
+  speed of the match days at the maximum (70); the original starts with them
+  on and speed 40. With the cup screens off the
   draws are not shown, and the results of a cup round only in the last rounds
   of the season (after day 315). All stay changeable in the options screen.
 - During a match the lineup screen leaves out the formation buttons below the
@@ -319,7 +333,8 @@ ties). Deliberate differences:
   takes it only on the number and the position. The player taken out leaves
   the board at once (not checked against the original).
 - The key `o` on the training screen sets an optimal training plan, on the
-  main menu also the lineup (see *Hidden keys*).
+  stadium screen an optimal ticket price, on the main menu all of them with the
+  lineup (see *Hidden keys*).
 - The key `o` on the tactics board sets an optimal lineup (see *Hidden keys*).
 - When a player is sold to an offer for a squad player, the buyer and the
   strength boost come from the sold player; the original reads the next

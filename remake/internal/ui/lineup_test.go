@@ -370,9 +370,9 @@ func TestLineupOptimalKey(t *testing.T) {
 		t.Errorf("message %q", toast.lines)
 	}
 	switch {
-	case ok && !strings.HasPrefix(toast.third, "GEGEN "+s.Teams[opp].Name[:3]):
+	case ok && (len(toast.extra) != 1 || !strings.HasPrefix(toast.extra[0], "GEGEN "+s.Teams[opp].Name[:3])):
 		t.Errorf("message %q does not name the opponent %s", toast.lines, s.Teams[opp].Name)
-	case !ok && toast.third != "":
+	case !ok && len(toast.extra) != 0:
 		t.Errorf("message %q", toast.lines)
 	}
 	// The text must fit into the box (167..317), also with three digits:
@@ -398,8 +398,8 @@ func TestLineupOptimalKeyLongName(t *testing.T) {
 	step(t, app, click(lnIconX+10, lnIconY[1]+10))
 	step(t, app, Input{Chars: []rune("o")})
 	toast := top(app).(*lineupToast)
-	if w := app.Gfx.TextWidth(FontNormal, toast.third); w > lnToastWidth || !strings.HasPrefix(toast.third, "GEGEN WW") {
-		t.Errorf("%q is %d pixels wide", toast.third, w)
+	if l := toast.extra[0]; app.Gfx.TextWidth(FontNormal, l) > lnToastWidth || !strings.HasPrefix(l, "GEGEN WW") {
+		t.Errorf("%q is %d pixels wide", l, app.Gfx.TextWidth(FontNormal, l))
 	}
 }
 
@@ -573,13 +573,13 @@ func TestBoardDecisions(t *testing.T) {
 }
 
 // A message of the original keeps its band and box; one of the remake is
-// centred in the band as wide as the box, and a third line makes it taller.
+// centred in the band as wide as the box, and an extra line makes it taller.
 func TestToastLayout(t *testing.T) {
 	orig := newLineupToast(game.ErrNoSubs).layout()
 	if orig.x0 != 0xb9 || orig.x1 != 0x12f || orig.bottom != 44 || len(orig.lines) != 2 {
 		t.Errorf("original %+v", orig)
 	}
-	r := &lineupToast{lines: [2]string{"A", "B"}, third: "C", wide: true}
+	r := &lineupToast{lines: [2]string{"A", "B"}, extra: []string{"C"}, wide: true}
 	lay := r.layout()
 	if lay.x0 != 169 || lay.x1 != 319 || lay.bottom != 44+lnToastLineH || len(lay.ys) != 3 || lay.ys[2] != 0x1a+2*lnToastLineH {
 		t.Errorf("remake %+v", lay)
