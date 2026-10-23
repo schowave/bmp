@@ -212,3 +212,23 @@ func TestEmbeddedFilesMatchTheOriginal(t *testing.T) {
 		t.Errorf("embedded %d files, the extract has %d", m, n)
 	}
 }
+
+func TestEncodeFontsIsStable(t *testing.T) {
+	fonts, err := dataDir(t).Fonts()
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := EncodeFonts(fonts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 5 {
+		again, err := EncodeFonts(fonts)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(first, again) {
+			t.Fatal("EncodeFonts gives different bytes for the same fonts")
+		}
+	}
+}

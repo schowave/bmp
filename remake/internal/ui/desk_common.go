@@ -79,4 +79,3 @@ func (g *Gfx) deskHeading(dst *ebiten.Image, x, y int, s string) {
 func deskMenuHit(in *Input) bool {
 	return MenuButton.Hit(in) || in.Escape
 }
-

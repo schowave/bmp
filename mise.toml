@@ -93,7 +93,7 @@ run = "go run ./cmd/bmp"
 [tasks."remake:test"]
 description = "Test the Go re-implementation"
 dir = "{{config_root}}/remake"
-run = ["go vet ./...", "go test -timeout 300s ./..."]
+run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test -timeout 300s ./..."]
 
 [tasks."remake:shot"]
 description = "Screenshot of a remake screen: demo name, PNG path, optional input script"
