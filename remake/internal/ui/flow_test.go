@@ -135,7 +135,8 @@ func openAllMenus(t *testing.T, app *App, m *MainMenu) {
 			img := newTestImage()
 			sc.Draw(app, img)
 			for top(app) != Scene(m) {
-				step(t, app, Input{Escape: true, Right: true})
+				// screens close with the HAUPTMENÜ button, dialogs with Escape
+				step(t, app, Input{Escape: true, Right: true, Left: true, X: MenuButton.X + 10, Y: MenuButton.Y + 10})
 			}
 		}
 	}

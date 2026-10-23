@@ -42,8 +42,8 @@ const (
 	IconLandesmeister
 	IconPokalsieger
 	IconUEFACup
-	IconSave
-	IconLoad
+	IconLoad // disk with an arrow: LADEN
+	IconSave // arrow into the disk: SPEICHERN
 	IconHighscore
 	IconOptions
 	IconMainMenu
@@ -72,8 +72,30 @@ const (
 
 // DrawIconButton draws an icon in its marble frame at x, y.
 func (g *Gfx) DrawIconButton(dst *ebiten.Image, i Icon, x, y int) {
-	Draw(dst, g.Pic(25, false), x, y)
+	g.drawIconButton(dst, i, x, y, false)
+}
+
+// drawIconButton draws an icon button; a pressed one (the open group of the
+// main menu) has the frame PIC/25.VGA instead of PIC/24.VGA.
+func (g *Gfx) drawIconButton(dst *ebiten.Image, i Icon, x, y int, pressed bool) {
+	frame := 24
+	if pressed {
+		frame = 25
+	}
+	Draw(dst, g.Pic(frame, false), x, y)
+	// The window of the frame is blue inside a black line.
+	FillRect(dst, x+9, y+9, 32, 23, g.C(ColBlue))
 	img := g.IconImage(i)
 	b := img.Bounds()
-	Draw(dst, img, x+(ButtonW-b.Dx())/2, y+(ButtonH-b.Dy())/2)
+	// Vertically the sheet is a grid of 24 pixels; a cell of 23 rows goes
+	// 9 pixels below the top of the frame.
+	c, r := int(i)%6, int(i)/6
+	ix, iy := x+(ButtonW-b.Dx())/2, y+9
+	img = g.Sub(3, image.Rect(iconCols[c][0], r*24, iconCols[c][1], min(r*24+23, 167)))
+	if i == IconCobweb {
+		// The cobweb is the only icon on black: the game shows it on blue.
+		img = g.SubKeyed(3, 0, image.Rect(iconCols[c][0], iconRows[r][0], iconCols[c][1], iconRows[r][1]))
+		iy = y + 9 + iconRows[r][0] - r*24
+	}
+	Draw(dst, img, ix, iy)
 }
