@@ -26,3 +26,20 @@ func TestCupScreenRelegationTitle(t *testing.T) {
 		t.Errorf("final: title %q", title)
 	}
 }
+
+// A foreign club has no logo: its scoreboard shows the trophy of the cup
+// (PIC/0x90+cup, f_1a58_042f), a German club its own logo.
+func TestFixtureLogo(t *testing.T) {
+	_, mana := testApp(t)
+	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := &game.Fixture{League: -1, Cup: game.CupUEFA, Home: 9, Away: game.NumGerman + 3}
+	if got := fixtureLogo(s, f, f.Home); got != s.Teams[9].Logo {
+		t.Errorf("German club: picture %d, want %d", got, s.Teams[9].Logo)
+	}
+	if got := fixtureLogo(s, f, f.Away); got != 147 {
+		t.Errorf("foreign club in the UEFA-Pokal: picture %d, want 147", got)
+	}
+}

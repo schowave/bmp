@@ -371,6 +371,16 @@ func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
 	}
 }
 
+// fixtureLogo is the picture of club t on the scoreboard of fixture f
+// (f_1a58_042f): the logo of a German club; a foreign club has none and
+// shows the trophy of its cup, PIC/0x90+cup. The scene window copies these.
+func fixtureLogo(s *game.State, f *game.Fixture, t int) int {
+	if t >= game.NumGerman {
+		return 0x90 + int(f.Cup)
+	}
+	return s.Teams[t].Logo
+}
+
 func logoSub(g *Gfx, logo int) *ebiten.Image {
 	return g.Pic(logo, false).SubImage(image.Rect(0, 0, 38, 38)).(*ebiten.Image)
 }
@@ -383,8 +393,8 @@ func (m *MatchScreen) drawPanel(g *Gfx, dst *ebiten.Image, p *matchPanel) {
 	Draw(dst, g.Sub(38, rectWH(0, 0, 155, 114)), x+3, y)
 	m.panelName(g, dst, s.Teams[f.Home].Name, x+5, x+0x4b, y+12)
 	m.panelName(g, dst, s.Teams[f.Away].Name, x+0x55, x+0x99, y+12)
-	Draw(dst, logoSub(g, s.Teams[f.Home].Logo), x+0x16, y+0x23)
-	Draw(dst, logoSub(g, s.Teams[f.Away].Logo), x+0x65, y+0x23)
+	Draw(dst, logoSub(g, fixtureLogo(s, f, f.Home)), x+0x16, y+0x23)
+	Draw(dst, logoSub(g, fixtureLogo(s, f, f.Away)), x+0x65, y+0x23)
 	h, a := m.md.Score(p.fixture)
 	for side, v := range []int{h, a} {
 		for v > 9 {
@@ -534,8 +544,8 @@ func (m *MatchScreen) drawScene(app *App, dst *ebiten.Image, minute int) {
 		f = m.md.Fixtures[m.panels[0].fixture]
 	}
 	if f != nil {
-		Draw(dst, logoSub(g, s.Teams[f.Home].Logo), 0x14, u+5)
-		Draw(dst, logoSub(g, s.Teams[f.Away].Logo), 0x105, u+5)
+		Draw(dst, logoSub(g, fixtureLogo(s, f, f.Home)), 0x14, u+5)
+		Draw(dst, logoSub(g, fixtureLogo(s, f, f.Away)), 0x105, u+5)
 		for mi, mg := range s.Managers {
 			if mg.Team == f.Home || mg.Team == f.Away {
 				x := 0x14
