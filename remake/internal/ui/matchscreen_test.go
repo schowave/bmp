@@ -70,6 +70,9 @@ func TestNoMatchScreenAfterFinalResults(t *testing.T) {
 	app, s, _, _, m := matchApp(t)
 	s.Display = game.DefaultDisplay()
 	s.Display.GoalScenes = false
+	// The results and tables are off in a new game; this test needs them.
+	s.Display.Results = [game.NumLeagues]bool{true, true, true}
+	s.Display.Table = [game.NumLeagues]bool{true, true, true}
 	final := false
 	for range 20000 {
 		switch sc := top(app).(type) {

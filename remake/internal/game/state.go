@@ -196,13 +196,12 @@ type Display struct {
 	Speed      int              // Spielgeschwindigkeit, 0..70
 }
 
-// DefaultDisplay is the setting of a new game: the results, tables and the
-// newspaper on, the half-time scores, goal scenes, cup screens, replays and
-// fades off, at the highest speed (the original starts with all but the fades
-// on and speed 40).
+// DefaultDisplay is the setting of a new game: only the newspaper on, at the
+// highest speed; the half-time scores, results and tables of the leagues, the
+// goal scenes, cup screens, replays and fades off (the original starts with
+// all but the fades on and speed 40).
 func DefaultDisplay() Display {
-	on := [NumLeagues]bool{true, true, true}
-	return Display{Results: on, Table: on, Newspaper: true, Speed: 70}
+	return Display{Newspaper: true, Speed: 70}
 }
 
 // TakeFlag returns the next flag to show, or false.

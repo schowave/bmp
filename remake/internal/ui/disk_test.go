@@ -107,6 +107,7 @@ func TestOptionsScreen(t *testing.T) {
 	o := NewOptionsScreen(ss)
 	app.Push(o)
 	d := &ss.S.Display
+	d.Results = [game.NumLeagues]bool{true, true, true} // a new game has them off
 	// AUS of Ergebnisse 2.Liga, AN of Blenden.
 	step(t, app, click(180+30, 54+5))
 	step(t, app, click(238+5, 119+5))
