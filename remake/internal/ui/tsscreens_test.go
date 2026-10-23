@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/game"
@@ -139,4 +140,53 @@ func TestContractPanel(t *testing.T) {
 	if p.years != 3 || p.salary != s.ContractHint(mi, 1, 3) {
 		t.Fatalf("years %d salary %d", p.years, p.salary)
 	}
+}
+
+// The key o sets the optimal training and says what it is worth.
+func TestTrainingOptimalKey(t *testing.T) {
+	app, ss := tsTestSession(t)
+	m := ss.M()
+	tr := NewTrainingScreen(ss)
+	app.Push(tr)
+	step(t, app, Input{Chars: []rune("o")})
+	toast, ok := top(app).(*lineupToast)
+	if !ok {
+		t.Fatalf("no message, top is %T", top(app))
+	}
+	if !strings.HasPrefix(toast.lines[0], "OPTIMAL ") || !strings.HasPrefix(toast.lines[1], "BISHER ") {
+		t.Errorf("message %q", toast.lines)
+	}
+	if sum := tsSum(m.Training); sum > 20 || m.Intensity < 1 || m.Intensity > 10 || tsSum(m.PosTraining) > 10 {
+		t.Errorf("plan %v %v %d", m.Training, m.PosTraining, m.Intensity)
+	}
+}
+
+func TestTenthsText(t *testing.T) {
+	for n, want := range map[int]string{410: "41,0", 375: "37,5", 7: "0,7", -12: "-1,2"} {
+		if got := tenthsText(n); got != want {
+			t.Errorf("%d: %q, want %q", n, got, want)
+		}
+	}
+}
+
+// The key o on the main menu sets the optimal training and lineup at once.
+func TestTurnMenuOptimalKey(t *testing.T) {
+	app, ss := tsTestSession(t)
+	m := NewTurnMenu(ss)
+	app.Push(m)
+	step(t, app, Input{})
+	m.msgOpen = false
+	old := ss.S.PlanOf(ss.Mgr())
+	step(t, app, Input{Chars: []rune("o")})
+	toast, ok := top(app).(*lineupToast)
+	if !ok {
+		t.Fatalf("no message, top is %T", top(app))
+	}
+	if !strings.HasPrefix(toast.lines[0], "AUFSTELLUNG ") || !strings.HasPrefix(toast.lines[1], "TRAINING ") {
+		t.Errorf("message %q", toast.lines)
+	}
+	if want := "AUFSTELLUNG " + pointsText(ss.S.LineupRating(ss.Mgr())); toast.lines[0] != want {
+		t.Errorf("message %q, want %q", toast.lines[0], want)
+	}
+	t.Logf("plan %+v -> %+v, %q %q", old, ss.S.PlanOf(ss.Mgr()), toast.lines, toast.third)
 }

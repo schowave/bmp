@@ -79,6 +79,9 @@ type MainMenu struct {
 	msgOpen     bool
 	alert       *MenuGroup // its RightAction runs: the icon shows the alert face
 	started     bool
+	// Key handles a key typed on the menu and reports whether it took it
+	// (the hidden keys of the remake).
+	Key func(app *App, c rune) bool
 }
 
 // calendarRect is the calendar sheet of the header panel (PIC/23.VGA).
@@ -100,6 +103,11 @@ func (m *MainMenu) Update(app *App) error {
 		// The panel takes all clicks until X closes it.
 		m.msgOpen = m.Messages.Update(in)
 		return nil
+	}
+	for _, c := range in.Chars {
+		if m.Key != nil && m.Key(app, c) {
+			return nil
+		}
 	}
 	if !in.Left {
 		if in.Right {

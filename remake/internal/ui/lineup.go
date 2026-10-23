@@ -319,15 +319,21 @@ func (q *SquadScreen) optimize(app *App) {
 		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2]),
 	})
 	if res.Opponent >= 0 {
-		name := []rune(s.Teams[res.Opponent].Name)
-		l := "GEGEN " + string(name)
-		for len(name) > 0 && app.Gfx.TextWidth(FontNormal, l) > lnToastWidth {
-			name = name[:len(name)-1]
-			l = "GEGEN " + string(name)
-		}
-		toast.third = l
+		toast.third = opponentLine(app, s.Teams[res.Opponent].Name)
 	}
 	app.Push(toast)
+}
+
+// opponentLine is "GEGEN" and the name of the opponent, cut to fit the
+// message box.
+func opponentLine(app *App, opponent string) string {
+	name := []rune(opponent)
+	l := "GEGEN " + string(name)
+	for len(name) > 0 && app.Gfx.TextWidth(FontNormal, l) > lnToastWidth {
+		name = name[:len(name)-1]
+		l = "GEGEN " + string(name)
+	}
+	return l
 }
 
 // lnToastWidth is the width of a line in the message box (167..317).

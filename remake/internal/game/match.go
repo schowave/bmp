@@ -334,8 +334,7 @@ func (md *MatchDay) squadBeforeMatch(mi, comp int) {
 		sl.Rating = 0
 		if sl.Lineup >= 1 && sl.Lineup <= 11 {
 			p := &s.Persons[sl.Person]
-			k := boolInt(p.Skill[0] > p.Skill[1])
-			sl.Fatigue += s.Rand.Between(2, 4) - k + 6
+			s.playFatigue(sl)
 			if comp == 0 {
 				p.LeagueGames++
 			}
@@ -938,6 +937,14 @@ func (md *MatchDay) sendOff(fi, mi, p, minute int, yellowRed bool) {
 	md.Events = append(md.Events, MatchEvent{Minute: minute, Fixture: fi, Kind: kind,
 		Side: md.humans[mi].side, Player: s.Persons[sl.Person].Name, Manager: mi})
 	s.LineupStrength(mi, true)
+}
+
+// playFatigue adds the Erschöpfung of a match to a player of the team
+// (f_1a58_20b2): less for one whose Kondition beats his Technik.
+func (s *State) playFatigue(sl *Slot) {
+	p := &s.Persons[sl.Person]
+	k := boolInt(p.Skill[0] > p.Skill[1])
+	sl.Fatigue += s.Rand.Between(2, 4) - k + 6
 }
 
 // replan reschedules the remaining chances of a human's match after a red
