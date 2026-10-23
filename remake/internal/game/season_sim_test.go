@@ -2,9 +2,11 @@ package game
 
 import "testing"
 
-// seasonResult is where manager 0 ended a season of his league.
+// seasonResult is where manager 0 ended a season of his league, and the
+// game at that point (his squad, money, ...).
 type seasonResult struct {
 	Place, Points, GoalDiff int
+	S                       *State
 }
 
 // playSeason plays the first season of a new game with one manager at the
@@ -44,7 +46,7 @@ func playSeason(t *testing.T, team int, seed uint32, turn func(s *State)) season
 	mt := s.Managers[0].Team
 	for i, r := range s.LeagueTable(l, TableTotal) {
 		if r.Club == mt {
-			return seasonResult{Place: i + 1, Points: r.Points, GoalDiff: r.Goals - r.Against}
+			return seasonResult{Place: i + 1, Points: r.Points, GoalDiff: r.Goals - r.Against, S: s}
 		}
 	}
 	t.Fatalf("club %d not in the table of league %d", mt, l)

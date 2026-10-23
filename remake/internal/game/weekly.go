@@ -74,12 +74,7 @@ func (s *State) turn(mi int) {
 	for i := 0; i < s.countLineup(mi, 0); i++ {
 		sl := &sq[i]
 		p := &s.Persons[sl.Person]
-		base := (boolInt(noMatch)*25 - sl.Fatigue + 160) * 2
-		if base < 40 {
-			base = 40
-		}
-		if sl.Out == 0 && sl.Status == 0 && r.Between(0, 30*s.Level+base+80) == 0 {
-			s.injure(sl)
+		if s.trainingInjury(sl, noMatch) {
 			s.notify(mi, msgInjury(p.Name, InjuryNames[sl.Injury]))
 			relineup = true
 		}
@@ -145,6 +140,21 @@ func (s *State) turn(mi int) {
 	}
 	s.develop(mi)
 	_ = m
+}
+
+// trainingInjury is the injury in training of f_0cb5_13bd: likelier for a
+// tired player and on a day with a match. It reports whether the player of
+// sl got injured.
+func (s *State) trainingInjury(sl *Slot, noMatch bool) bool {
+	base := (boolInt(noMatch)*25 - sl.Fatigue + 160) * 2
+	if base < 40 {
+		base = 40
+	}
+	if sl.Out == 0 && sl.Status == 0 && s.Rand.Between(0, 30*s.Level+base+80) == 0 {
+		s.injure(sl)
+		return true
+	}
+	return false
 }
 
 // retirementAge is f_14a4_2588: the "effective age" for the retirement

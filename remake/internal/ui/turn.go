@@ -20,6 +20,13 @@ func NewTurnMenu(ss *Session) *MainMenu {
 		return out
 	}}
 	m.NewMessages = func() bool { return ss.S.TakeNewMessages(ss.Mgr()) }
+	m.Key = func(app *App, c rune) bool {
+		if c != 'o' {
+			return false
+		}
+		optimizeTurn(app, ss)
+		return true
+	}
 	push := func(f func() Scene) func(*App) { return func(app *App) { app.Push(f()) } }
 	m.Left[0] = MenuGroup{Icon: IconDesk, Items: [9]MenuItem{
 		{IconFinanceChart, push(func() Scene { return NewFinanceScreen(ss) })},
@@ -101,4 +108,22 @@ func turnHeader(ss *Session) Header {
 		Year:     d.Year,
 	}
 	return h
+}
+
+// optimizeTurn is the hidden key o of the main menu (the remake's): it sets
+// the optimal training (game.State.OptimizeTraining) and then the optimal
+// lineup (game.State.OptimizeLineup) and names what each is worth, and the
+// opponent the lineup was made for.
+func optimizeTurn(app *App, ss *Session) {
+	s, mi := ss.S, ss.Mgr()
+	tr := s.OptimizeTraining(mi)
+	ln := s.OptimizeLineup(mi)
+	toast := newLineupToast(game.LineupError{
+		"AUFSTELLUNG " + pointsText(ln.After),
+		"TRAINING " + tenthsText(tr.After),
+	})
+	if ln.Opponent >= 0 {
+		toast.third = opponentLine(app, s.Teams[ln.Opponent].Name)
+	}
+	app.Push(toast)
 }

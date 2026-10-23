@@ -173,6 +173,24 @@ exact), so the lineup is left alone where nothing is gained. The lineup stays
 automatic if the automatic one of the formation is already the best,
 otherwise it becomes manual. The original has no such key.
 
+On the training screen `o` sets the training plan whose best eleven are
+strongest over the rest of the season: the 20 training points, the
+intensity and the 10 position points. It plays the rest of the season with
+the training of the original (`develop`, the injuries in training and the
+Erschöpfung of the matches) on copies of the game for each plan it tries:
+every split of the training points at intensity 6 and 10 over a part of the
+season, then every intensity for the best splits and single moves of the
+position points over all of it (`internal/game/trainingopt.go`). The
+strength is that of the best goalkeeper and the ten best field players,
+(Kondition + Technik + Form) / 3 less the Erschöpfung as the lineup counts it;
+the message names it for the new plan and the old one (`OPTIMAL 41,0`,
+`BISHER 37,5`). Training camps and the youth work are left alone. The
+original has no such key.
+
+On the main menu of a turn `o` does both: the optimal training, then the
+optimal lineup, and the message names the two ratings (`AUFSTELLUNG 1,13`,
+`TRAINING 41,0`) and the opponent.
+
 The level selects the high-score table (`HIGH.<length><level>`), so a game
 whose level was changed here is entered in the table of the new level.
 
@@ -286,6 +304,8 @@ ties). Deliberate differences:
   anywhere in a row of the list substitutes, also on the name; the original
   takes it only on the number and the position. The player taken out leaves
   the board at once; the one who comes on takes his cell, as in the original.
+- The key `o` on the training screen sets an optimal training plan, on the
+  main menu also the lineup (see *Hidden keys*).
 - The key `o` on the tactics board sets an optimal lineup (see *Hidden keys*).
 - When a player is sold to an offer for a squad player, the buyer and the
   strength boost come from the sold player; the original reads the next
