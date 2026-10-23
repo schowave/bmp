@@ -93,7 +93,30 @@ run = "go run ./cmd/bmp -data ../bmp"
 [tasks."remake:test"]
 description = "Test the Go re-implementation"
 dir = "{{config_root}}/remake"
-run = ["go vet ./...", "go test ./..."]
+run = ["go vet ./...", "go test -timeout 300s ./..."]
+
+[tasks."remake:shot"]
+description = "Screenshot of a remake screen: demo name, PNG path, optional input script"
+dir = "{{config_root}}/remake"
+usage = '''
+arg "<demo>" help="Demo scene, see internal/ui/demo.go"
+arg "<out>" help="PNG file (320x240)"
+arg "[script]" help="Input script (internal/ui/script.go); without it the screen is shot after a few frames"
+'''
+# Ebitengine needs a monitor: caffeinate -u wakes a sleeping display first,
+# otherwise bmp fails with "no monitor was found".
+run = '''
+caffeinate -u -t 2 || true
+if [ -n "${usage_script:-}" ]; then
+  go run ./cmd/bmp -data ../bmp -scale 1 -demo "$usage_demo" -script "$usage_script"
+else
+  go run ./cmd/bmp -data ../bmp -scale 1 -demo "$usage_demo" -shot "$usage_out"
+fi
+'''
+
+[tasks."re:build"]
+description = "Disassemble and (with GHIDRA set) decompile BMMAIN.EXE into remake/tools/re/work"
+run = "remake/tools/re/run.sh"
 
 [tasks."remake:build"]
 description = "Build remake/bin/bmp with the original files from bmp/ built in"
@@ -102,6 +125,10 @@ run = [
   "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data",
   "go build -tags embeddata -o bin/bmp ./cmd/bmp",
 ]
+
+[tasks.hooks]
+description = "Use the hooks of .githooks (pre-commit builds and vets the staged remake)"
+run = "git config core.hooksPath .githooks"
 
 # --- Release -----------------------------------------------------------------
 

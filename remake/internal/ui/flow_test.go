@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -82,7 +83,22 @@ func TestSetupAndFirstTurns(t *testing.T) {
 	ss := d.ss
 	// Play a few events through the UI: close message boxes, end turns,
 	// run match days.
+	var last string
+	same := 0
 	for i := 0; i < 20000 && ss.S.Event < 12; i++ {
+		// A scene that stays on top without anything moving is a screen
+		// the test cannot leave: fail instead of hanging until the timeout.
+		state := fmt.Sprintf("%p %d %d %d", top(app), len(app.stack), ss.S.Event, ss.S.Day)
+		if ms, ok := top(app).(*MatchScreen); ok {
+			state += fmt.Sprintf(" %d %d", ms.md.Minute, len(ms.shows))
+		}
+		if state == last {
+			if same++; same > 500 {
+				t.Fatalf("stuck on %T at event %d", top(app), ss.S.Event)
+			}
+		} else {
+			last, same = state, 0
+		}
 		switch sc := top(app).(type) {
 		case *Driver:
 			step(t, app, Input{})
@@ -145,7 +161,10 @@ func openAllMenus(t *testing.T, app *App, m *MainMenu) {
 			}
 			img := newTestImage()
 			sc.Draw(app, img)
-			for top(app) != Scene(m) {
+			for n := 0; top(app) != Scene(m); n++ {
+				if n > 100 {
+					t.Fatalf("item %d of group %d does not close: %T", k, gi, top(app))
+				}
 				// screens close with the HAUPTMENÜ button, dialogs with Escape
 				step(t, app, Input{Escape: true, Right: true, Left: true, X: MenuButton.X + 10, Y: MenuButton.Y + 10})
 			}

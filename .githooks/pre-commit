@@ -1,0 +1,13 @@
+#!/bin/sh
+# Builds and vets the remake as it is staged, when a commit touches it, so a
+# commit that does not compile is stopped. Enable with `mise run hooks`.
+git diff --cached --name-only | grep -q '^remake/' || exit 0
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+# Only remake/: a copy of the repository's mise.toml would be untrusted.
+git ls-files -z remake | xargs -0 git checkout-index --prefix="$tmp/" --
+cd "$tmp/remake" || exit 1
+if ! go build ./... || ! go vet ./...; then
+    echo "pre-commit: the staged remake does not build or vet" >&2
+    exit 1
+fi

@@ -2,7 +2,8 @@ name: CI
 
 # Builds both images, runs the VNC benchmark against the VNC image and a smoke test
 # against the WASM image, so a broken image shows up on the push instead of after the
-# release. The release workflow calls this as its first job.
+# release. The remake job vets and tests the Go re-implementation. The release workflow
+# calls this as its first job.
 
 on:
   push:
@@ -18,6 +19,44 @@ permissions:
 # fill the cache with layers main never builds.
 
 jobs:
+  remake:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remake
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: actions/setup-go@v7
+      with:
+        go-version-file: remake/go.mod
+        cache-dependency-path: remake/go.sum
+
+    # Ebitengine needs the GL and X11 headers to build; the tests draw on
+    # offscreen images, xvfb gives them a display anyway.
+    - name: Install GL and X11 headers
+      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev xvfb
+
+    - name: Vet
+      run: go vet ./...
+
+    # The tests use the original files in bmp/ of the repository. The timeout
+    # turns a screen that never closes into a failure instead of a hang.
+    - name: Test
+      run: xvfb-run -a go test -timeout 300s ./...
+
+    # Every demo screen as a PNG, to look at what a change did to the screens.
+    - name: Screenshots
+      run: xvfb-run -a tools/shots.sh shots
+
+    - name: Upload screenshots
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: remake-shots
+        path: remake/shots/*.png
+        if-no-files-found: ignore
+
   vnc:
     runs-on: ubuntu-latest
     steps:
