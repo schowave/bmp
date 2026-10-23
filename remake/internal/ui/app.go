@@ -49,8 +49,17 @@ type App struct {
 	// ShotFrame frames and quit (for tests and documentation).
 	ShotPath  string
 	ShotFrame int
-	// Script feeds synthetic input, one entry per frame, before real input.
-	Script []Input
+	// Script feeds synthetic input, one entry per frame, instead of real
+	// input; a step with a Shot saves the canvas after that frame.
+	Script    []ScriptStep
+	shot      string
+	scriptEnd bool // the last step of the script ran: quit after drawing
+}
+
+// ScriptStep is the input of one frame of a script.
+type ScriptStep struct {
+	In   Input
+	Shot string
 }
 
 // NewApp creates the application with a first scene.
@@ -85,11 +94,18 @@ func (a *App) Update() error {
 	if a.quit || len(a.stack) == 0 {
 		return ebiten.Termination
 	}
+	if a.shot != "" || (a.scriptEnd && a.ShotPath == "") {
+		// Ebitengine may run several updates per frame: wait for the
+		// screenshot of the script to be drawn.
+		return nil
+	}
 	a.frame++
 	a.readInput()
 	if len(a.Script) > 0 {
-		a.Input = a.Script[0]
+		a.Input = a.Script[0].In
+		a.shot = a.Script[0].Shot
 		a.Script = a.Script[1:]
+		a.scriptEnd = len(a.Script) == 0
 	}
 	return a.stack[len(a.stack)-1].Update(a)
 }
@@ -115,6 +131,15 @@ func (a *App) readInput() {
 func (a *App) Draw(screen *ebiten.Image) {
 	for _, s := range a.stack {
 		s.Draw(a, screen)
+	}
+	if a.shot != "" {
+		if err := savePNG(screen, a.shot); err != nil {
+			panic(err)
+		}
+		a.shot = ""
+	}
+	if a.scriptEnd && a.ShotPath == "" {
+		a.quit = true
 	}
 	if a.ShotPath != "" && a.frame >= a.ShotFrame {
 		if err := savePNG(screen, a.ShotPath); err != nil {
