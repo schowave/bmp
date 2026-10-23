@@ -279,21 +279,21 @@ func drawFlag(g *Gfx, dst *ebiten.Image) {
 	fillIncl(dst, 1, 0xa1, 0x13e, 0xee, g.PalColor(ColOrange))
 }
 
-// eventBanner is f_0310_01f2: before the matches of a competition the flag
+// flagScreen is f_0310_01f2: before the matches of a competition the flag
 // with its name in the big font ("Ligaspiel", "DFB-Pokal", ...), for
 // f_3930_01e7(0x32); then next opens the matches. The winter break and the
-// season end show it too (game.State.TakeBanner), with no next.
-type eventBanner struct {
+// season end show it too (game.State.TakeFlag), with no next.
+type flagScreen struct {
 	text   string
 	frames int
 	next   func(*App)
 }
 
-func newEventBanner(text string, next func(*App)) *eventBanner {
-	return &eventBanner{text: text, frames: waitFrames(0x32), next: next}
+func newFlagScreen(text string, next func(*App)) *flagScreen {
+	return &flagScreen{text: text, frames: waitFrames(0x32), next: next}
 }
 
-func (b *eventBanner) Update(app *App) error {
+func (b *flagScreen) Update(app *App) error {
 	if b.frames--; b.frames <= 0 {
 		app.Pop()
 		if b.next != nil {
@@ -303,18 +303,18 @@ func (b *eventBanner) Update(app *App) error {
 	return nil
 }
 
-func (b *eventBanner) Draw(app *App, dst *ebiten.Image) {
+func (b *flagScreen) Draw(app *App, dst *ebiten.Image) {
 	drawFlag(app.Gfx, dst)
 	app.Gfx.TextMid(dst, FontBig, 0, 0x13f, 0x80, b.text, ColWhite, ColBlack)
 }
 
-// bannerText is the name f_0310_0995, f_0310_0261, f_0310_0290, f_0310_02bf
+// flagText is the name f_0310_0995, f_0310_0261, f_0310_0290, f_0310_02bf
 // and f_0310_07a2 show before the matches of md.
-func bannerText(md *game.MatchDay) string {
+func flagText(md *game.MatchDay) string {
 	switch {
 	case md.Replays():
 		return "Nachholspiele"
-	case md.Title == "Relegationsspiel":
+	case md.Relegation():
 		return "Relegationsspiel"
 	case md.Cups() == 1:
 		return "DFB-Pokal"

@@ -182,12 +182,12 @@ func TestInjuryWaitsForSubstitution(t *testing.T) {
 }
 
 // After an injury the team has a place free: a player from the bench comes
-// on without one taken out, on the cell of the injured player; a full team,
+// on without one taken out, like a player put into the team outside a match; a full team,
 // or one with a sent-off player, takes nobody in.
 func TestSubstituteInAfterInjury(t *testing.T) {
 	s, md, f := twoManagerTie(t)
 	md.prepare(0, f)
-	if !md.humans[0].plays || md.Allowed(0) != 11 {
+	if !md.humans[0].plays || md.humans[0].allowed != 11 {
 		t.Fatalf("humans %+v", md.humans[0])
 	}
 	field, bench := -1, -1
@@ -210,15 +210,26 @@ func TestSubstituteInAfterInjury(t *testing.T) {
 		t.Fatal("a full team took a player in")
 	}
 	inj := &s.Squads[0][field]
-	col, row, number := inj.Col, inj.Row, inj.Lineup
 	s.injure(inj)
 	if err := md.SubstituteIn(0, bench); err != nil {
 		t.Fatal(err)
 	}
 	in := &s.Squads[0][bench]
-	if in.Lineup != number || in.Col != col || in.Row != row || s.CountOnPitch(0) != 11 || md.humans[0].fieldSubs != 1 {
-		t.Errorf("came on as %d at %d,%d (want %d at %d,%d), %d on the pitch, %d field subs left",
-			in.Lineup, in.Col, in.Row, number, col, row, s.CountOnPitch(0), md.humans[0].fieldSubs)
+	// He goes in as outside a match: a free cell of his position, numbers
+	// 1..11 in slot order.
+	if in.Lineup < 1 || in.Lineup > 11 || in.Col < 0 || s.PlayerAt(0, in.Col, in.Row) != bench ||
+		s.CountOnPitch(0) != 11 || md.humans[0].fieldSubs != 1 {
+		t.Errorf("came on as %d at %d,%d, %d on the pitch, %d field subs left",
+			in.Lineup, in.Col, in.Row, s.CountOnPitch(0), md.humans[0].fieldSubs)
+	}
+	numbers := map[int]bool{}
+	for i := 0; i < SquadMax; i++ {
+		if sl := &s.Squads[0][i]; !sl.Empty() && sl.Lineup >= 1 && sl.Lineup <= 11 {
+			numbers[sl.Lineup] = true
+		}
+	}
+	if len(numbers) != 11 {
+		t.Errorf("numbers %v", numbers)
 	}
 	// A sent-off player is not replaced.
 	other := -1
@@ -229,8 +240,8 @@ func TestSubstituteInAfterInjury(t *testing.T) {
 		}
 	}
 	md.sendOff(0, 0, bench, 30, false)
-	if md.Allowed(0) != 10 {
-		t.Errorf("allowed %d after a red card", md.Allowed(0))
+	if md.humans[0].allowed != 10 {
+		t.Errorf("allowed %d after a red card", md.humans[0].allowed)
 	}
 	if other >= 0 {
 		if err := md.SubstituteIn(0, other); err == nil {

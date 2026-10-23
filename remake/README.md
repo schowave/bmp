@@ -308,15 +308,15 @@ ties). Deliberate differences:
     (`f_1a58_20b2`); the remake still books his gate money.
 - A new game starts with the half-time scores of all leagues, the goal scenes,
   the cup screens (DfB-Pokal, Europapokale) and the results of the replays
-  (Nachholspiele) off and the speed of the match
-  days at the maximum (70); the original starts with them on and speed 40. With the cup screens off the
-  results of a cup round and the draws are not shown, except the last rounds
+  (Nachholspiele) off and the speed of the match days at the maximum (70); the
+  original starts with them on and speed 40. With the cup screens off the
+  draws are not shown, and the results of a cup round only in the last rounds
   of the season (after day 315). All stay changeable in the options screen.
 - During a match the lineup screen leaves out the formation buttons below the
   tactics board, which do nothing there; the original draws them. A click
   anywhere in a row of the list substitutes, also on the name; the original
   takes it only on the number and the position. The player taken out leaves
-  the board at once; the one who comes on takes his cell, as in the original.
+  the board at once (not checked against the original).
 - The key `o` on the training screen sets an optimal training plan, on the
   main menu also the lineup (see *Hidden keys*).
 - The key `o` on the tactics board sets an optimal lineup (see *Hidden keys*).

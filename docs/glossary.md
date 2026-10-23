@@ -72,6 +72,20 @@ A player borrowed from another club; the slot records the club he came from.
 Difficulty 0..5 as the options show it; the code stores `L = 5 - Level`, so
 `L = 5` is the easiest.
 
+**Flag** (Fahne):
+The German flag over the whole screen with a word on it (`f_0310_01f2`): the
+competition before the matches of a match day, WINTERPAUSE, SAISONENDE.
+_Avoid_: banner
+
+**Optimal lineup**:
+The lineup the remake's hidden key `o` sets: the most expected points against
+the next opponent, or against the league without one.
+
+**Training plan**:
+The settings of the training screen: the 20 training points, the 10 position
+points and the intensity. The remake's hidden key `o` sets the one with the
+strongest eleven over the rest of the season.
+
 **Original**:
 The DOS game, `BMMAIN.EXE` in `bmp/`; its functions are named `f_SSSS_OOOO`
 after their address in the unpacked image.

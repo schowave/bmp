@@ -177,7 +177,7 @@ func (s *State) afterEvent() bool {
 	}
 	// f_1a58_3176: within the winter break the flag says WINTERPAUSE.
 	if s.Day > 130 && s.Day < 207 {
-		s.banner("WINTERPAUSE")
+		s.flag("WINTERPAUSE")
 	}
 	for mi := range s.Managers {
 		for i := 0; i < SquadMax; i++ {
@@ -358,6 +358,7 @@ func (s *State) relegationDay() *MatchDay {
 	}
 	md := s.newMatchDay(0, 2, false)
 	md.Title = "Relegationsspiel"
+	md.relegation = true
 	md.onFinish = func() {
 		if !s.RelegationLeg2 {
 			c.RelegationStash = [2]int{c.First[1][0], c.First[1][1]}

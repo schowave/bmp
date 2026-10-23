@@ -127,7 +127,7 @@ func TestSetupAndFirstTurns(t *testing.T) {
 			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
 		case *CupScreen:
 			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
-		case *eventBanner:
+		case *flagScreen:
 			step(t, app, Input{}) // it goes on by itself
 		default:
 			t.Fatalf("unexpected scene %T", sc)
