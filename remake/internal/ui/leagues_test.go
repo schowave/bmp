@@ -149,7 +149,7 @@ func TestTableLine(t *testing.T) {
 	f := string(lgFigSpace)
 	want := "@@@@@@@s   " + f + "1     " + f + "1 " + f + "0 " + f + "0    " + f + "2:" + f + "0    " +
 		f + f + "4:" + f + f + "0      +" + f + "4"
-	if got := lgTableLine(r); got != want {
+	if got := lgTableLine(r, 2); got != want {
 		t.Fatalf("%q\nwant %q", got, want)
 	}
 }

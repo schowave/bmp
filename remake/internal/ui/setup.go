@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -15,7 +16,8 @@ import (
 // instead. With NEU in the disk menu the same
 // screen adds managers to a running game.
 type Setup struct {
-	mana    *assets.Mana
+	mana    *assets.Mana // the clubs of the game
+	orig    *assets.Mana // the clubs of the original, for the session
 	saveDir string
 	ss      *Session // the running game for NEU, else nil
 
@@ -54,12 +56,21 @@ func NewSetup(mana *assets.Mana, saveDir string) *Setup {
 }
 
 func newSetup(mana *assets.Mana, saveDir string) *Setup {
-	s := &Setup{mana: mana, saveDir: saveDir, center: 3, edit: -1, stripX: 5, slotsX: [4]int{12, 92, 172, 252}}
+	s := &Setup{mana: mana, orig: mana, saveDir: saveDir, center: 3, edit: -1, stripX: 5, slotsX: [4]int{12, 92, 172, 252}}
 	s.teams = [4]int{-1, -1, -1, -1}
 	s.opts.Level = 2
 	for i := 0; i < game.NumGerman; i++ {
 		s.clubs = append(s.clubs, setupClub{name: game.FromCP437(mana.Clubs[i].Name), logo: mana.Clubs[i].Logo, id: i})
 	}
+	return s
+}
+
+// NewSeasonSetup creates the setup of a new game of real season id that
+// starts in year; mana holds its clubs, orig those of the original.
+func NewSeasonSetup(orig, mana *assets.Mana, saveDir, id string, year int) *Setup {
+	s := NewSetup(mana, saveDir)
+	s.orig = orig
+	s.opts.Season, s.opts.Year = id, year
 	return s
 }
 
@@ -218,7 +229,7 @@ func (s *Setup) start(app *App) {
 		return
 	}
 	st.Start()
-	ss := &Session{S: st, Mana: s.mana, SaveDir: s.saveDir}
+	ss := &Session{S: st, Mana: s.orig, SaveDir: s.saveDir}
 	app.Reset(NewDriver(ss))
 }
 
@@ -311,11 +322,12 @@ func (o *setupOptions) Update(app *App) error {
 			opt.Length = l
 		}
 	}
+	// A real season has its own year: no historic start.
 	y := optLengthY + 3*18
-	if in.Clicked(optLeftX, y, 24, 17) {
+	if in.Clicked(optLeftX, y, 24, 17) && opt.Season == "" {
 		opt.Historic = true
 	}
-	if in.Clicked(optRightX, y, 24, 17) {
+	if in.Clicked(optRightX, y, 24, 17) && opt.Season == "" {
 		opt.Historic = false
 	}
 	if in.Right || in.Enter {
@@ -348,6 +360,10 @@ func (o *setupOptions) Draw(app *App, dst *ebiten.Image) {
 		drawOptSwitch(g, dst, optRightX, y, true, !on)
 	}
 	y := optLengthY + 3*18
+	if opt.Season != "" {
+		label(y, "Saison "+strings.Replace(opt.Season, "-", "/", 1))
+		return
+	}
 	label(y, "Histor. Start")
 	drawOptSwitch(g, dst, optLeftX, y, false, opt.Historic)
 	drawOptSwitch(g, dst, optRightX, y, true, !opt.Historic)

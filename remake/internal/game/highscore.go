@@ -43,10 +43,10 @@ func (s *State) HighscoreEntry(mi int) HighscoreEntry {
 // ("HIGH.02").
 func (s *State) HighscoreFile() string {
 	t := 0
-	switch s.EndYear {
-	case 1964, 1993:
+	switch s.Length() {
+	case OneYear:
 		t = 1
-	case 1966, 1995:
+	case ThreeYears:
 		t = 3
 	}
 	return "HIGH." + itoa(t) + itoa(5-s.Level)

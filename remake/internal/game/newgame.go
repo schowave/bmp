@@ -23,7 +23,11 @@ type Options struct {
 	Level    int
 	Length   GameLength
 	Historic bool // start in 1963 instead of 1992
-	Seed     uint32
+	// Season is the real season whose clubs mana holds ("1995-96"), empty
+	// for the clubs of the original; Year is its first year.
+	Season string
+	Year   int
+	Seed   uint32
 }
 
 // NewManager is a human manager of a new game.
@@ -127,6 +131,14 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 		s.EndYear += 29
 		s.StartYear = 1992
 	}
+	if opt.Season != "" {
+		// A real season starts in its own year; the end year keeps its
+		// distance to the start.
+		s.Season, s.Modern = opt.Season, true
+		s.EndYear += opt.Year - s.StartYear
+		s.StartYear = opt.Year
+	}
+	s.FirstYear = s.StartYear
 	s.initPersons()
 	for mi := range s.Managers {
 		s.initManager(mi, opt.Length, false)
@@ -256,14 +268,19 @@ func (s *State) initManager(mi int, length GameLength, late bool) {
 
 // Length returns the game length of the running game, from its end year.
 func (s *State) Length() GameLength {
-	switch s.EndYear {
-	case 1964, 1993:
+	switch {
+	case s.Endless():
+		return Endless
+	case s.EndYear-s.FirstYear == 1:
 		return OneYear
-	case 1966, 1995:
-		return ThreeYears
 	}
-	return Endless
+	return ThreeYears
 }
+
+// Endless reports whether the game has no end. The original encodes it as
+// an end year after 2000 (F:0x513c = 22222 or 22251); with real seasons
+// one- and three-year games end after 2000 too.
+func (s *State) Endless() bool { return s.EndYear > 10000 }
 
 // AddManager adds a manager to a running game (NEU in the disk menu): he
 // gets club team (an id of the current table) and the start values of a new
@@ -439,7 +456,7 @@ func (s *State) initPersons() {
 		}
 		if s.Persons[p].Name == "" {
 			s.Persons[p].Name = s.randomName(k, p)
-			if s.EndYear > 2000 {
+			if s.Endless() {
 				s.Persons[p].Team = 0xff
 			}
 		}

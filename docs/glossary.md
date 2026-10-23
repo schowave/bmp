@@ -21,6 +21,11 @@ index 0..2. The remake names the leagues after the season: the second
 Regionalliga until 1973/74; the third Amateurliga until 1977/78,
 Regionalliga from 1994/95, 3. Liga from 2008/09.
 
+**Real season** (Saison):
+A season from 1990/91 on whose clubs, players and logos the remake builds
+in (`remake/internal/seasons`), chosen before the setup; as opposed to the
+clubs of the original.
+
 **Matchday** (Spieltag):
 One round of league matches; each league counts its own.
 

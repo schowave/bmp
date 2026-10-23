@@ -83,6 +83,7 @@ func (s *State) snapshotMatchday(pairs []Pair, results []Score) {
 // the snapshot first, so calling it again with newer scores is safe; only
 // the games counters are not snapshotted and must be counted once.
 func (s *State) applyResults(pairs []Pair, results []Score, countGames bool) {
+	win := s.PointsPerWin()
 	for i, p := range pairs {
 		r := results[i]
 		if r.Home == Postponed {
@@ -101,7 +102,7 @@ func (s *State) applyResults(pairs []Pair, results []Score, countGames bool) {
 		}
 		switch {
 		case r.Home > r.Away:
-			h.Points[0] += PointsPerWin
+			h.Points[0] += win
 			h.Wins[0]++
 			a.Losses[1]++
 			h.addForm('s')
@@ -112,7 +113,7 @@ func (s *State) applyResults(pairs []Pair, results []Score, countGames bool) {
 			h.addForm('u')
 			a.addForm('U')
 		default:
-			a.Points[1] += PointsPerWin
+			a.Points[1] += win
 			a.Wins[1]++
 			h.Losses[0]++
 			h.addForm('n')

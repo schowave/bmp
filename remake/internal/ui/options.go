@@ -87,7 +87,7 @@ func (o *OptionsScreen) Draw(app *App, dst *ebiten.Image) {
 	g.Window(dst, 13, 13, 306, 181, ColBlue)
 	g.DrawMenuButton(dst)
 	ende := " NIE."
-	if s.EndYear < 2000 {
+	if !s.Endless() {
 		ende = itoa(s.EndYear)
 	}
 	g.TextAt(dst, FontSmall, 16, 23, "V2.0 - ENDE: "+ende+" (LEVEL "+itoa(5-s.Level)+")", ColGrey3, NoShadow)

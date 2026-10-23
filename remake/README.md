@@ -111,14 +111,17 @@ The controls follow the original: the left mouse button selects; the right
 mouse button confirms in some places (setup, lineup reserves, sponsors) but
 does not leave screens, which close with the HAUPT MENU or WEITER button.
 
-1. **Setup:** click the name field below a face and type the name. Click
+1. **Season:** when real seasons are built in (`internal/seasons`), the
+   first screen after the title lists them; ORIGINAL plays with the clubs
+   of the original.
+2. **Setup:** click the name field below a face and type the name. Click
    left or right of the middle of the logo strip to scroll it (hold the
    button to keep it moving), and click the empty field above the face to
    give that manager the club in the middle. Up to four managers. A right
    click opens the options (level, game length, historic start), a second
    right click starts the game. NEU in the disk menu adds managers later.
-2. **Cup draws** ask whether to watch them ("ABER KLAR" shows the draw).
-3. **Main menu:**
+3. **Cup draws** ask whether to watch them ("ABER KLAR" shows the draw).
+4. **Main menu:**
    - The icons on the left open the desk (statistics, eternal table,
      history, stadium, bank, sponsors), the leagues (tables, results,
      strengths) and the team (lineup with the pitch to place the players,
@@ -128,7 +131,7 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
    - A click on the calendar sheet ends the turn, a click in the middle
      opens the messages, and a right click on the manager tearing his hair quits
      the game.
-4. **Match days** run live with the goal scenes:
+5. **Match days** run live with the goal scenes:
 
    | Input | Effect |
    |---|---|
@@ -382,6 +385,11 @@ ties). Deliberate differences:
 - The high scores at the game end take a manager once, are sorted stably
   and highlight his row; the original can enter him twice
   (`f_1a58_3176`) and highlights row 18 in the menu.
+- Real seasons (see Playing): the game starts in the year of the season; a
+  1- or 3-year game ends one or three years later, the youth players come
+  from the fourth season on, as in the original's modern start. A win
+  counts 3 points from 1995/96 on (the original's variable D:0x2271);
+  games with the clubs of the original keep the 2-point rule.
 
 ## Legal
 

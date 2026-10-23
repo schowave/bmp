@@ -139,13 +139,17 @@ type State struct {
 	// transfer market (index 4).
 	Squads [MaxManagers + 1][SquadSlots]Slot
 
-	Day        int // D:0x7dc, day of the season, 0 = 29 July
-	Event      int // F:0x16e
-	Events     [NumEvents]byte
-	StartYear  int // D:0x7e0, year the current season started
-	Seasons    int // D:0x7e2, completed seasons
-	EndYear    int // F:0x513c
-	Modern     bool
+	Day       int // D:0x7dc, day of the season, 0 = 29 July
+	Event     int // F:0x16e
+	Events    [NumEvents]byte
+	StartYear int // D:0x7e0, year the current season started
+	Seasons   int // D:0x7e2, completed seasons
+	EndYear   int // F:0x513c
+	Modern    bool
+	// Season is the real season the game started with ("1995-96"), empty
+	// for the clubs of the original; FirstYear is the year it started in.
+	Season     string
+	FirstYear  int
 	Level      int // D:0x4a28, internal level (5 - displayed level)
 	Postponed  [20]PostponedGame
 	BankBase   int    // D:0x0630
