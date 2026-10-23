@@ -96,10 +96,16 @@ stay an indexed PNG.
 built from the raw data in [`data/`](data/README.md):
 
 ```sh
-mise run remake:seasons-fetch              # fetch every season (network, cached in data/.cache)
+mise run remake:seasons-fetch              # fetch 1990/91 to the running season
 mise run remake:seasons-fetch -- -from 2026 -to 2026   # only one season
-mise run remake:seasons                    # build internal/seasons/data (offline)
+mise run remake:seasons-fetch -- -refresh  # every season anew, not from data/.cache
+mise run remake:seasons                    # build internal/seasons/data from all of data/ (offline)
 ```
+
+The fetch takes the running season always from the network, the others
+from the cache `data/.cache` when they are there; a season or logo that
+fails is reported, the others are written. The build always writes every
+season, since the logos are numbered across them.
 
 A test fails when the built-in seasons differ from a build of `data/`.
 

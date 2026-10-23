@@ -2,7 +2,8 @@
 
 `mise run remake:seasons-fetch` (`go run ./cmd/bmpseasons fetch`) writes
 this directory from the German Wikipedia and Wikidata;
-`mise run remake:seasons` builds `internal/seasons/data` from it, offline.
+`mise run remake:seasons` builds `internal/seasons/data` from all of it,
+offline.
 Correct a mistake in the CSV files and build again; a later fetch
 overwrites the files of the seasons it fetches.
 
@@ -16,7 +17,7 @@ overwrites the files of the seasons it fetches.
 | `seasons/YYYY-YY/articles.txt` | The Wikipedia articles read for the season |
 | `seasons/YYYY-YY/missing.txt` | What the fetch could not find: articles, tables, squads with fewer than 11 players |
 | `logos/` | The logos as PNG, 76 pixels wide, and `index.csv` with file, licence, author and description page |
-| `.cache/` | Every response of the fetch (not checked in); a second fetch works offline |
+| `.cache/` | Every response of the fetch (not checked in): a second fetch reads it instead of the network, except for the running season; `-refresh` fetches everything anew |
 
 ## Sources and licences
 

@@ -38,14 +38,15 @@ type curated struct {
 
 // Config says what All builds.
 type Config struct {
-	Data     fs.FS  // the raw data (remake/data)
-	Orig     fs.FS  // the extract of the original: palettes, foreign clubs
-	Out      string // the output directory (internal/seasons/data)
-	From, To int    // the first and last season, by their first year
-	Log      func(format string, args ...any)
+	Data fs.FS  // the raw data (remake/data)
+	Orig fs.FS  // the extract of the original: palettes, foreign clubs
+	Out  string // the output directory (internal/seasons/data)
+	Log  func(format string, args ...any)
 }
 
-// All writes the seasons of cfg.Data from cfg.From to cfg.To into cfg.Out.
+// All writes every season of cfg.Data into cfg.Out, which it empties first:
+// the logos are numbered across all seasons, so a build of some would
+// renumber them.
 func All(cfg Config) error {
 	data, out, logf := cfg.Data, cfg.Out, cfg.Log
 	dir, err := assets.OpenDir(cfg.Orig)
@@ -84,8 +85,16 @@ func All(cfg Config) error {
 	}
 	var all []built
 	keys := map[string]bool{}
-	for y := cfg.From; y <= cfg.To; y++ {
-		id := seasons.ForYear(y).ID
+	dirs, err := fs.Glob(data, "seasons/*")
+	if err != nil {
+		return err
+	}
+	for _, d := range dirs {
+		sea, err := seasons.ParseID(path.Base(d))
+		if err != nil {
+			continue
+		}
+		y, id := sea.Year, sea.ID
 		sub, err := fs.Sub(data, path.Join("seasons", id))
 		if err != nil {
 			return err
