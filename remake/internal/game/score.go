@@ -8,7 +8,7 @@ func (s *State) performance(mi int) int {
 		v = 0
 	}
 	p := int64(v / 2)
-	for c := 0; c < NumCups; c++ {
+	for c := CupDFB; c < NumCups; c++ {
 		if b := m.CupStatus[c]; b >= 1 && b <= 6 {
 			p += int64(2 * b)
 		}
@@ -52,32 +52,4 @@ func (s *State) Score(mi int) int {
 		sc = 1
 	}
 	return sc
-}
-
-// HighscoreEntry is a line of the high-score table.
-type HighscoreEntry struct {
-	Manager string
-	Club    string
-	Titles  [3]int // Meisterschaften, DFB-Pokale, Europapokale
-	Score   int
-}
-
-// HighscoreEntry returns the entry of manager mi.
-func (s *State) HighscoreEntry(mi int) HighscoreEntry {
-	m := s.Managers[mi]
-	return HighscoreEntry{Manager: m.Name, Club: s.Teams[m.Team].Name,
-		Titles: [3]int{m.Titles[0], m.Titles[1], m.Titles[2] + m.Titles[3] + m.Titles[4]}, Score: s.Score(mi)}
-}
-
-// HighscoreKind returns the file suffix of the high-score table: game
-// length digit and displayed level ("HIGH.02").
-func (s *State) HighscoreKind() string {
-	t := 0
-	switch s.EndYear {
-	case 1964, 1993:
-		t = 1
-	case 1966, 1995:
-		t = 3
-	}
-	return itoa(t) + itoa(5-s.Level)
 }

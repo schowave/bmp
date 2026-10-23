@@ -1,83 +1,49 @@
 package ui
 
 import (
-	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// highscores reads the high-score table of a game kind (HIGH.xy of the
-// original; the remake keeps it as JSON in the save directory).
-func highscores(dir, kind string) []game.HighscoreEntry {
-	var hs []game.HighscoreEntry
-	data, err := os.ReadFile(filepath.Join(dir, "high."+kind+".json"))
-	if err == nil {
-		_ = json.Unmarshal(data, &hs)
+// loadHighscores reads the high-score table of the game from the save
+// directory; without the file the table is empty, like the original
+// starts a zeroed one.
+func loadHighscores(ss *Session) ([]game.HighscoreEntry, error) {
+	data, err := os.ReadFile(filepath.Join(ss.SaveDir, ss.S.HighscoreFile()))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
 	}
-	return hs
-}
-
-func saveHighscores(dir, kind string, hs []game.HighscoreEntry) {
-	data, err := json.MarshalIndent(hs, "", " ")
 	if err != nil {
-		return
+		return nil, err
 	}
-	_ = os.MkdirAll(dir, 0o755)
-	_ = os.WriteFile(filepath.Join(dir, "high."+kind+".json"), data, 0o644)
+	return game.DecodeHighscores(data)
 }
 
-// enterHighscore puts e into the table like f_322b_2366(2): it replaces
-// the entry of the same manager and club, or else the last of 20 when e
-// has more points, and sorts the table. It returns the table and the row
-// of e (-1 when it did not get in).
-func enterHighscore(hs []game.HighscoreEntry, e game.HighscoreEntry) ([]game.HighscoreEntry, int) {
-	hs = append([]game.HighscoreEntry(nil), hs...)
-	at := -1
-	for i := range hs {
-		if hs[i].Manager == e.Manager && hs[i].Club == e.Club {
-			at = i
-			break
-		}
+func saveHighscores(ss *Session, hs []game.HighscoreEntry) error {
+	if err := os.MkdirAll(ss.SaveDir, 0o755); err != nil {
+		return err
 	}
-	switch {
-	case at >= 0:
-		hs[at] = e
-	case len(hs) < 20:
-		hs = append(hs, e)
-	case hs[19].Score < e.Score:
-		hs[19] = e
-	default:
-		return hs, -1
-	}
-	// The original swaps an entry down only when the other has more
-	// points: a stable sort by descending points.
-	sort.SliceStable(hs, func(a, b int) bool { return hs[a].Score > hs[b].Score })
-	if len(hs) > 20 {
-		hs = hs[:20]
-	}
-	for i := range hs {
-		if hs[i] == e {
-			return hs, i
-		}
-	}
-	return hs, -1
+	return os.WriteFile(filepath.Join(ss.SaveDir, ss.S.HighscoreFile()), game.EncodeHighscores(hs), 0o644)
 }
 
-// recordHighscores enters every manager into the table and saves it (the
-// game end, @1a58:4161).
-func recordHighscores(ss *Session) []game.HighscoreEntry {
-	kind := ss.S.HighscoreKind()
-	hs := highscores(ss.SaveDir, kind)
-	for mi := range ss.S.Managers {
-		hs, _ = enterHighscore(hs, ss.S.HighscoreEntry(mi))
+// recordHighscores enters es into the table and saves it, at every season
+// end (f_322b_2366(2)) and at the game end (@1a58:4161). It returns the
+// table; a table that cannot be read is not overwritten.
+func recordHighscores(ss *Session, es []game.HighscoreEntry) ([]game.HighscoreEntry, error) {
+	hs, err := loadHighscores(ss)
+	for _, e := range es {
+		hs, _ = game.EnterHighscore(hs, e)
 	}
-	saveHighscores(ss.SaveDir, kind, hs)
-	return hs
+	if err != nil {
+		return hs, err
+	}
+	return hs, saveHighscores(ss, hs)
 }
 
 // HighscoreScreen is the high-score table on the full-screen picture
@@ -88,6 +54,8 @@ type HighscoreScreen struct {
 	// mark tells the rows drawn in the highlight colour.
 	mark func(row int, e game.HighscoreEntry) bool
 	done func(app *App)
+	// err is shown over the table: the file could not be read or saved.
+	err error
 }
 
 // NewHighscoreScreen shows the table from the main menu (f_322b_2366(1)):
@@ -97,17 +65,24 @@ type HighscoreScreen struct {
 // equals the current one (D:0x668); that id is never set, so every row is
 // highlighted.
 func NewHighscoreScreen(ss *Session) Scene {
-	kind := ss.S.HighscoreKind()
-	hs, row := enterHighscore(highscores(ss.SaveDir, kind), ss.S.HighscoreEntry(ss.Mgr()))
+	hs, err := loadHighscores(ss)
+	hs, row := game.EnterHighscore(hs, ss.S.HighscoreEntry(ss.Mgr()))
 	mark := func(r int, _ game.HighscoreEntry) bool { return r == row }
 	if ss.S.EndYear >= 2000 {
-		saveHighscores(ss.SaveDir, kind, hs)
+		if err == nil {
+			err = saveHighscores(ss, hs)
+		}
 		mark = func(int, game.HighscoreEntry) bool { return true }
 	}
-	return &HighscoreScreen{hs: hs, mark: mark, done: func(app *App) { app.Pop() }}
+	return &HighscoreScreen{hs: hs, mark: mark, err: err, done: func(app *App) { app.Pop() }}
 }
 
 func (h *HighscoreScreen) Update(app *App) error {
+	if h.err != nil {
+		h.err = nil
+		app.Push(diskError())
+		return nil
+	}
 	if app.Input.Left || app.Input.Escape || app.Input.Enter {
 		h.done(app)
 	}
@@ -150,16 +125,24 @@ type GameOver struct {
 func NewGameOver(ss *Session) Scene {
 	o := &GameOver{ss: ss}
 	mine := map[[2]string]bool{}
+	var es []game.HighscoreEntry
 	for mi := range ss.S.Managers {
 		e := ss.S.HighscoreEntry(mi)
 		mine[[2]string{e.Manager, e.Club}] = true
+		es = append(es, e)
 	}
-	o.list = &HighscoreScreen{hs: recordHighscores(ss),
+	hs, err := recordHighscores(ss, es)
+	o.list = &HighscoreScreen{hs: hs, err: err,
 		mark: func(_ int, e game.HighscoreEntry) bool { return mine[[2]string{e.Manager, e.Club}] }}
 	return o
 }
 
 func (o *GameOver) Update(app *App) error {
+	if o.list.err != nil {
+		o.list.err = nil
+		app.Push(diskError())
+		return nil
+	}
 	if app.Input.Left || app.Input.Right || app.Input.Enter || app.Input.Escape {
 		app.Reset(NewTitle().OnDone(func() Scene { return NewSetup(o.ss.Mana, o.ss.SaveDir) }))
 	}

@@ -31,6 +31,12 @@ func NewDriver(ss *Session) *Driver { return &Driver{ss: ss} }
 
 func (d *Driver) Update(app *App) error {
 	s := d.ss.S
+	if es := s.TakeHighscores(); len(es) > 0 {
+		if _, err := recordHighscores(d.ss, es); err != nil {
+			app.Push(diskError())
+			return nil
+		}
+	}
 	// Dialogs and screens the game queued (credit due, cards, trophies,
 	// the season report ...) come first.
 	if s.HasNotices() {

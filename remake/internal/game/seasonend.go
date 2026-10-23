@@ -103,6 +103,7 @@ func (s *State) seasonEnd1() {
 		return
 	}
 	for mi := range s.Managers {
+		s.Highscores = append(s.Highscores, s.HighscoreEntry(mi))
 		s.sponsorOffers(mi)
 	}
 	s.shuffleIDs()

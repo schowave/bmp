@@ -60,7 +60,7 @@ the files from a game directory instead.
 | Flag | Default | Purpose |
 |---|---|---|
 | `-data DIR` | `$BMP_DATA`, else the built-in files | Directory of the original game |
-| `-saves DIR` | user config directory | Save games and high scores |
+| `-saves DIR` | user config directory | Save games and the high-score tables (`HIGH.xy` in the format of the original, so the tables of `../bmp` can be copied there) |
 | `-scale N` | `3` | Window size as a multiple of 320×240 |
 | `-demo NAME` | | Open a development demo screen |
 | `-demos` | | List the demo screens and quit |
