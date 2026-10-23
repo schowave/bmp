@@ -203,7 +203,21 @@ func LeagueName(l, year int) string {
 }
 
 // LeagueName is the name of league l in the current season.
-func (s *State) LeagueName(l int) string { return LeagueName(l, s.StartYear) }
+func (s *State) LeagueName(l int) string { return LeagueName(l, s.NameYear(s.StartYear)) }
+
+// LeagueNameIn is the name of league l in the season that starts in year.
+func (s *State) LeagueNameIn(l, year int) string { return LeagueName(l, s.NameYear(year)) }
+
+// NameYear is the year whose league names a game shows for a season that
+// starts in year: that year in a real season; with the clubs of the
+// original always 1992, whose names are those of the original (Zweite
+// Liga, Am.-Oberliga).
+func (s *State) NameYear(year int) int {
+	if s.Season == "" {
+		return 1992
+	}
+	return year
+}
 
 // HistoryYear is the year in which the season of history record r of
 // manager mi started.

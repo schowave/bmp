@@ -17,9 +17,10 @@ _Avoid_: team when the id is meant
 
 **League** (Liga):
 1. Liga (18 clubs, 34 matchdays), 2. Liga (20, 38) or Amateur-Oberliga (20, 38),
-index 0..2. The remake names the leagues after the season: the second
-Regionalliga until 1973/74; the third Amateurliga until 1977/78,
-Regionalliga from 1994/95, 3. Liga from 2008/09.
+index 0..2. In a real season the remake names the leagues after the year:
+the second Regionalliga until 1973/74; the third Amateurliga until 1977/78,
+Regionalliga from 1994/95, 3. Liga from 2008/09. With the clubs of the
+original they keep the original's names.
 
 **Real season** (Saison):
 A season from 1990/91 on whose clubs, players and logos the remake builds

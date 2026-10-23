@@ -350,10 +350,11 @@ ties). Deliberate differences:
 - When a 1- or 3-year game is over, ENDE under the high scores returns to the
   title screen, where a new game can start; the original quits the program
   (`f_076b_114c` in `f_1a58_3176`).
-- The second and third league are called after the real tiers of the
-  season: Regionalliga until 1973/74, then Zweite Liga; Amateurliga until
-  1977/78, Am.-Oberliga until 1993/94, Regionalliga until 2007/08, then
-  3. Liga. The original always says Zweite Liga and Am.-Oberliga.
+- In a real season the second and third league are called after the real
+  tiers of the year: Regionalliga until 1973/74, then Zweite Liga;
+  Amateurliga until 1977/78, Am.-Oberliga until 1993/94, Regionalliga until
+  2007/08, then 3. Liga. With the clubs of the original they keep the
+  original's names, Zweite Liga and Am.-Oberliga.
 - Bugs of the match engine that the remake leaves out:
   - In cup matches the original checks the minutes of the chances against
     the person table instead of the chances (`f_0310_12fe`) and draws again
@@ -410,9 +411,9 @@ ties). Deliberate differences:
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
   from the fourth season on, as in the original's modern start.
-- A win counts 3 points from 1995/96 on, as in the real leagues, also in a
-  game with the clubs of the original that reaches that season; the
-  original always gives 2 (its variable D:0x2271).
+- In a real season a win counts 3 points from 1995/96 on, as in the real
+  leagues (the original's variable D:0x2271); with the clubs of the
+  original it stays 2.
 
 ## Legal
 
