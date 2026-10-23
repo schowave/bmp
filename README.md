@@ -6,6 +6,8 @@
 
 The classic 90s DOS football management game — containerized and playable in the browser via [noVNC](https://novnc.com).
 
+`remake/` holds a re-implementation of the game in Go, see [remake/README.md](remake/README.md).
+
 <p align="center">
   <img src="docs/bmp.png" alt="Bundesliga Manager Professional" width="700">
 </p>
@@ -108,7 +110,7 @@ A run that fails or is cancelled before step 4 leaves no git tag behind and does
 
 ### CI
 
-Every push to `main` and every pull request builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
+Every push to `main` and every pull request runs `mise run check` (lint and tests of the Go code, see [Development](#development)), builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
 
 The WASM image gets a smoke test without a browser, `wasm/smoke.sh`: page and bundle are served, a save comes back byte for byte, invalid names and oversized saves are refused, and the server does not run as root. Locally: `mise run wasm:smoke`.
 
@@ -124,13 +126,19 @@ Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mi
 | `web/` | Help page and favicon, served by both images |
 | `vnc/` | VNC image: `Dockerfile`, start script, DOSBox config, noVNC player page, `docker-compose.yml` |
 | `vnc/bench/` | Benchmark for the VNC image with Playwright, see [vnc/bench/README.md](vnc/bench/README.md) |
-| `wasm/` | WASM image, see [wasm/README.md](wasm/README.md) |
-| `docs/` | Images for this README |
+| `wasm/` | WASM image and its save server, see [wasm/README.md](wasm/README.md) |
+| `remake/` | Re-implementation of the game in Go, see [remake/README.md](remake/README.md) |
+| `docs/re/` | Rules and screens of the original, reverse-engineered from `BMMAIN.EXE` |
+| `docs/adr/`, `docs/glossary.md` | Architecture decisions and the terms of the game |
+| `docs/agent-readiness/` | Agent-readiness report of the repository |
+| `AGENTS.md` | Notes for coding agents |
 
 Both Dockerfiles build with the repository root as context, e.g. `docker build -f vnc/Dockerfile .`
 
 | Command | Description |
 |---|---|
+| `mise run check` | All fast checks: golangci-lint, then vet, format and tests of `remake/` and the save server |
+| `mise run hooks` | Enable the pre-commit hook (builds and vets the staged remake) |
 | `mise run vnc:build` | Build the container image |
 | `mise run vnc:run` | Stop, build, and start in detached mode |
 | `mise run vnc:stop` | Stop and remove the container |

@@ -2,6 +2,9 @@
 # Both images build with the repository root as context: vnc/Dockerfile for the
 # VNC variant (tasks vnc:*), wasm/Dockerfile for the WASM variant (tasks wasm:*).
 
+[tools]
+golangci-lint = "2.14.0"
+
 [env]
 IMAGE_NAME = "bmp"
 CONTAINER_NAME = "bmp"
@@ -79,6 +82,11 @@ run = [
   "python3 -m http.server 8000 -d wasm/dist",
 ]
 
+[tasks."wasm:test"]
+description = "Vet, format check and unit tests of the save server"
+dir = "{{config_root}}/wasm"
+run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test ./..."]
+
 [tasks."wasm:clean"]
 description = "Remove the generated web root"
 run = "rm -rf wasm/dist"
@@ -127,6 +135,16 @@ run = "go build -o bin/bmp ./cmd/bmp"
 description = "Extract the files the remake needs from bmp/ into remake/internal/embedded/data"
 dir = "{{config_root}}/remake"
 run = "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data"
+
+# --- Checks --------------------------------------------------------------------
+
+[tasks.lint]
+description = "golangci-lint over both Go modules (config: .golangci.yml)"
+run = ["cd remake && golangci-lint run ./...", "cd wasm && golangci-lint run ./..."]
+
+[tasks.check]
+description = "All fast checks: lint, remake vet/format/tests, save server tests"
+depends = ["lint", "remake:test", "wasm:test"]
 
 [tasks.hooks]
 description = "Use the hooks of .githooks (pre-commit builds and vets the staged remake)"

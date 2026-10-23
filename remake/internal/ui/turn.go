@@ -103,10 +103,3 @@ func turnHeader(ss *Session) Header {
 	}
 	return h
 }
-
-func posText(s *game.State, t int) string {
-	if t >= game.NumGerman {
-		return "-"
-	}
-	return itoa(s.Clubs[t].Pos + 1)
-}

@@ -1,0 +1,11 @@
+# golangci-lint for both Go modules (remake/ and wasm/), run by `mise run lint`.
+version: "2"
+
+linters:
+  # The standard set: errcheck, govet, ineffassign, staticcheck, unused.
+  default: standard
+  settings:
+    staticcheck:
+      # QF*: quick-fix suggestions of an editor, not findings. ST1005: the game's
+      # errors are German sentences shown to the player, punctuation included.
+      checks: ["all", "-QF*", "-ST1000", "-ST1003", "-ST1005", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]

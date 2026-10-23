@@ -30,13 +30,6 @@ func (s *State) notify(mi int, text string) {
 	m.NewMessages = true
 }
 
-// notifyTeam adds a message for the manager of club id, if any.
-func (s *State) notifyTeam(id int, text string) {
-	if m := s.ManagerOf(id); m != nil {
-		s.notify(s.managerIndex(m), text)
-	}
-}
-
 // TakeInbox returns and clears the messages of manager mi.
 func (s *State) TakeInbox(mi int) []Message {
 	m := s.Managers[mi]

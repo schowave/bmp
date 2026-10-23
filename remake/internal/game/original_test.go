@@ -35,7 +35,6 @@ func original(t *testing.T) *origImage {
 }
 
 func (o *origImage) dBytes(off, n int) []byte { return o.b[segD+off : segD+off+n] }
-func (o *origImage) fBytes(off, n int) []byte { return o.b[segF+off : segF+off+n] }
 
 // dFarString follows a far pointer stored at D:off.
 func (o *origImage) dFarString(off int) string {

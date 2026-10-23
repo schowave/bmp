@@ -59,8 +59,13 @@ func (p *preview) Draw(screen *ebiten.Image) {
 		p.canvas.ReadPixels(rgba.Pix)
 		f, err := os.Create(filepath.Join(p.out, fmt.Sprintf("p%d_f%03d.png", p.sc.Plays(), p.last)))
 		if err == nil {
-			png.Encode(f, rgba)
-			f.Close()
+			err = png.Encode(f, rgba)
+			if cerr := f.Close(); err == nil {
+				err = cerr
+			}
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "scenepreview:", err)
 		}
 		p.n++
 	}

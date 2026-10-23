@@ -16,8 +16,8 @@ type Font string
 // The fonts of the original.
 const (
 	FontNormal Font = "flow.font"    // 8 pixels, most text
-	FontSmall       = "micro4.font"  // 6 pixels, small print
-	FontBig         = "newbold.font" // 16 pixels, headlines
+	FontSmall  Font = "micro4.font"  // 6 pixels, small print
+	FontBig    Font = "newbold.font" // 16 pixels, headlines
 )
 
 // fontAtlas keeps the glyphs of a font as white pixels on one image, so text

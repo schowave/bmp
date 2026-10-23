@@ -2,7 +2,7 @@ package main
 
 import (
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,10 +11,12 @@ import (
 )
 
 const (
-	dataDir     = "/data"
 	publicDir   = "/public"
 	maxSaveSize = 4 << 20 // 4 MB
 )
+
+// A variable so the tests can point it at a temporary directory.
+var dataDir = "/data"
 
 var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
@@ -48,7 +50,7 @@ func handleSaves(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err := writeAtomic(savePath(name), data); err != nil {
-			log.Printf("save %s: %v", name, err)
+			slog.Error("save failed", "name", name, "err", err)
 			http.Error(w, "write error", http.StatusInternalServerError)
 			return
 		}
@@ -68,13 +70,13 @@ func writeAtomic(path string, data []byte) error {
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmp.Name()) // a no-op after the rename
+	defer func() { _ = os.Remove(tmp.Name()) }() // a no-op after the rename
 	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Sync(); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Close(); err != nil {
@@ -117,6 +119,9 @@ func staticHandler() http.Handler {
 }
 
 func main() {
+	// One JSON object per line, so `docker logs` can be filtered by field.
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
 	http.Handle("/", staticHandler())
 	http.HandleFunc("/api/saves/{name}", handleSaves)
 
@@ -131,6 +136,9 @@ func main() {
 		IdleTimeout:       2 * time.Minute,
 	}
 
-	log.Println("listening on :8080")
-	log.Fatal(srv.ListenAndServe())
+	slog.Info("listening", "addr", srv.Addr)
+	if err := srv.ListenAndServe(); err != nil {
+		slog.Error("server stopped", "err", err)
+		os.Exit(1)
+	}
 }

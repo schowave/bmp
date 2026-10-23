@@ -4,8 +4,8 @@
 
 FROM golang:1.27-alpine AS server
 WORKDIR /src
-COPY wasm/server.go .
-RUN CGO_ENABLED=0 go build -o server server.go
+COPY wasm/go.mod wasm/server.go ./
+RUN CGO_ENABLED=0 go build -o server .
 
 FROM alpine:3 AS bundle
 RUN apk add --no-cache bash zip

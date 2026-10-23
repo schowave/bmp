@@ -71,8 +71,12 @@ func DecodeFonts(data []byte) (map[string]*Font, error) {
 		f := &Font{Name: fj.Name, Height: fj.Height, Spacing: fj.Spacing, remap: map[byte]byte{}}
 		for k, v := range fj.Remap {
 			var kb, vb byte
-			fmt.Sscan(k, &kb)
-			fmt.Sscan(v, &vb)
+			if _, err := fmt.Sscan(k, &kb); err != nil {
+				return nil, fmt.Errorf("font %q: remap key %q: %w", fj.Name, k, err)
+			}
+			if _, err := fmt.Sscan(v, &vb); err != nil {
+				return nil, fmt.Errorf("font %q: remap value %q: %w", fj.Name, v, err)
+			}
 			f.remap[kb] = vb
 		}
 		for i, gj := range fj.Glyphs {

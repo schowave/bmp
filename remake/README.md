@@ -131,8 +131,10 @@ hang.
 
 `mise run hooks` enables the pre-commit hook, which builds, vets and
 checks the formatting of the staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
-runs vet and the tests under xvfb and uploads all demo screens as the
-`remake-shots` artifact.
+runs `mise run check` (golangci-lint, then this task and the tests of the save
+server in `../wasm`) under xvfb, and uploads all demo screens as the
+`remake-shots` artifact and the package docs (`go doc -all`) as
+`remake-godoc`.
 
 ### Screenshots
 
@@ -154,7 +156,8 @@ Linux use `xvfb-run`.
   `python3 tools/re/q.py` queries strings, functions, callers and data
   constants.
 
-Notes for coding agents are in [`CLAUDE.md`](CLAUDE.md).
+Notes for coding agents are in [`CLAUDE.md`](CLAUDE.md) and, for the whole
+repository, [`../AGENTS.md`](../AGENTS.md).
 
 ## Deviations from the original
 

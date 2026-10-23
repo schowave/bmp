@@ -10,9 +10,8 @@ var posShort = [4]string{"TOR", "ABW", "MIT", "ANG"}
 
 // PlayerInfo shows the details of a player (f_14a4_0906).
 type PlayerInfo struct {
-	ss     *Session
-	m, i   int
-	market bool
+	ss   *Session
+	m, i int
 }
 
 // NewPlayerInfo creates the info screen of slot i of squad m.

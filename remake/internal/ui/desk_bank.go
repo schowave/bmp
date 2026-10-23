@@ -44,13 +44,6 @@ func NewBankScreen(ss *Session) *BankScreen {
 	return b
 }
 
-func (b *BankScreen) lenderName() string {
-	if b.lender == game.LenderBank {
-		return "der Bank"
-	}
-	return b.ss.S.Managers[b.lender].Name
-}
-
 func (b *BankScreen) Update(app *App) error {
 	in := &app.Input
 	if b.input != nil {
