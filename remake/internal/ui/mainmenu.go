@@ -76,6 +76,9 @@ type MainMenu struct {
 // calendarRect is the calendar sheet of the header panel (PIC/23.VGA).
 func calendarRect() (x, y, w, h int) { return 240, headerPanelY, 68, 66 }
 
+// Passing implements passer: the first tick opens the message panel.
+func (m *MainMenu) Passing() bool { return !m.started }
+
 func (m *MainMenu) Update(app *App) error {
 	in := &app.Input
 	if !m.started {

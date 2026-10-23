@@ -287,6 +287,13 @@ type seasonEndScreen struct {
 	busy   bool
 }
 
+// Passing implements passer: the dialogs and the remaining lines come up
+// without waiting for the player, and after the click the popups and the
+// end.
+func (s *seasonEndScreen) Passing() bool {
+	return !s.busy && (s.dialog < len(s.n.Dialogs) || s.shown < len(s.n.Lines) || s.popup > 0)
+}
+
 func (s *seasonEndScreen) Update(app *App) error {
 	if s.busy {
 		return nil
@@ -353,6 +360,9 @@ type noticeDemo struct {
 	menu    *MainMenu
 	started bool
 }
+
+// Passing implements passer: the first tick shows the notices.
+func (d *noticeDemo) Passing() bool { return !d.started }
 
 func (d *noticeDemo) Update(app *App) error {
 	if !d.started {
