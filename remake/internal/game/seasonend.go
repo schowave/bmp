@@ -265,7 +265,7 @@ func (s *State) agePlayers() {
 			continue
 		}
 		sl := &s.Squads[h][i]
-		sl.Message = false
+		s.endMessage(sl)
 		sl.Status &= 0x3f
 		sl.Years--
 		if sl.Years < 0 {

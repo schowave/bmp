@@ -57,3 +57,24 @@ func TestOfferRowWhite(t *testing.T) {
 		t.Error("the contract list marks the offer too")
 	}
 }
+
+// An own listed player with an offer is white in the market list, a player
+// of somebody else with an offer is not.
+func TestListedOfferRowWhite(t *testing.T) {
+	_, ss := tsTestSession(t)
+	s := ss.S
+	sl := &s.Squads[game.MarketIndex][0]
+	if sl.Empty() {
+		t.Skip("empty market")
+	}
+	market := &tsList{m: game.MarketIndex, viewer: ss.Mgr(), mode: 1}
+	sl.Status |= 0x80
+	s.Persons[sl.Person].Owner = ss.Mgr()
+	if got := market.rowColor(s, sl); got != ColWhite {
+		t.Errorf("own listed player with an offer: colour %d", got)
+	}
+	s.Persons[sl.Person].Owner = game.MarketIndex
+	if got := market.rowColor(s, sl); got == ColWhite {
+		t.Error("a player of the market is white")
+	}
+}

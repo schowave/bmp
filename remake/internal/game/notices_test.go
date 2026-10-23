@@ -136,3 +136,25 @@ func TestSeasonNoticesInGame(t *testing.T) {
 		}
 	}
 }
+
+// The message of an offer goes when the offer goes, as the original deletes
+// the message its slot points to; other messages stay.
+func TestOfferMessageEndsWithTheOffer(t *testing.T) {
+	s := noticeGame(t)
+	sl := &s.Squads[0][2]
+	s.notify(0, "other")
+	s.notifyFor(0, sl.Person, "interested")
+	sl.Message = true
+	s.endMessage(sl)
+	if sl.Message || len(s.Messages(0)) == 0 {
+		t.Fatalf("message %v, inbox %v", sl.Message, s.Messages(0))
+	}
+	for _, m := range s.Messages(0) {
+		if m.Text == "interested" {
+			t.Error("the message of the offer stays")
+		}
+	}
+	if s.Messages(0)[0].Text != "other" {
+		t.Errorf("inbox %v", s.Messages(0))
+	}
+}
