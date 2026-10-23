@@ -225,6 +225,39 @@ type matchScene struct {
 	done bool
 }
 
+// shownScore is the score of fixture fi on its scoreboard: a goal counts
+// only once its show reaches the result with the goal picture, not while
+// "Chance für X !" blinks or the goal scene runs.
+func (m *MatchScreen) shownScore(fi int) (int, int) {
+	h, a := m.md.Score(fi)
+	if h < 0 {
+		return h, a
+	}
+	for i, sh := range m.shows {
+		e := sh.ev
+		if sh.ticker != "" || e.Fixture != fi || e.Kind != game.EvGoal && e.Kind != game.EvPenaltyGoal {
+			continue
+		}
+		if i == 0 && sh.resultShown() {
+			continue
+		}
+		if e.Side == 0 {
+			h--
+		} else {
+			a--
+		}
+	}
+	return h, a
+}
+
+// resultShown reports whether the show has reached its result.
+func (sh *matchShow) resultShown() bool {
+	if sh.scene != nil {
+		return sh.pre == 0 && sh.scene.done && sh.post == 0
+	}
+	return sh.frames <= sh.result
+}
+
 // tickerGoal shows "HOME - AWAY   h:a" at the bottom for a goal in a
 // match of a club whose goals are announced.
 func (m *MatchScreen) tickerGoal(e game.MatchEvent) {
@@ -397,7 +430,7 @@ func (m *MatchScreen) drawPanel(g *Gfx, dst *ebiten.Image, p *matchPanel) {
 	m.panelName(g, dst, s.Teams[f.Away].Name, x+0x55, x+0x99, y+12)
 	Draw(dst, logoSub(g, fixtureLogo(s, f, f.Home)), x+0x16, y+0x23)
 	Draw(dst, logoSub(g, fixtureLogo(s, f, f.Away)), x+0x65, y+0x23)
-	h, a := m.md.Score(p.fixture)
+	h, a := m.shownScore(p.fixture)
 	for side, v := range []int{h, a} {
 		for v > 9 {
 			v -= 10
