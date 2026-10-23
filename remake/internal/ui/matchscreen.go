@@ -126,26 +126,39 @@ func (m *MatchScreen) Update(app *App) error {
 		return nil
 	}
 	if in.Left {
+		if mi := m.logoHit(in); mi >= 0 {
+			app.Push(NewSubstitutionScreen(m.ss, m.md, mi))
+			return nil
+		}
 		m.fast = true
 	}
-	if !m.fast {
+	if !m.fast && !m.quiet() {
 		m.tick++
 		if m.tick < m.framesPerMinute() {
 			return nil
 		}
 	}
 	m.tick = 0
-	more := m.md.Step()
-	m.collect(app)
-	if to := m.md.PeriodEnded(); to != 0 {
-		m.fast = false
-		m.periodEnd(to)
+	for {
+		more := m.md.Step()
+		m.collect(app)
+		if to := m.md.PeriodEnded(); to != 0 {
+			m.fast = false
+			m.periodEnd(to)
+		}
+		if !more {
+			m.matchDayEnd()
+		}
+		// Without a human match nothing is shown and nothing waits (spec
+		// §8): the period is played at once.
+		if !m.quiet() || !more || len(m.end) > 0 {
+			return nil
+		}
 	}
-	if !more {
-		m.matchDayEnd()
-	}
-	return nil
 }
+
+// quiet reports a match day without a match of a human team.
+func (m *MatchScreen) quiet() bool { return len(m.panels) == 0 }
 
 // collect turns the new events of human teams into scenes.
 func (m *MatchScreen) collect(app *App) {
@@ -205,12 +218,41 @@ type matchScene struct {
 func (m *MatchScreen) tickerGoal(e game.MatchEvent) {
 	s := m.ss.S
 	f := m.md.Fixtures[e.Fixture]
-	if e.Kind != game.EvGoal && e.Kind != game.EvPenaltyGoal || !s.Ticker(f.Home) && !s.Ticker(f.Away) || m.fast {
+	if e.Kind != game.EvGoal && e.Kind != game.EvPenaltyGoal || !s.Ticker(f.Home) && !s.Ticker(f.Away) || m.fast || m.quiet() {
 		return
 	}
 	h, a := m.md.Score(e.Fixture)
 	text := s.Teams[f.Home].Name + " - " + s.Teams[f.Away].Name + "   " + itoa(h%10) + ":" + itoa(a%10)
 	m.shows = append(m.shows, &matchShow{ev: e, frames: 0x46 * 2, ticker: text})
+}
+
+// logoHit returns the manager whose club logo on a scoreboard is under the
+// pointer, or -1 (f_0310_3314). The original takes the home logo from
+// x+0x22, right of where it is drawn at x+0x16; the drawn logo counts too.
+func (m *MatchScreen) logoHit(in *Input) int {
+	if m.md.Done {
+		return -1
+	}
+	s := m.ss.S
+	for _, p := range m.panels {
+		if in.Y <= p.y+0x22 || in.Y >= p.y+0x49 {
+			continue
+		}
+		f := m.md.Fixtures[p.fixture]
+		team := -1
+		switch {
+		case in.X >= p.x+0x16 && in.X < p.x+0x4c:
+			team = f.Home
+		case in.X > p.x+99 && in.X < p.x+0x8f:
+			team = f.Away
+		}
+		for mi, mg := range s.Managers {
+			if team >= 0 && mg.Team == team {
+				return mi
+			}
+		}
+	}
+	return -1
 }
 
 func (m *MatchScreen) panelOf(fi int) int {
@@ -279,6 +321,9 @@ var (
 
 func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
+	if m.quiet() {
+		return
+	}
 	dst.Fill(g.PalColor(ColBlack))
 	for i := range m.panels {
 		m.drawPanel(g, dst, &m.panels[i])
