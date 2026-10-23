@@ -175,6 +175,10 @@ func (s *State) afterEvent() bool {
 			s.Matchday[l]++
 		}
 	}
+	// f_1a58_3176: within the winter break the flag says WINTERPAUSE.
+	if s.Day > 130 && s.Day < 207 {
+		s.banner("WINTERPAUSE")
+	}
 	for mi := range s.Managers {
 		for i := 0; i < SquadMax; i++ {
 			if s.Squads[mi][i].Out != 0 {

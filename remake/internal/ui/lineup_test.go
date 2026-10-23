@@ -508,3 +508,25 @@ func TestMatchLineupSubstitutesByName(t *testing.T) {
 		t.Errorf("came on at %d,%d, not on the cell %d,%d of the player taken out", n.Col, n.Row, col, row)
 	}
 }
+
+// Before the matches the flag names the competition for f_3930_01e7(0x32),
+// then the matches open.
+func TestEventBanner(t *testing.T) {
+	app, _, _, md, _ := matchApp(t)
+	if got := bannerText(md); got != "Ligaspiel" {
+		t.Errorf("banner %q, want Ligaspiel", got)
+	}
+	opened := false
+	b := newEventBanner("Ligaspiel", func(*App) { opened = true })
+	app.Push(b)
+	for i := 1; i < waitFrames(0x32); i++ {
+		step(t, app, click(160, 120))
+		if opened || top(app) != Scene(b) {
+			t.Fatalf("frame %d: banner gone early", i)
+		}
+	}
+	step(t, app, Input{})
+	if !opened || top(app) == Scene(b) {
+		t.Fatal("the matches did not open after the banner")
+	}
+}
