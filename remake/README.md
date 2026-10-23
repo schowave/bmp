@@ -41,7 +41,8 @@ mise run remake:build   # = go build -o bin/bmp ./cmd/bmp
 remake/bin/bmp
 ```
 
-Or run it straight from the sources with `mise run remake:run` (`go run
+`mise run remake:restart` builds and starts it and ends the game it started
+before, for trying out a change. Or run it straight from the sources with `mise run remake:run` (`go run
 ./cmd/bmp`).
 
 ### The original files
@@ -225,12 +226,14 @@ panel with new messages is open, it takes the keys; close it first.
 ### Tests
 
 ```sh
-mise run remake:test    # go vet, gofmt -l and go test -timeout 300s
+mise run remake:test       # go vet, gofmt -l and go test -short -timeout 300s
+mise run remake:test-long  # all tests, also those that play whole seasons (CI)
 ```
 
 The tests compare constant tables with the original executable, check the
 start finances against the original, play several seasons with random
-managers and drive the screens headless with the built-in files. Tests of
+managers (only `remake:test-long`) and drive the screens headless with the
+built-in files. Tests of
 `BMMAIN.EXE` and of the extraction are skipped when `../bmp` is missing.
 The timeout turns a screen that never closes into a failure instead of a
 hang.

@@ -98,10 +98,35 @@ description = "Run the Go re-implementation"
 dir = "{{config_root}}/remake"
 run = "go run ./cmd/bmp"
 
-[tasks."remake:test"]
-description = "Test the Go re-implementation"
+[tasks."remake:restart"]
+description = "Build and start the remake, ending the one this task started before"
 dir = "{{config_root}}/remake"
-run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test -timeout 300s ./..."]
+# The pid file keeps the game this task started, so a restart ends only that
+# one; a game ended so exits without an error.
+run = '''
+pidfile="${TMPDIR:-/tmp}/bmp-remake.pid"
+if [ -f "$pidfile" ]; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
+go build -o bin/bmp ./cmd/bmp
+if command -v caffeinate >/dev/null; then caffeinate -u -t 2; fi
+bin/bmp &
+pid=$!
+echo "$pid" > "$pidfile"
+status=0
+wait "$pid" || status=$?
+[ "$(cat "$pidfile" 2>/dev/null)" = "$pid" ] && rm -f "$pidfile"
+[ "$status" -eq 143 ] && exit 0
+exit "$status"
+'''
+
+[tasks."remake:test"]
+description = "Test the Go re-implementation (without the tests that play whole seasons)"
+dir = "{{config_root}}/remake"
+run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test -short -timeout 300s ./..."]
+
+[tasks."remake:test-long"]
+description = "All tests of the Go re-implementation, also those that play whole seasons (CI)"
+dir = "{{config_root}}/remake"
+run = "go test -timeout 600s ./..."
 
 [tasks."remake:shot"]
 description = "Screenshot of a remake screen: demo name, PNG path, optional input script"

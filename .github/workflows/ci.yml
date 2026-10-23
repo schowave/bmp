@@ -53,6 +53,10 @@ jobs:
     - name: Check
       run: xvfb-run -a mise run check
 
+    # The tests `check` skips with -short: they play whole seasons.
+    - name: Long tests
+      run: xvfb-run -a mise run remake:test-long
+
     # Reference docs of the remake packages, generated from the source.
     - name: Package docs
       run: |
