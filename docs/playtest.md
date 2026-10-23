@@ -15,6 +15,17 @@ the picture itself is in question.
 - `turn N` and `advance` click through match days with the defaults:
   every period at once, draws not watched, substitutions skipped.
 
+## Simulating seasons
+
+To measure what a strategy is worth (a lineup, training, transfers), play
+seasons headless instead of clicking: `playSeason` in
+`remake/internal/game/season_sim_test.go` plays a season to the last
+matchday with a function before every turn and returns place, points and goal
+difference. Compare strategies over several seeds in a test of your own;
+`TestOptimalLineupWinsPoints` is an example. `NewManager.Team` is the club in
+MANA.DAT order; the club's id and league in the game come from
+`Manager.Team` and `Manager.League` after `NewGame`.
+
 ## Before reporting a bug
 
 The remake copies the original, bugs included. These looked like bugs in

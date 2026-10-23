@@ -29,7 +29,10 @@ type Options struct {
 // NewManager is a human manager of a new game.
 type NewManager struct {
 	Name string
-	Team int // id of the chosen German club (0..63, MANA.DAT order)
+	// Team is the id of the chosen German club in MANA.DAT order (0..63).
+	// NewGame moves the club to the id and league the start year gives it:
+	// read Manager.Team and Manager.League after NewGame.
+	Team int
 	Face int
 }
 
