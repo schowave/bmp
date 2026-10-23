@@ -40,7 +40,8 @@ Use `gh` for pull requests and CI results, for example `gh pr create`,
 ## Definition of done
 
 - The checks above are green.
-- New task, flag or command → `README.md` or `remake/README.md` (not enforced).
+- New or changed task, flag, command or data format → every doc that names
+  it (`README.md`, `remake/README.md`, `docs/adr/`) (not enforced).
 - A rule of the original found or corrected → the matching
   `docs/re/spec_*.md` (not enforced).
 - The remake deliberately differs from the original → *Deviations from the
