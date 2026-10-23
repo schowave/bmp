@@ -8,7 +8,6 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
-	"path"
 	"slices"
 	"strconv"
 	"strings"
@@ -81,9 +80,9 @@ func mana(fsys fs.FS, id string) (*assets.Mana, error) {
 	return m, nil
 }
 
+// Files returns the built-in files: the seasons and pic/.
+func Files() fs.FS { return files }
+
 // Pics returns the logos of the clubs of the seasons, as pic/N.png for
 // assets.Dir.AddPics.
 func Pics() fs.FS { return files }
-
-// PicPath is the file of logo n in Pics.
-func PicPath(n int) string { return path.Join("pic", strconv.Itoa(n)+".png") }

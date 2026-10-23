@@ -90,6 +90,19 @@ directory, for example one with edited clubs or logos (`go run
 ./cmd/bmpextract -out DIR` writes one to start from). An edited picture must
 stay an indexed PNG.
 
+### The real seasons
+
+`internal/seasons/data` holds the clubs of the seasons 1990/91 to 2026/27,
+built from the raw data in [`data/`](data/README.md):
+
+```sh
+mise run remake:seasons-fetch              # fetch every season (network, cached in data/.cache)
+mise run remake:seasons-fetch -- -from 2026 -to 2026   # only one season
+mise run remake:seasons                    # build internal/seasons/data (offline)
+```
+
+A test fails when the built-in seasons differ from a build of `data/`.
+
 ## Command-line options
 
 | Flag | Default | Purpose |
@@ -257,10 +270,13 @@ the panel with new messages is open, it takes the keys, so close it first.
 | `cmd/bmpextract` | Extracts the original files into open formats in `internal/embedded/data` |
 | `cmd/bmpicon` | Draws the icon `cmd/bmp/icon.png` from the embedded title banner |
 | `cmd/scenepreview` | Plays a single goal scene in a window, for development |
+| `cmd/bmpseasons` | Fetches the real seasons into `data/` and builds `internal/seasons/data` from it |
 | `internal/assets` | Readers of the original files (EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT`, goal scenes) and of the extract |
 | `internal/game` | The rules: calendar, fixtures, match engine, cups, finances, stadium, players, transfers, season end. Deterministic (the random generator of the MS C runtime), saved as JSON |
 | `internal/ui` | The screens on the 320×240 canvas |
 | `internal/embedded` | The original files built into the binary |
+| `internal/seasons` | The real seasons 1990/91–2026/27 built into the binary; `source` fetches them, `build` writes them |
+| `data` | Raw data of the real seasons from Wikipedia and Wikidata, with sources and licences (see [`data/README.md`](data/README.md)) |
 | `testdata/original` | Reference screenshots of the original (see its README) |
 | `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
@@ -385,13 +401,24 @@ ties). Deliberate differences:
 - The high scores at the game end take a manager once, are sorted stably
   and highlight his row; the original can enter him twice
   (`f_1a58_3176`) and highlights row 18 in the menu.
-- Real seasons (see Playing): the game starts in the year of the season; a
+- Real seasons (see Playing) fit the places of the original: a league with
+  more clubs than places passes its last ones down, one with fewer takes
+  the best of the tier below; the third league is the Oberliga until
+  1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
+  second teams of professional clubs before 2008. Strengths come from the
+  goals and points per game of the season ([ADR 0006](../docs/adr/0006-real-seasons-from-wikipedia.md)).
+- Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
   from the fourth season on, as in the original's modern start. A win
   counts 3 points from 1995/96 on (the original's variable D:0x2271);
   games with the clubs of the original keep the 2-point rule.
 
 ## Legal
+
+The real seasons (`internal/seasons`, `data/`) come from the German
+Wikipedia (CC BY-SA 4.0) and Wikidata (CC0); `data/README.md` names the
+sources and `data/logos/index.csv` the licence and author of every logo.
+Club names and logos are trademarks of the clubs.
 
 The original game files are copyrighted by Software 2000.
 `internal/embedded/data` and every binary contain them; converted into PNG

@@ -65,8 +65,9 @@ func TestSeasonSetupStartsTheSeason(t *testing.T) {
 	if err != nil {
 		t.Skip("not in a turn yet:", err)
 	}
-	if _, err := LoadGame(data, mana); err == nil {
-		t.Fatal("a season that is not built in loaded")
+	l, err := LoadGame(data, mana)
+	if err != nil || l.Season != "2008-09" {
+		t.Fatalf("load: %v", err)
 	}
 	if id, _ := game.SaveSeason(data); id != "2008-09" {
 		t.Fatalf("saved season %q", id)

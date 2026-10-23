@@ -36,3 +36,6 @@ __pycache__/
 .vscode/
 # Windows resources that mise run remake:dist writes for the .exe
 remake/cmd/bmp/rsrc_windows_*.syso
+
+# Cache of the season fetcher (bmpseasons fetch)
+remake/data/.cache/
