@@ -402,6 +402,7 @@ repeat:
     if D:2280[slot] not in (0x00, 0x80): continue  # only on otherwise free dates
     conflict = any record q with q.slot == slot whose pair (league q.league, matchday q.md, pair q.pair)
                shares a team with pair p of league l, matchday D:225a[l]
+               or 9 or more records have q.slot == slot (at most 8 games per date)
 until not conflict
 record[r] = {slot, md = D:225a[l], league = l, pair = p}
 result[l][D:225a[l]][p].home = 0x1e                # skipped when the matchday is played

@@ -71,3 +71,27 @@ func TestMovePersons(t *testing.T) {
 		}
 	}
 }
+
+// f_0310_05f1 puts at most 8 rescheduled games on one date.
+func TestRescheduleLimitPerDate(t *testing.T) {
+	for _, n := range []int{8, 9} {
+		s := &State{Events: seasonEvents}
+		s.Matchday = [NumLeagues]int{1, 1, 1}
+		s.Event = 60
+		free := s.Event + 1
+		for free < 90 && s.Events[free] != 0 {
+			free++
+		}
+		for i := 0; i < n; i++ {
+			s.Postponed[i] = PostponedGame{Slot: free, Matchday: 1, League: 1, Pair: i}
+		}
+		s.Events[free] = EvReplay
+		if !s.reschedule(2, 0, n) {
+			t.Fatalf("%d games: no date", n)
+		}
+		got := s.Postponed[n].Slot
+		if (n == 8) != (got == free) {
+			t.Errorf("%d games on date %d: rescheduled to %d", n, free, got)
+		}
+	}
+}
