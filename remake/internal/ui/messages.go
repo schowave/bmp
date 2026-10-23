@@ -77,7 +77,9 @@ func (p *MessagePanel) Draw(g *Gfx, dst *ebiten.Image) {
 	}
 	y := 0x7a
 	for i := p.top; i < len(msgs) && i < p.top+3; i++ {
-		for k, l := range msgLines(g, msgs[i]) {
+		// Each line is centred as it is, with its blanks; a line wider than
+		// the field reaches over its edges as in the original.
+		for k, l := range msgs[i] {
 			c := 24
 			if k == 0 {
 				c = 25
@@ -93,20 +95,4 @@ func (p *MessagePanel) Draw(g *Gfx, dst *ebiten.Image) {
 		}
 		y += 7
 	}
-}
-
-// msgLines returns the lines of a message as the panel shows them: the date,
-// then the text with the lines that are too wide wrapped.
-func msgLines(g *Gfx, msg []string) []string {
-	lines := []string{msg[0]}
-	for _, l := range msg[1:] {
-		// Lines that fit stay as they are, with blanks: the original
-		// centres them with trailing spaces and shows empty lines.
-		if g.TextWidth(FontNormal, l) <= msgPanelX1-msgPanelX0 {
-			lines = append(lines, l)
-		} else {
-			lines = append(lines, g.Wrap(FontNormal, l, msgPanelX1-msgPanelX0-4)...)
-		}
-	}
-	return lines
 }
