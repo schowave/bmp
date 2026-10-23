@@ -378,4 +378,5 @@ func (s *State) nextCupRound(cup int) {
 	if cup == CupDFB {
 		s.dfbHomeRule()
 	}
+	s.Draws = append(s.Draws, cup)
 }
