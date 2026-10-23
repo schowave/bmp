@@ -12,54 +12,6 @@ import (
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// NewCupScreen shows the current round of a cup (f_17c2_1ccb).
-func NewCupScreen(ss *Session, c int) Scene {
-	s := ss.S
-	cols := []Column{{"", 4, 130, Right}, {"", 136, 10, Center}, {"", 148, 120, Left}, {"", 270, 38, Center}}
-	t := NewTableView(4, 24, 312, 168, cols)
-	t.NoHeader = true
-	t.RowH = 10
-	round := s.Cups.Round[game.CupDFB]
-	if c != game.CupDFB {
-		round = s.Cups.Round[game.CupLandesmeister]
-	}
-	for i, p := range s.CupPairs(c) {
-		h, a := s.Cups.Result[c][2*i], s.Cups.Result[c][2*i+1]
-		res := ""
-		if h != 0 || a != 0 {
-			res = itoa(game.ResultOf(h)) + ":" + itoa(a)
-			if h >= 20 {
-				res += " n.E."
-			} else if h >= 10 {
-				res += " n.V."
-			}
-		}
-		if c != game.CupDFB && (s.Cups.First[c][2*i] != 0 || s.Cups.First[c][2*i+1] != 0) {
-			res = "(" + itoa(s.Cups.First[c][2*i]) + ":" + itoa(s.Cups.First[c][2*i+1]) + ")"
-		}
-		row := Row{Cells: []string{teamWithLeague(s, p.Home), "-", teamWithLeague(s, p.Away), res}}
-		if s.ManagerOf(p.Home) != nil || s.ManagerOf(p.Away) != nil {
-			row.Color = ColYellow
-		}
-		t.Rows = append(t.Rows, row)
-	}
-	sub := ""
-	if round >= 1 && round <= 5 {
-		sub = game.RoundNames[round]
-	}
-	if w := s.Cups.Holder[c]; w != 0 {
-		sub += "   POKALVERTEIDIGER: " + s.Teams[w-1].Name
-	}
-	return &ListScreen{Title: game.CupNames[c], Sub: sub, Table: t}
-}
-
-func teamWithLeague(s *game.State, t int) string {
-	if t >= game.NumGerman {
-		return s.Teams[t].Name
-	}
-	return s.Teams[t].Name + " (" + itoa(game.LeagueOf(t)+1) + ")"
-}
-
 // FileScreen saves or loads a game.
 type FileScreen struct {
 	ss    *Session
