@@ -146,7 +146,7 @@ func (st *StadiumScreen) Update(app *App) error {
 				return nil
 			}
 			st.note = append([]string{priceLine(tp) + "  EINNAHME " + game.FormatMoney(tp.AfterGate)},
-				opponentNote(s.Teams[tp.Opponent].Name, tp.Opponent)...)
+				opponentNote(s.Teams[tp.Opponent].Name, tp.Opponent, true)...)
 			return nil
 		}
 	}

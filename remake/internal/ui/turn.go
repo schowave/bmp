@@ -127,8 +127,5 @@ func optimizeTurn(ss *Session) []string {
 	if tp.Opponent >= 0 {
 		note = append(note, priceLine(tp))
 	}
-	if ln.Opponent >= 0 {
-		note = append(note, "GEGEN "+s.Teams[ln.Opponent].Name)
-	}
-	return note
+	return append(note, opponentNote(s.Teams[max(ln.Opponent, 0)].Name, ln.Opponent, ln.Home)...)
 }

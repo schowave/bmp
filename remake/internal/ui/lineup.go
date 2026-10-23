@@ -321,7 +321,7 @@ func (q *SquadScreen) optimize(app *App) {
 	q.note = []string{"OPTIMAL " + pointsText(res.After),
 		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2])}
 	if res.Opponent >= 0 {
-		q.note = append(q.note, "GEGEN "+s.Teams[res.Opponent].Name)
+		q.note = append(q.note, opponentNote(s.Teams[res.Opponent].Name, res.Opponent, res.Home)...)
 	}
 }
 

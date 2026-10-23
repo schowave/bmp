@@ -168,7 +168,8 @@ not count this rule, so it can be lower than before when a tired player rests.
   match, so he plays as the strengths screen shows him. The lineup values
   of the manager have dice of their own (a wrong side or position, no
   goalkeeper), so the rating is the mean of eight fixed series of them. The
-  note names the opponent. An opponent with a human
+  note names the opponent: `GEGEN` for a home match, `BEI` for an away
+  match. An opponent with a human
   manager counts as no opponent, because his lineup is not known yet.
 - Without a match, or against a human, the rating is the mean over every other
   club of the league, home and away, and the dice count with their mean. One club
