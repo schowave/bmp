@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"strings"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/assets"
@@ -157,8 +158,9 @@ func TestPickForeign(t *testing.T) {
 }
 
 func TestLogos(t *testing.T) {
-	if LogoFileName("Datei:Logo 1 FC Kaiserslautern.svg") != "Logo_1_FC_Kaiserslautern.svg" {
-		t.Error(LogoFileName("Datei:Logo 1 FC Kaiserslautern.svg"))
+	a, b := LogoFileName("Datei:FC Erzgebirge Aue.svg"), LogoFileName("Datei:Fc erzgebirge aue.svg")
+	if strings.ToLower(a) != a || a == b || !strings.HasPrefix(a, "fc_erzgebirge_aue.svg-") {
+		t.Errorf("logo files %q %q", a, b)
 	}
 	if c := crestColors("Schwarz-Gelb"); c[0] != 0 || c[1] != 23 {
 		t.Errorf("Schwarz-Gelb: %v", c)

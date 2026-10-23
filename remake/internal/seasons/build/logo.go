@@ -1,6 +1,8 @@
 package build
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"image"
 	"image/color"
 	_ "image/gif"  // logos of Wikipedia
@@ -25,13 +27,16 @@ var logoColors = []uint8{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1
 var fileChars = regexp.MustCompile(`[^A-Za-z0-9._-]+`)
 
 // LogoFileName is the base name under which the fetcher stores the logo
-// file title ("Datei:Logo 1 FC Kaiserslautern.svg").
+// file title ("Datei:Logo 1 FC Kaiserslautern.svg"): in lower case with a
+// hash of the title, since titles that differ only in case are different
+// files, but one file on a case-insensitive file system.
 func LogoFileName(file string) string {
 	_, name, ok := strings.Cut(file, ":")
 	if !ok {
 		name = file
 	}
-	return strings.Trim(fileChars.ReplaceAllString(name, "_"), "_")
+	sum := sha256.Sum256([]byte(file))
+	return strings.ToLower(strings.Trim(fileChars.ReplaceAllString(name, "_"), "_")) + "-" + hex.EncodeToString(sum[:4])
 }
 
 // convertLogo scales img into a 38×38 picture in the colours of the
