@@ -121,3 +121,79 @@ func TestLineupListClicks(t *testing.T) {
 }
 
 func rclick2(x, y int) Input { return Input{X: x, Y: y, Right: true} }
+
+// A click on the logo of the own club on a scoreboard opens the
+// substitutions (f_0310_3314); a click elsewhere plays the period at once.
+func TestMatchLogoOpensSubstitutions(t *testing.T) {
+	app, s, _ := lineupApp(t)
+	app.Pop()
+	var md *game.MatchDay
+	for i := 0; i < 40 && md == nil; i++ {
+		switch s.Loop.Phase {
+		case game.PhaseTurn:
+			s.EndTurn()
+		case game.PhaseMatches:
+			for md = s.NextMatchDay(); md != nil && md.Done; md = s.NextMatchDay() {
+			}
+		}
+	}
+	if md == nil {
+		t.Fatal("no match day")
+	}
+	md.Step()
+	ss := &Session{S: s, Mana: nil, SaveDir: t.TempDir()}
+	m := NewMatchScreen(ss, md)
+	if len(m.panels) == 0 {
+		t.Fatal("no scoreboard of the own club")
+	}
+	app.Push(m)
+	p := m.panels[0]
+	f := md.Fixtures[p.fixture]
+	x := p.x + 0x16 + 10
+	if f.Away == s.Managers[0].Team {
+		x = p.x + 0x65 + 10
+	}
+	step(t, app, click(x, p.y+0x23+10))
+	if _, ok := top(app).(*SubstitutionScreen); !ok || m.fast {
+		t.Fatalf("logo click: %T, fast %v", top(app), m.fast)
+	}
+	app.Pop()
+	step(t, app, click(p.x+0x50, p.y+5))
+	if top(app) != Scene(m) || !m.fast {
+		t.Fatalf("click beside: %T, fast %v", top(app), m.fast)
+	}
+}
+
+// A match day without a match of a human team shows nothing and does not
+// wait: a frame plays the period (spec_match §8).
+func TestQuietMatchDayRunsAtOnce(t *testing.T) {
+	app, s, _ := lineupApp(t)
+	app.Pop()
+	ss := &Session{S: s, SaveDir: t.TempDir()}
+	for i := 0; i < 400; i++ {
+		switch s.Loop.Phase {
+		case game.PhaseTurn:
+			s.EndTurn()
+			continue
+		case game.PhaseMatches:
+		default:
+			t.Fatalf("phase %v", s.Loop.Phase)
+		}
+		md := s.NextMatchDay()
+		if md == nil {
+			continue
+		}
+		m := NewMatchScreen(ss, md)
+		if !m.quiet() {
+			md.Run()
+			continue
+		}
+		app.Push(m)
+		step(t, app, Input{})
+		if md.Minute < 45 {
+			t.Fatalf("minute %d after one frame of a quiet match day", md.Minute)
+		}
+		return
+	}
+	t.Skip("no match day without the human team")
+}

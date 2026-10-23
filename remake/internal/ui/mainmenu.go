@@ -193,7 +193,7 @@ func drawHeader(app *App, dst *ebiten.Image, h Header) {
 		drawPlaces(g, dst, h.Places)
 	}
 	if h.Logo > 0 {
-		Draw(dst, g.Pic(h.Logo, false), 188, headerPanelY+22)
+		Draw(dst, g.Pic(h.Logo, false), 187, headerPanelY+19)
 	}
 	// The sheet is printed grey-blue with a shadow to the right, the day
 	// darker.
