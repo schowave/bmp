@@ -159,7 +159,9 @@ type State struct {
 
 	CupDay bool // F:0x513e: league suspensions do not apply today
 
-	// PendingSubsidy is a sponsor subsidy offered after a Purchase.
+	// SubsidyOffered is set when a sponsor subsidy of PendingSubsidy DM,
+	// possibly 0, is offered after a Purchase.
+	SubsidyOffered bool
 	PendingSubsidy int64
 	Purchase       PendingPurchase
 
