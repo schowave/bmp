@@ -131,6 +131,48 @@ taken. The keys act on the manager who is on turn.
 | `g` | Adds 200,000 DM to the account |
 | `d`, `p` | Keys of the original without an effect in the remake, which has no state for them (`d` clears the table of loaded saves, `p` sets a flag) |
 
+One more key is the remake's own: with the tactics board open on the lineup
+screen, `o` sets the best lineup it finds (not on a match day). It tries the
+automatic lineups of the three formations, improves each by swapping players
+(also with the bench, never an injured or suspended one) or moving them to a
+free cell of their line, and takes the best. The rating is the expected
+points per match (2 for a win, 1 for a draw) that the engine of the original
+gives the lineup, so it weighs the goals scored against the goals let in as
+a result does: the strengths of the lineup as the original calculates them
+(`f_0f9d_0002`), the chances of a half (`f_0f9d_08e9`) and the odds of a goal
+(`f_0f9d_0c3b`), in `internal/game/lineupmodel.go`; a test checks it against
+a run of the dice of the engine. Cards, injuries, substitutions and the 9
+goals a side stops at are left out. Nobody is fielded out of place: the
+goalkeeper stays in goal and a field player in his own line or next to it. A
+tired player (Erschöpfung 130 or more) plays only if he is worth 0,05 points
+more than who would play for him: a match adds 7 to 10 to the Erschöpfung of
+a player in the team, and above 135 his training does little and an injury in
+training gets likelier. The rating in the message does not count this rule,
+so it can be lower than before when a tired player rests.
+
+- With a match today the rating is against the next opponent in his venue:
+  the strengths of the clubs change before the turn and not again before the
+  match, so he plays as the strengths screen shows him. The lineup values
+  of the manager have dice of their own (a wrong side or position, no
+  goalkeeper), so the rating is the mean of eight fixed series of them. A
+  third line of the message names the opponent. An opponent with a human
+  manager counts as no opponent, because his lineup is not known yet.
+- Without a match, or against a human, the rating is the mean over every other
+  club of the league, home and away, and the dice count with their mean. One club
+  would not do there: the odds of a goal of the original have a step (with the
+  attack 0 to 3 points behind the defence a chance is a goal for sure, one
+  point ahead it is two in three), which the search would use for nothing
+  against the others.
+
+The message gives the points with a decimal comma (`OPTIMAL 1,13`): the
+rating of the new lineup and the ratings of the automatic lineups of the three
+formations (`STAND.`: 4-4-2, 3-5-2, 3-4-3), against the same opponent or
+clubs. A change
+counts only if it raises the rating by 0,03 points (the model is not more
+exact), so the lineup is left alone where nothing is gained. The lineup stays
+automatic if the automatic one of the formation is already the best,
+otherwise it becomes manual. The original has no such key.
+
 The level selects the high-score table (`HIGH.<length><level>`), so a game
 whose level was changed here is entered in the table of the new level.
 
@@ -233,6 +275,18 @@ ties). Deliberate differences:
   - When the away manager of a match of two humans comes first by index and
     forfeits, the original returns before the home manager
     (`f_1a58_20b2`); the remake still books his gate money.
+- A new game starts with the half-time scores of all leagues, the goal scenes,
+  the cup screens (DfB-Pokal, Europapokale) and the results of the replays
+  (Nachholspiele) off and the speed of the match
+  days at the maximum (70); the original starts with them on and speed 40. With the cup screens off the
+  results of a cup round and the draws are not shown, except the last rounds
+  of the season (after day 315). All stay changeable in the options screen.
+- During a match the lineup screen leaves out the formation buttons below the
+  tactics board, which do nothing there; the original draws them. A click
+  anywhere in a row of the list substitutes, also on the name; the original
+  takes it only on the number and the position. The player taken out leaves
+  the board at once; the one who comes on takes his cell, as in the original.
+- The key `o` on the tactics board sets an optimal lineup (see *Hidden keys*).
 - When a player is sold to an offer for a squad player, the buyer and the
   strength boost come from the sold player; the original reads the next
   slot after removing him (`f_2277_04a5`).

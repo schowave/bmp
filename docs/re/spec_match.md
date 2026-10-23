@@ -386,6 +386,13 @@ return goal
 Resulting probability per chance: home `0.6 * (1 - 1/((dH>>2)+3))` if dH>0, else
 `0.6 * (1/(k+1) + k/(k+1)/7)`; away the same with 0.5.
 
+The odds are not monotone in `dd`. For `dd` in -3..0, `k = 0` and every chance that
+passes is a goal (0.6 home, 0.5 away); for `dd` 1..3 only two in three of those are
+(`rnd(0,2) != 0`), and no positive `dd` reaches 1. An attack just behind the defence
+scores more often than one a little ahead. The remake's optimal lineup
+(`remake/internal/game/lineupmodel.go`) rates against all clubs of the league for that
+reason when no opponent is known.
+
 AI-vs-AI matches consist only of §5.1–5.4: no cards, injuries or substitutions.
 
 ---------------------------------------------------------------------------------

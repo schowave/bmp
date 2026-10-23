@@ -427,12 +427,39 @@ func (s *State) posDiff(sl *Slot) int {
 	return abs(s.Persons[sl.Person].Pos - ((sl.Row-7)*-75/7 + 5))
 }
 
+// dice is the source of the random numbers of the lineup strength: the
+// generator of the game, or meanDice when a lineup is only rated.
+type dice interface{ Between(a, b int) int }
+
+// meanDice returns the middle of every range, so that rating a lineup
+// neither moves the generator of the game nor depends on luck.
+type meanDice struct{}
+
+func (meanDice) Between(a, b int) int { return (a + b) / 2 }
+
+// lineupValues are the strength values of a club the lineup gives
+// (Strength, Base and Extra of Team) and the effort of the manager.
+type lineupValues struct {
+	strength, base, extra [3]int
+	effort                int
+}
+
 // LineupStrength turns the lineup of manager m into the strength values of
 // his club (f_0f9d_0002). detailed adds the tactical bonuses and penalties
 // used before matches.
 func (s *State) LineupStrength(m int, detailed bool) {
 	mg := s.Managers[m]
-	r := &s.Rand
+	v := s.lineupValues(m, detailed, &s.Rand)
+	mg.Effort = v.effort
+	tm := &s.Teams[mg.Team]
+	tm.Strength, tm.Base, tm.Extra = v.strength, v.base, v.extra
+}
+
+// lineupValues is the calculation of LineupStrength; it changes nothing but
+// the generator r.
+func (s *State) lineupValues(m int, detailed bool, r dice) lineupValues {
+	mg := s.Managers[m]
+	var out lineupValues
 	bal := [3]int{-9, -8, -5}
 	var pen, n, ksum, fsum [3]int
 	tsum := [3]int{8, 8, 8}
@@ -508,10 +535,9 @@ func (s *State) LineupStrength(m int, detailed bool) {
 	if cnt == 0 {
 		tsum = [3]int{}
 	}
+	effort := 0
 	if cnt < 8 {
-		mg.Effort = ForfeitEffort
-	} else {
-		mg.Effort = 0
+		effort = ForfeitEffort
 	}
 	for j := 0; cnt != 0 && cnt < 11; j = (j + 1) % 3 {
 		n[j]++
@@ -562,18 +588,18 @@ func (s *State) LineupStrength(m int, detailed bool) {
 			kt = 0
 		}
 		kt = clamp(kt+mg.EffortSetting, 0, 40)
-		if mg.Effort != ForfeitEffort {
-			mg.Effort = kt
+		if effort != ForfeitEffort {
+			effort = kt
 		}
 	}
-	tm := &s.Teams[mg.Team]
+	out.effort = effort
 	for i := 0; i < 3; i++ {
 		if n[i] <= 1 {
-			tm.Strength[i], tm.Base[i], tm.Extra[i] = 0, 0, 0
 			continue
 		}
-		tm.Strength[i] = (ksum[i] / n[i]) & 0xff
-		tm.Base[i] = (tsum[i] / n[i]) & 0xff
-		tm.Extra[i] = (fsum[i] / n[i]) & 0xff
+		out.strength[i] = (ksum[i] / n[i]) & 0xff
+		out.base[i] = (tsum[i] / n[i]) & 0xff
+		out.extra[i] = (fsum[i] / n[i]) & 0xff
 	}
+	return out
 }

@@ -380,8 +380,13 @@ var chanceSpread = [20]int{1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4,
 // planChances computes the number of chances of both sides in a period
 // (f_0f9d_08e9).
 func (md *MatchDay) planChances(f *Fixture, from, to int) (int, int) {
-	r := &md.s.Rand
 	s := md.s
+	return chanceCounts(&s.Rand, s.strengthAt(f.Home, 1, from), s.strengthAt(f.Away, 1, from), from, to)
+}
+
+// chanceCounts is the dice part of planChances: the chances of home and away
+// from their midfield strengths sh and sa.
+func chanceCounts(r dice, sh, sa, from, to int) (int, int) {
 	pick := func(x, y int) int {
 		if r.Between(0, 1) == 1 && x > y {
 			return x
@@ -390,7 +395,6 @@ func (md *MatchDay) planChances(f *Fixture, from, to int) (int, int) {
 	}
 	h, a := 0, 0
 	h += r.Between(0, 1)
-	sh, sa := s.strengthAt(f.Home, 1, from), s.strengthAt(f.Away, 1, from)
 	d := sa/(-3) + sh/3
 	if d > 0 {
 		n := d / 5

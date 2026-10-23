@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/game"
@@ -341,4 +342,169 @@ func TestQuietMatchScreenNeverOnTop(t *testing.T) {
 		}
 	}
 	t.Fatal("match day did not end")
+}
+
+// The key o on the open board sets the optimal lineup and says what it is
+// worth.
+func TestLineupOptimalKey(t *testing.T) {
+	app, s, q := lineupApp(t)
+	step(t, app, Input{Chars: []rune("o")})
+	if _, ok := top(app).(*lineupToast); ok {
+		t.Fatal("o works without the board")
+	}
+	step(t, app, click(lnIconX+10, lnIconY[1]+10))
+	rating := s.LineupRating(0)
+	opp, _, ok := s.NextOpponent(0)
+	step(t, app, Input{Chars: []rune("o")})
+	toast, ok2 := top(app).(*lineupToast)
+	if !ok2 {
+		t.Fatalf("no message, top is %T", top(app))
+	}
+	if s.LineupRating(0) < rating {
+		t.Errorf("rating fell from %d to %d", rating, s.LineupRating(0))
+	}
+	if toast.lines[0] != "OPTIMAL "+pointsText(s.LineupRating(0)) {
+		t.Errorf("message %q", toast.lines)
+	}
+	if !strings.HasPrefix(toast.lines[1], "STAND. ") {
+		t.Errorf("message %q", toast.lines)
+	}
+	switch {
+	case ok && !strings.HasPrefix(toast.third, "GEGEN "+s.Teams[opp].Name[:3]):
+		t.Errorf("message %q does not name the opponent %s", toast.lines, s.Teams[opp].Name)
+	case !ok && toast.third != "":
+		t.Errorf("message %q", toast.lines)
+	}
+	// The text must fit into the box (167..317), also with three digits:
+	// midX moves a text that would end behind x = 319 to the left edge.
+	for _, l := range []string{"OPTIMAL 2,00", "STAND. 2,00/2,00/2,00"} {
+		if w := app.Gfx.TextWidth(FontNormal, l); 244-w/2+1+w > 0x13f {
+			t.Errorf("%q is %d pixels wide", l, w)
+		}
+	}
+	if q.picked != -1 {
+		t.Error("a picked player stays picked")
+	}
+}
+
+// The name of the opponent is cut to fit the box.
+func TestLineupOptimalKeyLongName(t *testing.T) {
+	app, s, _ := lineupApp(t)
+	opp, _, ok := s.NextOpponent(0)
+	if !ok {
+		t.Skip("no match today")
+	}
+	s.Teams[opp].Name = "WWWWWWWWWWWWWWWWWWWWWW"
+	step(t, app, click(lnIconX+10, lnIconY[1]+10))
+	step(t, app, Input{Chars: []rune("o")})
+	toast := top(app).(*lineupToast)
+	if w := app.Gfx.TextWidth(FontNormal, toast.third); w > lnToastWidth || !strings.HasPrefix(toast.third, "GEGEN WW") {
+		t.Errorf("%q is %d pixels wide", toast.third, w)
+	}
+}
+
+func TestPointsText(t *testing.T) {
+	for n, want := range map[int]string{135: "1,35", 7: "0,07", 0: "0,00", -12: "-0,12", 200: "2,00"} {
+		if got := pointsText(n); got != want {
+			t.Errorf("%d: %q, want %q", n, got, want)
+		}
+	}
+}
+
+// Pressing the key again changes nothing and names no old lineup.
+func TestLineupOptimalKeyTwice(t *testing.T) {
+	app, _, _ := lineupApp(t)
+	step(t, app, click(lnIconX+10, lnIconY[1]+10))
+	var first string
+	for n := 0; n < 2; n++ {
+		step(t, app, Input{Chars: []rune("o")})
+		toast := top(app).(*lineupToast)
+		if n == 0 {
+			first = toast.lines[0]
+		} else if toast.lines[0] != first {
+			t.Errorf("second press: %q, first %q", toast.lines[0], first)
+		}
+		for i := 0; i < 200; i++ {
+			if _, ok := top(app).(*lineupToast); !ok {
+				break
+			}
+			step(t, app, Input{})
+		}
+	}
+}
+
+// After an injury a click on a reserve player brings him on: the team has a
+// place free, nobody has to be taken out first.
+func TestMatchLineupReserveAfterInjury(t *testing.T) {
+	app, s, ss, md, _ := matchApp(t)
+	field, bench := -1, -1
+	for i := 0; i < game.SquadMax; i++ {
+		sl := &s.Squads[0][i]
+		if sl.Empty() || s.Persons[sl.Person].Position() == game.PosKeeper || sl.Status&3 != 0 {
+			continue
+		}
+		switch {
+		case sl.Lineup >= 1 && sl.Lineup <= 11 && field < 0:
+			field = i
+		case sl.Lineup >= 12 && bench < 0:
+			bench = i
+		}
+	}
+	if field < 0 || bench < 0 {
+		t.Skip("no field player or no reserve")
+	}
+	sl := &s.Squads[0][field]
+	sl.Lineup, sl.Status, sl.Out = 0, sl.Status|2, 3
+	q := NewMatchLineup(ss, md, 0)
+	app.Push(q)
+	step(t, app, click(lnListX0+3, lnRow0Y+6*bench-2))
+	if l := s.Squads[0][bench].Lineup; l < 1 || l > 11 {
+		t.Fatalf("reserve has number %d, top %T", l, top(app))
+	}
+	if s.CountOnPitch(0) != 11 {
+		t.Errorf("%d on the pitch", s.CountOnPitch(0))
+	}
+}
+
+// During a match a click on the name substitutes like one on the number.
+func TestMatchLineupSubstitutesByName(t *testing.T) {
+	app, s, ss, md, _ := matchApp(t)
+	q := NewMatchLineup(ss, md, 0)
+	app.Push(q)
+	step(t, app, click(lnIconX+10, lnIconY[1]+10)) // with the tactics board open
+	out, in := -1, -1
+	for i := range s.Squads[0] {
+		sl := &s.Squads[0][i]
+		field := !sl.Empty() && s.Persons[sl.Person].Position() != game.PosKeeper
+		switch {
+		case field && sl.Lineup >= 1 && sl.Lineup <= 11 && out < 0:
+			out = i
+		case field && sl.Lineup > 11 && sl.Status&3 == 0 && in < 0:
+			in = i
+		}
+	}
+	if out < 0 || in < 0 {
+		t.Fatalf("slots out %d in %d", out, in)
+	}
+	nameX := lnListX0 + lineupColW[0] + lineupColW[1] + 10
+	nr := s.Squads[0][out].Lineup
+	step(t, app, click(nameX, lnRow0Y+6*out-2))
+	// He has left the board: a click on his cell picks nobody.
+	o := &s.Squads[0][out]
+	col, row := o.Col, o.Row
+	step(t, app, click(cellXY(o.Col, o.Row)))
+	if q.picked >= 0 {
+		t.Errorf("picked slot %d on the cell of the player taken out", q.picked)
+	}
+	for i := 0; i < 200 && top(app) != Scene(q); i++ {
+		step(t, app, Input{}) // the message that the automatic lineup is off
+	}
+	step(t, app, click(nameX, lnRow0Y+6*in-2))
+	n := &s.Squads[0][in]
+	if n.Lineup != nr || o.Lineup != 0 {
+		t.Fatalf("substitution by name: in %d out %d", n.Lineup, o.Lineup)
+	}
+	if n.Col != col || n.Row != row {
+		t.Errorf("came on at %d,%d, not on the cell %d,%d of the player taken out", n.Col, n.Row, col, row)
+	}
 }
