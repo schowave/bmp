@@ -86,3 +86,14 @@ func TestPickScene(t *testing.T) {
 		t.Errorf("penalty miss: %s", name)
 	}
 }
+
+// f_3930_01e7(n) waits n/3 ticks of the 18.2 Hz timer: a minute of a match
+// day at speed 40 lasts 6 ticks, about a third of a second, as measured on
+// the original in the browser.
+func TestWaitFrames(t *testing.T) {
+	for _, c := range []struct{ n, want int }{{6, 7}, {0x14, 20}, {0x1e, 33}, {0x26 - 40/2, 20}, {0x46, 76}, {0x78 - 40, 86}, {0x96, 165}} {
+		if got := waitFrames(c.n); got != c.want {
+			t.Errorf("waitFrames(%#x) = %d, want %d", c.n, got, c.want)
+		}
+	}
+}

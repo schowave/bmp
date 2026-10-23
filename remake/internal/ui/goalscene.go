@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -24,6 +25,10 @@ const (
 // biosTicksPerFrame converts the BIOS timer of the original (18.2 Hz, the
 // unit of f_35ac_307a) to Ebitengine updates at 60 per second.
 const biosTicksPerFrame = 1193182.0 / 65536 / 60
+
+// waitFrames is the length of the pause f_3930_01e7(n) in frames: it waits
+// n/3 ticks of the BIOS timer.
+func waitFrames(n int) int { return int(math.Round(float64(n/3) / biosTicksPerFrame)) }
 
 // GoalScene plays a scene like f_0c7c_0004. Play 0 shows all frames at 2
 // ticks each (the first frame 10 ticks longer); the replays (Replay) are

@@ -172,7 +172,7 @@ type cardScreen struct {
 // (f_3930_01e7(0x96)).
 const (
 	cardMinute = 0x438 * 60 * 10 / 182
-	cardShame  = 0x96 * 60 * 10 / 182
+	cardShame  = 0x96 / 3 * 60 * 10 / 182
 )
 
 func (c *cardScreen) close(app *App) {
