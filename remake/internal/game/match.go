@@ -81,6 +81,7 @@ type MatchDay struct {
 	pens       bool
 	onFinish   func()
 	started    int // number of periods started
+	ended      int // last minute of the period the last Step ended, 0 = none
 }
 
 func (md *MatchDay) score(f *Fixture) (int, int) {
@@ -220,7 +221,7 @@ func (md *MatchDay) prepare(fi int, f *Fixture) {
 		}
 		if m.Effort == ForfeitEffort && !exempt {
 			// f_1a58_2051: the match is not played at all.
-			s.notify(mi, "Ihr Spiel wird mit 0:2 gewertet. Sie zahlen 200.000 DM Strafe.")
+			s.alert(mi, BackdropNone, msgForfeit(m.Name))
 			m.Money -= 200000
 			f.Forfeit = side + 1
 			f.Watched = false
@@ -472,7 +473,9 @@ func (md *MatchDay) Step() bool {
 		md.Minute = from
 	}
 	md.playMinute(md.Minute)
+	md.ended = 0
 	if md.Minute == to {
+		md.ended = to
 		md.endPeriod(to)
 		md.period++
 		if md.period >= len(md.periods) {
