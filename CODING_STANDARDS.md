@@ -12,8 +12,9 @@ paints the result. The tests of package `ui` cannot draw, since Ebitengine
 images need the running game loop, so a decision made inside `Draw` stays
 untested.
 
-Example: `msgLines` in `remake/internal/ui/messages.go`. While its loop sat in
-`Draw`, a wrapped line overwrote the lines after it, and no test could see it.
+Example: `CupScreen.layout` in `remake/internal/ui/cupscreen.go` computes the
+title and the rows; `TestCupScreenRelegationTitle` checks the title of the
+relegation without drawing.
 
 ## Generated data is checked by its test
 
