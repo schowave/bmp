@@ -96,9 +96,10 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 				c = ColBeige
 			}
 			g.TextAt(dst, FontSmall, 0x2a, y, numText(int64(int(e[0])-game.FirstID[l]), 2, false)+".", c, -1)
-			g.TextMid(dst, FontSmall, 0x55, 0x55, y, game.LeagueNames[l], ColLight, -1)
+			name := game.LeagueName(l, s.HistoryYear(h.ss.Mgr(), r))
+			g.TextMid(dst, FontSmall, 0x55, 0x55, y, name, ColLight, -1)
 			// the DFB-Pokal
-			buf, c := game.LeagueNames[l], ColLight
+			buf, c := name, ColLight
 			txt := "SIEGER"
 			if e[2]&0x80 != 0 {
 				c = ColBeige

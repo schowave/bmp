@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"strings"
+
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/game"
@@ -29,13 +31,13 @@ type cupRow struct {
 // in one order or the other.
 var cupGroups = [6][2]int{{9, 9}, {10, 17}, {12, 33}, {18, 18}, {34, 20}, {36, 36}}
 
-var cupGroupTitles = [6]string{
-	"BUNDESLIGA GEGEN BUNDESLIGA:",
-	"BUNDESLIGA GEGEN ZWEITE LIGA:",
-	"BUNDESLIGA GEGEN AM.-OBERLIGA:",
-	"ZWEITE LIGA GEGEN ZWEITE LIGA:",
-	"ZWEITE LIGA GEGEN AM.-OBERLIGA:",
-	"AM.-OBERLIGA GEGEN AM.-OBERLIGA:",
+var cupGroupLeagues = [6][2]int{{0, 0}, {0, 1}, {0, 2}, {1, 1}, {1, 2}, {2, 2}}
+
+// cupGroupTitle is the headline of DFB group k, with the league names of
+// the season.
+func cupGroupTitle(s *game.State, k int) string {
+	g := cupGroupLeagues[k]
+	return strings.ToUpper(s.LeagueName(g[0])) + " GEGEN " + strings.ToUpper(s.LeagueName(g[1])) + ":"
 }
 
 // NewCupScreen shows the current round of cup c from the menu.
@@ -204,7 +206,7 @@ func (c *CupScreen) Draw(app *App, dst *ebiten.Image) {
 	for _, r := range c.rows {
 		switch {
 		case r.home == -1 && r.away >= 0:
-			g.TextMid(dst, FontSmall, 0, 0x12b, r.y, cupGroupTitles[r.away], ColGrey2, ColBlack)
+			g.TextMid(dst, FontSmall, 0, 0x12b, r.y, cupGroupTitle(s, r.away), ColGrey2, ColBlack)
 		case r.home == -1:
 			g.TextMid(dst, FontSmall, 0, 0x118, r.y, "@@@@@@@@@", ColGrey2, ColGrey7)
 		default:

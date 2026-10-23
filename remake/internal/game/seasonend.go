@@ -180,6 +180,35 @@ func (s *State) seasonReport() {
 // LeagueNames are the texts of the original.
 var LeagueNames = [3]string{"Bundesliga", "Zweite Liga", "Am.-Oberliga"}
 
+// LeagueName is the name of league l in the season that starts in year.
+// The original always calls the third league Am.-Oberliga; the remake
+// follows the third tier of the real leagues: Regionalliga from 1994/95,
+// 3. Liga from 2008/09.
+func LeagueName(l, year int) string {
+	if l == 2 {
+		switch {
+		case year >= 2008:
+			return "3. Liga"
+		case year >= 1994:
+			return "Regionalliga"
+		}
+	}
+	return LeagueNames[l]
+}
+
+// LeagueName is the name of league l in the current season.
+func (s *State) LeagueName(l int) string { return LeagueName(l, s.StartYear) }
+
+// HistoryYear is the year in which the season of history record r of
+// manager mi started.
+func (s *State) HistoryYear(mi, r int) int {
+	last := s.StartYear - 1
+	if s.Loop.Phase == PhaseContracts || s.Loop.Phase == PhaseGameOver {
+		last = s.StartYear // recorded, the new season has not begun
+	}
+	return last - (len(s.Managers[mi].History) - 1 - r)
+}
+
 // youthPlayer promotes a youth player (f_0cb5_0012 @033d).
 func (s *State) youthPlayer(mi int) {
 	r := &s.Rand

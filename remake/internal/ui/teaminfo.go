@@ -170,7 +170,7 @@ func (ti *TeamInfo) drawInfo(g *Gfx, dst *ebiten.Image) {
 	left := func(y int, txt string, col int) { g.TextAt(dst, FontSmall, tiX+3, y, txt, col, NoShadow) }
 	right := func(y int, txt string) { g.TextAt(dst, FontSmall, tiX+0x6b, y, txt, ColLight, NoShadow) }
 
-	head := itoa(c.Pos+1) + ". PLATZ IN DER " + strings.ToUpper(game.LeagueNames[game.LeagueOf(t)]) +
+	head := itoa(c.Pos+1) + ". PLATZ IN DER " + strings.ToUpper(s.LeagueName(game.LeagueOf(t))) +
 		", STÄRKE: " + itoa(s.InfoStrength(t))
 	g.TextMid(dst, FontSmall, tiX, tiX+0xe0, 0x49, head, ColLight, ColBlack)
 

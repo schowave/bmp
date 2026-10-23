@@ -95,10 +95,14 @@ var msgChristmasLines = [5]string{
 	"erspähen. Was für eine Freude !",
 }
 
-func msgChristmasAmounts(x int64) []string {
+func msgChristmasAmounts(x int64, year int) []string {
+	third := "AMATEUR-OBERLIGA"
+	if n := LeagueName(2, year); n != LeagueNames[2] {
+		third = strings.ToUpper(n)
+	}
 	return []string{
 		"BUNDESLIGA: " + FormatMoney(x) + " DM, 2.LIGA: " + FormatMoney(x/2) + " DM,",
-		"AMATEUR-OBERLIGA: " + FormatMoney(x/3) + " DM (INCL. MWST.)",
+		third + ": " + FormatMoney(x/3) + " DM (INCL. MWST.)",
 	}
 }
 
@@ -159,13 +163,13 @@ const (
 	msgNoEvents     = "Keine besonderen Ereignisse..."
 )
 
-func msgSeasonPlace(pos, league int) string {
-	return itoa(pos) + ".Platz der " + strings.ToUpper(LeagueNames[league])
+func msgSeasonPlace(pos, league, year int) string {
+	return itoa(pos) + ".Platz der " + strings.ToUpper(LeagueName(league, year))
 }
 
 // msgSeasonEnd is the head of the report as one text.
-func msgSeasonEnd(pos, league int) string {
-	return "Saisonende\n" + msgSeasonHead + "\n" + msgSeasonPlace(pos, league)
+func msgSeasonEnd(pos, league, year int) string {
+	return "Saisonende\n" + msgSeasonHead + "\n" + msgSeasonPlace(pos, league, year)
 }
 
 // Dialogs D:0x4e08.. and 0x4e18.. that f_0cb5_0012 shows with chance 1/5

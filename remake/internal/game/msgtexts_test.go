@@ -38,7 +38,7 @@ func TestMessageTextsMatchOriginalFormats(t *testing.T) {
 			t.Errorf("got %q, want %q", c.got, c.want)
 		}
 	}
-	if got := msgSeasonEnd(3, 1); got != "Saisonende\nSie beendeten Ihre Saison\n3.Platz der ZWEITE LIGA" {
+	if got := msgSeasonEnd(3, 1, 1992); got != "Saisonende\nSie beendeten Ihre Saison\n3.Platz der ZWEITE LIGA" {
 		t.Errorf("season end: %q", got)
 	}
 }

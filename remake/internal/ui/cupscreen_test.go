@@ -43,3 +43,15 @@ func TestFixtureLogo(t *testing.T) {
 		t.Errorf("foreign club in the UEFA-Pokal: picture %d, want 147", got)
 	}
 }
+
+// The DFB groups name the leagues of the season.
+func TestCupGroupTitle(t *testing.T) {
+	s := &game.State{StartYear: 1992}
+	if got := cupGroupTitle(s, 2); got != "BUNDESLIGA GEGEN AM.-OBERLIGA:" {
+		t.Errorf("1992: %q", got)
+	}
+	s.StartYear = 2008
+	if got := cupGroupTitle(s, 5); got != "3. LIGA GEGEN 3. LIGA:" {
+		t.Errorf("2008: %q", got)
+	}
+}

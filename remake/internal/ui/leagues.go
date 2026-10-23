@@ -162,7 +162,7 @@ func (t *TableScreen) Draw(app *App, dst *ebiten.Image) {
 	s := t.ss.S
 	l := t.league
 	g.Background(dst)
-	g.TextMid(dst, FontNormal, 0, 0x10c, 0xdc, "Tabelle "+game.LeagueNames[l], ColBeige, ColBlack)
+	g.TextMid(dst, FontNormal, 0, 0x10c, 0xdc, "Tabelle "+s.LeagueName(l), ColBeige, ColBlack)
 	g.Window(dst, tblX0, tblY0, tblX1, tblY1, ColBlue)
 	icon := IconMainMenu
 	if t.round {
@@ -313,7 +313,7 @@ func lgB2i(b bool) int {
 // title is the headline of the screen.
 func (r *ResultsScreen) title() string {
 	s := r.ss.S
-	t := "SPIELE  " + game.LeagueNames[r.league] + "   " + itoa(r.md) + ".SPIELTAG  "
+	t := "SPIELE  " + s.LeagueName(r.league) + "   " + itoa(r.md) + ".SPIELTAG  "
 	if r.live {
 		return t + "  " + itoa(r.minute) + ".MINUTE"
 	}
@@ -487,7 +487,7 @@ func (st *StrengthScreen) Draw(app *App, dst *ebiten.Image) {
 	g.DrawIconButton(dst, IconMainMenu, MenuButton.X, MenuButton.Y)
 	FillRect(dst, 0x3f, 0x23, 0xf6-0x3f+1, 1, g.PalColor(ColLight))
 	FillRect(dst, 0x3f, 0xb2, 0xf6-0x3f+1, 1, g.PalColor(ColLight))
-	g.TextMid(dst, FontNormal, 0x3d, 0xf8, 0x19, "STÄRKEN "+game.LeagueNames[st.league], ColLight, ColGrey7)
+	g.TextMid(dst, FontNormal, 0x3d, 0xf8, 0x19, "STÄRKEN "+s.LeagueName(st.league), ColLight, ColGrey7)
 	g.TextAt(dst, FontSmall, 0x41, 0x21, strHeader, ColLight, NoShadow)
 	g.BevelButton(dst, 0x85, 0xb5, 0x39, 0xc, ColBlack)
 	g.TextMid(dst, FontSmall, 0x86, 0x85+0x39, 0xb5+8, strPartNames[st.part], ColRed, NoShadow)
