@@ -115,6 +115,25 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
    | `r` or `w` after a scene | Replays it |
    | Right button | Names the author of the last scene |
 
+### Hidden keys (cheats)
+
+Like the original, the options screen reacts to a few keys that are not
+shown anywhere (`f_262f_01b8`, `Cheat` in `internal/game/cheats.go`). Open
+the screen with OPTIONEN in the disk menu or with Space on a match day and
+type the letter; the frame of the screen flashes briefly when the key was
+taken. The keys act on the manager who is on turn.
+
+| Key | Effect |
+|---|---|
+| `0` to `5` | Sets the level to that digit, as shown in the header of the screen (`LEVEL n`); `0` is the easiest |
+| `s` | Every player of the squad gets tendency 68 and fatigue 50 |
+| `a` | Like `s`, and all three skills of every player become 99 and the account 99,999,999 DM |
+| `g` | Adds 200,000 DM to the account |
+| `d`, `p` | Keys of the original without an effect in the remake, which has no state for them (`d` clears the table of loaded saves, `p` sets a flag) |
+
+The level selects the high-score table (`HIGH.<length><level>`), so a game
+whose level was changed here is entered in the table of the new level.
+
 ## Project layout
 
 | Path | Content |
