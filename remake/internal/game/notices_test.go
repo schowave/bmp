@@ -158,3 +158,35 @@ func TestOfferMessageEndsWithTheOffer(t *testing.T) {
 		t.Errorf("inbox %v", s.Messages(0))
 	}
 }
+
+// A timed message lives three turns of manager 0; with ten timed messages
+// waiting a new one goes at once, and other messages stay.
+func TestTimedMessages(t *testing.T) {
+	s := noticeGame(t)
+	m := s.Managers[0]
+	m.Inbox = nil
+	s.notify(0, "plain")
+	s.notifyTimed(0, "timed")
+	for i := 0; i < timedLife-1; i++ {
+		s.ageMessages()
+	}
+	if len(m.Inbox) != 2 {
+		t.Fatalf("after %d turns: %v", timedLife-1, m.Inbox)
+	}
+	s.ageMessages()
+	if len(m.Inbox) != 1 || m.Inbox[0].Text != "plain" {
+		t.Fatalf("after %d turns: %v", timedLife, m.Inbox)
+	}
+	for i := 0; i < timedSlots+2; i++ {
+		s.notifyTimed(0, "t"+itoa(i))
+	}
+	n := 0
+	for _, msg := range m.Inbox {
+		if msg.Life > 0 {
+			n++
+		}
+	}
+	if n != timedSlots {
+		t.Errorf("%d timed messages, want %d", n, timedSlots)
+	}
+}

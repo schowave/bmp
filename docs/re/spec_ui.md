@@ -263,9 +263,9 @@ The shots of the original taken for this work are listed in
 
 ## 6. Known differences
 
-- Messages: the original dates panel messages today minus rand(0,3) days and
-  lets most of them expire (counters in 0x5664/0x1d34, deletion when the
-  player concerned leaves); the remake keeps them until 20 are reached.
+- Messages: the original dates panel messages today minus rand(0,3) days; the
+  remake dates them today. (Their expiry and their deletion with the slot they
+  belong to are in the remake: spec_players §3.1.)
 - The best series of the statistics screen start again every season.
 - The Christmas/birthday cards, credit dialogs and the season report were
   built from the decompilation only; reaching them in the original takes many
