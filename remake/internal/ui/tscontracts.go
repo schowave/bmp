@@ -172,8 +172,7 @@ func (p *tsPanel) Update(app *App) error {
 		p.offer(app)
 		return nil
 	case tsButtonHit(in, 0xb8, 0xd8):
-		p.ss.S.CancelNegotiation(p.m, p.si)
-		p.close(app, false)
+		p.cancel(app)
 		return nil
 	}
 	if in.Left && in.X > 8 && in.X < 0xb4 && in.Y > 0xd2 && in.Y < 0xe2 {
@@ -216,14 +215,47 @@ func (p *tsPanel) commit() {
 }
 
 // offer evaluates NEUER VERTRAG.
+// forced is the contract length the player insists on, or 0.
+func (p *tsPanel) forced() int {
+	if sl := p.slot(); sl.Nego >= 100 && sl.Nego&0x80 == 0 {
+		return sl.Nego - 100
+	}
+	return 0
+}
+
+// untouched reports whether nothing usable was typed (f_2277_2a8f checks it
+// after either button): no length, and no salary or no contract left. A
+// purchase during the season skips the check.
+func (p *tsPanel) untouched() bool {
+	s := p.ss.S
+	return (p.purpose == tsPanelNormal || s.Day > 321) && p.forced() == 0 && p.years == 0 &&
+		(p.salary == 0 || p.slot().Years == 0)
+}
+
+// cancel is ABBRUCH. With nothing typed during the season nothing changes;
+// otherwise the player refuses to talk for a while.
+func (p *tsPanel) cancel(app *App) {
+	s := p.ss.S
+	if p.years > 4 {
+		s.CancelNegotiation(p.m, p.si)
+		p.wait = true
+		app.Push(newTsMessage("Wer wird sich denn SO", "lange verpflichten ?", "(Mal abgesehen", "von Bundi's)",
+			func(app *App) { p.close(app, false) }))
+		return
+	}
+	if p.untouched() && s.Day <= 321 {
+		p.close(app, false)
+		return
+	}
+	s.CancelNegotiation(p.m, p.si)
+	p.close(app, false)
+}
+
 func (p *tsPanel) offer(app *App) {
 	s := p.ss.S
 	sl := p.slot()
 	name := s.Persons[sl.Person].Name
-	forced := 0
-	if sl.Nego >= 100 && sl.Nego&0x80 == 0 {
-		forced = sl.Nego - 100
-	}
+	forced := p.forced()
 	fail := func(l0, l1, l2, l3 string) {
 		s.CancelNegotiation(p.m, p.si)
 		if l0 == "" {
@@ -237,8 +269,7 @@ func (p *tsPanel) offer(app *App) {
 		fail("Wer wird sich denn SO", "lange verpflichten ?", "(Mal abgesehen", "von Bundi's)")
 		return
 	}
-	if (p.purpose == tsPanelNormal || s.Day > 321) && forced == 0 && p.years == 0 &&
-		(p.salary == 0 || sl.Years == 0) {
+	if p.untouched() {
 		if s.Day > 321 {
 			fail("", "", "", "")
 			return

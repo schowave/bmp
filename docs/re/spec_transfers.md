@@ -382,7 +382,8 @@ hint= max(hint, current salary)
 ### 8.3 Evaluation after a button press (`res` = button)
 * `Y > 4` → "Wer wird sich denn SO lange verpflichten ? (Mal abgesehen von Bundi's)" → res=2.
 * If (interactive, or day > 321) and nothing usable entered (`Y==0 && salary==0`, or `Y==0 &&`
-  current years 0) and forcedYears == 0 → `res = (day > 321) ? 2 : 3`.
+  current years 0) and forcedYears == 0 → `res = (day > 321) ? 2 : 3`. This overrides the button,
+  ABBRUCH too: an empty ABBRUCH during the season changes nothing.
 * Defaults: `Y = forcedYears || current years`; `salary = salary || current salary`.
 * `res==1 && Y > curYears && salary < curSalary` → "So dumm ist <name> leider nicht..." res=2.
 * forcedYears != 0 and (`salary < curSalary` or `Y != forcedYears`) → res=2.
