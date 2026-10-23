@@ -267,7 +267,7 @@ func (s *State) pickBest(m, k int) int {
 	mode := s.Managers[m].AutoLineup
 	pos := k
 	for {
-		best, bestV := -1, -2
+		best, bestV := -1, 0
 		gk := 0
 		for i := 0; i < SquadMax; i++ {
 			sl := &s.Squads[m][i]
@@ -279,8 +279,8 @@ func (s *State) pickBest(m, k int) int {
 			}
 			v := sl.Strength()
 			if k != PosKeeper && pos == PosKeeper {
-				// A goalkeeper offered for a field position: the last one
-				// found is taken.
+				// A goalkeeper offered for a field position: the first one
+				// found is never taken, of the others the last one.
 				v = -1
 				if gk > 0 {
 					v = 1
@@ -353,7 +353,40 @@ func (s *State) AutoLineup(m int) {
 		}
 		sq[i].Lineup = n
 	}
+	s.swapSides(m)
 	s.renumber(m)
+}
+
+// swapSides moves team players who stand more than one column away from
+// their preferred side: each swaps columns with the player of his row whose
+// side fits his column best, if that one fits better (f_0cb5_25d5).
+func (s *State) swapSides(m int) {
+	sq := &s.Squads[m]
+	inTeam := func(sl *Slot) bool { return sl.Person != 0 && sl.Lineup >= 1 && sl.Lineup <= 11 }
+	dist := func(col, side int) int { return abs(col-side) & 0xff }
+	for a := 0; a < SquadMax; a++ {
+		sa := &sq[a]
+		if !inTeam(sa) {
+			continue
+		}
+		own := dist(sa.Col, s.Persons[sa.Person].Side)
+		if own <= 1 {
+			continue
+		}
+		best, bestD := -1, 0x63
+		for b := 0; b < SquadMax; b++ {
+			sb := &sq[b]
+			if b == a || !inTeam(sb) || sb.Row != sa.Row {
+				continue
+			}
+			if d := dist(sa.Col, s.Persons[sb.Person].Side); d < bestD {
+				best, bestD = b, d
+			}
+		}
+		if best >= 0 && own > bestD {
+			sa.Col, sq[best].Col = sq[best].Col, sa.Col
+		}
+	}
 }
 
 // renumber numbers the players in the team 1..n in slot order
