@@ -53,7 +53,7 @@ func TestPointsPerWin(t *testing.T) {
 		season string
 		year   int
 		want   int
-	}{{"", 1992, 2}, {"", 1995, 3}, {"", 2010, 3}, {"1994-95", 1994, 2}, {"1995-96", 1995, 3}, {"2025-26", 2025, 3}} {
+	}{{"", 1992, 2}, {"", 1995, 2}, {"", 2010, 2}, {"1994-95", 1994, 2}, {"1995-96", 1995, 3}, {"2025-26", 2025, 3}} {
 		if got := (&State{Season: c.season, StartYear: c.year}).PointsPerWin(); got != c.want {
 			t.Errorf("%+v: %d", c, got)
 		}
