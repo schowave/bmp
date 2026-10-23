@@ -14,3 +14,6 @@ wasm/dist/
 # Go re-implementation
 remake/bin/
 remake/internal/embedded/data/
+
+# Screenshots of the original game (its graphics), see remake/testdata/original/README.md
+remake/testdata/original/*.png

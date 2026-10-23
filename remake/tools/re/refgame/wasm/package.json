@@ -1,0 +1,9 @@
+{
+  "name": "bmp-refgame-wasm",
+  "private": true,
+  "description": "Drives the original game in the browser for reference screenshots",
+  "type": "module",
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
