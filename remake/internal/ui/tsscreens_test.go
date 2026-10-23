@@ -110,11 +110,19 @@ func TestContractPanel(t *testing.T) {
 	if !ok {
 		t.Fatalf("no panel but %T", top(app))
 	}
-	// ABBRUCH makes the player unwilling to talk.
+	// ABBRUCH with nothing typed changes nothing during the season.
 	step(t, app, click(0xb8+5, 0xd8+5))
 	if top(app) == Scene(p) {
 		t.Fatal("ABBRUCH did not close")
 	}
+	if n := s.Squads[mi][0].Nego; n != 0 {
+		t.Fatalf("empty ABBRUCH: nego %d", n)
+	}
+	// After typing, ABBRUCH makes the player unwilling to talk.
+	c.negotiate(app, 0)
+	p = top(app).(*tsPanel)
+	p.years = 2
+	step(t, app, click(0xb8+5, 0xd8+5))
 	if n := s.Squads[mi][0].Nego; n < 10 || n > 18 {
 		t.Fatalf("nego %d", n)
 	}
