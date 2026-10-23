@@ -37,7 +37,7 @@ func step(t *testing.T, app *App, in Input) {
 	if len(app.stack) == 0 {
 		t.Fatal("empty scene stack")
 	}
-	if err := app.stack[len(app.stack)-1].Update(app); err != nil {
+	if err := app.updateTop(); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -71,8 +71,8 @@ func TestSetupAndFirstTurns(t *testing.T) {
 		t.Fatalf("no options: %T", top(app))
 	}
 	step(t, app, rclick())
-	d, ok := top(app).(*Driver)
-	if !ok {
+	d, ok := app.stack[0].(*Driver)
+	if !ok || len(app.stack) < 2 {
 		t.Fatalf("game did not start: %T", top(app))
 	}
 	ss := d.ss
@@ -96,7 +96,9 @@ func TestSetupAndFirstTurns(t *testing.T) {
 		}
 		switch sc := top(app).(type) {
 		case *Driver:
-			step(t, app, Input{})
+			// It opens the next screen in the same tick: on top it would
+			// be drawn alone for a frame.
+			t.Fatalf("driver on top at event %d phase %d", ss.S.Event, ss.S.Loop.Phase)
 		case *MessageBox:
 			step(t, app, Input{Enter: true})
 		case *MainMenu:
@@ -111,6 +113,9 @@ func TestSetupAndFirstTurns(t *testing.T) {
 			// the calendar sheet goes on to the next date
 			step(t, app, click(260, headerPanelY+30))
 		case *MatchScreen:
+			if sc.quiet() {
+				t.Fatalf("match screen without a human match on top at event %d", ss.S.Event)
+			}
 			step(t, app, click(160, 120))
 		case *SquadScreen:
 			step(t, app, click(lnIconX+10, lnIconY[3]+10))

@@ -305,3 +305,33 @@ func TestMatchEndScreensFollowAtOnce(t *testing.T) {
 	}
 	t.Fatal("match day did not end")
 }
+
+// Without a human match the match screen shows nothing: it plays on to the
+// next screen in the same tick and is never on top on its own.
+func TestQuietMatchScreenNeverOnTop(t *testing.T) {
+	app, s, _, _, m := matchApp(t)
+	for l := range s.Display.Results {
+		s.Display.HalfTime[l], s.Display.Results[l], s.Display.Table[l] = true, true, true
+	}
+	m.panels = nil // as if no human club played
+	step(t, app, Input{})
+	shown := 0
+	for i := 0; i < 100; i++ {
+		switch top(app).(type) {
+		case *MatchScreen:
+			t.Fatalf("match screen on top after screen %d", shown)
+		case *ResultsScreen, *TableScreen, *CupScreen:
+			shown++
+			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
+		case *NewspaperScene:
+			shown++
+			step(t, app, click(160, 120))
+		default:
+			if shown < 3 {
+				t.Fatalf("only %d screens after the match day", shown)
+			}
+			return
+		}
+	}
+	t.Fatal("match day did not end")
+}
