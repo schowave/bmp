@@ -28,11 +28,11 @@ var (
 // UEFAPlaces is D:0x226d.
 const UEFAPlaces = 4
 
-// PointsPerWin is D:0x2271: 2 in the original (2-point rule). A game of a
-// real season gives 3 from 1995/96 on, when the German leagues took up the
-// 3-point rule.
+// PointsPerWin is D:0x2271: 2 in the original (2-point rule). The remake
+// gives 3 from 1995/96 on, when the German leagues took up the 3-point
+// rule, also in a game with the clubs of the original.
 func (s *State) PointsPerWin() int {
-	if s.Season != "" && s.StartYear >= 1995 {
+	if s.StartYear >= 1995 {
 		return 3
 	}
 	return 2
