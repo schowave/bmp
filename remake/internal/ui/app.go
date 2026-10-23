@@ -66,6 +66,12 @@ type App struct {
 	next    time.Time
 	pending Input
 	pressed bool // pending holds a click: its place is kept
+
+	// Control, when set, delivers further scripts while the app runs (for
+	// -control); ControlDone is called after the last step of each was drawn.
+	Control     <-chan []ScriptStep
+	ControlDone func()
+	ctlDone     bool
 }
 
 // TPS is the number of ticks a second the scenes are updated.
@@ -101,6 +107,14 @@ func (a *App) Replace(s Scene) {
 // Reset replaces the whole stack with one scene.
 func (a *App) Reset(s Scene) { a.stack = []Scene{s} }
 
+// Top returns the topmost scene, or nil.
+func (a *App) Top() Scene {
+	if len(a.stack) == 0 {
+		return nil
+	}
+	return a.stack[len(a.stack)-1]
+}
+
 // Quit ends the program after this frame.
 func (a *App) Quit() { a.quit = true }
 
@@ -132,11 +146,21 @@ func (a *App) update(raw Input, now time.Time) error {
 	}
 	a.Input, a.pending, a.pressed = a.pending, Input{}, false
 	a.frame++
+	if len(a.Script) == 0 && a.Control != nil {
+		select {
+		case a.Script = <-a.Control:
+		default:
+		}
+	}
 	if len(a.Script) > 0 {
 		a.Input = a.Script[0].In
 		a.shot = a.Script[0].Shot
 		a.Script = a.Script[1:]
-		a.scriptEnd = len(a.Script) == 0
+		if a.Control != nil {
+			a.ctlDone = len(a.Script) == 0
+		} else {
+			a.scriptEnd = len(a.Script) == 0
+		}
 	}
 	return a.stack[len(a.stack)-1].Update(a)
 }
@@ -207,6 +231,10 @@ func (a *App) Draw(screen *ebiten.Image) {
 	}
 	if a.scriptEnd && a.ShotPath == "" {
 		a.quit = true
+	}
+	if a.ctlDone {
+		a.ctlDone = false
+		a.ControlDone()
 	}
 	if a.ShotPath != "" && a.frame >= a.ShotFrame {
 		if err := savePNG(screen, a.ShotPath); err != nil && a.err == nil {

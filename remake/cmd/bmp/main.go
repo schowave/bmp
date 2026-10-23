@@ -16,6 +16,7 @@ import (
 
 	"github.com/schowave/bmp/remake/internal/assets"
 	"github.com/schowave/bmp/remake/internal/embedded"
+	"github.com/schowave/bmp/remake/internal/game"
 	"github.com/schowave/bmp/remake/internal/ui"
 )
 
@@ -27,6 +28,9 @@ func main() {
 	demo := flag.String("demo", "", "show a development demo scene (see -demos)")
 	demos := flag.Bool("demos", false, "list the demo scenes and quit")
 	script := flag.String("script", "", "play the input of this development script (see ui.ParseScript) and quit")
+	control := flag.String("control", "", "development: play the scripts written to DIR/cmd while running, at -tps ticks a second")
+	load := flag.String("load", "", "development: start with this save game")
+	tps := flag.Int("tps", ui.TPS, "ticks a second with -control")
 	saves := flag.String("saves", defaultSaveDir(), "directory for save games and high scores")
 	flag.Parse()
 	if *demos {
@@ -60,9 +64,25 @@ func main() {
 	if *demo != "" {
 		first = ui.Demo(*demo, mana, *saves)
 	}
+	if *load != "" {
+		data, err := os.ReadFile(*load)
+		var st *game.State
+		if err == nil {
+			st, err = game.Load(data, mana)
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "bmp:", err)
+			os.Exit(1)
+		}
+		first = ui.NewDriver(&ui.Session{S: st, Mana: mana, SaveDir: *saves})
+	}
 	app := ui.NewApp(gfx, first)
 	app.ShotPath, app.ShotFrame = *shot, *shotFrame
-	pace(app)
+	if *control != "" {
+		startControl(app, *control, *tps)
+	} else {
+		pace(app)
+	}
 	if *script != "" {
 		f, err := os.Open(*script)
 		if err == nil {
