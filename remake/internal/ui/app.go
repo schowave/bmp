@@ -72,15 +72,20 @@ type App struct {
 	Control     <-chan []ScriptStep
 	ControlDone func()
 	ctlDone     bool
+	ctlErr      string // a step of the last control script failed
 }
 
 // TPS is the number of ticks a second the scenes are updated.
 const TPS = 60
 
-// ScriptStep is the input of one frame of a script.
+// ScriptStep is the input of one frame of a script. Target names a click
+// target (see App.target) that replaces the place of the input; Dump
+// writes the running game to that file.
 type ScriptStep struct {
-	In   Input
-	Shot string
+	In     Input
+	Shot   string
+	Target string
+	Dump   string
 }
 
 // NewApp creates the application with a first scene.
@@ -149,13 +154,30 @@ func (a *App) update(raw Input, now time.Time) error {
 	if len(a.Script) == 0 && a.Control != nil {
 		select {
 		case a.Script = <-a.Control:
+			a.ctlErr = ""
 		default:
 		}
 	}
 	if len(a.Script) > 0 {
-		a.Input = a.Script[0].In
-		a.shot = a.Script[0].Shot
+		st := a.Script[0]
+		a.Input = st.In
+		a.shot = st.Shot
 		a.Script = a.Script[1:]
+		if st.Target != "" {
+			// The release after a click may find the target gone (a
+			// dialog closed): only the click itself needs it.
+			if x, y, ok := a.target(st.Target); ok {
+				a.Input.X, a.Input.Y = x, y
+			} else if st.In.Left || st.In.Right {
+				a.ctlErr = "no target " + st.Target
+				a.Input = Input{}
+			}
+		}
+		if st.Dump != "" {
+			if err := a.dump(st.Dump); err != nil {
+				a.ctlErr = err.Error()
+			}
+		}
 		if a.Control != nil {
 			a.ctlDone = len(a.Script) == 0
 		} else {

@@ -14,6 +14,9 @@ import (
 //	click X Y     left click
 //	rclick X Y    right click
 //	move X Y      move the pointer
+//	click NAME    left click on a named target (App.target), also rclick
+//	              and move
+//	dump FILE     write the running game as a save file
 //	type TEXT     type characters
 //	key NAME      enter, escape or backspace
 //	wait N        N frames without input
@@ -38,6 +41,11 @@ func ParseScript(r io.Reader) ([]ScriptStep, error) {
 		in := Input{X: x, Y: y}
 		switch f[0] {
 		case "click", "rclick", "move":
+			if len(f) == 2 {
+				in = Input{Left: f[0] == "click", Right: f[0] == "rclick", LeftHeld: f[0] == "click"}
+				steps = append(steps, ScriptStep{In: in, Target: f[1]}, ScriptStep{Target: f[1]})
+				continue
+			}
 			var err error
 			if x, err = num(1); err != nil {
 				return nil, err
@@ -67,6 +75,12 @@ func ParseScript(r io.Reader) ([]ScriptStep, error) {
 			for ; k > 0; k-- {
 				steps = append(steps, ScriptStep{In: Input{X: x, Y: y}})
 			}
+			continue
+		case "dump":
+			if len(f) < 2 {
+				return nil, fmt.Errorf("line %d: missing file", n)
+			}
+			steps = append(steps, ScriptStep{In: Input{X: x, Y: y}, Dump: f[1]})
 			continue
 		case "shot":
 			if len(f) < 2 {

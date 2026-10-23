@@ -66,6 +66,9 @@ the files from a game directory instead.
 | `-demos` | | List the demo screens and quit |
 | `-shot FILE` | | Save the canvas as a PNG and quit (with `-shot-frame N`, default 10) |
 | `-script FILE` | | Play a development input script and quit (see `internal/ui/script.go`) |
+| `-control DIR` | | Play the scripts written to `DIR/cmd` while running, for playtests (driver: `tools/playtest.sh`) |
+| `-tps N` | `60` | Ticks a second with `-control`; 600 plays ten times as fast |
+| `-load FILE` | | Start with a save game |
 
 ## Playing
 
@@ -113,6 +116,7 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
 | `testdata/original` | Reference screenshots of the original (see its README) |
 | `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
+| `tools/playtest.sh` | Plays the game through `-control` for playtests (see [`../docs/playtest.md`](../docs/playtest.md)) |
 
 ## Development
 
