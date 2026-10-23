@@ -371,6 +371,7 @@ func (s *State) skipSettledContracts() {
 // seasonEnd2 finishes the season end after the contract talks: summer
 // break and the new season (f_1a58_3176 @43b5..).
 func (s *State) seasonEnd2() {
+	s.movePersons()
 	s.Seasons++
 	s.Day++
 	for {
@@ -396,10 +397,83 @@ func (s *State) seasonEnd2() {
 		s.seasonBudget(mi)
 	}
 	s.clearCupResults()
-	s.reshufflePersons()
 	for c := CupDFB; c < NumCups; c++ {
 		s.drawCup(c)
 	}
 	s.Draws = append(s.Draws, CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA)
 	s.beginEvent()
+}
+
+// personRanges are the team ids of the leagues and of the rest (D:0x2272).
+var personRanges = [4][2]int{{0, 17}, {18, 37}, {38, 57}, {58, 255}}
+
+// movePersons ends the season report (f_0cb5_2756): after a reshuffle each
+// league takes persons not owned by a human from the other ranges until it
+// has its share, then the persons are reshuffled again.
+func (s *State) movePersons() {
+	var need [4]int
+	share := s.reshufflePersons()
+	copy(need[:], share[:])
+	var list [4][]int
+	for k, rg := range personRanges {
+		for p := 1; p < NumPersons; p++ {
+			if t := s.Persons[p].Team; t >= rg[0] && t <= rg[1] {
+				if need[k] != 0 {
+					need[k]--
+				}
+				if s.Persons[p].Owner > 3 {
+					list[k] = append(list[k], p)
+				}
+			}
+		}
+	}
+	var left [4]int
+	for k := range list {
+		left[k] = len(list[k])
+	}
+	for k := range need {
+		for tries := 0; need[k] > 0 && tries < 1000; tries++ {
+			for j := range list {
+				for j != k && left[j] > 0 && need[k] > 0 {
+					idx := 0
+					for try := 0; try <= 1000; try++ {
+						idx = s.Rand.Between(0, len(list[j])-1)
+						if list[j][idx] != 0 {
+							break
+						}
+					}
+					p := list[j][idx]
+					list[j][idx] = 0
+					t := s.leagueTeam(k)
+					if p != 0 {
+						s.Persons[p].Team = t
+					}
+					left[j]--
+					need[k]--
+				}
+			}
+		}
+	}
+	s.reshufflePersons()
+}
+
+// leagueTeam draws a club of league k without a human manager, mostly one
+// of the first ids (f_0cb5_2987); for the rest any id from 58.
+func (s *State) leagueTeam(k int) int {
+	r := &s.Rand
+	if k >= NumLeagues {
+		return r.Between(personRanges[k][0], 255)
+	}
+	for {
+		x := r.Between(0, 3)
+		if r.Between(0, 1) != 0 {
+			x = r.Between(0, 6)
+		}
+		if r.Between(0, 5) == 0 {
+			x = r.Between(0, 12)
+		}
+		if t := FirstID[k] + x; s.ManagerOf(t) == nil {
+			return t
+		}
+	}
 }

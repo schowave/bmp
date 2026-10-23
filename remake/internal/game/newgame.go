@@ -491,9 +491,17 @@ func (s *State) startSquad(mi, l0 int, short bool) {
 // foreign players to German clubs (f_14a4_1798). Each of the n rounds draws
 // persons until one is neither moved by the draw nor at a human club while
 // at most 4 foreign players are left, and moves him too; so the first round
-// brings home all foreign players beyond 4.
-func (s *State) reshufflePersons() {
+// brings home all foreign players beyond 4. It returns how many persons
+// each league should get: its share of the human squads, applied to the
+// persons neither in a human squad nor abroad.
+func (s *State) reshufflePersons() [NumLeagues]int {
 	r := &s.Rand
+	var squads [NumLeagues]int
+	for mi, m := range s.Managers {
+		if m.League >= 0 && m.League < NumLeagues {
+			squads[m.League] += s.countLineup(mi, 0)
+		}
+	}
 	foreign := 0
 	for p := 1; p < NumPersons; p++ {
 		ps := &s.Persons[p]
@@ -526,4 +534,24 @@ func (s *State) reshufflePersons() {
 			}
 		}
 	}
+	// Bytes, like the original: taken counts the human squads, then the
+	// foreign persons.
+	taken := 0
+	for l := range squads {
+		squads[l] &= 0xff
+		taken += squads[l]
+	}
+	for p := 1; p < NumPersons; p++ {
+		if foreignTeam(s.Persons[p].Team) {
+			taken++
+		}
+	}
+	taken &= 0xff
+	rest := (150 - taken) & 0xff
+	taken = max(taken, 1)
+	var share [NumLeagues]int
+	for l := range share {
+		share[l] = squads[l] * 100 / taken * rest / 100
+	}
+	return share
 }
