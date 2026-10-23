@@ -210,7 +210,9 @@ func (m *MatchScreen) collect(app *App) {
 			}
 		}
 		m.shows = append(m.shows, sh)
-		if e.Manager >= 0 && (e.Kind == game.EvInjury || e.Kind == game.EvRed || e.Kind == game.EvYellowRed) && !m.md.Done {
+		// After an injury the substitution screen opens (f_1a58_1f75); a
+		// sent-off player is not replaced.
+		if e.Manager >= 0 && e.Kind == game.EvInjury && !m.md.Done {
 			mi := e.Manager
 			sh.after = func(app *App) { app.Push(NewMatchLineup(m.ss, m.md, mi)) }
 		}

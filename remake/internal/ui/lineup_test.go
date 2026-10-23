@@ -253,24 +253,31 @@ func TestMatchLineupSubstitutes(t *testing.T) {
 	}
 }
 
-// A red card of the human club is shown first; the lineup opens after it.
-func TestRedCardShowsThenSubstitutes(t *testing.T) {
-	app, s, _, md, m := matchApp(t)
-	p := m.panels[0]
-	side := 0
-	if md.Fixtures[p.fixture].Away == s.Managers[0].Team {
-		side = 1
-	}
-	md.Events = append(md.Events, game.MatchEvent{Kind: game.EvRed, Manager: 0, Fixture: p.fixture, Side: side, Minute: md.Minute})
-	m.collect(app)
-	if top(app) != Scene(m) || len(m.shows) == 0 {
-		t.Fatalf("before the card: %T, %d shows", top(app), len(m.shows))
-	}
-	for i := 0; i < 1000 && top(app) == Scene(m); i++ {
-		step(t, app, Input{})
-	}
-	if q, ok := top(app).(*SquadScreen); !ok || q.md != md || len(m.shows) > 0 {
-		t.Fatalf("after the card: %T, %d shows left", top(app), len(m.shows))
+// An injury of the human club is shown first; the lineup opens after it
+// (f_1a58_1f75). A sent-off player is not replaced: no lineup.
+func TestInjuryShowsThenSubstitutes(t *testing.T) {
+	for _, kind := range []game.EventKind{game.EvInjury, game.EvRed} {
+		app, s, _, md, m := matchApp(t)
+		p := m.panels[0]
+		side := 0
+		if md.Fixtures[p.fixture].Away == s.Managers[0].Team {
+			side = 1
+		}
+		md.Events = append(md.Events, game.MatchEvent{Kind: kind, Manager: 0, Fixture: p.fixture, Side: side, Minute: md.Minute})
+		m.collect(app)
+		if top(app) != Scene(m) || len(m.shows) == 0 {
+			t.Fatalf("%v before the event: %T, %d shows", kind, top(app), len(m.shows))
+		}
+		for i := 0; i < 1000 && top(app) == Scene(m) && len(m.shows) > 0; i++ {
+			step(t, app, Input{})
+		}
+		q, ok := top(app).(*SquadScreen)
+		if kind == game.EvInjury && (!ok || q.md != md || len(m.shows) > 0) {
+			t.Fatalf("after the injury: %T, %d shows left", top(app), len(m.shows))
+		}
+		if kind == game.EvRed && ok {
+			t.Fatal("the lineup opens after a red card")
+		}
 	}
 }
 

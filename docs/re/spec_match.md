@@ -539,7 +539,10 @@ text "Verletzt: NAME (injury name)"
 ```
 Duration unit = weeks: `f_0cb5_2b88` decrements +0x0d of injured players when
 `(day - D:0x224c) % 7 == 0` and clears status bits when it reaches 0.
-After the injury screen the substitution screen `f_1ecd_1560` is opened (`f_1a58_1f75`).
+After the injury screen, unless D:0x5d4 (auto-play) is set: `rnd(0,15)` (0 = the cross blinks),
+then the substitution screen `f_1ecd_1560` (`f_1a58_1f75`), which runs `f_0f9d_0002` when it
+closes; no other strength recomputation follows the injury. A red or yellow-red card runs
+`f_0f9d_0002(team,1)` once and opens no substitution screen.
 
 ### 10.5 Re-planning after red card / injury / user substitution – `f_0310_347f`
 ```

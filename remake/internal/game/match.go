@@ -82,6 +82,13 @@ type MatchDay struct {
 	onFinish   func()
 	started    int // number of periods started
 	ended      int // last minute of the period the last Step ended, 0 = none
+
+	// injured are the managers whose substitution screen after an injury
+	// is still open; the strength and the re-planning wait for it
+	// (f_1a58_1f75, then f_0310_347f).
+	injured      []int
+	replanMi     int // manager to re-plan after the screens, -1 none
+	replanMinute int
 }
 
 func (md *MatchDay) score(f *Fixture) (int, int) {
@@ -131,7 +138,7 @@ func (md *MatchDay) ExtraTime(i int) bool {
 // newMatchDay prepares the matches of an event. leagueMask has a bit per
 // league, cupMask a bit per cup.
 func (s *State) newMatchDay(leagueMask, cupMask int, replay bool) *MatchDay {
-	md := &MatchDay{s: s, leagueMask: leagueMask, cupMask: cupMask, replay: replay}
+	md := &MatchDay{s: s, leagueMask: leagueMask, cupMask: cupMask, replay: replay, replanMi: -1}
 	md.humans = make([]humanMatch, len(s.Managers))
 	md.periods = [][2]int{{1, 45}, {46, 90}}
 	s.CupDay = cupMask != 0
@@ -476,6 +483,7 @@ func (md *MatchDay) Step() bool {
 	if md.Done {
 		return false
 	}
+	md.closeInjuries()
 	if md.period >= len(md.periods) {
 		md.ended = 0
 		md.finish()
@@ -821,15 +829,52 @@ func (md *MatchDay) humanEvents(fi int, f *Fixture, minute int) {
 			if p := s.pickVictim(mi); p >= 0 {
 				sl := &s.Squads[mi][p]
 				s.injure(sl)
+				// f_1a58_0ca3: the blinking cross draws, then the
+				// substitution screen opens; it works out the strength
+				// when it closes.
+				r.Between(0, 15)
 				md.Events = append(md.Events, MatchEvent{Minute: minute, Fixture: fi, Kind: EvInjury,
 					Side: hm.side, Player: s.Persons[sl.Person].Name, Text: InjuryNames[sl.Injury], Manager: mi})
-				s.LineupStrength(mi, true)
+				md.injured = append(md.injured, mi)
 				replan = mi
 			}
 		}
 	}
-	if replan >= 0 {
-		md.replan(replan, minute)
+	if replan < 0 {
+		return
+	}
+	if len(md.injured) > 0 {
+		md.replanMi, md.replanMinute = replan, minute
+		return
+	}
+	md.replan(replan, minute)
+}
+
+// Injured returns the managers whose substitution screen after an injury
+// is due.
+func (md *MatchDay) Injured() []int { return md.injured }
+
+// LineupClosed ends the substitution screen of manager mi during the
+// match: it works out his strength, and after the last open screen of an
+// injury the chances are planned again.
+func (md *MatchDay) LineupClosed(mi int) {
+	md.s.LineupStrength(mi, true)
+	for i, x := range md.injured {
+		if x == mi {
+			md.injured = append(md.injured[:i], md.injured[i+1:]...)
+			if len(md.injured) == 0 && md.replanMi >= 0 {
+				md.replan(md.replanMi, md.replanMinute)
+				md.replanMi = -1
+			}
+			break
+		}
+	}
+}
+
+// closeInjuries closes the substitution screens nobody opened.
+func (md *MatchDay) closeInjuries() {
+	for len(md.injured) > 0 {
+		md.LineupClosed(md.injured[0])
 	}
 }
 

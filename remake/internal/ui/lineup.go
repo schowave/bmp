@@ -324,7 +324,11 @@ func (q *SquadScreen) substitute(app *App, i int) {
 func (q *SquadScreen) exit(app *App) {
 	// During a match the strength gets the tactical bonuses (f_0f9d_0002
 	// with 1).
-	q.ss.S.LineupStrength(q.mi(), q.md != nil)
+	if q.md != nil {
+		q.md.LineupClosed(q.mi())
+	} else {
+		q.ss.S.LineupStrength(q.mi(), false)
+	}
 	app.Pop()
 }
 

@@ -154,3 +154,29 @@ func TestSubsidyOfZero(t *testing.T) {
 		t.Error("never offered")
 	}
 }
+
+// After an injury the strength and the re-planning wait for the
+// substitution screen; without one, the next minute closes it.
+func TestInjuryWaitsForSubstitution(t *testing.T) {
+	s, err := NewGame(mana(t), Options{Managers: []NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 6})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Start()
+	md := s.newMatchDay(7, 0, false)
+	md.Step()
+	md.injured, md.replanMi, md.replanMinute = []int{0}, 0, md.Minute-1
+	if got := md.Injured(); len(got) != 1 || got[0] != 0 {
+		t.Fatalf("injured %v", got)
+	}
+	md.LineupClosed(0)
+	if len(md.injured) != 0 || md.replanMi != -1 {
+		t.Fatalf("after the screen: injured %v, replan %d", md.injured, md.replanMi)
+	}
+
+	md.injured, md.replanMi, md.replanMinute = []int{0}, 0, md.Minute-1
+	md.Step()
+	if len(md.injured) != 0 || md.replanMi != -1 {
+		t.Errorf("next minute: injured %v, replan %d", md.injured, md.replanMi)
+	}
+}
