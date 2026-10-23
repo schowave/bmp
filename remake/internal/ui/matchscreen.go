@@ -40,7 +40,8 @@ type matchPanel struct {
 // a goal of a club marked with ANZEIGEN (f_0f9d_0c3b).
 type matchShow struct {
 	ev     game.MatchEvent
-	frames int
+	frames int // left to show; the last result frames show the result
+	result int
 	ticker string
 	// A goal scene (Torszenen on): pre frames of the empty stadium, the
 	// scene, post frames in which 'r' or 'w' replays it, then the result.
@@ -73,14 +74,18 @@ func NewMatchScreen(ss *Session, md *game.MatchDay) *MatchScreen {
 	return m
 }
 
-// framesPerMinute is the delay of f_0310_2303: 0x26 - speed/2 timer ticks.
+// framesPerMinute is the delay of f_0310_2303: f_3930_01e7(0x26 - speed/2).
 func (m *MatchScreen) framesPerMinute() int {
 	sp := m.ss.S.Display.Speed
 	if sp >= 0x47 {
 		return 0
 	}
-	return (0x26 - sp/2) * 2
+	return waitFrames(0x26 - sp/2)
 }
+
+// chanceBlink is one half of a blink of "Chance für X !": f_3930_01e7(6)
+// dark, then f_3930_01e7(6) lit, four times.
+var chanceBlink = waitFrames(6)
 
 func (m *MatchScreen) Update(app *App) error {
 	in := &app.Input
@@ -177,12 +182,14 @@ func (m *MatchScreen) collect(app *App) {
 			m.sceneY = (3 - p) / 2 * 0x71
 		}
 		// The chance text blinks four times, then the result stays for
-		// 0x78 - speed ticks.
-		d := (0x78 - m.ss.S.Display.Speed) * 2
-		if d < 30 {
-			d = 30
+		// f_3930_01e7(0x78 - speed), a card or an injury for 0x82 - speed.
+		base := 0x82
+		switch e.Kind {
+		case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
+			base = 0x78
 		}
-		sh := &matchShow{ev: e, frames: d}
+		d := waitFrames(base - m.ss.S.Display.Speed)
+		sh := &matchShow{ev: e, frames: d, result: d}
 		switch e.Kind {
 		case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
 			if m.ss.S.Display.GoalScenes {
@@ -191,12 +198,12 @@ func (m *MatchScreen) collect(app *App) {
 				if sc, _, p, err := PickScene(app.Gfx.dir, &m.ss.S.Rand, goal, pen); err == nil {
 					gs := NewGoalScene(app.Gfx, sc, e.Side == 1)
 					sh.scene = &matchScene{gs: gs}
-					sh.pre, sh.post, sh.pen = 33, 20, p
+					sh.pre, sh.post, sh.pen = waitFrames(0x1e), waitFrames(0x14), p
 					m.builder = gs.Builder()
 				}
 			}
 			if sh.scene == nil {
-				sh.frames += 48 // the blinking "Chance für X !"
+				sh.frames += 8 * chanceBlink // the blinking "Chance für X !"
 			}
 		}
 		m.shows = append(m.shows, sh)
@@ -223,7 +230,7 @@ func (m *MatchScreen) tickerGoal(e game.MatchEvent) {
 	}
 	h, a := m.md.Score(e.Fixture)
 	text := s.Teams[f.Home].Name + " - " + s.Teams[f.Away].Name + "   " + itoa(h%10) + ":" + itoa(a%10)
-	m.shows = append(m.shows, &matchShow{ev: e, frames: 0x46 * 2, ticker: text})
+	m.shows = append(m.shows, &matchShow{ev: e, frames: waitFrames(0x46), ticker: text})
 }
 
 // logoHit returns the manager whose club logo on a scoreboard is under the
@@ -547,16 +554,12 @@ func (m *MatchScreen) drawScene(app *App, dst *ebiten.Image, minute int) {
 	FillRect(dst, 10, u+0x6c, 0x136-10+1, 0x79-0x6c+1, g.PalColor(ColBlack))
 	switch ev.Kind {
 	case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
-		total := (0x78 - s.Display.Speed) * 2
-		if total < 30 {
-			total = 30
-		}
 		if sh.scene != nil && (sh.pre > 0 || !sh.scene.done || sh.post > 0) {
 			return
 		}
-		if sh.scene == nil && sh.frames > total {
-			// "Chance für X !" blinks before the result.
-			if (sh.frames/6)%2 == 0 {
+		if sh.scene == nil && sh.frames > sh.result {
+			// "Chance für X !" blinks before the result: dark first.
+			if (sh.result+8*chanceBlink-sh.frames)/chanceBlink%2 == 1 {
 				pre := "Chance für "
 				if ev.Kind == game.EvPenaltyGoal || ev.Kind == game.EvPenaltyMiss {
 					pre = "Elfmeter für "

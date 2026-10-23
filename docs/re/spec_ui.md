@@ -209,7 +209,9 @@ club opens its information.
 - Bottom: bars x 36..125 and 194..286 at y 235/236 in a bevel 35..126/194..287,
   234..237; the first half fills the left bar 2 px per minute, the second half
   the right bar from the right; "N.Minute" flow white, shadow 4, centred in
-  [4,320] at 239. Minute delay (0x26 − speed/2) timer ticks (18.2 Hz).
+  [4,320] at 239. Minute delay f_3930_01e7(0x26 − speed/2). The pause
+  f_3930_01e7(n) waits n/3 ticks of the BIOS timer (18.2 Hz): at speed 40 a
+  minute lasts 6 ticks, about 0.33 s (0.35 s measured in the browser).
 - Scene window for a chance, card or injury of a human team, in the other half
   (y = 113 for panels 0/1, 0 for 2/3): black, outline colour 1, logos at 0x14 and
   0x105, faces of managers below them, clocks of PIC/8.VGA at 115 and 193 at
@@ -219,8 +221,9 @@ club opens its information.
   "Chance vergeben: N" (flow colour 1), the TOR icon of PIC/8.VGA at the
   scorer's side; cards "Gelbe Karte: N" (colour 23), "Rote Karte"/"Gelb-Rote
   Karte"/"Verletzt" (colour 18, shadow 16) with their icons. With Torszenen off
-  "Chance für X !" (colour 11) blinks four times. The result stays 0x78 − speed
-  ticks.
+  "Chance für X !" (colour 11) blinks four times (f_3930_01e7(6) dark, then
+  lit). The result stays f_3930_01e7(0x78 − speed), a card or an injury
+  0x82 − speed; the ticker line f_3930_01e7(0x46).
 - A goal of a club marked ANZEIGEN: "HOME - AWAY   h:a" white, centred, at 237.
 - After each period: the results of every league whose Halbzeitstände (45) or
   Ergebnisse (90) option is on (f_2a41_120a), on cup days the cup round with
