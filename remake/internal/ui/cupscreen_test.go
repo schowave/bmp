@@ -46,12 +46,35 @@ func TestFixtureLogo(t *testing.T) {
 
 // The DFB groups name the leagues of the season.
 func TestCupGroupTitle(t *testing.T) {
-	s := &game.State{StartYear: 1992}
+	s := &game.State{StartYear: 1963}
+	if got := cupGroupTitle(s, 4); got != "REGIONALLIGA GEGEN AMATEURLIGA:" {
+		t.Errorf("1963: %q", got)
+	}
+	s.StartYear = 1992
 	if got := cupGroupTitle(s, 2); got != "BUNDESLIGA GEGEN AM.-OBERLIGA:" {
 		t.Errorf("1992: %q", got)
 	}
 	s.StartYear = 2008
 	if got := cupGroupTitle(s, 5); got != "3. LIGA GEGEN 3. LIGA:" {
 		t.Errorf("2008: %q", got)
+	}
+}
+
+// The league names of every season fit the cup groups and the christmas
+// card, whose lines are centred over the screen.
+func TestLeagueNamesFit(t *testing.T) {
+	app, _ := testApp(t)
+	for year := 1963; year <= 2030; year++ {
+		s := &game.State{StartYear: year}
+		for k := range cupGroupLeagues {
+			if w := app.Gfx.TextWidth(FontSmall, cupGroupTitle(s, k)); w > 0x12b {
+				t.Errorf("%d group %d: %d px", year, k, w)
+			}
+		}
+		for _, l := range game.ChristmasAmounts(850000, year) {
+			if w := app.Gfx.TextWidth(FontSmall, l); w > 320 {
+				t.Errorf("%d christmas %q: %d px", year, l, w)
+			}
+		}
 	}
 }

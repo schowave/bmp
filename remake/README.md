@@ -195,9 +195,10 @@ ties). Deliberate differences:
 - When a 1- or 3-year game is over, ENDE under the high scores returns to the
   title screen, where a new game can start; the original quits the program
   (`f_076b_114c` in `f_1a58_3176`).
-- The third league is called after the real third tier of the season:
-  Am.-Oberliga until 1993/94, Regionalliga from 1994/95, 3. Liga from
-  2008/09. The original always says Am.-Oberliga.
+- The second and third league are called after the real tiers of the
+  season: Regionalliga until 1973/74, then Zweite Liga; Amateurliga until
+  1977/78, Am.-Oberliga until 1993/94, Regionalliga until 2007/08, then
+  3. Liga. The original always says Zweite Liga and Am.-Oberliga.
 - Bugs of the match engine that the remake leaves out:
   - In cup matches the original checks the minutes of the chances against
     the person table instead of the chances (`f_0310_12fe`) and draws again

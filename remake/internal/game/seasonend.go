@@ -181,17 +181,20 @@ func (s *State) seasonReport() {
 var LeagueNames = [3]string{"Bundesliga", "Zweite Liga", "Am.-Oberliga"}
 
 // LeagueName is the name of league l in the season that starts in year.
-// The original always calls the third league Am.-Oberliga; the remake
-// follows the third tier of the real leagues: Regionalliga from 1994/95,
-// 3. Liga from 2008/09.
+// The original always says Zweite Liga and Am.-Oberliga; the remake
+// follows the real second and third tier: Regionalliga until 1973/74,
+// then Zweite Liga; Amateurliga until 1977/78, Am.-Oberliga until 1993/94,
+// Regionalliga until 2007/08, then 3. Liga.
 func LeagueName(l, year int) string {
-	if l == 2 {
-		switch {
-		case year >= 2008:
-			return "3. Liga"
-		case year >= 1994:
-			return "Regionalliga"
-		}
+	switch {
+	case l == 1 && year < 1974:
+		return "Regionalliga"
+	case l == 2 && year < 1978:
+		return "Amateurliga"
+	case l == 2 && year >= 2008:
+		return "3. Liga"
+	case l == 2 && year >= 1994:
+		return "Regionalliga"
 	}
 	return LeagueNames[l]
 }

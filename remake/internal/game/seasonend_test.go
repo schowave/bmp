@@ -145,8 +145,9 @@ func TestLeagueName(t *testing.T) {
 		l, year int
 		want    string
 	}{
-		{2, 1963, "Am.-Oberliga"}, {2, 1993, "Am.-Oberliga"}, {2, 1994, "Regionalliga"},
-		{2, 2007, "Regionalliga"}, {2, 2008, "3. Liga"}, {1, 2010, "Zweite Liga"}, {0, 2010, "Bundesliga"},
+		{1, 1963, "Regionalliga"}, {1, 1973, "Regionalliga"}, {1, 1974, "Zweite Liga"}, {1, 2010, "Zweite Liga"},
+		{2, 1963, "Amateurliga"}, {2, 1977, "Amateurliga"}, {2, 1978, "Am.-Oberliga"}, {2, 1993, "Am.-Oberliga"},
+		{2, 1994, "Regionalliga"}, {2, 2007, "Regionalliga"}, {2, 2008, "3. Liga"}, {0, 1963, "Bundesliga"},
 	} {
 		if got := LeagueName(c.l, c.year); got != c.want {
 			t.Errorf("league %d in %d: %q, want %q", c.l, c.year, got, c.want)
@@ -157,6 +158,10 @@ func TestLeagueName(t *testing.T) {
 	}
 	if got := msgChristmasAmounts(300000, 1995)[1]; got != "REGIONALLIGA: 100.000 DM (INCL. MWST.)" {
 		t.Errorf("christmas 1995: %q", got)
+	}
+	if got := msgChristmasAmounts(300000, 1963); got[0] != "BUNDESLIGA: 300.000 DM, REGIONALLIGA: 150.000 DM," ||
+		got[1] != "AMATEURLIGA: 100.000 DM (INCL. MWST.)" {
+		t.Errorf("christmas 1963: %q", got)
 	}
 }
 
