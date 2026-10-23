@@ -46,12 +46,10 @@ Or run it straight from the sources with `mise run remake:run` (`go run
 
 ### The original files
 
-`internal/embedded/data` holds what the game needs from `../bmp`, about
-2.3 MB: the pictures and palettes of `PIC/`, `MANA.DAT`, the goal scenes of
-`TORE/` and the fonts inside `BMMAIN.EXE` as `FONTS.JSON`. It is checked in
-and embedded by every build, so neither building nor running needs the
-game directory. The sounds and the other programs of the original are not
-used.
+`internal/embedded/data` holds what the game needs from `../bmp` (which
+files: `Extract` in `internal/assets/extract.go`). It is checked in and
+embedded by every build, so neither building nor running needs the game
+directory.
 
 `mise run remake:extract` writes the directory anew from `../bmp`; a test
 fails when the two differ. `-data DIR` or `$BMP_DATA` makes the program read
@@ -120,7 +118,7 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
 ### Tests
 
 ```sh
-mise run remake:test    # go vet ./... && go test -timeout 300s ./...
+mise run remake:test    # go vet, gofmt -l and go test -timeout 300s
 ```
 
 The tests compare constant tables with the original executable, check the
@@ -130,8 +128,8 @@ managers and drive the screens headless with the built-in files. Tests of
 The timeout turns a screen that never closes into a failure instead of a
 hang.
 
-`mise run hooks` enables the pre-commit hook, which builds and vets the
-staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
+`mise run hooks` enables the pre-commit hook, which builds, vets and
+checks the formatting of the staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
 runs vet and the tests under xvfb and uploads all demo screens as the
 `remake-shots` artifact.
 

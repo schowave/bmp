@@ -40,6 +40,9 @@ jobs:
     - name: Vet
       run: go vet ./...
 
+    - name: Format
+      run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+
     # The tests compare the files built into the remake and the constant tables
     # with the original in bmp/ of the repository. The timeout
     # turns a screen that never closes into a failure instead of a hang.
