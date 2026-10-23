@@ -18,6 +18,16 @@ func Demo(name string, mana *assets.Mana, saveDir string) Scene {
 	}
 	s.Start()
 	ss := &Session{S: s, Mana: mana, SaveDir: saveDir}
+	switch name {
+	case "dfb0":
+		return NewCupScreen(ss, game.CupDFB)
+	case "uefa0":
+		return NewCupScreen(ss, game.CupUEFA)
+	case "start":
+		return NewDriver(ss)
+	case "newspaper":
+		return NewspaperDemo(mana, saveDir, 1)
+	}
 	// Play some events so that the screens have content.
 	for i := 0; i < 30 && name != "turn"; i++ {
 		switch s.Loop.Phase {
@@ -85,6 +95,14 @@ func Demo(name string, mana *assets.Mana, saveDir string) Scene {
 		return NewCupScreen(ss, game.CupUEFA)
 	case "highscore":
 		return NewHighscoreScreen(ss)
+	case "notices":
+		return NoticeDemo(ss)
+	case "options":
+		return NewOptionsScreen(ss)
+	case "load":
+		return NewFileScreen(ss, false)
+	case "save":
+		return NewFileScreen(ss, true)
 	}
 	return NewTurnMenu(ss)
 }
