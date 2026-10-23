@@ -1,267 +1,545 @@
 package ui
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// MatchScreen shows a match day live: minute, scores of all matches and
-// the events of the human teams' matches.
+// MatchScreen plays a match day live like the original (f_0310_15db,
+// f_0310_2303): a scoreboard panel (PIC/38.VGA) for every match of a human
+// team, the minute at the bottom and, for a chance, card or injury of a
+// human team, the scene window in the free half of the screen. After each
+// period the results are shown as the options ask, at the end the tables.
 type MatchScreen struct {
-	ss        *Session
-	md        *game.MatchDay
-	table     *TableView
-	speed     int // frames per minute
-	tick      int
-	seen      int // events already shown
-	banner    []string
-	bannerT   int
-	log       []string
-	paused    bool
-	rowsOrder []int
+	ss *Session
+	md *game.MatchDay
 
-	speedBtn Button
-	subBtn   Button
-	nextBtn  Button
-	tableBtn Button
+	tick    int
+	seen    int // events already shown
+	shows   []*matchShow
+	scene   bool // the scene window is open
+	sceneY  int
+	fast    bool   // left click: play the rest of the period at once
+	builder string // author of the last goal scene (right click)
+	end     []func(app *App)
+	closing bool
+
+	panels []matchPanel
 }
 
-var speeds = []int{12, 6, 3, 1}
+// matchPanel is the scoreboard of one match with a human team.
+type matchPanel struct {
+	fixture int
+	x, y    int
+}
+
+// matchShow is an event shown in the scene window, or the ticker line of
+// a goal of a club marked with ANZEIGEN (f_0f9d_0c3b).
+type matchShow struct {
+	ev     game.MatchEvent
+	frames int
+	ticker string
+	// A goal scene (Torszenen on): pre frames of the empty stadium, the
+	// scene, post frames in which 'r' or 'w' replays it, then the result.
+	scene     *matchScene
+	pre, post int
+	pen       bool
+}
+
+// Panel positions (D:0x0632, D:0x063c).
+var matchPanelPos = [4][2]int{{0, 0}, {161, 0}, {0, 115}, {161, 115}}
 
 // NewMatchScreen creates the screen for a match day.
 func NewMatchScreen(ss *Session, md *game.MatchDay) *MatchScreen {
-	cols := []Column{{"", 4, 116, Right}, {"", 122, 8, Center}, {"", 132, 116, Left}, {"", 252, 26, Center}, {"", 280, 26, Left}}
-	t := NewTableView(4, 24, 312, 112, cols)
-	t.NoHeader = true
-	t.RowH = 7
-	m := &MatchScreen{ss: ss, md: md, table: t, speed: speeds[1]}
-	m.speedBtn = Button{X: 4, Y: 222, W: 60, H: 13}
-	m.subBtn = Button{X: 70, Y: 222, W: 76, H: 13, Label: "AUSWECHSELN"}
-	m.tableBtn = Button{X: 152, Y: 222, W: 60, H: 13, Label: "TABELLE"}
-	m.nextBtn = Button{X: 252, Y: 222, W: 64, H: 13, Label: "WEITER"}
-	m.order()
-	return m
-}
-
-// order sorts the fixtures: matches of human teams first, then by league.
-func (m *MatchScreen) order() {
-	s := m.ss.S
-	var rows []int
-	for pass := 0; pass < 2; pass++ {
-		for i, f := range m.md.Fixtures {
-			human := s.ManagerOf(f.Home) != nil || s.ManagerOf(f.Away) != nil
-			if (pass == 0) == human {
-				rows = append(rows, i)
+	m := &MatchScreen{ss: ss, md: md}
+	for _, mg := range ss.S.Managers {
+		for fi, f := range md.Fixtures {
+			if f.Home != mg.Team && f.Away != mg.Team {
+				continue
+			}
+			dup := false
+			for _, p := range m.panels {
+				dup = dup || p.fixture == fi
+			}
+			if !dup && len(m.panels) < 4 {
+				pos := matchPanelPos[len(m.panels)]
+				m.panels = append(m.panels, matchPanel{fixture: fi, x: pos[0], y: pos[1]})
 			}
 		}
 	}
-	m.rowsOrder = rows
+	return m
 }
 
-func (m *MatchScreen) humanManagerPlaying() int {
-	s := m.ss.S
-	for _, f := range m.md.Fixtures {
-		if mg := s.ManagerOf(f.Home); mg != nil {
-			return indexOfManager(s, mg)
-		}
-		if mg := s.ManagerOf(f.Away); mg != nil {
-			return indexOfManager(s, mg)
-		}
+// framesPerMinute is the delay of f_0310_2303: 0x26 - speed/2 timer ticks.
+func (m *MatchScreen) framesPerMinute() int {
+	sp := m.ss.S.Display.Speed
+	if sp >= 0x47 {
+		return 0
 	}
-	return -1
-}
-
-func indexOfManager(s *game.State, m *game.Manager) int {
-	for i, x := range s.Managers {
-		if x == m {
-			return i
-		}
-	}
-	return -1
+	return (0x26 - sp/2) * 2
 }
 
 func (m *MatchScreen) Update(app *App) error {
 	in := &app.Input
-	m.table.Update(in)
-	if m.speedBtn.Hit(in) {
-		for i, sp := range speeds {
-			if sp == m.speed {
-				m.speed = speeds[(i+1)%len(speeds)]
-				break
+	if len(m.end) > 0 {
+		f := m.end[0]
+		m.end = m.end[1:]
+		f(app)
+		return nil
+	}
+	if m.closing {
+		app.Pop()
+		return nil
+	}
+	if len(in.Chars) > 0 && in.Chars[0] == ' ' {
+		app.Push(NewOptionsScreen(m.ss))
+		return nil
+	}
+	if len(m.shows) > 0 {
+		sh := m.shows[0]
+		switch {
+		case sh.scene != nil && sh.pre > 0:
+			sh.pre--
+		case sh.scene != nil && !sh.scene.done:
+			sh.scene.done = sh.scene.gs.Update()
+		case sh.scene != nil && sh.post > 0:
+			sh.post--
+			for _, c := range in.Chars {
+				if (c == 'r' || c == 'w') && sh.scene.gs.Replay() {
+					sh.scene.done = false
+					sh.post = 20
+				}
+			}
+		default:
+			sh.frames--
+			if sh.frames <= 0 || in.Left {
+				m.shows = m.shows[1:]
 			}
 		}
 		return nil
 	}
-	if m.md.Done {
-		if m.tableBtn.Hit(in) {
-			if l := m.league(); l >= 0 {
-				app.Push(NewTableScreen(m.ss, l))
-			}
+	if in.Right && m.builder != "" {
+		app.Push(NewAlertText("Der Erbauer der\nletzten gespielten\nTorszene war:\n" + m.builder))
+		return nil
+	}
+	if in.Left {
+		m.fast = true
+	}
+	if !m.fast {
+		m.tick++
+		if m.tick < m.framesPerMinute() {
 			return nil
 		}
-		if m.nextBtn.Hit(in) || in.Right || in.Enter {
-			app.Pop()
-		}
-		return nil
-	}
-	if m.subBtn.Hit(in) {
-		if mi := m.humanManagerPlaying(); mi >= 0 {
-			app.Push(NewSubstitutionScreen(m.ss, m.md, mi))
-		}
-		return nil
-	}
-	if m.bannerT > 0 {
-		m.bannerT--
-		if in.Left || in.Right {
-			m.bannerT = 0
-		}
-		return nil
-	}
-	if in.Right {
-		// fast forward to the end
-		m.md.Run()
-		m.collect(app)
-		return nil
-	}
-	m.tick++
-	if m.tick < m.speed {
-		return nil
 	}
 	m.tick = 0
-	m.md.Step()
+	more := m.md.Step()
 	m.collect(app)
+	if to := m.md.PeriodEnded(); to != 0 {
+		m.fast = false
+		m.periodEnd(to)
+	}
+	if !more {
+		m.matchDayEnd()
+	}
 	return nil
 }
 
-// collect turns new events into the log and banners.
+// collect turns the new events of human teams into scenes.
 func (m *MatchScreen) collect(app *App) {
-	s := m.ss.S
 	for ; m.seen < len(m.md.Events); m.seen++ {
 		e := m.md.Events[m.seen]
-		f := m.md.Fixtures[e.Fixture]
-		att := f.Home
-		if e.Side == 1 {
-			att = f.Away
-		}
-		if !f.Watched {
+		if m.panelOf(e.Fixture) < 0 {
+			m.tickerGoal(e)
 			continue
 		}
-		var text string
+		if m.fast && e.Kind != game.EvInjury && e.Kind != game.EvRed && e.Kind != game.EvYellowRed {
+			continue
+		}
+		p := m.panelOf(e.Fixture)
+		if !m.scene {
+			m.scene = true
+			m.sceneY = (3 - p) / 2 * 0x71
+		}
+		// The chance text blinks four times, then the result stays for
+		// 0x78 - speed ticks.
+		d := (0x78 - m.ss.S.Display.Speed) * 2
+		if d < 30 {
+			d = 30
+		}
+		sh := &matchShow{ev: e, frames: d}
 		switch e.Kind {
-		case game.EvGoal, game.EvMiss:
-			text = itoa(e.Minute) + ". Chance für " + s.Teams[att].Name + " !"
-			if e.Player != "" {
-				text += " " + m.md.EventText(e)
-			} else if e.Kind == game.EvGoal {
-				text += " TOR !"
+		case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
+			if m.ss.S.Display.GoalScenes {
+				goal := e.Kind == game.EvGoal || e.Kind == game.EvPenaltyGoal
+				pen := e.Kind == game.EvPenaltyGoal || e.Kind == game.EvPenaltyMiss
+				if sc, _, p, err := PickScene(app.Gfx.dir, &m.ss.S.Rand, goal, pen); err == nil {
+					gs := NewGoalScene(app.Gfx, sc, e.Side == 1)
+					sh.scene = &matchScene{gs: gs}
+					sh.pre, sh.post, sh.pen = 33, 20, p
+					m.builder = gs.Builder()
+				}
 			}
-		case game.EvPenaltyGoal, game.EvPenaltyMiss:
-			text = "Elfmeter für " + s.Teams[att].Name + ": " + map[bool]string{true: "TOR", false: "verschossen"}[e.Kind == game.EvPenaltyGoal]
-		default:
-			text = itoa(e.Minute) + ". " + m.md.EventText(e)
+			if sh.scene == nil {
+				sh.frames += 48 // the blinking "Chance für X !"
+			}
 		}
-		m.log = append(m.log, text)
-		if e.Manager >= 0 || e.Kind == game.EvGoal {
-			m.banner = []string{text}
-			m.bannerT = 50
-		}
-		if e.Kind == game.EvInjury && e.Manager >= 0 && !m.md.Done {
-			app.Push(NewSubstitutionScreen(m.ss, m.md, e.Manager))
+		m.shows = append(m.shows, sh)
+		if e.Manager >= 0 && (e.Kind == game.EvInjury || e.Kind == game.EvRed || e.Kind == game.EvYellowRed) && !m.md.Done {
+			mi := e.Manager
+			m.end = append(m.end, func(app *App) { app.Push(NewSubstitutionScreen(m.ss, m.md, mi)) })
 		}
 	}
 }
 
-// league returns the league shown in the table button, or -1.
-func (m *MatchScreen) league() int {
-	if mi := m.humanManagerPlaying(); mi >= 0 {
-		l := m.ss.S.Managers[mi].League
-		for _, f := range m.md.Fixtures {
-			if f.League == l {
-				return l
-			}
-		}
-	}
-	for _, f := range m.md.Fixtures {
-		if f.League >= 0 {
-			return f.League
-		}
-	}
-	return -1
+// matchScene is a goal scene being played.
+type matchScene struct {
+	gs   *GoalScene
+	done bool
 }
 
-func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
-	g := app.Gfx
+// tickerGoal shows "HOME - AWAY   h:a" at the bottom for a goal in a
+// match of a club whose goals are announced.
+func (m *MatchScreen) tickerGoal(e game.MatchEvent) {
 	s := m.ss.S
-	g.Background(dst)
-	g.Panel(dst, 4, 3, 312, 17)
-	g.Text(dst, FontNormal, 10, 7, m.md.Title, g.C(ColBeige))
-	minute := m.md.Minute
-	if m.md.Done {
-		g.TextRight(dst, FontNormal, 310, 7, "ENDE", g.C(ColYellow))
-	} else if minute > 0 {
-		g.TextRight(dst, FontNormal, 310, 7, "MINUTE "+itoa(minute-1), g.C(ColWhite))
+	f := m.md.Fixtures[e.Fixture]
+	if e.Kind != game.EvGoal && e.Kind != game.EvPenaltyGoal || !s.Ticker(f.Home) && !s.Ticker(f.Away) || m.fast {
+		return
 	}
-	m.table.Rows = m.table.Rows[:0]
-	for _, i := range m.rowsOrder {
-		f := m.md.Fixtures[i]
-		h, a := m.md.Score(i)
-		res := itoa(h) + ":" + itoa(a)
-		extra := ""
-		if m.md.Penalties(i) {
-			extra = "n.E."
-		} else if m.md.ExtraTime(i) {
-			extra = "n.V."
-		}
-		if f.Forfeit != 0 {
-			extra = "(W)"
-		}
-		row := Row{Cells: []string{s.Teams[f.Home].Name, "-", s.Teams[f.Away].Name, res, extra}}
-		if s.ManagerOf(f.Home) != nil || s.ManagerOf(f.Away) != nil {
-			row.Color = ColYellow
-		}
-		m.table.Rows = append(m.table.Rows, row)
-	}
-	m.table.Draw(g, dst)
-	g.Panel(dst, 4, 140, 312, 78)
-	g.Text(dst, FontSmall, 8, 142, "SPIELBERICHT", g.C(ColBeige))
-	lines := []string{}
-	for _, l := range m.log {
-		lines = append(lines, g.Wrap(FontSmall, l, 300)...)
-	}
-	if len(lines) > 9 {
-		lines = lines[len(lines)-9:]
-	}
-	for i, l := range lines {
-		g.Text(dst, FontSmall, 8, 150+i*7, l, g.C(ColLight))
-	}
-	m.speedBtn.Label = "TEMPO " + itoa(indexOf(speeds, m.speed)+1)
-	m.speedBtn.Draw(g, dst, app.Input.In(m.speedBtn.X, m.speedBtn.Y, m.speedBtn.W, m.speedBtn.H))
-	if m.md.Done {
-		if m.league() >= 0 {
-			m.tableBtn.Draw(g, dst, app.Input.In(m.tableBtn.X, m.tableBtn.Y, m.tableBtn.W, m.tableBtn.H))
-		}
-		m.nextBtn.Draw(g, dst, app.Input.In(m.nextBtn.X, m.nextBtn.Y, m.nextBtn.W, m.nextBtn.H))
-	} else if m.humanManagerPlaying() >= 0 {
-		m.subBtn.Draw(g, dst, app.Input.In(m.subBtn.X, m.subBtn.Y, m.subBtn.W, m.subBtn.H))
-	}
-	if m.bannerT > 0 && len(m.banner) > 0 {
-		lines := g.Wrap(FontNormal, m.banner[0], 240)
-		h := len(lines)*10 + 10
-		y := 80 - h/2
-		FillRect(dst, 30, y, 260, h, g.C(ColDarkRed))
-		FrameRect(dst, 30, y, 260, h, g.C(ColRed))
-		for i, l := range lines {
-			g.TextCentered(dst, FontNormal, 30, y+5+i*10, 260, l, g.C(ColBeige))
-		}
-	}
+	h, a := m.md.Score(e.Fixture)
+	text := s.Teams[f.Home].Name + " - " + s.Teams[f.Away].Name + "   " + itoa(h%10) + ":" + itoa(a%10)
+	m.shows = append(m.shows, &matchShow{ev: e, frames: 0x46 * 2, ticker: text})
 }
 
-func indexOf(xs []int, v int) int {
-	for i, x := range xs {
-		if x == v {
+func (m *MatchScreen) panelOf(fi int) int {
+	for i, p := range m.panels {
+		if p.fixture == fi {
 			return i
 		}
 	}
 	return -1
+}
+
+// periodEnd queues what the original shows after a period (end of
+// f_0310_2303): the results of the leagues, or the cup round.
+func (m *MatchScreen) periodEnd(to int) {
+	s := m.ss.S
+	md := m.md
+	if cups := md.Cups(); cups != 0 {
+		if s.Day > 0x13b || cups&1 != 0 && s.Display.DFB || cups&^1 != 0 && s.Display.Europe {
+			for c := 0; c < game.NumCups; c++ {
+				if cups&(1<<c) != 0 {
+					c := c
+					m.end = append(m.end, func(app *App) { app.Push(NewCupRound(m.ss, c, to, nil)) })
+				}
+			}
+		}
+		return
+	}
+	for l := 0; l < game.NumLeagues; l++ {
+		if md.Leagues()&(1<<l) == 0 {
+			continue
+		}
+		show := md.Replays() && s.Display.Replays ||
+			!md.Replays() && (to == 45 && s.Display.HalfTime[l] || to == 90 && s.Display.Results[l])
+		if show && resultsRound != nil {
+			l := l
+			m.end = append(m.end, func(app *App) { app.Push(resultsRound(m.ss, md, l, to)) })
+		}
+	}
+}
+
+// matchDayEnd queues the tables of the leagues (f_2a41_214c) and closes.
+func (m *MatchScreen) matchDayEnd() {
+	s := m.ss.S
+	if m.md.Cups() == 0 && !m.md.Replays() {
+		for l := 0; l < game.NumLeagues; l++ {
+			if m.md.Leagues()&(1<<l) != 0 && s.Display.Table[l] && tableRound != nil {
+				l := l
+				m.end = append(m.end, func(app *App) { app.Push(tableRound(m.ss, l)) })
+			}
+		}
+	}
+	// Then the newspaper of each manager (f_2e3a_23aa), then back.
+	m.end = append(m.end, func(app *App) {
+		PushNewspapers(app, m.ss, m.md, func(app *App) { m.closing = true })
+	})
+}
+
+// resultsRound and tableRound show the results of a league after a period
+// and the table after the match day; set by the league screens.
+var (
+	resultsRound = func(ss *Session, md *game.MatchDay, league, minute int) Scene {
+		return NewResultsRound(ss, league, minute, nil)
+	}
+	tableRound = func(ss *Session, league int) Scene { return NewTableRound(ss, league, nil) }
+)
+
+func (m *MatchScreen) Draw(app *App, dst *ebiten.Image) {
+	g := app.Gfx
+	dst.Fill(g.C(ColBlack))
+	for i := range m.panels {
+		m.drawPanel(g, dst, &m.panels[i])
+	}
+	minute := m.md.Minute
+	if minute > 0 {
+		minute--
+	}
+	if len(m.shows) > 0 && m.shows[0].ticker != "" {
+		if m.scene {
+			m.drawScene(app, dst, minute)
+		}
+		FillRect(dst, 0, 0xe7, 320, 9, g.C(ColBlack))
+		g.TextMid(dst, FontNormal, 0, 0x140, 0xed, m.shows[0].ticker, ColWhite, NoShadow)
+		return
+	}
+	if m.scene {
+		m.drawScene(app, dst, minute)
+	} else {
+		m.drawMinuteBar(g, dst, minute)
+	}
+}
+
+func logoSub(g *Gfx, logo int) *ebiten.Image {
+	return g.Pic(logo, false).SubImage(image.Rect(0, 0, 38, 38)).(*ebiten.Image)
+}
+
+// drawPanel draws a scoreboard (f_1a58_042f, f_1a58_009d, f_1a58_024e).
+func (m *MatchScreen) drawPanel(g *Gfx, dst *ebiten.Image, p *matchPanel) {
+	s := m.ss.S
+	f := m.md.Fixtures[p.fixture]
+	x, y := p.x, p.y
+	Draw(dst, g.Sub(38, rectWH(0, 0, 155, 114)), x+3, y)
+	m.panelName(g, dst, s.Teams[f.Home].Name, x+5, x+0x4b, y+12)
+	m.panelName(g, dst, s.Teams[f.Away].Name, x+0x55, x+0x99, y+12)
+	Draw(dst, logoSub(g, s.Teams[f.Home].Logo), x+0x16, y+0x23)
+	Draw(dst, logoSub(g, s.Teams[f.Away].Logo), x+0x65, y+0x23)
+	h, a := m.md.Score(p.fixture)
+	for side, v := range []int{h, a} {
+		for v > 9 {
+			v -= 10
+		}
+		if v < 0 {
+			v = 0
+		}
+		Draw(dst, g.Sub(38, rectWH(v*14, 114, 11, 15)), x+0x24+side*0x4e, y+0x10)
+	}
+	// Attendance of a home team with a manager, in red when sold out.
+	att, col := "(AUSW.)", ColLight
+	if hm := s.ManagerOf(f.Home); hm != nil {
+		att = game.FormatMoney(f.Attendance)
+		if f.Attendance == hm.Capacity() {
+			col = ColRedDark
+		}
+	}
+	g.TextMid(dst, FontSmall, x+9, x+0x33, y+99, att, col, NoShadow)
+	for mi, mg := range s.Managers {
+		side := -1
+		switch mg.Team {
+		case f.Home:
+			side = 0
+		case f.Away:
+			side = 1
+		}
+		if side < 0 {
+			continue
+		}
+		x0 := x + 0x7e + side*16
+		FillRect(dst, x0, y+0x4d, 11, 0x70-0x4d+1, g.C(12))
+		for i, v := range m.counters(mi, p.fixture, side) {
+			g.TextAt(dst, FontSmall, x0, y+0x52+i*7, itoa(v), ColLight, NoShadow)
+		}
+	}
+}
+
+// panelName draws a club name; a name wider than 60 pixels is split at its
+// first space (f_1a58_0350).
+func (m *MatchScreen) panelName(g *Gfx, dst *ebiten.Image, name string, x0, x1, y int) {
+	if g.TextWidth(FontSmall, name) > 0x3c {
+		for i, c := range name {
+			if c == ' ' {
+				g.TextMid(dst, FontSmall, x0, x1, y-5, name[:i], ColLight, NoShadow)
+				name, y = name[i+1:], y+1
+				break
+			}
+		}
+	}
+	g.TextMid(dst, FontSmall, x0, x1, y, name, ColLight, NoShadow)
+}
+
+// counters are the lines of a panel for manager mi: yellow and red cards,
+// injured, players on the pitch, chances.
+func (m *MatchScreen) counters(mi, fi, side int) [5]int {
+	var c [5]int
+	for _, e := range m.md.Events[:m.seen] {
+		if e.Fixture != fi {
+			continue
+		}
+		own := e.Side == side
+		switch e.Kind {
+		case game.EvYellow:
+			if own {
+				c[0]++
+			}
+		case game.EvYellowRed, game.EvRed:
+			if own {
+				c[1]++
+			}
+		case game.EvInjury:
+			if own {
+				c[2]++
+			}
+		case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
+			if own {
+				c[4]++
+			}
+		}
+	}
+	c[3] = m.ss.S.OnPitch(mi)
+	return c
+}
+
+// drawMinuteBar draws the minute and the two half bars at the bottom
+// (f_0310_1def, f_0310_2086).
+func (m *MatchScreen) drawMinuteBar(g *Gfx, dst *ebiten.Image, minute int) {
+	for _, b := range [][2]int{{35, 126}, {194, 287}} {
+		FillRect(dst, b[0], 234, b[1]-b[0]+1, 4, g.C(ColGrey4))
+		FillRect(dst, b[0], 234, b[1]-b[0], 1, g.C(ColLight))
+		FillRect(dst, b[0], 234, 1, 4, g.C(ColLight))
+		FillRect(dst, b[1], 234, 1, 4, g.C(ColGrey7))
+		FillRect(dst, b[0]+1, 237, b[1]-b[0], 1, g.C(ColGrey7))
+	}
+	bar := func(x0, x1 int) {
+		if x1 < x0 {
+			x0, x1 = x1, x0
+		}
+		FillRect(dst, x0, 235, x1-x0+1, 1, g.C(ColYellow))
+		FillRect(dst, x0, 236, x1-x0+1, 1, g.C(ColWhite))
+	}
+	switch {
+	case minute <= 45:
+		if minute > 0 {
+			bar(36, 36+2*minute-1)
+		}
+	case minute <= 90:
+		bar(36, 125)
+		bar(285-2*(minute-45)+1, 285)
+	default:
+		bar(36, 125)
+		bar(196, 285)
+	}
+	m.drawMinute(g, dst, minute, 0xef)
+}
+
+// drawMinute writes "N.Minute" centred with its baseline at y.
+func (m *MatchScreen) drawMinute(g *Gfx, dst *ebiten.Image, minute, y int) {
+	FillRect(dst, 0x7f, y-6, 0xc1-0x7f+1, 7, g.C(ColBlack))
+	if minute > 0 {
+		g.TextMid(dst, FontNormal, 4, 0x140, y, itoa(minute)+".Minute", ColWhite, ColGrey4)
+	}
+}
+
+// drawScene draws the scene window (f_1a58_0ca3).
+func (m *MatchScreen) drawScene(app *App, dst *ebiten.Image, minute int) {
+	g := app.Gfx
+	s := m.ss.S
+	u := m.sceneY
+	FillRect(dst, 0, u, 320, 0x7f, g.C(ColBlack))
+	FrameRect(dst, 0, u, 320, 0x7f, g.C(ColLight))
+	for k := 0; k < 2; k++ {
+		Draw(dst, g.Sub(8, rectWH(0xa3, 0x66, 13, 13)), k*0x4e+0x73, u+0x6c)
+	}
+	for k := 0; k < 2; k++ {
+		iv := k * 0xf1
+		FrameRect(dst, 0x12+iv, u+3, 0x3b-0x12+1, 0x2c-3+1, g.C(ColGrey2))
+		FrameRect(dst, 0x12+iv, u+0x3b, 0x3c-0x12+1, 0x66-0x3b+1, g.C(ColGrey2))
+	}
+	var f *game.Fixture
+	var ev *game.MatchEvent
+	if len(m.shows) > 0 && m.shows[0].ticker == "" {
+		ev = &m.shows[0].ev
+		f = m.md.Fixtures[ev.Fixture]
+	} else if len(m.panels) > 0 {
+		f = m.md.Fixtures[m.panels[0].fixture]
+	}
+	if f != nil {
+		Draw(dst, logoSub(g, s.Teams[f.Home].Logo), 0x14, u+5)
+		Draw(dst, logoSub(g, s.Teams[f.Away].Logo), 0x105, u+5)
+		for mi, mg := range s.Managers {
+			if mg.Team == f.Home || mg.Team == f.Away {
+				x := 0x14
+				if mg.Team == f.Away {
+					x = 0x105
+				}
+				Draw(dst, g.Sub(0, rectWH(mg.Face*41+1, 0, 40, 40)), x, u+0x3d)
+				_ = mi
+			}
+		}
+	}
+	var sh *matchShow
+	if ev != nil {
+		sh = m.shows[0]
+	}
+	if sh != nil && sh.scene != nil && sh.pre == 0 {
+		sh.scene.gs.Draw(dst, 0x42, u+2)
+	} else {
+		Draw(dst, g.Sub(8, rectWH(0, 0, 0xbc, 0x66)), 0x42, u+2)
+	}
+	m.drawMinute(g, dst, minute, u+0x77)
+	if ev == nil {
+		return
+	}
+	team := f.Home
+	if ev.Side == 1 {
+		team = f.Away
+	}
+	iconX := ev.Side*0xf1 + 0x14
+	if sh.scene != nil && (sh.pre > 0 || !sh.scene.done || sh.post > 0) {
+		return // the scene runs; clocks and minute stay
+	}
+	FillRect(dst, 10, u+0x6c, 0x136-10+1, 0x79-0x6c+1, g.C(ColBlack))
+	switch ev.Kind {
+	case game.EvGoal, game.EvMiss, game.EvPenaltyGoal, game.EvPenaltyMiss:
+		total := (0x78 - s.Display.Speed) * 2
+		if total < 30 {
+			total = 30
+		}
+		if sh.scene != nil && (sh.pre > 0 || !sh.scene.done || sh.post > 0) {
+			return
+		}
+		if sh.scene == nil && sh.frames > total {
+			// "Chance für X !" blinks before the result.
+			if (sh.frames/6)%2 == 0 {
+				pre := "Chance für "
+				if ev.Kind == game.EvPenaltyGoal || ev.Kind == game.EvPenaltyMiss {
+					pre = "Elfmeter für "
+				}
+				g.TextMid(dst, FontNormal, 0, 0x13f, u+0x75, pre+s.Teams[team].Name+" !", ColBeige, ColBlack)
+			}
+			return
+		}
+		goal := ev.Kind == game.EvGoal || ev.Kind == game.EvPenaltyGoal
+		line := "Chance vergeben: " + ev.Player
+		if goal {
+			Draw(dst, g.Sub(8, rectWH(0x7c, 0x66, 39, 40)), iconX, u+0x3d)
+			line = "Torschütze: " + ev.Player
+		}
+		if ev.Player == "" {
+			line = ""
+		}
+		g.TextMid(dst, FontNormal, 0, 0x13f, u+0x70, line, ColLight, ColBlack)
+		if goal && ev.Assist != "" && !sh.pen {
+			g.TextMid(dst, FontNormal, 0, 0x13f, u+0x7a, "nach Vorlage von "+ev.Assist, ColLight, ColBlack)
+		}
+	case game.EvYellow, game.EvYellowRed, game.EvRed, game.EvInjury:
+		icon := map[game.EventKind]int{game.EvYellow: 1, game.EvYellowRed: 0x2a, game.EvRed: 0x2a, game.EvInjury: 0x53}[ev.Kind]
+		Draw(dst, g.Sub(8, rectWH(icon, 0x66, 40, 40)), iconX, u+0x3d)
+		col := ColRed
+		if ev.Kind == game.EvYellow {
+			col = ColYellow
+		}
+		g.TextMid(dst, FontNormal, 0, 0x13f, u+0x75, m.md.EventText(*ev), col, ColDarkRed)
+	}
 }

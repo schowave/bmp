@@ -82,7 +82,7 @@ func TestSetupAndFirstTurns(t *testing.T) {
 	ss := d.ss
 	// Play a few events through the UI: close message boxes, end turns,
 	// run match days.
-	for i := 0; i < 400 && ss.S.Event < 12; i++ {
+	for i := 0; i < 20000 && ss.S.Event < 12; i++ {
 		switch sc := top(app).(type) {
 		case *Driver:
 			step(t, app, Input{})
@@ -100,14 +100,17 @@ func TestSetupAndFirstTurns(t *testing.T) {
 			// the calendar sheet goes on to the next date
 			step(t, app, click(260, headerPanelY+30))
 		case *MatchScreen:
-			step(t, app, rclick())
-			step(t, app, Input{Enter: true})
+			step(t, app, click(160, 120))
+		case *SubstitutionScreen:
+			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
 		case *DrawShow:
 			step(t, app, click(160, 120))
+		case *NewspaperScene:
+			step(t, app, click(160, 120))
+		case *ResultsScreen, *TableScreen:
+			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
 		case *CupScreen:
 			step(t, app, click(MenuButton.X+10, MenuButton.Y+10))
-		case *SubstitutionScreen:
-			step(t, app, rclick())
 		default:
 			t.Fatalf("unexpected scene %T", sc)
 		}
