@@ -23,7 +23,8 @@ type StadiumScreen struct {
 	list  int // highlighted level, -1 none
 	lim   game.BuildLimit
 	order game.BuildOrder
-	listN int // last row index of the level list
+	listN int      // last row index of the level list
+	note  []string // what the key o did, below the table
 }
 
 const (
@@ -141,10 +142,11 @@ func (st *StadiumScreen) Update(app *App) error {
 		if c == 'o' {
 			tp := s.OptimizeTicketPrice(mi)
 			if tp.Opponent < 0 {
-				app.Push(remakeToast(app, s, -1, "KEIN HEIMSPIEL", "MEHR IN DER SAISON"))
+				st.note = []string{"KEIN HEIMSPIEL MEHR IN DER SAISON"}
 				return nil
 			}
-			app.Push(remakeToast(app, s, tp.Opponent, priceLine(tp), "EINNAHME "+game.FormatMoney(tp.AfterGate)))
+			st.note = append([]string{priceLine(tp) + "  EINNAHME " + game.FormatMoney(tp.AfterGate)},
+				opponentNote(s.Teams[tp.Opponent].Name, tp.Opponent)...)
 			return nil
 		}
 	}
@@ -238,6 +240,7 @@ func (st *StadiumScreen) Draw(app *App, dst *ebiten.Image) {
 	st.drawPicture(g, dst)
 	g.Window(dst, 0x96, 0xf, 0x96+0x8b, 0xf+0x52, ColBlue)
 	g.Window(dst, 6, 0x68, 6+0x11b, 0x68+0x52, ColBlue)
+	drawNote(g, dst, FontSmall, 8, 0x104, 0xcc, st.note)
 	g.DrawMenuButton(dst)
 	st.drawTable(g, dst)
 

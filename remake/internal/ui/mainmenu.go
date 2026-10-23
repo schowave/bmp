@@ -82,6 +82,9 @@ type MainMenu struct {
 	// Key handles a key typed on the menu and reports whether it took it
 	// (the hidden keys of the remake).
 	Key func(app *App, c rune) bool
+	// Note is what the key o did, in the middle of the menu until the turn
+	// ends (a new menu comes with the next turn).
+	Note []string
 }
 
 // calendarRect is the calendar sheet of the header panel (PIC/23.VGA).
@@ -184,7 +187,9 @@ func (m *MainMenu) Draw(app *App, dst *ebiten.Image) {
 	}
 	if m.msgOpen {
 		m.Messages.Draw(g, dst)
-	} else if m.open != nil {
+	} else if m.open == nil {
+		drawNote(g, dst, FontNormal, 0x3c, 0x104, 0x8c, m.Note)
+	} else {
 		for k, it := range m.open.Items {
 			icon := it.Icon
 			if !m.open.available(k) {

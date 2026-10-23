@@ -344,65 +344,6 @@ func TestQuietMatchScreenNeverOnTop(t *testing.T) {
 	t.Fatal("match day did not end")
 }
 
-// The key o on the open board sets the optimal lineup and says what it is
-// worth.
-func TestLineupOptimalKey(t *testing.T) {
-	app, s, q := lineupApp(t)
-	step(t, app, Input{Chars: []rune("o")})
-	if _, ok := top(app).(*lineupToast); ok {
-		t.Fatal("o works without the board")
-	}
-	step(t, app, click(lnIconX+10, lnIconY[1]+10))
-	rating := s.LineupRating(0)
-	opp, _, ok := s.NextOpponent(0)
-	step(t, app, Input{Chars: []rune("o")})
-	toast, ok2 := top(app).(*lineupToast)
-	if !ok2 {
-		t.Fatalf("no message, top is %T", top(app))
-	}
-	if s.LineupRating(0) < rating {
-		t.Errorf("rating fell from %d to %d", rating, s.LineupRating(0))
-	}
-	if toast.lines[0] != "OPTIMAL "+pointsText(s.LineupRating(0)) {
-		t.Errorf("message %q", toast.lines)
-	}
-	if !strings.HasPrefix(toast.lines[1], "STAND. ") {
-		t.Errorf("message %q", toast.lines)
-	}
-	switch {
-	case ok && (len(toast.extra) != 1 || !strings.HasPrefix(toast.extra[0], "GEGEN "+s.Teams[opp].Name[:3])):
-		t.Errorf("message %q does not name the opponent %s", toast.lines, s.Teams[opp].Name)
-	case !ok && len(toast.extra) != 0:
-		t.Errorf("message %q", toast.lines)
-	}
-	// The text must fit into the box (167..317), also with three digits:
-	// midX moves a text that would end behind x = 319 to the left edge.
-	for _, l := range []string{"OPTIMAL 2,00", "STAND. 2,00/2,00/2,00"} {
-		if w := app.Gfx.TextWidth(FontNormal, l); 244-w/2+1+w > 0x13f {
-			t.Errorf("%q is %d pixels wide", l, w)
-		}
-	}
-	if q.picked != -1 {
-		t.Error("a picked player stays picked")
-	}
-}
-
-// The name of the opponent is cut to fit the box.
-func TestLineupOptimalKeyLongName(t *testing.T) {
-	app, s, _ := lineupApp(t)
-	opp, _, ok := s.NextOpponent(0)
-	if !ok {
-		t.Skip("no match today")
-	}
-	s.Teams[opp].Name = "WWWWWWWWWWWWWWWWWWWWWW"
-	step(t, app, click(lnIconX+10, lnIconY[1]+10))
-	step(t, app, Input{Chars: []rune("o")})
-	toast := top(app).(*lineupToast)
-	if l := toast.extra[0]; app.Gfx.TextWidth(FontNormal, l) > lnToastWidth || !strings.HasPrefix(l, "GEGEN WW") {
-		t.Errorf("%q is %d pixels wide", l, app.Gfx.TextWidth(FontNormal, l))
-	}
-}
-
 func TestDecimalText(t *testing.T) {
 	for _, c := range []struct {
 		n, places int
@@ -429,28 +370,6 @@ func TestPointsText(t *testing.T) {
 	for n, want := range map[int]string{135: "1,35", 7: "0,07", 0: "0,00", -12: "-0,12", 200: "2,00"} {
 		if got := pointsText(n); got != want {
 			t.Errorf("%d: %q, want %q", n, got, want)
-		}
-	}
-}
-
-// Pressing the key again changes nothing and names no old lineup.
-func TestLineupOptimalKeyTwice(t *testing.T) {
-	app, _, _ := lineupApp(t)
-	step(t, app, click(lnIconX+10, lnIconY[1]+10))
-	var first string
-	for n := 0; n < 2; n++ {
-		step(t, app, Input{Chars: []rune("o")})
-		toast := top(app).(*lineupToast)
-		if n == 0 {
-			first = toast.lines[0]
-		} else if toast.lines[0] != first {
-			t.Errorf("second press: %q, first %q", toast.lines[0], first)
-		}
-		for i := 0; i < 200; i++ {
-			if _, ok := top(app).(*lineupToast); !ok {
-				break
-			}
-			step(t, app, Input{})
 		}
 	}
 }
@@ -572,16 +491,50 @@ func TestBoardDecisions(t *testing.T) {
 	}
 }
 
-// A message of the original keeps its band and box; one of the remake is
-// centred in the band as wide as the box, and an extra line makes it taller.
-func TestToastLayout(t *testing.T) {
-	orig := newLineupToast(game.ErrNoSubs).layout()
-	if orig.x0 != 0xb9 || orig.x1 != 0x12f || orig.bottom != 44 || len(orig.lines) != 2 {
-		t.Errorf("original %+v", orig)
+// The key o on the open board sets the optimal lineup and notes in the footer
+// what it is worth; the hint of a column comes first.
+func TestLineupOptimalKey(t *testing.T) {
+	app, s, q := lineupApp(t)
+	step(t, app, Input{Chars: []rune("o")})
+	if q.note != nil {
+		t.Fatal("o works without the board")
 	}
-	r := &lineupToast{lines: [2]string{"A", "B"}, extra: []string{"C"}, wide: true}
-	lay := r.layout()
-	if lay.x0 != 169 || lay.x1 != 319 || lay.bottom != 44+lnToastLineH || len(lay.ys) != 3 || lay.ys[2] != 0x1a+2*lnToastLineH {
-		t.Errorf("remake %+v", lay)
+	step(t, app, click(lnIconX+10, lnIconY[1]+10))
+	rating := s.LineupRating(0)
+	opp, _, ok := s.NextOpponent(0)
+	step(t, app, Input{Chars: []rune("o")})
+	if top(app) != Scene(q) {
+		t.Fatalf("a message on top: %T", top(app))
+	}
+	if s.LineupRating(0) < rating {
+		t.Errorf("rating fell from %d to %d", rating, s.LineupRating(0))
+	}
+	if len(q.note) < 2 || q.note[0] != "OPTIMAL "+pointsText(s.LineupRating(0)) || !strings.HasPrefix(q.note[1], "STAND. ") {
+		t.Errorf("note %q", q.note)
+	}
+	if ok && (len(q.note) != 3 || q.note[2] != "GEGEN "+s.Teams[opp].Name) {
+		t.Errorf("note %q does not name the opponent %s", q.note, s.Teams[opp].Name)
+	}
+	// The footer shows the parts that fit beside the board, whole.
+	if f := fitParts(app.Gfx, FontSmall, lnPitchX1-lnListX0, q.note...); !strings.HasPrefix(f, q.note[0]) ||
+		app.Gfx.TextWidth(FontSmall, f) > lnPitchX1-lnListX0 {
+		t.Errorf("footer %q", f)
+	}
+	// Pressing it again changes nothing.
+	first := strings.Join(q.note, "|")
+	step(t, app, Input{Chars: []rune("o")})
+	if got := strings.Join(q.note, "|"); got != first {
+		t.Errorf("second press: %q, first %q", got, first)
+	}
+	if q.picked != -1 {
+		t.Error("a picked player stays picked")
+	}
+}
+
+// The original's messages keep their band and box.
+func TestToastLayout(t *testing.T) {
+	lay := newLineupToast(game.ErrNoSubs).layout()
+	if lay.x0 != 0xb9 || lay.x1 != 0x12f || lay.bottom != 44 || len(lay.lines) != 2 || lay.ys[1] != 0x1a+lnToastLineH {
+		t.Errorf("layout %+v", lay)
 	}
 }

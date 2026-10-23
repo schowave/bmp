@@ -14,7 +14,8 @@ import (
 // Mittelfeld, Angriff (10 points), the intensity, the points left in the
 // bars at the sides, the K-T-E meter of the team and the JUGEND meter.
 type TrainingScreen struct {
-	ss *Session
+	ss   *Session
+	note []string // what the key o did, under the intensity
 }
 
 // NewTrainingScreen creates the training screen.
@@ -42,7 +43,7 @@ func (t *TrainingScreen) Update(app *App) error {
 	for _, c := range in.Chars {
 		if c == 'o' {
 			res := t.ss.S.OptimizeTraining(t.ss.Mgr())
-			app.Push(remakeToast(app, t.ss.S, -1, "OPTIMAL "+tenthsText(res.After), "BISHER "+tenthsText(res.Before)))
+			t.note = []string{"OPTIMAL " + tenthsText(res.After) + "  BISHER " + tenthsText(res.Before)}
 			return nil
 		}
 	}
@@ -119,6 +120,7 @@ func (t *TrainingScreen) Draw(app *App, dst *ebiten.Image) {
 		Draw(dst, ball, 0x12c, 0xb1-16*k)
 	}
 	t.drawKTE(g, dst)
+	drawNote(g, dst, FontSmall, 0x1d, 0xc1, 0xe6, t.note)
 	// JUGEND: the length of the line is the youth work, below its cost.
 	Draw(dst, g.Sub(0x25, image.Rect(0, 0x36, 0x32, 0x36+0x29)), 0xd1, 0xc1)
 	FillRect(dst, 0xd9, 0xd4, m.Youth+1, 2, g.PalColor(ColWhite))

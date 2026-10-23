@@ -142,25 +142,6 @@ func TestContractPanel(t *testing.T) {
 	}
 }
 
-// The key o sets the optimal training and says what it is worth.
-func TestTrainingOptimalKey(t *testing.T) {
-	app, ss := tsTestSession(t)
-	m := ss.M()
-	tr := NewTrainingScreen(ss)
-	app.Push(tr)
-	step(t, app, Input{Chars: []rune("o")})
-	toast, ok := top(app).(*lineupToast)
-	if !ok {
-		t.Fatalf("no message, top is %T", top(app))
-	}
-	if !strings.HasPrefix(toast.lines[0], "OPTIMAL ") || !strings.HasPrefix(toast.lines[1], "BISHER ") {
-		t.Errorf("message %q", toast.lines)
-	}
-	if sum := tsSum(m.Training); sum > 20 || m.Intensity < 1 || m.Intensity > 10 || tsSum(m.PosTraining) > 10 {
-		t.Errorf("plan %v %v %d", m.Training, m.PosTraining, m.Intensity)
-	}
-}
-
 func TestTenthsText(t *testing.T) {
 	for n, want := range map[int]string{410: "41,0", 375: "37,5", 7: "0,7", -12: "-1,2"} {
 		if got := tenthsText(n); got != want {
@@ -169,7 +150,24 @@ func TestTenthsText(t *testing.T) {
 	}
 }
 
-// The key o on the main menu sets the optimal training and lineup at once.
+// The key o on the training screen sets the optimal plan and notes what it
+// is worth under the intensity.
+func TestTrainingOptimalKey(t *testing.T) {
+	app, ss := tsTestSession(t)
+	m := ss.M()
+	tr := NewTrainingScreen(ss)
+	app.Push(tr)
+	step(t, app, Input{Chars: []rune("o")})
+	if len(tr.note) != 1 || !strings.HasPrefix(tr.note[0], "OPTIMAL ") || !strings.Contains(tr.note[0], "  BISHER ") {
+		t.Errorf("note %q", tr.note)
+	}
+	if sum := tsSum(m.Training); sum > 20 || m.Intensity < 1 || m.Intensity > 10 || tsSum(m.PosTraining) > 10 {
+		t.Errorf("plan %v %v %d", m.Training, m.PosTraining, m.Intensity)
+	}
+}
+
+// The key o on the main menu sets training, lineup and ticket price and
+// notes them in the middle of the menu, for the rest of the turn.
 func TestTurnMenuOptimalKey(t *testing.T) {
 	app, ss := tsTestSession(t)
 	m := NewTurnMenu(ss)
@@ -178,42 +176,31 @@ func TestTurnMenuOptimalKey(t *testing.T) {
 	m.msgOpen = false
 	old := ss.S.PlanOf(ss.Mgr())
 	step(t, app, Input{Chars: []rune("o")})
-	toast, ok := top(app).(*lineupToast)
-	if !ok {
-		t.Fatalf("no message, top is %T", top(app))
+	if len(m.Note) < 2 || !strings.HasPrefix(m.Note[0], "AUFSTELLUNG ") || !strings.HasPrefix(m.Note[1], "TRAINING ") {
+		t.Fatalf("note %q", m.Note)
 	}
-	if !strings.HasPrefix(toast.lines[0], "AUFSTELLUNG ") || !strings.HasPrefix(toast.lines[1], "TRAINING ") {
-		t.Errorf("message %q", toast.lines)
+	if want := "AUFSTELLUNG " + pointsText(ss.S.LineupRating(ss.Mgr())) + " "; !strings.HasPrefix(m.Note[0], want) {
+		t.Errorf("note %q, want %q and the gain", m.Note[0], want)
 	}
-	if want := "AUFSTELLUNG " + pointsText(ss.S.LineupRating(ss.Mgr())) + " "; !strings.HasPrefix(toast.lines[0], want) {
-		t.Errorf("message %q, want %q and the gain", toast.lines[0], want)
+	if NewTurnMenu(ss).Note != nil {
+		t.Error("the menu of the next turn has the note")
 	}
-	// The gains fit the box also at their widest.
-	for _, l := range []string{"AUFSTELLUNG 2,00 +2,00", "TRAINING 99,9 +99,9", "EINTRITT 25 +999.999", "EINNAHME 9.999.999"} {
-		if w := app.Gfx.TextWidth(FontNormal, l); w > lnToastWidth {
-			t.Errorf("%q is %d pixels wide", l, w)
-		}
-	}
-	t.Logf("plan %+v -> %+v, %q %q", old, ss.S.PlanOf(ss.Mgr()), toast.lines, toast.extra)
+	t.Logf("plan %+v -> %+v, %q", old, ss.S.PlanOf(ss.Mgr()), m.Note)
 }
 
 // The key o on the stadium screen sets the ticket price with the most gate
-// money at the next home match.
+// money at the next home match and notes it below the table.
 func TestStadiumOptimalKey(t *testing.T) {
 	app, ss := tsTestSession(t)
 	st := NewStadiumScreen(ss)
 	app.Push(st)
 	r := ss.S.Rand
 	step(t, app, Input{Chars: []rune("o")})
-	toast, ok := top(app).(*lineupToast)
-	if !ok {
-		t.Fatalf("no message, top is %T", top(app))
-	}
 	if ss.S.Rand != r {
 		t.Error("the generator moved")
 	}
 	p := ss.M().TicketPrice
-	if p < 5 || p > 25 || !strings.HasPrefix(toast.lines[0], "EINTRITT "+itoa(p)+" ") {
-		t.Errorf("price %d, message %q", p, toast.lines)
+	if p < 5 || p > 25 || len(st.note) == 0 || !strings.HasPrefix(st.note[0], "EINTRITT "+itoa(p)+" ") {
+		t.Errorf("price %d, note %q", p, st.note)
 	}
 }

@@ -24,7 +24,7 @@ func NewTurnMenu(ss *Session) *MainMenu {
 		if c != 'o' {
 			return false
 		}
-		optimizeTurn(app, ss)
+		m.Note = optimizeTurn(ss)
 		return true
 	}
 	push := func(f func() Scene) func(*App) { return func(app *App) { app.Push(f()) } }
@@ -113,19 +113,22 @@ func turnHeader(ss *Session) Header {
 // optimizeTurn is the hidden key o of the main menu (the remake's): it sets
 // the optimal training (game.State.OptimizeTraining), the optimal lineup
 // (game.State.OptimizeLineup) and the optimal ticket price
-// (game.State.OptimizeTicketPrice), and names what each is worth and gained
-// against the one before, and the opponent the lineup was made for.
-func optimizeTurn(app *App, ss *Session) {
+// (game.State.OptimizeTicketPrice), and returns the note of what each is
+// worth and gained against the one before, and the opponent of the lineup.
+func optimizeTurn(ss *Session) []string {
 	s, mi := ss.S, ss.Mgr()
 	tr := s.OptimizeTraining(mi)
 	ln := s.OptimizeLineup(mi)
 	tp := s.OptimizeTicketPrice(mi)
-	lines := []string{
+	note := []string{
 		"AUFSTELLUNG " + pointsText(ln.After) + " " + signedDecimal(ln.After-ln.Before, 2),
 		"TRAINING " + tenthsText(tr.After) + " " + signedDecimal(tr.After-tr.Before, 1),
 	}
 	if tp.Opponent >= 0 {
-		lines = append(lines, priceLine(tp))
+		note = append(note, priceLine(tp))
 	}
-	app.Push(remakeToast(app, s, ln.Opponent, lines...))
+	if ln.Opponent >= 0 {
+		note = append(note, "GEGEN "+s.Teams[ln.Opponent].Name)
+	}
+	return note
 }
