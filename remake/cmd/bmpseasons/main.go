@@ -8,8 +8,9 @@
 // update writes internal/seasons/data/YYYY-YY.json for each DIR/YYYY-YY.json
 // between the seasons from and to, and the logos of new clubs, the season
 // before first (see internal/seasons/update). logo gives the club NAME (as
-// the game shows it) the logo of an image, drawn in the colours of the
-// logos of the original, in every season, and notes its source in
+// the game shows it; several spellings separated by "|") the logo of an
+// image, drawn in the colours of the logos of the original, in every
+// season where it has a plain shield, and notes its source in
 // internal/seasons/credits/logos.csv.
 package main
 
@@ -188,7 +189,7 @@ const creditsFile = "internal/seasons/credits/logos.csv"
 
 func logoMain() {
 	fl := flag.NewFlagSet("logo", flag.ExitOnError)
-	club := fl.String("club", "", "the club as the game shows its name, e.g. \"SPVGG WEIDEN\"")
+	club := fl.String("club", "", "the club as the game shows its name, e.g. \"SPVGG WEIDEN\"; spellings separated by |")
 	file := fl.String("image", "", "the logo, PNG, JPEG or GIF")
 	src := fl.String("source", "", "where the logo comes from, for the credits (default: the file name)")
 	_ = fl.Parse(os.Args[2:])
@@ -209,8 +210,18 @@ func logoMain() {
 }
 
 // setLogo draws the image file as a logo with the next free number and
-// gives it to every German club named club in the seasons.
+// gives it to the German clubs named club (spellings separated by "|") in
+// the seasons where they have a plain shield; a club of the same name with
+// a logo is another club (FC Gütersloh of 1978 and of 2000).
 func setLogo(club, file, src string) error {
+	names := map[string]bool{}
+	for _, n := range strings.Split(club, "|") {
+		names[strings.TrimSpace(n)] = true
+	}
+	shields, err := shieldLogos()
+	if err != nil {
+		return err
+	}
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -248,7 +259,7 @@ func setLogo(club, file, src string) error {
 		}
 		hit := false
 		for i := range m.Clubs[:assets.NumGermanClubs] {
-			if assets.FromCP437(m.Clubs[i].Name) == club {
+			if names[assets.FromCP437(m.Clubs[i].Name)] && shields[m.Clubs[i].Logo] {
 				m.Clubs[i].Logo, hit = n, true
 			}
 		}
@@ -289,4 +300,24 @@ func setLogo(club, file, src string) error {
 	}
 	fmt.Fprintf(os.Stderr, "logo %d for %s in %s\n", n, club, strings.Join(changed, ", "))
 	return nil
+}
+
+// shieldLogos are the numbers of the plain shields, from the credits.
+func shieldLogos() (map[int]bool, error) {
+	f, err := os.Open(creditsFile)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+	rows, err := csv.NewReader(f).ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	out := map[int]bool{}
+	for _, r := range rows[1:] {
+		if n, err := strconv.Atoi(r[0]); err == nil && strings.HasPrefix(r[1], "shield") {
+			out[n] = true
+		}
+	}
+	return out, nil
 }
