@@ -113,7 +113,7 @@ func (s *Setup) Update(app *App) error {
 	// (f_08bc_2184 calls f_322b_120c for y <= 35); without a loaded game it
 	// comes back here.
 	if s.ss == nil && in.Left && in.Y <= 35 {
-		app.Push(NewFileScreen(&Session{Mana: s.mana, SaveDir: s.saveDir}, false))
+		app.Push(NewFileScreen(&Session{Mana: s.orig, SaveDir: s.saveDir}, false))
 		return nil
 	}
 	// A click left of the middle scrolls the strip back, right of it on;
