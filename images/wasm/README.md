@@ -17,14 +17,14 @@ Defined in the repository root's `mise.toml`; they work from the root and from `
 
 The Docker build makes the bundle itself (`images/wasm/Dockerfile`, context is the repository root), so `wasm:docker` does not need `wasm:build` first. `wasm:build` is for the local dev server: it writes the same web root to `images/wasm/dist/`, which is ignored by git.
 
-| Task               | Description                                                     |
-|--------------------|-----------------------------------------------------------------|
-| `wasm:build`       | Build the web root with `bmp.jsdos` into `images/wasm/dist`            |
-| `wasm:docker`      | Build the container image (`bmp-wasm`)                          |
-| `wasm:smoke`       | Build the image and smoke test it with `images/wasm/smoke.sh`          |
-| `wasm:run-docker`  | Run the container locally (port 8090, saves in `images/wasm/savegame`) |
-| `wasm:run`         | Local dev server for `images/wasm/dist` (python, no save persistence)  |
-| `wasm:clean`       | Remove `images/wasm/dist`                                              |
+| Task              | Description                                                            |
+|-------------------|------------------------------------------------------------------------|
+| `wasm:build`      | Build the web root with `bmp.jsdos` into `images/wasm/dist`            |
+| `wasm:docker`     | Build the container image (`bmp-wasm`)                                 |
+| `wasm:smoke`      | Build the image and smoke test it with `images/wasm/smoke.sh`          |
+| `wasm:run-docker` | Run the container locally (port 8090, saves in `.local/savegame/wasm`) |
+| `wasm:run`        | Local dev server for `images/wasm/dist` (python, no save persistence)  |
+| `wasm:clean`      | Remove `images/wasm/dist`                                              |
 
 ## Architecture
 

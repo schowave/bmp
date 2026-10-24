@@ -70,8 +70,8 @@ GL and X11 headers.
 ### From source (images)
 
 ```bash
-mise run vnc:run          # VNC image on port 8080, saves in savegame/
-mise run wasm:run-docker  # WASM image on port 8090, saves in images/wasm/savegame/
+mise run vnc:run          # VNC image on port 8080, saves in .local/savegame/vnc/
+mise run wasm:run-docker  # WASM image on port 8090, saves in .local/savegame/wasm/
 ```
 
 ## Features

@@ -3,7 +3,7 @@
 .github
 .idea
 docs
-savegame
+.local
 images/wasm/dist
-images/wasm/savegame
 images/vnc/bench
+.venv

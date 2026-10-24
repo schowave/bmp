@@ -5,8 +5,8 @@
 .DS_Store
 Thumbs.db
 
-# Runtime
-savegame/
+# Runtime: the saves of mise run vnc:run and wasm:run-docker
+.local/
 
 # Generated WASM web root (mise run wasm:build)
 images/wasm/dist/

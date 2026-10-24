@@ -29,11 +29,11 @@ run = [
 ]
 
 [tasks."vnc:run"]
-description = "Stop, build, and start in detached mode (saves in savegame/)"
+description = "Stop, build, and start in detached mode (saves in .local/savegame/vnc)"
 depends = ["vnc:stop", "vnc:build"]
 run = [
-  "mkdir -p savegame",
-  "podman run -d --name $CONTAINER_NAME -p $PORT:8080 -v \"$PWD/savegame:/savegame\" $IMAGE_NAME",
+  "mkdir -p .local/savegame/vnc",
+  "podman run -d --name $CONTAINER_NAME -p $PORT:8080 -v \"$PWD/.local/savegame/vnc:/savegame\" $IMAGE_NAME",
   "echo \"Running — open http://localhost:$PORT\"",
 ]
 
@@ -68,13 +68,13 @@ depends = ["wasm:docker"]
 run = "images/wasm/smoke.sh bmp-wasm"
 
 [tasks."wasm:run-docker"]
-description = "Run the container locally (port 8090, saves in images/wasm/savegame)"
+description = "Run the container locally (port 8090, saves in .local/savegame/wasm)"
 depends = ["wasm:docker"]
 run = [
-  "mkdir -p images/wasm/savegame",
+  "mkdir -p .local/savegame/wasm",
   "echo 'Opening http://localhost:8090'",
   "open http://localhost:8090 || true",
-  "podman run --rm -p 8090:8080 -v \"$PWD/images/wasm/savegame:/data\" bmp-wasm",
+  "podman run --rm -p 8090:8080 -v \"$PWD/.local/savegame/wasm:/data\" bmp-wasm",
 ]
 
 [tasks."wasm:run"]
