@@ -13,18 +13,18 @@ Then open http://localhost:8090.
 
 ## mise Tasks
 
-Defined in the repository root's `mise.toml`; they work from the root and from `wasm/`.
+Defined in the repository root's `mise.toml`; they work from the root and from `images/wasm/`.
 
-The Docker build makes the bundle itself (`wasm/Dockerfile`, context is the repository root), so `wasm:docker` does not need `wasm:build` first. `wasm:build` is for the local dev server: it writes the same web root to `wasm/dist/`, which is ignored by git.
+The Docker build makes the bundle itself (`images/wasm/Dockerfile`, context is the repository root), so `wasm:docker` does not need `wasm:build` first. `wasm:build` is for the local dev server: it writes the same web root to `images/wasm/dist/`, which is ignored by git.
 
 | Task               | Description                                                     |
 |--------------------|-----------------------------------------------------------------|
-| `wasm:build`       | Build the web root with `bmp.jsdos` into `wasm/dist`            |
+| `wasm:build`       | Build the web root with `bmp.jsdos` into `images/wasm/dist`            |
 | `wasm:docker`      | Build the container image (`bmp-wasm`)                          |
-| `wasm:smoke`       | Build the image and smoke test it with `wasm/smoke.sh`          |
-| `wasm:run-docker`  | Run the container locally (port 8090, saves in `wasm/savegame`) |
-| `wasm:run`         | Local dev server for `wasm/dist` (python, no save persistence)  |
-| `wasm:clean`       | Remove `wasm/dist`                                              |
+| `wasm:smoke`       | Build the image and smoke test it with `images/wasm/smoke.sh`          |
+| `wasm:run-docker`  | Run the container locally (port 8090, saves in `images/wasm/savegame`) |
+| `wasm:run`         | Local dev server for `images/wasm/dist` (python, no save persistence)  |
+| `wasm:clean`       | Remove `images/wasm/dist`                                              |
 
 ## Architecture
 
@@ -55,16 +55,16 @@ Save files appear as plain files in the mounted directory, visible in File Stati
 
 ### Synology Container Manager
 
-`wasm/docker-compose.yml` is the configuration the NAS runs: port `49160`, saves in `/volume1/docker/bmp-wasm/bmp-saves`. Use it as a **Project**:
+`images/wasm/docker-compose.yml` is the configuration the NAS runs: port `49160`, saves in `/volume1/docker/bmp-wasm/bmp-saves`. Use it as a **Project**:
 
 1. Create the folder `/volume1/docker/bmp-wasm/bmp-saves`
-2. Copy `wasm/docker-compose.yml` to `/volume1/docker/bmp-wasm/`
+2. Copy `images/wasm/docker-compose.yml` to `/volume1/docker/bmp-wasm/`
 3. **Container Manager → Project → Create**, point to `/volume1/docker/bmp-wasm/` and start
 4. Access at `http://<nas-ip>:49160`
 
-Watchtower only replaces the image. When `wasm/docker-compose.yml` changes in this repository, copy it again and **Build** the project, since a restart alone does not pick up the change.
+Watchtower only replaces the image. When `images/wasm/docker-compose.yml` changes in this repository, copy it again and **Build** the project, since a restart alone does not pick up the change.
 
-The server runs unprivileged as uid 1000 and has to write to `/data`. The compose file runs the container in group `100` (`users`, which the shared folder's ACL lets write). The single-container dialog cannot add a group, so do not create the container there, or give the folder to uid 1000 instead. Without either, loading works but every save fails with `permission denied` in the container log. The same applies to the VNC image, see [Savegames](../README.md#the-mount-has-to-be-writable).
+The server runs unprivileged as uid 1000 and has to write to `/data`. The compose file runs the container in group `100` (`users`, which the shared folder's ACL lets write). The single-container dialog cannot add a group, so do not create the container there, or give the folder to uid 1000 instead. Without either, loading works but every save fails with `permission denied` in the container log. The same applies to the VNC image, see [Savegames](../../README.md#the-mount-has-to-be-writable).
 
 ### docker run
 

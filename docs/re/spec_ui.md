@@ -14,7 +14,7 @@ are in `remake/tools/re/refgame/wasm` and `remake/tools/re/pixcmp`.
 ```sh
 # from the repository root, once:
 (cd remake/tools/re/refgame/wasm && npm install && npx playwright install chromium)
-# shell 1 (stays in the foreground): build wasm/dist, expose window.ci, serve :8000, driver on :9333
+# shell 1 (stays in the foreground): build images/wasm/dist, expose window.ci, serve :8000, driver on :9333
 remake/tools/re/refgame/wasm/serve.sh --driver
 # shell 2:
 remake/tools/re/refgame/wasm/cmd.sh '[["newgame","TEST"],["shot","/abs/menu.png"]]'

@@ -1,4 +1,4 @@
-# golangci-lint for both Go modules (remake/ and wasm/), run by `mise run lint`.
+# golangci-lint for both Go modules (remake/ and images/wasm/), run by `mise run lint`.
 version: "2"
 
 linters:

@@ -1,6 +1,6 @@
 # Tasks for both images. Run `mise tasks` for an overview.
-# Both images build with the repository root as context: vnc/Dockerfile for the
-# VNC variant (tasks vnc:*), wasm/Dockerfile for the WASM variant (tasks wasm:*).
+# Both images build with the repository root as context: images/vnc/Dockerfile for the
+# VNC variant (tasks vnc:*), images/wasm/Dockerfile for the WASM variant (tasks wasm:*).
 
 [tools]
 golangci-lint = "2.14.0"
@@ -15,7 +15,7 @@ PORT = "8080"
 [tasks."vnc:build"]
 description = "Build the container image"
 # --format docker: in the default OCI format podman drops HEALTHCHECK.
-run = "podman build --format docker -f vnc/Dockerfile -t $IMAGE_NAME ."
+run = "podman build --format docker -f images/vnc/Dockerfile -t $IMAGE_NAME ."
 
 [tasks."vnc:stop"]
 description = "Stop and remove the container"
@@ -34,9 +34,9 @@ run = [
 ]
 
 [tasks."vnc:bench"]
-description = "Build the image and measure CPU, traffic and click latency (vnc/bench)"
+description = "Build the image and measure CPU, traffic and click latency (images/vnc/bench)"
 depends = ["vnc:build"]
-dir = "{{config_root}}/vnc/bench"
+dir = "{{config_root}}/images/vnc/bench"
 usage = 'arg "[label]" help="Name of the run in results.jsonl" default="local"'
 run = [
   "npm ci --silent",
@@ -48,48 +48,48 @@ run = [
 # --- WASM image --------------------------------------------------------------
 
 [tasks."wasm:build"]
-description = "Build the web root with bmp.jsdos into wasm/dist"
+description = "Build the web root with bmp.jsdos into images/wasm/dist"
 # Only rebuilt when one of these changed.
-sources = ["wasm/build-bundle.sh", "wasm/dosbox.conf", "wasm/index.html", "VERSION", "web/*", "bmp/**/*"]
-outputs = ["wasm/dist/bmp.jsdos"]
-run = "wasm/build-bundle.sh wasm/dist"
+sources = ["images/wasm/build-bundle.sh", "images/wasm/dosbox.conf", "images/wasm/index.html", "VERSION", "images/shared/*", "bmp/**/*"]
+outputs = ["images/wasm/dist/bmp.jsdos"]
+run = "images/wasm/build-bundle.sh images/wasm/dist"
 
 [tasks."wasm:docker"]
 description = "Build the container image (bmp-wasm)"
-run = "podman build --format docker -f wasm/Dockerfile -t bmp-wasm ."
+run = "podman build --format docker -f images/wasm/Dockerfile -t bmp-wasm ."
 
 [tasks."wasm:smoke"]
 description = "Build the container image and smoke test it (page, bundle, save API)"
 depends = ["wasm:docker"]
-run = "wasm/smoke.sh bmp-wasm"
+run = "images/wasm/smoke.sh bmp-wasm"
 
 [tasks."wasm:run-docker"]
-description = "Run the container locally (port 8090, saves in wasm/savegame)"
+description = "Run the container locally (port 8090, saves in images/wasm/savegame)"
 depends = ["wasm:docker"]
 run = [
-  "mkdir -p wasm/savegame",
+  "mkdir -p images/wasm/savegame",
   "echo 'Opening http://localhost:8090'",
   "open http://localhost:8090 || true",
-  "podman run --rm -p 8090:8080 -v \"$PWD/wasm/savegame:/data\" bmp-wasm",
+  "podman run --rm -p 8090:8080 -v \"$PWD/images/wasm/savegame:/data\" bmp-wasm",
 ]
 
 [tasks."wasm:run"]
-description = "Local dev server for wasm/dist (python, no save persistence)"
+description = "Local dev server for images/wasm/dist (python, no save persistence)"
 depends = ["wasm:build"]
 run = [
   "echo 'Opening http://localhost:8000 (no save persistence)'",
   "open http://localhost:8000 || true",
-  "python3 -m http.server 8000 -d wasm/dist",
+  "python3 -m http.server 8000 -d images/wasm/dist",
 ]
 
 [tasks."wasm:test"]
 description = "go.mod tidiness, vet, format check and unit tests of the save server"
-dir = "{{config_root}}/wasm"
+dir = "{{config_root}}/images/wasm"
 run = ["go mod tidy -diff", "go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test ./..."]
 
 [tasks."wasm:clean"]
 description = "Remove the generated web root"
-run = "rm -rf wasm/dist"
+run = "rm -rf images/wasm/dist"
 
 # --- Go re-implementation (remake/) ------------------------------------------
 
@@ -244,7 +244,7 @@ run = "tools/transfermarkt/games.sh"
 
 [tasks.lint]
 description = "golangci-lint over both Go modules (config: .golangci.yml), file names that differ only in case"
-run = ["cd remake && golangci-lint run ./...", "cd wasm && golangci-lint run ./...", ".githooks/check-names"]
+run = ["cd remake && golangci-lint run ./...", "cd images/wasm && golangci-lint run ./...", ".githooks/check-names"]
 
 [tasks."remake:test-tm"]
 description = "Tests of the Transfermarkt scripts (tools/transfermarkt), offline"

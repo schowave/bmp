@@ -11,17 +11,20 @@ or `mise run wasm:run-docker`; `mise tasks` lists every task.
 
 Run `mise run check` after every change. It runs golangci-lint
 (`.golangci.yml`) over both Go modules and a check for file names that
-differ only in case, then `go mod tidy -diff`, vet, the gofmt check and the tests of `remake/`
-(`remake:test`, on Apple Silicon also as amd64 in `remake:test-amd64`), of
-the Transfermarkt scripts (`remake:test-tm`) and of the save server in
-`wasm/` (`wasm:test`). Fix every failure it reports.
+differ only in case, then `go mod tidy -diff`, vet, the gofmt check and the
+tests of `remake/` (`remake:test`, on Apple Silicon also as amd64 in
+`remake:test-amd64`), of the Transfermarkt scripts (`remake:test-tm`) and of
+the save server in `images/wasm/` (`wasm:test`). Fix every failure it
+reports.
 
 The slower stages, which CI runs on every pull request and push to `main`:
 
-- Changes to `vnc/`, `web/` or `bmp/`: run `mise run vnc:bench` (builds the
-  VNC image with podman, then checks picture, clicks and idle pausing).
-- Changes to `wasm/`, `web/` or `bmp/`: run `mise run wasm:smoke` (builds the
-  WASM image, then checks page, bundle and the save API).
+- Changes to `images/vnc/`, `images/shared/` or `bmp/`: run
+  `mise run vnc:bench` (builds the VNC image with podman, then checks
+  picture, clicks and idle pausing).
+- Changes to `images/wasm/`, `images/shared/` or `bmp/`: run
+  `mise run wasm:smoke` (builds the WASM image, then checks page, bundle and
+  the save API).
 - Changes to the rules in `remake/internal/game`: run
   `mise run remake:test-long`, the tests that play whole seasons (`check`
   runs the tests with `-short`).
@@ -92,7 +95,7 @@ Use `gh` for pull requests and CI results, for example `gh pr create`,
 - Glossary: `docs/glossary.md`.
 - Review rules beyond the checks: `CODING_STANDARDS.md`.
 - Architecture decisions: `docs/adr/`.
-- Images: `README.md`, `wasm/README.md`, `vnc/bench/README.md`.
+- Images: `README.md`, `images/wasm/README.md`, `images/vnc/bench/README.md`.
 
 The agent setup (this file, the `CLAUDE.md` files, `.claude/`) is owned by
 David Schowalter (@schowave), who reviews every change to it.

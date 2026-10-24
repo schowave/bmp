@@ -30,7 +30,7 @@ any browser from a container, and re-implemented in Go.
 | | How it runs | Saves | Details |
 |---|---|---|---|
 | **VNC image** `schowave/bmp:latest` | DOSBox in the container, streamed to the browser with [noVNC](https://novnc.com) | Host directory, drive `D:` | [Architecture](#architecture) |
-| **WASM image** `schowave/bmp:wasm` | DOSBox as WebAssembly in the browser ([js-dos](https://js-dos.com/)), the container only serves files and saves | Host directory, one save per browser | [wasm/README.md](wasm/README.md) |
+| **WASM image** `schowave/bmp:wasm` | DOSBox as WebAssembly in the browser ([js-dos](https://js-dos.com/)), the container only serves files and saves | Host directory, one save per browser | [images/wasm/README.md](images/wasm/README.md) |
 | **Go remake** | Native program for macOS, Windows and Linux, built with [Ebitengine](https://ebitengine.org) | `~/Library/Application Support/bmp` and the like | [remake/README.md](remake/README.md) |
 
 ## Quick start
@@ -53,7 +53,7 @@ Open <http://localhost:8080> and save to `D:` in the game.
 docker run -d -p 8090:8080 -v ./bmp-saves:/data schowave/bmp:wasm
 ```
 
-Open <http://localhost:8090>. See [wasm/README.md](wasm/README.md) for the
+Open <http://localhost:8090>. See [images/wasm/README.md](images/wasm/README.md) for the
 save API and the Synology setup.
 
 ### Go remake
@@ -71,7 +71,7 @@ GL and X11 headers.
 
 ```bash
 mise run vnc:run          # VNC image on port 8080, saves in savegame/
-mise run wasm:run-docker  # WASM image on port 8090, saves in wasm/savegame/
+mise run wasm:run-docker  # WASM image on port 8090, saves in images/wasm/savegame/
 ```
 
 ## Features
@@ -123,12 +123,12 @@ Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :59
                                                    └── D: /savegame    (persistent saves)
 ```
 
-The WASM image is described in [wasm/README.md](wasm/README.md#architecture).
+The WASM image is described in [images/wasm/README.md](images/wasm/README.md#architecture).
 
 ### Synology NAS
 
 1. Create a project folder on your NAS (e.g. `/volume1/docker/bmp/`)
-2. Add `vnc/docker-compose.yml` from this repository
+2. Add `images/vnc/docker-compose.yml` from this repository
 3. In **Container Manager** → **Project** → **Create**, point to the folder and start
 4. If using a reverse proxy, add WebSocket headers under **Custom Header**:
 
@@ -163,7 +163,7 @@ services:
 > [!WARNING]
 > Neither image asks for a password. Do not forward the port to the internet as it is.
 
-The VNC server runs with `-SecurityTypes None`, so anyone who reaches its port is in the running game, with mouse and keyboard, and can overwrite the saves on `D:`. There is only one game, so whoever connects plays it alongside you. The WASM image gives each browser its own save, but anyone who knows or guesses a slot name can read and overwrite it through the API, see [wasm/README.md](wasm/README.md#save-files).
+The VNC server runs with `-SecurityTypes None`, so anyone who reaches its port is in the running game, with mouse and keyboard, and can overwrite the saves on `D:`. There is only one game, so whoever connects plays it alongside you. The WASM image gives each browser its own save, but anyone who knows or guesses a slot name can read and overwrite it through the API, see [images/wasm/README.md](images/wasm/README.md#save-files).
 
 That is fine on a home network. To play from outside, reach the NAS through a VPN such as WireGuard or Tailscale, or put a reverse proxy with its own login in front, for example nginx with basic auth or Authelia. The reverse proxy built into DSM forwards requests but does not ask for a login by itself.
 
@@ -193,7 +193,7 @@ The game runs unprivileged as user `bmp` (uid 1000), while the mounted directory
 docker exec bmp sh -c 'touch /savegame/PROBE && echo writable || echo denied; rm -f /savegame/PROBE'
 ```
 
-`vnc/docker-compose.yml` therefore runs the container in group `100`, which on a Synology is `users`, the group owning the shared folders, and whose ACL grants write access:
+`images/vnc/docker-compose.yml` therefore runs the container in group `100`, which on a Synology is `users`, the group owning the shared folders, and whose ACL grants write access:
 
 ```yaml
     group_add:
@@ -213,10 +213,10 @@ Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mi
 | `mise run vnc:build` | Build the container image |
 | `mise run vnc:run` | Stop, build, and start in detached mode |
 | `mise run vnc:stop` | Stop and remove the container |
-| `mise run vnc:bench [label]` | Build and benchmark the image with checks, see [vnc/bench/README.md](vnc/bench/README.md) |
+| `mise run vnc:bench [label]` | Build and benchmark the image with checks, see [images/vnc/bench/README.md](images/vnc/bench/README.md) |
 | `mise run release` | Start the release workflow, see [Releases](#releases) |
 
-Both Dockerfiles build with the repository root as context, e.g. `docker build -f vnc/Dockerfile .`
+Both Dockerfiles build with the repository root as context, e.g. `docker build -f images/vnc/Dockerfile .`
 
 The animation at the top is rendered from the remake's demo screens with
 `remake/tools/readme-gif.sh` (needs ImageMagick and an awake display).
@@ -226,10 +226,10 @@ The animation at the top is rendered from the remake's demo screens with
 | Path | Contents |
 |---|---|
 | `bmp/` | Game files, used by both images |
-| `web/` | Help page and favicon, served by both images |
-| `vnc/` | VNC image: `Dockerfile`, start script, DOSBox config, noVNC player page, `docker-compose.yml` |
-| `vnc/bench/` | Benchmark for the VNC image with Playwright, see [vnc/bench/README.md](vnc/bench/README.md) |
-| `wasm/` | WASM image and its save server, see [wasm/README.md](wasm/README.md) |
+| `images/shared/` | Help page and favicon, served by both images |
+| `images/vnc/` | VNC image: `Dockerfile`, start script, DOSBox config, noVNC player page, `docker-compose.yml` |
+| `images/vnc/bench/` | Benchmark for the VNC image with Playwright, see [images/vnc/bench/README.md](images/vnc/bench/README.md) |
+| `images/wasm/` | WASM image and its save server, see [images/wasm/README.md](images/wasm/README.md) |
 | `remake/` | Re-implementation of the game in Go, see [remake/README.md](remake/README.md) |
 | `docs/re/` | Rules and screens of the original, reverse-engineered from `BMMAIN.EXE` |
 | `docs/adr/`, `docs/glossary.md` | Architecture decisions and the terms of the game |
@@ -238,9 +238,9 @@ The animation at the top is rendered from the remake's demo screens with
 
 ### CI
 
-Every push to `main` and every pull request runs `mise run check`, builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
+Every push to `main` and every pull request runs `mise run check`, builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [images/vnc/bench/README.md](images/vnc/bench/README.md).
 
-The WASM image gets a smoke test without a browser, `wasm/smoke.sh`: page and bundle are served, a save comes back byte for byte, invalid names and oversized saves are refused, and the server does not run as root. Locally: `mise run wasm:smoke`.
+The WASM image gets a smoke test without a browser, `images/wasm/smoke.sh`: page and bundle are served, a save comes back byte for byte, invalid names and oversized saves are refused, and the server does not run as root. Locally: `mise run wasm:smoke`.
 
 ### Help page
 
@@ -249,7 +249,7 @@ bottom right of the game page. The WASM variant also answers the shorter `/hilfe
 one does not, because websockify serves files literally, which is why both pages link to
 `hilfe.html`.
 
-The page lives at `web/hilfe.html` since both images serve it; both Docker builds take it
+The page lives at `images/shared/hilfe.html` since both images serve it; both Docker builds take it
 from there.
 
 ## Releases

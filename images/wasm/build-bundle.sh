@@ -6,13 +6,13 @@
 #   .jsdos/dosbox.conf  — DOSBox configuration
 #   <game files>        — everything from bmp/
 #
-# Usage: wasm/build-bundle.sh <output dir>
-# The Docker build writes to /public, `mise run wasm:build` to wasm/dist.
+# Usage: images/wasm/build-bundle.sh <output dir>
+# The Docker build writes to /public, `mise run wasm:build` to images/wasm/dist.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 GAME_DIR="$PROJECT_ROOT/bmp"
 OUT_DIR="${1:?Usage: $0 <output dir>}"
 mkdir -p "$OUT_DIR"
@@ -49,10 +49,10 @@ cp "$SCRIPT_DIR/dosbox.conf" "$TMPDIR_BUILD/.jsdos/dosbox.conf"
 (cd "$TMPDIR_BUILD" && zip -q -r -9 "$OUTPUT" .)
 
 # The page and what it serves next to the bundle. The help page and favicon live
-# in web/ because both images serve them.
+# in images/shared/ because both images serve them.
 cp "$SCRIPT_DIR/index.html" "$OUT_DIR/index.html"
 cp "$PROJECT_ROOT/VERSION" "$OUT_DIR/version.txt"
-cp "$PROJECT_ROOT/web/hilfe.html" "$OUT_DIR/hilfe.html"
-cp "$PROJECT_ROOT/web/favicon.png" "$OUT_DIR/favicon.png"
+cp "$PROJECT_ROOT/images/shared/hilfe.html" "$OUT_DIR/hilfe.html"
+cp "$PROJECT_ROOT/images/shared/favicon.png" "$OUT_DIR/favicon.png"
 
 echo "Created $OUTPUT ($(du -h "$OUTPUT" | cut -f1))"

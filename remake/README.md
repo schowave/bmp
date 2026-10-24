@@ -60,7 +60,8 @@ on the first start, and on another Mac the app opens only with right click →
 *Open*. They carry the original files of Software 2000.
 
 The icon of both programs and of the game's window is `cmd/bmp/icon.png`: the
-title banner (PIC/4.VGA) in two lines on the marble of PIC/22.CP.
+letters of the title banner (PIC/4.VGA) in three lines on its turf, framed by
+the marble of PIC/22.CP, so that it still reads at small sizes.
 `mise run remake:icon` (`go run ./cmd/bmpicon`) draws it anew from the
 embedded files. For the `.exe`, the task runs go-winres (`go run
 github.com/tc-hib/go-winres@v0.3.3`), which links the icon and the version of
@@ -428,7 +429,7 @@ hang.
 that differ only in case and builds, vets and checks the formatting of the
 staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
 runs `mise run check` (golangci-lint, then this task and the tests of the save
-server in `../wasm`) under xvfb, and uploads all demo screens as the
+server in `../images/wasm`) under xvfb, and uploads all demo screens as the
 `remake-shots` artifact and the package docs (`go doc -all`) as
 `remake-godoc`.
 

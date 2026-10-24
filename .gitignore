@@ -9,7 +9,7 @@ Thumbs.db
 savegame/
 
 # Generated WASM web root (mise run wasm:build)
-wasm/dist/
+images/wasm/dist/
 
 # Go re-implementation
 remake/bin/

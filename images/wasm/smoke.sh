@@ -3,7 +3,7 @@
 # served, that a save survives a PUT and a GET byte for byte, and that the server
 # rejects what it should. Needs no browser; the game itself is not started.
 #
-# Usage: wasm/smoke.sh [image]   (default bmp-wasm, what `mise run wasm:docker` builds)
+# Usage: images/wasm/smoke.sh [image]   (default bmp-wasm, what `mise run wasm:docker` builds)
 # Runs podman, or the command in CONTAINER_CLI (CI sets docker).
 
 set -euo pipefail

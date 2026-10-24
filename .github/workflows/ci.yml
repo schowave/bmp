@@ -48,7 +48,7 @@ jobs:
     - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5.2.2
 
     # The same command as locally: lint, then vet, format and tests of remake/ and
-    # wasm/. The remake tests compare the files built into the remake and the
+    # images/wasm/. The remake tests compare the files built into the remake and the
     # constant tables with the original in bmp/ of the repository.
     - name: Check
       run: xvfb-run -a mise run check
@@ -93,7 +93,7 @@ jobs:
       uses: docker/build-push-action@v7
       with:
         context: .
-        file: vnc/Dockerfile
+        file: images/vnc/Dockerfile
         platforms: linux/amd64
         load: true
         tags: bmp:ci
@@ -104,10 +104,10 @@ jobs:
       with:
         node-version: 22
         cache: npm
-        cache-dependency-path: vnc/bench/package-lock.json
+        cache-dependency-path: images/vnc/bench/package-lock.json
 
     - name: Install Playwright
-      working-directory: vnc/bench
+      working-directory: images/vnc/bench
       run: |
         npm ci
         npx playwright install --with-deps chromium
@@ -115,7 +115,7 @@ jobs:
     # Short run: enough for the checks (full picture, clicks arrive, DOSBox runs with
     # a client and pauses without one), not for comparing numbers.
     - name: Benchmark with checks
-      working-directory: vnc/bench
+      working-directory: images/vnc/bench
       env:
         CONTAINER_CLI: docker
       run: node bench.mjs --label ci --image bmp:ci --secs 5 --clicks 5 --check
@@ -126,8 +126,8 @@ jobs:
       with:
         name: vnc-bench
         path: |
-          vnc/bench/shots/
-          vnc/bench/results.jsonl
+          images/vnc/bench/shots/
+          images/vnc/bench/results.jsonl
         if-no-files-found: ignore
 
   wasm:
@@ -142,7 +142,7 @@ jobs:
       uses: docker/build-push-action@v7
       with:
         context: .
-        file: wasm/Dockerfile
+        file: images/wasm/Dockerfile
         platforms: linux/amd64
         load: true
         tags: bmp-wasm:ci
@@ -153,4 +153,4 @@ jobs:
     - name: Smoke test
       env:
         CONTAINER_CLI: docker
-      run: wasm/smoke.sh bmp-wasm:ci
+      run: images/wasm/smoke.sh bmp-wasm:ci

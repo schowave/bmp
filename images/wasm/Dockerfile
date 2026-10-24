@@ -1,24 +1,24 @@
 # The build context is the repository root:
-#   docker build -f wasm/Dockerfile .
+#   docker build -f images/wasm/Dockerfile .
 # The bundle is built here in the image build, so local and CI take the same path.
 
 FROM golang:1.27-alpine AS server
 WORKDIR /src
-COPY wasm/go.mod wasm/server.go ./
+COPY images/wasm/go.mod images/wasm/server.go ./
 RUN CGO_ENABLED=0 go build -o server .
 
 FROM alpine:3 AS bundle
 RUN apk add --no-cache bash zip
 WORKDIR /src
 COPY bmp bmp
-COPY web web
+COPY images/shared images/shared
 COPY VERSION VERSION
-COPY wasm/build-bundle.sh wasm/dosbox.conf wasm/index.html wasm/
-RUN wasm/build-bundle.sh /public
+COPY images/wasm/build-bundle.sh images/wasm/dosbox.conf images/wasm/index.html images/wasm/
+RUN images/wasm/build-bundle.sh /public
 
 FROM alpine:3
 # Unprivileged like the VNC image, with the same uid 1000. /data must be writable
-# for it, see wasm/docker-compose.yml.
+# for it, see images/wasm/docker-compose.yml.
 RUN adduser -D -H -u 1000 bmp \
     && mkdir /data \
     && chown bmp:bmp /data

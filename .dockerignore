@@ -4,6 +4,6 @@
 .idea
 docs
 savegame
-wasm/dist
-wasm/savegame
-vnc/bench
+images/wasm/dist
+images/wasm/savegame
+images/vnc/bench

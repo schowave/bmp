@@ -7,13 +7,13 @@ services:
       - "49160:8080"
     volumes:
       # Port and path are those of the running Synology project, so this file can be
-      # used there as it is. Unlike vnc/docker-compose.yml (./savegame), the path is
+      # used there as it is. Unlike images/vnc/docker-compose.yml (./savegame), the path is
       # fixed because the existing saves live there. Adjust both on another host,
       # e.g. ./savegame:/data. Whoever changes the path must move the .sav files
       # along, otherwise every slot starts empty.
       - /volume1/docker/bmp-wasm/bmp-saves:/data
     # The server runs unprivileged as uid 1000 and has to write to /data. As in
-    # vnc/docker-compose.yml it therefore runs in group 100 (users on Synology),
+    # images/vnc/docker-compose.yml it therefore runs in group 100 (users on Synology),
     # which the folder's ACL grants write access. On another host, use the group
     # that owns the directory, or run chown -R 1000:1000 on it.
     group_add:

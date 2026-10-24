@@ -81,7 +81,7 @@ jobs:
       uses: docker/build-push-action@v7
       with:
         context: .
-        file: vnc/Dockerfile
+        file: images/vnc/Dockerfile
         platforms: linux/amd64
         push: true
         tags: schowave/bmp:${{ needs.version.outputs.version }}
@@ -110,7 +110,7 @@ jobs:
       uses: docker/build-push-action@v7
       with:
         context: .
-        file: wasm/Dockerfile
+        file: images/wasm/Dockerfile
         platforms: linux/amd64
         push: true
         tags: schowave/bmp:wasm-${{ needs.version.outputs.version }}

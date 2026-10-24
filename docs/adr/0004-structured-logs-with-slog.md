@@ -4,7 +4,7 @@ status: accepted
 
 # Structured logs with log/slog in the save server
 
-The save server of the WASM image (`wasm/server.go`) logged with `log.Printf`.
+The save server of the WASM image (`images/wasm/server.go`) logged with `log.Printf`.
 The agent-readiness criterion `structured_logging` asks for logs a tool can
 parse; operators read them with `docker logs`.
 

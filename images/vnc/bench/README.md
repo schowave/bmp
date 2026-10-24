@@ -13,7 +13,7 @@ builds the image as `bmp`, runs the benchmark against it with `--check` and prin
 all runs so far. For variants, call the script directly:
 
 ```bash
-cd vnc/bench
+cd images/vnc/bench
 npm ci && npx playwright install chromium
 node bench.mjs --label cycles10k --conf variants/cycles10k.conf
 node bench.mjs --label no-pause --cmd "$(cat variants/no-pause.sh)"
@@ -37,7 +37,7 @@ screenshot to `shots/<label>.png`.
 The container is run with `podman`; set `CONTAINER_CLI=docker` to use Docker.
 
 `variants/` holds the alternatives measured so far: two DOSBox configs with fixed
-cycles, and `no-pause.sh`, the container command from before `vnc/start.sh` stopped
+cycles, and `no-pause.sh`, the container command from before `images/vnc/start.sh` stopped
 DOSBox while nobody is connected.
 
 `shot.mjs` only takes a screenshot, optionally after clicks or key presses, which
