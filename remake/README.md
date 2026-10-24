@@ -45,6 +45,27 @@ remake/bin/bmp
 before, for trying out a change. Or run it straight from the sources with `mise run remake:run` (`go run
 ./cmd/bmp`).
 
+### Windows and Mac programs
+
+`mise run remake:dist` builds into `bin/dist`:
+
+- `bmp.exe`, the game for 64-bit Windows, which cross-compiles on any system.
+- On macOS only: `Bundesliga Manager Professional.app`, one binary for Apple
+  Silicon and Intel, and the same app zipped for passing on.
+
+The game files are built in, so each is a single file; saves go to the user's
+config directory (`%AppData%\bmp`, `~/Library/Application Support/bmp`). The
+programs have no signature from a developer account: Windows SmartScreen warns
+on the first start, and on another Mac the app opens only with right click →
+*Open*. They carry the original files of Software 2000.
+
+The icon of both programs and of the game's window is `cmd/bmp/icon.png`: the
+title banner (PIC/4.VGA) in two lines on the marble of PIC/22.CP.
+`mise run remake:icon` (`go run ./cmd/bmpicon`) draws it anew from the
+embedded files. For the `.exe`, the task runs go-winres (`go run
+github.com/tc-hib/go-winres@v0.3.3`), which links the icon and the version of
+`VERSION` into it; the app gets an `.icns` made with `iconutil`.
+
 ### The original files
 
 `internal/embedded/data` holds what the game needs from `../bmp`, converted
@@ -231,6 +252,7 @@ the panel with new messages is open, it takes the keys, so close it first.
 |---|---|
 | `cmd/bmp` | The game |
 | `cmd/bmpextract` | Extracts the original files into open formats in `internal/embedded/data` |
+| `cmd/bmpicon` | Draws the icon `cmd/bmp/icon.png` from the embedded title banner |
 | `cmd/scenepreview` | Plays a single goal scene in a window, for development |
 | `internal/assets` | Readers of the original files (EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT`, goal scenes) and of the extract |
 | `internal/game` | The rules: calendar, fixtures, match engine, cups, finances, stadium, players, transfers, season end. Deterministic (the random generator of the MS C runtime), saved as JSON |

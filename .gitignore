@@ -34,3 +34,5 @@ __pycache__/
 *.pem
 *.key
 .vscode/
+# Windows resources that mise run remake:dist writes for the .exe
+remake/cmd/bmp/rsrc_windows_*.syso

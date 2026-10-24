@@ -4,8 +4,12 @@
 package main
 
 import (
+	"bytes"
+	_ "embed"
 	"flag"
 	"fmt"
+	"image"
+	"image/png"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -54,6 +58,9 @@ func main() {
 	}
 	ebiten.SetWindowSize(ui.ScreenW**scale, ui.ScreenH**scale)
 	ebiten.SetWindowTitle("Bundesliga Manager Professional")
+	if ic, err := png.Decode(bytes.NewReader(iconPNG)); err == nil {
+		ebiten.SetWindowIcon([]image.Image{ic})
+	}
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	mana, err := dir.Mana()
 	if err != nil {
@@ -122,6 +129,12 @@ func openGameDir(flagDir string) (*assets.Dir, error) {
 	}
 	return nil, firstErr
 }
+
+// iconPNG is the icon of the remake, drawn by cmd/bmpicon (mise run
+// remake:icon); macOS takes the icon of the app instead.
+//
+//go:embed icon.png
+var iconPNG []byte
 
 func defaultSaveDir() string {
 	if d, err := os.UserConfigDir(); err == nil {

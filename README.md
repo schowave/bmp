@@ -65,6 +65,7 @@ only needed to extract them again.
 ```bash
 mise run remake:run     # play it (Go and, on Linux, the GL/X11 headers)
 mise run remake:build   # build remake/bin/bmp
+mise run remake:dist    # Windows .exe and (on macOS) Mac app in remake/bin/dist
 mise run remake:test    # vet, gofmt and the fast tests (remake:test-long: all)
 ```
 
