@@ -68,8 +68,9 @@ func (s *State) OptimizeLineup(m int) OptimalLineup {
 	*sq = tuned[best]
 	res.Manual = tuned[best] != autos[best]
 
-	if after[best] < before && s.playable(orig[:]) {
-		// Never worse than what the manager had, if that could be played.
+	if after[best] < before+lineupMinGain && s.playable(orig[:]) {
+		// What the manager had stays unless the new lineup gains
+		// lineupMinGain, as every single change must, if it can be played.
 		*sq = orig
 		mg.AutoLineup = mode
 		res.After, res.Manual = res.Before, false
@@ -102,7 +103,7 @@ func (lr *lineupRater) score() int {
 	x := lr.rate()
 	for i := 0; i < SquadMax; i++ {
 		sl := &lr.s.Squads[lr.m][i]
-		if !sl.Empty() && sl.Lineup >= 1 && sl.Lineup <= 11 && sl.Fatigue >= tiredFatigue {
+		if sl.InTeam() && sl.Fatigue >= tiredFatigue {
 			x -= tiredCost
 		}
 	}
@@ -137,7 +138,7 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 		improved = false
 		for a := 0; a < SquadMax; a++ {
 			sa := &sq[a]
-			if sa.Empty() || sa.Lineup < 1 || sa.Lineup > 11 {
+			if !sa.InTeam() {
 				continue
 			}
 			for b := 0; b < SquadMax; b++ {
@@ -145,7 +146,7 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 				if b == a || sb.Empty() || !s.available(sb) {
 					continue
 				}
-				inTeam := sb.Lineup >= 1 && sb.Lineup <= 11
+				inTeam := sb.InTeam()
 				if inTeam && b < a {
 					continue
 				}
@@ -163,13 +164,13 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 		}
 		taken = [BoardCols][BoardRows]bool{}
 		for i := 0; i < SquadMax; i++ {
-			if sl := &sq[i]; !sl.Empty() && sl.Lineup >= 1 && sl.Lineup <= 11 {
+			if sl := &sq[i]; sl.InTeam() {
 				taken[sl.Col][sl.Row] = true
 			}
 		}
 		for a := 0; a < SquadMax; a++ {
 			sa := &sq[a]
-			if sa.Empty() || sa.Lineup < 1 || sa.Lineup > 11 {
+			if !sa.InTeam() {
 				continue
 			}
 			col, row := sa.Col, sa.Row
@@ -207,7 +208,7 @@ func (s *State) playable(sq []Slot) bool {
 	n := 0
 	for i := range sq {
 		sl := &sq[i]
-		if sl.Empty() || sl.Lineup < 1 || sl.Lineup > 11 {
+		if !sl.InTeam() {
 			continue
 		}
 		if !s.available(sl) {
@@ -225,7 +226,7 @@ func (s *State) playable(sq []Slot) bool {
 // original punishes a wrong position so little that the search would
 // otherwise field a goalkeeper as a striker.
 func (s *State) fitsCell(sl *Slot) bool {
-	if sl.Lineup < 1 || sl.Lineup > 11 {
+	if !sl.InTeam() {
 		return true
 	}
 	pos := s.Persons[sl.Person].Position()
