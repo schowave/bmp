@@ -49,6 +49,16 @@ func showNotice(app *App, ss *Session, n game.Notice, next func(*App)) {
 		app.Push(&trophyScreen{n: n, done: next})
 	case game.NoticeSeasonEnd:
 		app.Push(&seasonEndScreen{ss: ss, n: n, done: next})
+	case game.NoticeFlag:
+		app.Push(newFlagScreen(n.Title, next))
+	case game.NoticeDraw:
+		// A draw whose screens are switched off in the options is skipped
+		// here, not by a show that closes again.
+		if c := game.Cup(n.Cup); drawShown(ss.S, c) {
+			app.Push(NewDrawShow(ss, c, next))
+		} else {
+			next(app)
+		}
 	default:
 		next(app)
 	}
@@ -282,7 +292,7 @@ func drawFlag(g *Gfx, dst *ebiten.Image) {
 // flagScreen is f_0310_01f2: before the matches of a competition the flag
 // with its name in the big font ("Ligaspiel", "DFB-Pokal", ...), for
 // f_3930_01e7(0x32); then next opens the matches. The winter break and the
-// season end show it too (game.State.TakeFlag), with no next.
+// season end show it too (game.NoticeFlag).
 type flagScreen struct {
 	text   string
 	frames int

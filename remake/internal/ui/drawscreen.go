@@ -15,6 +15,7 @@ type DrawShow struct {
 	state int // drawAsk, drawRun, drawDone
 	shown int // plates on the board
 	t     int // frames of the moving plate
+	done  func(*App)
 }
 
 const (
@@ -35,8 +36,19 @@ const (
 	drawMoveFrames = 40
 )
 
-// NewDrawShow creates the presentation of the draw of cup c.
-func NewDrawShow(ss *Session, c game.Cup) *DrawShow { return &DrawShow{ss: ss, cup: c, state: -1} }
+// NewDrawShow creates the presentation of the draw of cup c; done (which may
+// be nil) runs when it closes.
+func NewDrawShow(ss *Session, c game.Cup, done func(*App)) *DrawShow {
+	return &DrawShow{ss: ss, cup: c, state: -1, done: done}
+}
+
+// close ends the show without the overview.
+func (d *DrawShow) close(app *App) {
+	app.Pop()
+	if d.done != nil {
+		d.done(app)
+	}
+}
 
 func (d *DrawShow) slots() []int {
 	var out []int
@@ -47,7 +59,7 @@ func (d *DrawShow) slots() []int {
 }
 
 func (d *DrawShow) overview(app *App) {
-	app.Replace(NewCupRound(d.ss, d.cup, 0, nil))
+	app.Replace(NewCupRound(d.ss, d.cup, 0, d.done))
 }
 
 // drawShown tells whether the draw of cup c is shown: the options switch the
@@ -69,7 +81,7 @@ func (d *DrawShow) Update(app *App) error {
 	switch d.state {
 	case -1:
 		if !drawShown(s, d.cup) {
-			app.Pop()
+			d.close(app)
 			return nil
 		}
 		if d.cup == game.CupDFB && len(s.CupPairs(d.cup)) < 4 {
@@ -87,7 +99,7 @@ func (d *DrawShow) Update(app *App) error {
 				if yes {
 					d.state = drawRun
 				} else {
-					app.Pop()
+					d.close(app)
 				}
 			}))
 	case drawRun:

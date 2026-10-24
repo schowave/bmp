@@ -16,8 +16,15 @@ func noticeGame(t *testing.T) *State {
 
 func TestNoticeQueue(t *testing.T) {
 	s := noticeGame(t)
-	if s.HasNotices() || s.TakeNotices() != nil {
-		t.Fatal("new game has notices")
+	var draws []int
+	for _, n := range s.TakeNotices() {
+		if n.Kind != NoticeDraw {
+			t.Fatalf("new game has notice %+v", n)
+		}
+		draws = append(draws, n.Cup)
+	}
+	if !slices.Equal(draws, []int{0, 1, 2, 3}) || s.HasNotices() {
+		t.Fatalf("draws of a new game %v", draws)
 	}
 	s.alert(0, BackdropMenu, msgWinterBreak)
 	s.seasonScreen(0, 3, 1)

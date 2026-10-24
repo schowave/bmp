@@ -40,30 +40,12 @@ func (d *Driver) Update(app *App) error {
 			return nil
 		}
 	}
-	// The flags of the winter break and of the season end come first, as
-	// in the loop of the original, before its turns and reports.
-	if b, ok := s.TakeFlag(); ok {
-		app.Push(newFlagScreen(b, nil))
-		return nil
-	}
-	// Dialogs and screens the game queued (credit due, cards, trophies,
-	// the season report ...) come first.
+	// The dialogs and screens the game queued (flags, cup draws, credit
+	// due, cards, trophies, the season report ...) come first, in the order
+	// of the original.
 	if s.HasNotices() {
 		ShowNotices(app, d.ss, nil)
 		return nil
-	}
-	// A draw whose screens are switched off in the options is skipped here,
-	// not by a show that closes again: a run of them would take more passes
-	// than a tick has.
-	for {
-		c, ok := s.TakeDraw()
-		if !ok {
-			break
-		}
-		if drawShown(s, c) {
-			app.Push(NewDrawShow(d.ss, c))
-			return nil
-		}
 	}
 	switch s.Loop.Phase {
 	case game.PhaseTurn:

@@ -1,14 +1,9 @@
 package game
 
-import (
-	"runtime"
-	"strings"
-	"sync"
-	"weak"
-)
+import "strings"
 
 // NoticeKind is the way the original shows a note at once instead of
-// adding it to the message panel.
+// adding it to the message panel, or a screen it shows between the turns.
 type NoticeKind int
 
 const (
@@ -31,6 +26,12 @@ const (
 	// NoticePopup is the message panel of f_3091_05c4 called with a single
 	// text: Lines are the message, Day its date.
 	NoticePopup
+	// NoticeFlag is the flag with a word of f_0310_01f2 between the turns:
+	// Title is the word (WINTERPAUSE, SAISONENDE).
+	NoticeFlag
+	// NoticeDraw is the presentation of a cup draw (f_17c2_0006): Cup is
+	// the game.Cup drawn.
+	NoticeDraw
 )
 
 // Backdrop is what the original shows behind an alert or a popup.
@@ -47,7 +48,9 @@ const (
 	BackdropDesk
 )
 
-// Notice is a note the UI has to show at once, in the order of the queue.
+// Notice is a note the UI has to show at once. The original shows each where
+// its rule runs; the remake queues them in that order (State.Notices) and
+// the UI shows them in the order of the queue.
 type Notice struct {
 	Kind     NoticeKind
 	Manager  int // index of the manager it is for, -1 = everybody
@@ -58,7 +61,7 @@ type Notice struct {
 	Small    []string
 	Day      int  // date of a card or popup
 	Birthday bool // card: closes after a minute, "Das war keine Minute !"
-	Cup      int  // trophy: 0 championship, 1..4 cup
+	Cup      int  // trophy: 0 championship, 1..4 cup; draw: the Cup
 	Dialogs  []NoticeDialog
 	Popups   []Notice
 }
@@ -70,68 +73,42 @@ type NoticeDialog struct {
 	Lines []string
 }
 
-// The queues live beside the State until it gets a field of its own; a
-// weak key lets a State be collected with its queue.
-var noticeQueues struct {
-	sync.Mutex
-	m map[weak.Pointer[State]][]Notice
-}
-
-func (s *State) noticeKey() weak.Pointer[State] {
-	k := weak.Make(s)
-	if noticeQueues.m == nil {
-		noticeQueues.m = map[weak.Pointer[State]][]Notice{}
-	}
-	if _, ok := noticeQueues.m[k]; !ok {
-		noticeQueues.m[k] = nil
-		runtime.AddCleanup(s, func(k weak.Pointer[State]) {
-			noticeQueues.Lock()
-			delete(noticeQueues.m, k)
-			noticeQueues.Unlock()
-		}, k)
-	}
-	return k
-}
-
 // AddNotice queues a notice for the UI.
-func (s *State) AddNotice(n Notice) {
-	noticeQueues.Lock()
-	defer noticeQueues.Unlock()
-	k := s.noticeKey()
-	noticeQueues.m[k] = append(noticeQueues.m[k], n)
-}
+func (s *State) AddNotice(n Notice) { s.Notices = append(s.Notices, n) }
 
 // TakeNotices returns the queued notices, the oldest first, and clears
 // the queue.
 func (s *State) TakeNotices() []Notice {
-	noticeQueues.Lock()
-	defer noticeQueues.Unlock()
-	k := weak.Make(s)
-	q := noticeQueues.m[k]
-	if q != nil {
-		noticeQueues.m[k] = []Notice{}
-	}
+	q := s.Notices
+	s.Notices = nil
 	return q
 }
 
 // HasNotices reports whether notices are waiting.
-func (s *State) HasNotices() bool {
-	noticeQueues.Lock()
-	defer noticeQueues.Unlock()
-	return len(noticeQueues.m[weak.Make(s)]) > 0
-}
+func (s *State) HasNotices() bool { return len(s.Notices) > 0 }
 
 // lastNotice returns the newest queued notice of manager mi of kind k.
 func (s *State) lastNotice(mi int, k NoticeKind) *Notice {
-	noticeQueues.Lock()
-	defer noticeQueues.Unlock()
-	q := noticeQueues.m[weak.Make(s)]
-	for i := len(q) - 1; i >= 0; i-- {
-		if q[i].Kind == k && q[i].Manager == mi {
-			return &q[i]
+	for i := len(s.Notices) - 1; i >= 0; i-- {
+		if n := &s.Notices[i]; n.Kind == k && n.Manager == mi {
+			return n
 		}
 	}
 	return nil
+}
+
+// flag queues a flag with a word, once: a run of days without a turn shows
+// it once.
+func (s *State) flag(text string) {
+	if n := len(s.Notices); n > 0 && s.Notices[n-1].Kind == NoticeFlag && s.Notices[n-1].Title == text {
+		return
+	}
+	s.AddNotice(Notice{Kind: NoticeFlag, Manager: -1, Title: text})
+}
+
+// queueDraw queues the presentation of the draw of cup c.
+func (s *State) queueDraw(c Cup) {
+	s.AddNotice(Notice{Kind: NoticeDraw, Manager: -1, Cup: int(c)})
 }
 
 // lines splits a message text of msgtexts.go into its lines.

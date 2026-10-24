@@ -383,5 +383,5 @@ func (s *State) nextCupRound(cup Cup) {
 	if cup == CupDFB {
 		s.dfbHomeRule()
 	}
-	s.Draws = append(s.Draws, cup)
+	s.queueDraw(cup)
 }
