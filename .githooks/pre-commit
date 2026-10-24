@@ -1,6 +1,7 @@
 #!/bin/sh
 # Builds, vets and checks the formatting of the remake as it is staged, when a commit touches it, so a
 # commit that does not compile is stopped. Enable with `mise run hooks`.
+"$(dirname "$0")/check-names" || exit 1
 git diff --cached --name-only | grep -q '^remake/' || exit 0
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT

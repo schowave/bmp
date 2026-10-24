@@ -102,9 +102,10 @@ run = "go run ./cmd/bmp"
 description = "Build and start the remake, ending the one this task started before"
 dir = "{{config_root}}/remake"
 # The pid file keeps the game this task started, so a restart ends only that
-# one; a game ended so exits without an error.
+# one; a game ended so exits without an error. One pid file per checkout: a
+# restart in a worktree leaves the game of the main checkout running.
 run = '''
-pidfile="${TMPDIR:-/tmp}/bmp-remake.pid"
+pidfile="${TMPDIR:-/tmp}/bmp-remake-$(pwd | shasum | cut -c1-8).pid"
 if [ -f "$pidfile" ]; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
 go build -o bin/bmp ./cmd/bmp
 if command -v caffeinate >/dev/null; then caffeinate -u -t 2; fi
@@ -234,20 +235,40 @@ description = "Fetch seasons from transfermarkt.de and write them into remake/in
 dir = "{{config_root}}/remake"
 run = "tools/transfermarkt/update.sh"
 
-# --- Checks --------------------------------------------------------------------
 [tasks."remake:seasons-games"]
 description = "Order the squads of the seasons 1995/96 to 2003/04 by their games on transfermarkt.de (args: [FROM [TO]])"
 dir = "{{config_root}}/remake"
 run = "tools/transfermarkt/games.sh"
 
+# --- Checks --------------------------------------------------------------------
 
 [tasks.lint]
-description = "golangci-lint over both Go modules (config: .golangci.yml)"
-run = ["cd remake && golangci-lint run ./...", "cd wasm && golangci-lint run ./..."]
+description = "golangci-lint over both Go modules (config: .golangci.yml), file names that differ only in case"
+run = ["cd remake && golangci-lint run ./...", "cd wasm && golangci-lint run ./...", ".githooks/check-names"]
+
+[tasks."remake:test-tm"]
+description = "Tests of the Transfermarkt scripts (tools/transfermarkt), offline"
+dir = "{{config_root}}/remake"
+run = "python3 -B -m unittest discover -s tools/transfermarkt -p 'test_*.py'"
+
+[tasks."remake:test-amd64"]
+description = "On Apple Silicon: the tests of the seasons and the extract as amd64 (Rosetta), as CI runs them"
+dir = "{{config_root}}/remake"
+# Go fuses multiply and add (FMA) on arm64 but not on amd64, so float maths
+# can give other logos or strengths on a Mac than in CI. Elsewhere CI's own
+# run covers it.
+run = '''
+if [ "$(uname -sm)" != "Darwin arm64" ]; then exit 0; fi
+if ! arch -x86_64 /usr/bin/true 2>/dev/null; then
+  echo "remake:test-amd64 needs Rosetta: softwareupdate --install-rosetta" >&2
+  exit 1
+fi
+GOARCH=amd64 go test -short ./internal/seasons/... ./internal/assets/...
+'''
 
 [tasks.check]
 description = "All fast checks: lint, remake vet/format/tests, save server tests"
-depends = ["lint", "remake:test", "wasm:test"]
+depends = ["lint", "remake:test", "remake:test-tm", "remake:test-amd64", "wasm:test"]
 
 [tasks.hooks]
 description = "Use the hooks of .githooks (pre-commit builds and vets the staged remake)"

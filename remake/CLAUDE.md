@@ -7,4 +7,5 @@
 - **Playtesting**, or a bug the user reports from play: `tools/playtest.sh` plays the game fast and reports what it shows, so reproduce the bug there; read `../docs/playtest.md` before reporting a bug from a playtest.
 - **Restarting** the game for the user: `mise run remake:restart` (in the background); it ends only the game it started before.
 - **Parallel agents** on screens: start each with `isolation: "worktree"`; package `internal/ui` is one namespace, so a shared tree clashes names and breaks the build mid-edit.
+- **Real seasons** (data, logos, a new season): `README.md` § The real seasons and ADR 0009; `mise run remake:seasons-update` fetches transfermarkt.de, so the user runs it.
 - **Checks**: `mise run remake:test` (with `-short`), `mise run remake:test-long` for the tests that play seasons; `mise run hooks` enables the pre-commit build and vet.
