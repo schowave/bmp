@@ -41,8 +41,10 @@ clubs, 20 players per club.
   into the amateur tiers before 2008 only when the places cannot be filled
   without them. Strengths come from the goals and points
   per game, spread over the ranges of the original.
-- Squads come from Transfermarkt where it has the club: from 1995/96 on in
-  its order, by market value; before, ranked by the games Wikipedia knows.
+- Squads come from Transfermarkt where it has the club: from 2004/05 on in
+  its order, by market value; from 1995/96 to 2003/04, which have no market
+  values there and no games per season in Wikipedia, in the order of its
+  squad page; before, ranked by the games Wikipedia knows.
   Wikipedia and Wikidata fill the rest. Squads of
   small clubs outside the files (the Regionalliga from 2008 on) are
   incomplete; their empty slots get random names like in the original.
