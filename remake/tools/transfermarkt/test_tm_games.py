@@ -1,7 +1,7 @@
-"""Tests von tm_games ohne Netz: die Umrechnungen und eine Saison ueber einen
-kleinen Cache. Laufen mit python3 der Standardbibliothek
-(mise run remake:test-tm); requests und beautifulsoup4 werden ersetzt, wenn
-sie fehlen."""
+"""Tests of tm_games without the network: the conversions and a season from a
+small cache. They run with the standard library of python3
+(mise run remake:test-tm); requests and beautifulsoup4 are stubbed when
+missing."""
 import contextlib, io, json, os, sys, tempfile, types, unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -48,22 +48,21 @@ class Conversions(unittest.TestCase):
         self.assertEqual(g.minutes("-"), 0)
 
     def test_by_games(self):
-        kader = squad(("Sven Scheuer", "Torwart"), ("Oliver Kahn", "Torwart"), ("Bernd Dreher", "Torwart"),
-                      ("Markus Münch", "Linker Verteidiger"), ("Ali Daei", "Mittelstürmer"))
-        got = g.by_games(kader, games(("Oliver Kahn", "34", "3.060'"),
-                                      ("Sven Scheuer", "Wurde in dieser Spielzeit nicht eingesetzt", "-"),
-                                      ("Markus Münch", "Stand in dieser Spielzeit nicht im Kader", "-"),
-                                      ("Ali Daei", "34", "2.500'")))
-        # Mehr Minuten zuerst; ohne Einsatz und ohne Leistungsdaten wie im Kader.
+        listed = squad(("Sven Scheuer", "Torwart"), ("Oliver Kahn", "Torwart"), ("Bernd Dreher", "Torwart"),
+                       ("Markus Münch", "Linker Verteidiger"), ("Ali Daei", "Mittelstürmer"))
+        got = g.by_games(listed, games(("Oliver Kahn", "34", "3.060'"),
+                                       ("Sven Scheuer", "Wurde in dieser Spielzeit nicht eingesetzt", "-"),
+                                       ("Markus Münch", "Stand in dieser Spielzeit nicht im Kader", "-"),
+                                       ("Ali Daei", "34", "2.500'")))
+        # More minutes first; without games and without performance data as in the squad.
         self.assertEqual([p["name"] for p in got],
                          ["Oliver Kahn", "Ali Daei", "Sven Scheuer", "Bernd Dreher", "Markus Münch"])
 
 
 class Offline(unittest.TestCase):
     def test_season_from_cache(self):
-        """Ein Verein des Spiels bekommt seinen Kader nach Einsaetzen; der Kader
-        eines Vereins, den das Spiel nicht hat, und ein Verein ohne Kader
-        bleiben aussen vor."""
+        """A club of the game gets its squad by games; the squad of a club the
+        game lacks and a club without a squad are left out."""
         with tempfile.TemporaryDirectory() as out:
             cache = os.path.join(out, ".cache", "1997")
             write(os.path.join(cache, "L1-27.squad.json"),

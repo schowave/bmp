@@ -8,6 +8,6 @@ set -eu
 from=${1:-1995}
 to=${2:-2003}
 dir=${BMP_TM_DIR:-$HOME/tm-daten}
-uv run --quiet --with requests --with beautifulsoup4 python tools/transfermarkt/tm_games.py \
+uv run --quiet --with requests==2.34.2 --with beautifulsoup4==4.15.0 python tools/transfermarkt/tm_games.py \
 	--out "$dir" --seasons internal/seasons/data --from "$from" --to "$to"
 go run ./cmd/bmpseasons squads -tm "$dir" -from "$from" -to "$to"

@@ -1,7 +1,7 @@
-"""Tests von tm_json ohne Netz: die Umrechnungen und ein Lauf mit --offline
-ueber einen kleinen Cache. Laufen mit python3 der Standardbibliothek
-(mise run remake:test-tm); requests und beautifulsoup4 werden ersetzt, wenn
-sie fehlen."""
+"""Tests of tm_json without the network: the conversions and a run with
+--offline from a small cache. They run with the standard library of python3
+(mise run remake:test-tm); requests and beautifulsoup4 are stubbed when
+missing."""
 import contextlib, io, json, os, sys, tempfile, types, unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -19,8 +19,9 @@ def squad(*players):
     return [{"name": n, "position": p, "geburtsdatum": "", "marktwert": v} for n, p, v in players]
 
 
-def row(platz, verein, verein_id, spiele="34", tore="60:30", punkte="70"):
-    return {"platz": platz, "verein": verein, "verein_id": verein_id, "spiele": spiele, "tore": tore, "punkte": punkte}
+def row(rank, club, club_id, games="34", goals="60:30", points="70"):
+    # The keys are those of the cache files of tm_fetch.table.
+    return {"platz": rank, "verein": club, "verein_id": club_id, "spiele": games, "tore": goals, "punkte": points}
 
 
 class Conversions(unittest.TestCase):
@@ -62,7 +63,7 @@ class Offline(unittest.TestCase):
                 "regionalligas.json": ["RLW"],
                 "L1.table.json": [row("1", "Borussia Dortmund", "16")],
                 "L2.table.json": [row("1", "Hertha BSC", "44")],
-                "L3.table.json": [row("1", "Eintracht Braunschweig", "23", tore="81:22", punkte="85")],
+                "L3.table.json": [row("1", "Eintracht Braunschweig", "23", goals="81:22", points="85")],
                 "RLW.table.json": [row("1", "Preußen Münster", "35"), row("4", "SC Verl", "42")],
                 "L1-16.squad.json": squad(("Roman Weidenfeller", "Torwart", "2,00 Mio. €"), ("Mats Hummels", "Innenverteidiger", "9,00 Mio. €")),
                 "L2-44.squad.json": squad(("Adrián Ramos", "Mittelstürmer", "3,00 Mio. €")),

@@ -6,6 +6,7 @@
 package update
 
 import (
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -257,12 +258,8 @@ func foreignClubs(cups []Foreign, prev *assets.Mana, german []assets.ClubRecord)
 			continue
 		}
 		taken[name] = true
-		p := 1.0
-		if perCup[f.Cup] > 1 {
-			p = 1 - float64(rank[f.Cup])/float64(perCup[f.Cup]-1)
-		}
+		v := spread(rank[f.Cup], perCup[f.Cup], r[0], r[1])
 		rank[f.Cup]++
-		v := r[0] + int(math.Round(float64(p*float64(r[1]-r[0]))))
 		out = append(out, assets.ClubRecord{Name: name, Strength: [3]int{v, v, v}})
 	}
 	for _, c := range prev.Clubs[numGerman:] {
@@ -421,11 +418,29 @@ func unplayed(x, y row, k int) int {
 	return sy - sx
 }
 
-func perGame(v, games int) float64 {
-	if games == 0 {
-		return 0
+// comparePerGame compares a per ga games with b per gb games by
+// multiplying across, so that no float decides; a club without games
+// counts 0.
+func comparePerGame(a, ga, b, gb int) int {
+	if ga == 0 {
+		a, ga = 0, 1
 	}
-	return float64(v) / float64(games)
+	if gb == 0 {
+		b, gb = 0, 1
+	}
+	return cmp.Compare(a*gb, b*ga)
+}
+
+// spread is the strength of place pos of n, the best first, spread from
+// hi down to lo. Its float maths has no multiply-add to fuse, so it writes
+// the same on arm64 and amd64; exact integer rounding would round some
+// halves up that it rounds down and change the seasons.
+func spread(pos, n, lo, hi int) int {
+	p := 1.0
+	if n > 1 {
+		p = 1 - float64(pos)/float64(n-1)
+	}
+	return lo + int(math.Round(p*float64(hi-lo)))
 }
 
 // ordered sorts the rows of a tier best first: by place, so that the
@@ -445,12 +460,11 @@ func ordered(rows []row) []row {
 		if x.rank != y.rank {
 			return x.rank < y.rank
 		}
-		if px, py := perGame(x.points, x.games), perGame(y.points, y.games); px != py {
-			return px > py
+		if c := comparePerGame(x.points, x.games, y.points, y.games); c != 0 {
+			return c > 0
 		}
-		dx, dy := perGame(x.goalsFor-x.goalsAgainst, x.games), perGame(y.goalsFor-y.goalsAgainst, y.games)
-		if dx != dy {
-			return dx > dy
+		if c := comparePerGame(x.goalsFor-x.goalsAgainst, x.games, y.goalsFor-y.goalsAgainst, y.games); c != 0 {
+			return c > 0
 		}
 		return x.name < y.name
 	})
@@ -536,10 +550,10 @@ func strengths(clubs []placed) map[string][3]int {
 			}
 		}
 		lo, hi := strengthRange[lg][0], strengthRange[lg][1]
-		metric := [3]func(r row) float64{
-			func(r row) float64 { return -perGame(r.goalsAgainst, r.games) },
-			func(r row) float64 { return perGame(r.points, r.games) },
-			func(r row) float64 { return perGame(r.goalsFor, r.games) },
+		metric := [3]func(r row) int{
+			func(r row) int { return -r.goalsAgainst },
+			func(r row) int { return r.points },
+			func(r row) int { return r.goalsFor },
 		}
 		for k := 0; k < 3; k++ {
 			idx := make([]int, len(rows))
@@ -560,15 +574,11 @@ func strengths(clubs []placed) map[string][3]int {
 				if ra.games == 0 || rb.games == 0 {
 					return idx[a] < idx[b]
 				}
-				return metric[k](ra) > metric[k](rb)
+				return comparePerGame(metric[k](ra), ra.games, metric[k](rb), rb.games) > 0
 			})
 			for pos, i := range idx {
-				p := 1.0
-				if len(rows) > 1 {
-					p = 1 - float64(pos)/float64(len(rows)-1)
-				}
 				v := out[rows[i].name]
-				v[k] = lo + int(math.Round(p*float64(hi-lo)))
+				v[k] = spread(pos, len(rows), lo, hi)
 				out[rows[i].name] = v
 			}
 		}

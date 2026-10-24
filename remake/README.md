@@ -119,7 +119,8 @@ by the season before, the league they played in first, then their strength
 there; fetch the season again later in the season for strengths from its
 table. A new club gets a plain shield, noted as such in
 `internal/seasons/credits/logos.csv` for `bmpseasons logo`. It needs
-`uv` for the Python packages `requests` and `beautifulsoup4`.
+`uv` for the Python packages `requests` and `beautifulsoup4`, whose versions
+`tools/transfermarkt/update.sh` and `games.sh` pin.
 
 A new season, step by step:
 
@@ -163,10 +164,11 @@ transfermarkt.de ── tm_fetch.py (reads the pages)
 ```
 
 `internal/seasons/update` is the core: plain functions from these files and
-the season before to a season (`Season`, `SetSquads`), with no file access;
-`cmd/bmpseasons` reads and writes the files. `match.go` and `names.go` turn
-the names of Transfermarkt into those of the game, so that its spellings do
-not leak into the seasons. New data belongs in a new stage, new rules for
+the season before to a season (`Season`, `SetSquads`), plus the readers of
+the Transfermarkt files (`ReadClubs`, `ReadForeign`, `ReadSquads`);
+`cmd/bmpseasons` reads the seasons and writes the files. `match.go` and
+`names.go` turn the names of Transfermarkt into those of the game, so that
+its spellings do not leak into the seasons. New data belongs in a new stage, new rules for
 the places, strengths or squads in `update`.
 
 When Transfermarkt changes its pages, `tools/transfermarkt/tm_fetch.py`
@@ -487,6 +489,11 @@ ties). Deliberate differences:
   (`f_1a58_3176`) and highlights row 18 in the menu.
 - Real seasons (see Playing) fit the places of the original: a league with
   more clubs than places passes its last ones down, one with fewer takes
+- With real seasons built in, the setup of a new game shows the clubs it
+  plays with left of the club name ("ORIGINAL 1991/92" or "SAISON
+  1995/96") and "S: SAISON WÄHLEN" right of it, and the key S opens the
+  season choice, a screen the original does not have; while a name is
+  typed, S is a letter of it.
   the best of the tier below; the third league is the Oberliga until
   1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
   second teams of professional clubs before 2008 unless the places cannot
@@ -494,7 +501,9 @@ ties). Deliberate differences:
   goals and points per game of the season ([ADR 0009](../docs/adr/0009-real-seasons-from-transfermarkt.md)).
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
-  from the fourth season on, as in the original's modern start.
+  from the fourth season on, as in the original's modern start. The
+  history of a manager counts from the year of the season; the original's
+  modern start counts from 1991, a year before its first season.
 - In a real season a win counts 3 points from 1995/96 on, as in the real
   leagues (the original's variable D:0x2271); with the clubs of the
   original it stays 2. When a new real season changes the points of a win

@@ -48,6 +48,20 @@ func TestSeasonStartYearAndLength(t *testing.T) {
 	}
 }
 
+// The history screen counts the original's modern start from 1991, one
+// year before its first season, and a real season from its own year.
+func TestHistoryBaseYear(t *testing.T) {
+	for _, c := range []struct {
+		season string
+		year   int
+		want   int
+	}{{"", 0, 1991}, {"1995-96", 1995, 1995}} {
+		if got := seasonGame(t, c.season, c.year, OneYear).HistoryBaseYear(); got != c.want {
+			t.Errorf("%q: %d, want %d", c.season, got, c.want)
+		}
+	}
+}
+
 func TestPointsPerWin(t *testing.T) {
 	for _, c := range []struct {
 		season string

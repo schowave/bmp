@@ -7,6 +7,10 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
+
+	"github.com/schowave/bmp/remake/internal/assets"
+	"github.com/schowave/bmp/remake/internal/game"
+	"github.com/schowave/bmp/remake/internal/seasons"
 )
 
 // FileScreen is the screen to load or save a game (f_322b_2bbe, called by
@@ -240,6 +244,20 @@ func (f *FileScreen) confirm(app *App) {
 	lastFileName = f.name
 	f.ss.S = s
 	app.Reset(NewDriver(f.ss))
+}
+
+// LoadGame restores a saved game with the clubs it was started with: those
+// of the original (orig) or of its real season.
+func LoadGame(data []byte, orig *assets.Mana) (*game.State, error) {
+	id, err := game.SaveSeason(data)
+	if err != nil {
+		return nil, err
+	}
+	m, err := seasons.ManaOr(orig, id)
+	if err != nil {
+		return nil, err
+	}
+	return game.Load(data, m)
 }
 
 // asker is the name over a question: the manager whose turn it is, none
