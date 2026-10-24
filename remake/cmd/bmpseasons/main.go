@@ -6,7 +6,7 @@
 //	                   season always anew, the others from data/.cache)
 //	bmpseasons import-tm -tm DIR
 //	                   takes the Transfermarkt squads of DIR (YYYY-YY.json)
-//	                   into data/seasons/*/transfermarkt.csv
+//	                   into data/transfermarkt/YYYY-YY.csv
 //	bmpseasons build   writes internal/seasons/data from every season in
 //	                   data/ (offline, deterministic)
 package main
@@ -273,7 +273,7 @@ func importTM(data, dir string) error {
 			}
 			squads[match[i]], names[match[i]] = ps, c.Name
 		}
-		if err := source.WriteTM(sdir, squads, names); err != nil {
+		if err := source.WriteTM(filepath.Join(data, filepath.FromSlash(source.TMFile(sea.ID))), squads, names); err != nil {
 			return err
 		}
 		logf("season %s: %d clubs, %d without a match", sea.Label(), len(squads), unmatched)

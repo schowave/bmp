@@ -23,8 +23,8 @@ clubs, 20 players per club.
   access and its terms forbid extracting its database. The CC0 dataset built
   from it covers only the Bundesliga from 2012 on.
 - Squads of Transfermarkt that the owner of the repository collected
-  themselves, one file per season: taken in by `bmpseasons import-tm` as
-  `transfermarkt.csv` next to the Wikipedia data. They cover all tiers,
+  themselves, one file per season: taken in by `bmpseasons import-tm` into
+  `remake/data/transfermarkt/`, apart from the openly licensed data. They cover all tiers,
   also the Oberliga and Regionalliga of the 1990s, and are taken as the most
   correct squads; the owner decided to publish them in this public
   repository, knowing that Transfermarkt's terms forbid reusing its
