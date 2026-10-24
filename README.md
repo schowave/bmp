@@ -273,3 +273,6 @@ A run that fails or is cancelled before step 4 leaves no git tag behind and does
 Software 2000. This project is a fan project, not affiliated with the rights
 holders; it only packages the game to keep it playable and re-implements it
 for study.
+
+The rest of the repository is not openly licensed: `LICENSE` says what it
+covers and what not.

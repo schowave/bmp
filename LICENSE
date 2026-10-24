@@ -1,0 +1,15 @@
+Copyright (c) 2023-2026 David Schowalter. All rights reserved.
+
+This covers the code and documentation of this repository outside `bmp/`.
+No licence is granted: you may read it here on GitHub, but not copy,
+modify or distribute it without permission.
+
+Not covered:
+
+- `bmp/`, the original files of Bundesliga Manager Professional, belong to
+  Software 2000. `remake/internal/embedded/data` and every binary of the
+  remake contain them, converted into PNG and JSON.
+- The real seasons in `remake/internal/seasons` come from transfermarkt.de,
+  Wikipedia (CC BY-SA 4.0) and Wikidata (CC0); `remake/README.md` § Legal
+  names the sources and `remake/internal/seasons/credits/` the licence and
+  author of every logo. Club names and logos are trademarks of the clubs.
