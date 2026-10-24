@@ -428,7 +428,11 @@ Nachholspiele, event with bit 0x80 (f_0310_000a / f_0310_07a2):
 3. Copy results from the scratch row positions (2j, 2j+1) to result[league][md][pair] for each record,
    free the record (slot = 0), zero the first 19 bytes of the scratch row (bug: 20 would be needed) and
    set D:2280[e] = 0.
-(f_0310_000a returns garbage-nonzero when there are no records; 07a2 then plays nothing — harmless.)
+f_0310_000a(e) depends on the manager index F:0x304a: the game loop sets it to 0x1e first, and then
+any record with slot == e returns 1. With a manager m (header of the main menu, f_08bc_0b5f) it
+returns 1 only when a record with slot == e is in m's league (M+0x237a) and its pair contains m's
+club (M+0x2260); it recomputes fixtures with f_2a41_10e3 for that and restores those of the current
+matchday afterwards.
 
 Forfeits: if a human club's status M+0x237f == 'd' (set by f_0f9d_0002 when fewer than 8 players are
 available, see §5.5) and the date is not on/after 10 June, f_1a58_20b2 returns 1/2: the game is not simulated, the manager is

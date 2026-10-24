@@ -41,4 +41,26 @@ func TestEventLabelOnlyForClubsTakingPart(t *testing.T) {
 	if got := s.EventLabel(0); got != "Relegation" {
 		t.Errorf("relegation with the club: %q", got)
 	}
+
+	set(EvReplay)
+	l := m.League
+	other := 0
+	for i, p := range Fixtures(l, 1) {
+		if p.Home != m.Team && p.Away != m.Team {
+			other = i
+			break
+		}
+	}
+	s.Postponed[0] = PostponedGame{Slot: s.Event, Matchday: 1, League: l, Pair: other}
+	if got := s.EventLabel(0); got != "Spielfrei" {
+		t.Errorf("Nachholspiele without the club: %q", got)
+	}
+	for i, p := range Fixtures(l, 1) {
+		if p.Home == m.Team || p.Away == m.Team {
+			s.Postponed[1] = PostponedGame{Slot: s.Event, Matchday: 1, League: l, Pair: i}
+		}
+	}
+	if got := s.EventLabel(0); got != "Nachholspiel" {
+		t.Errorf("Nachholspiel of the club: %q", got)
+	}
 }

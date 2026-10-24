@@ -246,7 +246,9 @@ club opens its information.
   the round F:0x0008; "Relegation" if e == 0x10 and m's club is F:0x5369
   or F:0x5370; "Europapokal" if e & 0x70, e != 0x10 and m's status in one
   of the cups 1..3 equals F:0x0008+c; "Nachholspiel" if e & 0x80 and
-  f_0310_000a(day); otherwise "Spielfrei" (so also for an eliminated club).
+  f_0310_000a(day), which with F:0x304a = m is true only when m's club plays
+  one of the day's Nachholspiele; otherwise "Spielfrei" (so also for an
+  eliminated club or a club without a Nachholspiel).
 - Calendar sheet: weekday, month, year colour 4 with shadow 7, the day in the
   big font colour 6 with shadow 8, lines at y=54, 65, 84, 94.
 - Box under the matchday: the table places of the manager's league after each

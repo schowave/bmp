@@ -1,9 +1,9 @@
 package game
 
 // EventLabel describes today's event for manager mi like the header of the
-// main menu ("12. Spieltag", "DFB-Pokal", ...). A cup day or the relegation
-// shows only for a club that takes part in it, otherwise the day is
-// "Spielfrei" (f_08bc_0b5f @0f28).
+// main menu ("12. Spieltag", "DFB-Pokal", ...). A cup day, the relegation
+// or a day of Nachholspiele shows only for a club that takes part in it,
+// otherwise the day is "Spielfrei" (f_08bc_0b5f @0f28).
 func (s *State) EventLabel(mi int) string {
 	if s.Loop.SeasonEnd {
 		return "SAISONENDE"
@@ -22,10 +22,25 @@ func (s *State) EventLabel(mi int) string {
 	case ev&EvEurope != 0 && ev != EvRelegation &&
 		(inCup(CupLandesmeister) || inCup(CupPokalsieger) || inCup(CupUEFA)):
 		return "Europapokal"
-	case ev&EvReplay != 0 && s.hasReplays():
+	case ev&EvReplay != 0 && s.hasReplayOf(l, m.Team):
 		return "Nachholspiel"
 	}
 	return "Spielfrei"
+}
+
+// hasReplayOf reports whether club team of league l plays a Nachholspiel
+// today: f_0310_000a with a manager in F:0x304a (the game loop passes 0x1e
+// and asks for any Nachholspiel, hasReplays).
+func (s *State) hasReplayOf(l, team int) bool {
+	for _, p := range s.Postponed {
+		if p.Slot != s.Event || p.League != l {
+			continue
+		}
+		if pair := Fixtures(l, p.Matchday)[p.Pair]; pair.Home == team || pair.Away == team {
+			return true
+		}
+	}
+	return false
 }
 
 // NextOpponent returns the opponent of manager mi in today's event.
