@@ -28,9 +28,12 @@ they wrote for it.
 - `tools/transfermarkt` fetches transfermarkt.de, which blocks automated
   access and whose terms forbid reusing its database; the owner decided to
   keep the script and its results in this public repository.
-- A new season takes its foreign clubs, the logos of its clubs and the clubs
-  of the places outside the leagues (from 2008/09 on) from the season before;
-  a club the seasons do not know gets a plain shield.
+- A new season takes the places outside the leagues (from 2008/09 on) from
+  the Regionalliga and its foreign clubs from the European cups of
+  Transfermarkt; what the script cannot fetch, the logos of known clubs and
+  the rest of the foreign clubs come from the season before. A club the
+  seasons do not know gets a plain shield until `bmpseasons logo` gives it
+  its logo.
 - The rules of ADR 0008 for the places stay: overflowing leagues pass clubs
   down, short ones take the best of the tier below, strengths come from goals
   and points per game.

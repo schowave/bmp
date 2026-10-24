@@ -107,12 +107,30 @@ mise run remake:seasons-update -- 2025 2026   # several
 ```
 
 The task fetches tables and squads with `tools/transfermarkt` into
-`$BMP_TM_DIR` (default `~/tm-daten`, with its cache) and writes the seasons
-with `cmd/bmpseasons update`: the clubs on the places of the game with
-strengths from their table and their most valuable players; clubs the
-tables lack (the places outside the leagues from 2008/09 on), the logos and
-the foreign clubs come from the season before. It needs `uv` for the Python
-packages `requests` and `beautifulsoup4`.
+`$BMP_TM_DIR` (default `~/tm-daten`, with its cache), from 2008/09 on also
+the Regionalliga, and the foreign clubs of the European cups
+(`YYYY-YY.europe.json`). `cmd/bmpseasons update` writes the seasons from
+them: the clubs on the places of the game with strengths from their table
+and their most valuable players, the places outside the leagues from the
+Regionalliga, the foreign clubs from the European cups. What the files
+lack comes from the season before: clubs, logos, foreign clubs. It needs
+`uv` for the Python packages `requests` and `beautifulsoup4`.
+
+A new season, step by step:
+
+1. `mise run remake:seasons-update -- 2027` and read its output: a league
+   that could not be fetched leaves the season unwritten; "Regionalliga nicht
+   gefunden" or no foreign clubs mean those come from the season before.
+2. `git diff --stat remake/internal/seasons` shows what changed; "N new
+   logos" in the output are clubs with a plain shield.
+3. Give them their logos: `go run ./cmd/bmpseasons logo -club "NAME" -image
+   FILE -source "…"` (below).
+4. `mise run remake:shot seasons OUT.png` and the setup of the season: the
+   clubs and their logos.
+5. `mise run check`, then commit the season, its logos and credits.
+
+When Transfermarkt changes its pages, `tools/transfermarkt/tm_fetch.py`
+reads nothing or too little; the output of step 1 shows it.
 
 A club with a plain shield gets a logo of an image, drawn in the colours of
 the logos of the original, in every season it plays in:

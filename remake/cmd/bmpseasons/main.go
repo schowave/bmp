@@ -108,7 +108,11 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
-	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Previous: prev, Known: known, NextLogo: next})
+	foreign, err := update.ReadForeign(filepath.Join(dir, s.ID+".europe.json"))
+	if err != nil {
+		return err
+	}
+	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Known: known, NextLogo: next})
 	if err != nil {
 		return err
 	}

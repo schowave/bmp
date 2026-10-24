@@ -78,6 +78,39 @@ def table(session, comp, year, pause):
     return rows
 
 
+def regionalligas(session, year, pause):
+    """Kuerzel der Regionalliga-Staffeln einer Saison, aus der Uebersicht der
+    deutschen Wettbewerbe (Land 40): die Links .../regionalliga-.../wettbewerb/KUERZEL."""
+    url = f"{BASE}/wettbewerbe/national/wettbewerbe/40/saison_id/{year}"
+    soup = get(session, url, pause)
+    codes = []
+    for a in soup.select("a[href*='/wettbewerb/']"):
+        m = re.search(r"/(regionalliga[a-z-]*)/startseite/wettbewerb/([A-Z0-9]+)", a.get("href", ""))
+        if m and m.group(2) not in codes:
+            codes.append(m.group(2))
+    return codes
+
+
+def participants(session, comp, year, pause):
+    """Teilnehmer eines Europapokals (CL, EL, UCOL, CLQ, ELQ, ECLQ) einer Saison:
+    Verein und Land, in der Reihenfolge der Seite."""
+    url = f"{BASE}/x/teilnehmer/pokalwettbewerb/{comp}/saison_id/{year}"
+    soup = get(session, url, pause)
+    out, seen = [], set()
+    for tr in soup.select("table.items tbody tr"):
+        link = tr.select_one("td.hauptlink a[href*='/verein/']") or tr.select_one("a[href*='/verein/']")
+        if not link:
+            continue
+        m = re.search(r"/verein/(\d+)", link["href"])
+        if not m or m.group(1) in seen:
+            continue
+        seen.add(m.group(1))
+        flag = tr.select_one("img.flaggenrahmen")
+        out.append({"verein": link.get("title") or link.get_text(strip=True), "verein_id": m.group(1),
+                    "land": flag.get("title", "") if flag else ""})
+    return out
+
+
 def squad(session, club_id, year, pause):
     """Kader eines Vereins in der Saison year/year+1."""
     url = f"{BASE}/x/kader/verein/{club_id}/saison_id/{year}/plus/1"
