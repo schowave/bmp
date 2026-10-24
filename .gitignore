@@ -37,5 +37,5 @@ __pycache__/
 # Windows resources that mise run remake:dist writes for the .exe
 remake/cmd/bmp/rsrc_windows_*.syso
 
-# Cache of the season fetcher (bmpseasons fetch)
-remake/data/.cache/
+# Python caches of tools/transfermarkt
+remake/tools/transfermarkt/__pycache__/

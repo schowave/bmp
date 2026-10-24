@@ -25,8 +25,8 @@ var cp437Bytes = func() map[rune]byte {
 	return m
 }()
 
-// cp437ToUTF8 converts a CP437 string to UTF-8.
-func cp437ToUTF8(s string) string {
+// FromCP437 converts a CP437 string, a name of a club database, to UTF-8.
+func FromCP437(s string) string {
 	r := make([]rune, 0, len(s))
 	for i := 0; i < len(s); i++ {
 		if s[i] < 0x80 {

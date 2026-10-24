@@ -1,7 +1,8 @@
 // Package seasons holds the clubs of real seasons from 1990/91 on, built
 // into every binary: for each season a club database in the format of
 // clubs.json, and the logos of the clubs the original does not have.
-// cmd/bmpseasons writes them from remake/data (mise run remake:seasons).
+// They are the data of the seasons; cmd/bmpseasons updates them from
+// Transfermarkt (mise run remake:seasons-update).
 package seasons
 
 import (
