@@ -4,6 +4,10 @@
 
 [tools]
 golangci-lint = "2.14.0"
+# For tools/re and remake/tools/transfermarkt; their packages are pinned in
+# pyproject.toml and uv.lock.
+python = "3.15.1"
+uv = "0.13.1"
 
 [env]
 IMAGE_NAME = "bmp"

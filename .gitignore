@@ -25,8 +25,9 @@ remake/shots/
 # Package docs generated in CI
 remake/godoc/
 
-# Python bytecode of the tools
+# Python bytecode and the uv environment of the tools
 __pycache__/
+.venv/
 
 # Secrets and editor settings
 .env

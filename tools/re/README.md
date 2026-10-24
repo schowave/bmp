@@ -23,8 +23,8 @@ implements them.
 ## Pipeline
 
 ```sh
-python3 -m venv .venv && .venv/bin/pip install capstone
-PATH=.venv/bin:$PATH GHIDRA=/path/to/ghidra_12.x mise run re:build
+uv sync --group re    # capstone and the other packages of pyproject.toml
+PATH=$PWD/.venv/bin:$PATH GHIDRA=/path/to/ghidra_12.x mise run re:build
 ```
 
 Ghidra's decompiler has no macOS arm64 binary in the release; build it
@@ -43,9 +43,8 @@ only; `tcpproxy.py` forwards port 5902 to it:
 podman run -d --name bmp-ref -p 5991:5902 bmp
 podman cp tools/re/refgame/tcpproxy.py bmp-ref:/tmp/
 podman exec -d bmp-ref python3 /tmp/tcpproxy.py
-pip install vncdotool pillow
-BMP_SHOTS=shots python3 tools/re/refgame/ctl.py click 320 300 3   # right click
-BMP_SHOTS=shots python3 tools/re/refgame/ctl.py shot menu.png
+BMP_SHOTS=shots uv run --group re python tools/re/refgame/ctl.py click 320 300 3   # right click
+BMP_SHOTS=shots uv run --group re python tools/re/refgame/ctl.py shot menu.png
 ```
 
 Coordinates are in the 640×480 VNC picture (twice the 320×240 of the game).

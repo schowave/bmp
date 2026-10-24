@@ -4,7 +4,7 @@
 # annotated decompilation the specs in docs/re were written from.
 #
 # usage: tools/re/run.sh [workdir]      (default: tools/re/work, ignored by git)
-# needs: python3 with capstone; optional GHIDRA=<ghidra install dir>
+# needs: python3 with capstone (uv sync --group re, see README.md); optional GHIDRA=<ghidra install dir>
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)

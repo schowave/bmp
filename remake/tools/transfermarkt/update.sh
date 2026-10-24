@@ -11,6 +11,6 @@ running=$(date +%Y)
 from=${1:-$running}
 to=${2:-$from}
 dir=${BMP_TM_DIR:-$HOME/tm-daten}
-uv run --quiet --with requests==2.34.2 --with beautifulsoup4==4.15.0 python tools/transfermarkt/tm_json.py \
+uv run --quiet --group transfermarkt python tools/transfermarkt/tm_json.py \
 	--out "$dir" --from "$from" --to "$to" --refresh
 go run ./cmd/bmpseasons update -tm "$dir" -from "$from" -to "$to"

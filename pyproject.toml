@@ -1,0 +1,31 @@
+# The Python scripts of the repository: tools/re (reverse engineering of
+# BMMAIN.EXE) and remake/tools/transfermarkt (real seasons). They are scripts,
+# not a package; this file only pins what they import beyond the standard
+# library, one dependency group each, locked in uv.lock. Python and uv are
+# pinned in mise.toml.
+#
+#   uv run --group transfermarkt python remake/tools/transfermarkt/tm_json.py …
+#   uv run --group re python tools/re/disasm16.py …
+#
+# The offline tests of remake:test-tm stub requests and bs4, so `mise run
+# check` needs none of them.
+
+[project]
+name = "bmp-tools"
+version = "0"
+requires-python = ">=3.15"
+
+[dependency-groups]
+re = [
+  "capstone==5.0.9",   # disasm16.py, fpdis.py
+  "numpy==2.5.4",      # pixcmp/find.py
+  "pillow==13.0.0",    # pixcmp, refgame/ctl.py
+  "vncdotool==1.4.2",  # refgame/ctl.py
+]
+transfermarkt = [
+  "beautifulsoup4==4.15.0",
+  "requests==2.34.2",
+]
+
+[tool.uv]
+package = false
