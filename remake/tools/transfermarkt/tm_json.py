@@ -57,7 +57,8 @@ def value(text):
 
 def convert(players):
     """Nachnamen in Grossbuchstaben; bei gleichem Nachnamen im Verein Initial davor."""
-    # Teuerste zuerst; ohne Marktwert (vor ca. 2004) bleibt es bei der Reihenfolge von Transfermarkt.
+    # Teuerste zuerst; ohne Marktwert (vor 2004) bleibt es bei der Reihenfolge von Transfermarkt,
+    # tm_games.py ordnet diese Saisons nach Einsaetzen.
     players = sorted(players, key=lambda p: -value(p["marktwert"]))
     pairs = [(split(p["name"]), group(p["position"])) for p in players]
     counts = {}

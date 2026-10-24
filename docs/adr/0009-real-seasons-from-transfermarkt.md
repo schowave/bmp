@@ -34,6 +34,10 @@ they wrote for it.
   the rest of the foreign clubs come from the season before. A club the
   seasons do not know gets a plain shield until `bmpseasons logo` gives it
   its logo.
+- The seasons 1995/96 to 2003/04, which have no market values on
+  Transfermarkt, order their squads by the games in the league of the
+  performance data of Transfermarkt (`mise run remake:seasons-games`),
+  fetched only for the clubs the seasons took a Transfermarkt squad for.
 - The rules of ADR 0008 for the places stay: overflowing leagues pass clubs
   down, short ones take the best of the tier below, strengths come from goals
   and points per game.

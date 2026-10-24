@@ -129,6 +129,23 @@ def squad(session, club_id, year, pause):
     return out
 
 
+def games(session, club_id, comp, year, pause):
+    """Einsaetze und Minuten der Spieler eines Vereins im Wettbewerb comp in der
+    Saison year/year+1, aus seinen Leistungsdaten; auch fuer Saisons ohne Marktwert."""
+    url = f"{BASE}/x/leistungsdaten/verein/{club_id}/reldata/{comp}%26{year}/plus/1"
+    soup = get(session, url, pause)
+    out = []
+    for tr in soup.select("table.items > tbody > tr"):
+        name = tr.select_one("td.hauptlink a")
+        tds = [td.get_text(" ", strip=True) for td in tr.find_all("td", recursive=False)]
+        if not name or len(tds) < 10:
+            continue
+        # Von hinten: Einsaetze, Tore, Vorlagen, Gelb, Gelb-Rot, Rot, Ein-, Auswechslungen, PPS, Minuten.
+        # Ohne Einsatz steht statt der Zahl ein Text ("Wurde ... nicht eingesetzt").
+        out.append({"name": name.get_text(strip=True), "einsaetze": tds[-10], "minuten": tds[-1]})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)

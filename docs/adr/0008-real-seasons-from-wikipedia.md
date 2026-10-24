@@ -44,7 +44,8 @@ clubs, 20 players per club.
 - Squads come from Transfermarkt where it has the club: from 2004/05 on in
   its order, by market value; from 1995/96 to 2003/04, which have no market
   values there and no games per season in Wikipedia, in the order of its
-  squad page; before, ranked by the games Wikipedia knows.
+  squad page (since ADR 0009 by the games of its performance data); before,
+  ranked by the games Wikipedia knows.
   Wikipedia and Wikidata fill the rest. Squads of
   small clubs outside the files (the Regionalliga from 2008 on) are
   incomplete; their empty slots get random names like in the original.

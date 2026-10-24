@@ -232,3 +232,28 @@ func TestRealFile(t *testing.T) {
 		}
 	}
 }
+
+// A squads file changes only the players of the clubs it names, in the
+// slots of MANA.DAT, and leaves foreign clubs alone.
+func TestSetSquads(t *testing.T) {
+	m := previousSeason()
+	before := m.Clubs[1]
+	squads := map[string]Squad{
+		"WERDER BREMEN": {Goalkeepers: []string{"REINKE", "BORel", "THIRD"}, Forwards: []string{"AILTON", "KLASNIĆ"}},
+		"FOREIGN 100":   {Goalkeepers: []string{"NOBODY"}},
+	}
+	n, err := SetSquads(m, squads)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 1 {
+		t.Errorf("changed %d clubs, want 1", n)
+	}
+	p := m.Clubs[0].Players
+	if len(p) != 20 || p[0] != "REINKE" || p[1] != "BOREL" || p[2] != "" || p[15] != "AILTON" || p[16] != "KLASNIC" {
+		t.Errorf("players %q", p)
+	}
+	if fmt.Sprint(m.Clubs[1]) != fmt.Sprint(before) || m.Clubs[100].Players != nil {
+		t.Errorf("other clubs changed: %v, %v", m.Clubs[1], m.Clubs[100])
+	}
+}
