@@ -81,7 +81,14 @@ func TestBuiltInSeasonsLoad(t *testing.T) {
 			}
 		}
 	}
-	if len(List()) != 37 {
-		t.Errorf("%d seasons, want 1990/91..2026/27", len(List()))
+	// Every season from 1990/91 on, without a gap, at least to 2026/27.
+	l := List()
+	for i, s := range l {
+		if s.Year != 1990+i {
+			t.Fatalf("season %d is %s, want %s", i, s.ID, ForYear(1990+i).ID)
+		}
+	}
+	if len(l) == 0 || l[len(l)-1].Year < 2026 {
+		t.Errorf("%d seasons, want 1990/91..2026/27 at least", len(l))
 	}
 }

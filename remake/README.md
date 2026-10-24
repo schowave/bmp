@@ -113,7 +113,12 @@ the Regionalliga, and the foreign clubs of the European cups
 them: the clubs on the places of the game with strengths from their table
 and their most valuable players, the places outside the leagues from the
 Regionalliga, the foreign clubs from the European cups. What the files
-lack comes from the season before: clubs, logos, foreign clubs. It needs
+lack comes from the season before: clubs, logos, foreign clubs. Before the
+first game of a season its tables say nothing, so clubs without games rank
+by the season before, the league they played in first, then their strength
+there; fetch the season again later in the season for strengths from its
+table. A new club gets a plain shield, noted as such in
+`internal/seasons/credits/logos.csv` for `bmpseasons logo`. It needs
 `uv` for the Python packages `requests` and `beautifulsoup4`.
 
 A new season, step by step:

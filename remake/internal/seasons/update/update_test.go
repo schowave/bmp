@@ -73,6 +73,55 @@ func TestSeason(t *testing.T) {
 	}
 }
 
+// Before the first game the tables say nothing: the clubs rank by the
+// season before, the league they played in first, then their strength
+// there; a club down from the league above leads, one up from below trails.
+func TestSeasonBeforeFirstGame(t *testing.T) {
+	prev := previousSeason()
+	for i := range prev.Clubs[:numGerman] {
+		prev.Clubs[i].Name = fmt.Sprintf("CLUB %d", i)
+		prev.Clubs[i].Strength = [3]int{90 - i, 90 - i, 90 - i}
+	}
+	var l1, l2, l3 []int
+	for i := 0; i <= 16; i++ {
+		l1 = append(l1, i)
+	}
+	l1 = append(l1, 20)    // up from the second league
+	l2 = []int{17, 18, 19} // CLUB 17 down from the first
+	for i := 21; i <= 35; i++ {
+		l2 = append(l2, i)
+	}
+	for i := 36; i <= 55; i++ {
+		l3 = append(l3, i)
+	}
+	var clubs []Club
+	for _, lg := range []struct {
+		code string
+		ids  []int
+	}{{"L1", l1}, {"L2", l2}, {"L3", l3}} {
+		for k, i := range lg.ids {
+			c := club(fmt.Sprintf("CLUB %d", i), lg.code, len(lg.ids)-k) // the places of Transfermarkt say nothing
+			c.Games, c.Goals, c.Points = 0, "0:0", 0
+			clubs = append(clubs, c)
+		}
+	}
+	out, err := Season(Input{Year: 2027, Clubs: clubs, Previous: prev, Known: []*assets.Mana{prev}, NextLogo: 2000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := out.Mana.Clubs
+	if c[0].Name != "CLUB 0" || c[17].Name != "CLUB 20" || c[18].Name != "CLUB 17" || c[38].Name != "CLUB 38" {
+		t.Errorf("order %q %q %q %q", c[0].Name, c[17].Name, c[18].Name, c[38].Name)
+	}
+	for _, x := range []struct {
+		i, want int
+	}{{0, strengthRange[0][1]}, {17, strengthRange[0][0]}, {18, strengthRange[1][1]}, {38, strengthRange[2][1]}} {
+		if c[x.i].Strength != [3]int{x.want, x.want, x.want} {
+			t.Errorf("club %d (%s): strengths %v, want %d", x.i, c[x.i].Name, c[x.i].Strength, x.want)
+		}
+	}
+}
+
 func TestMatchNames(t *testing.T) {
 	known := []string{"WERDER BREMEN", "1.FC HEIDENHEIM", "PREUßEN MÜNSTER", "VFB STUTTGART", "VFB STUTTGART II", "FSV FRANKFURT"}
 	got := matchNames([]string{"SV WERDER BREMEN", "1.FC HEIDENHEIM 1846", "PREUSSEN MÜNSTER", "VFB STUTTGART II",

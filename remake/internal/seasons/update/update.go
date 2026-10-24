@@ -147,6 +147,14 @@ func Season(in Input) (*Output, error) {
 	}
 	sort.Strings(knownNames)
 	byKnown := matchNames(others, knownNames)
+	// The places and strengths of the German clubs in the season before,
+	// for clubs that have not played yet.
+	prev := map[string]assets.ClubRecord{}
+	prevLeague := map[string]int{}
+	for i, c := range in.Previous.Clubs[:numGerman] {
+		name := assets.FromCP437(c.Name)
+		prev[name], prevLeague[name] = c, leagueOf(i)
+	}
 	var rows []row
 	tm := map[string]Club{}
 	for _, c := range in.Clubs {
@@ -161,17 +169,19 @@ func Season(in Input) (*Output, error) {
 		}
 		tm[name] = c
 		gf, ga := goals(c.Goals)
-		rows = append(rows, row{name: name, tier: tier(c), group: c.League, rank: c.Rank,
-			games: c.Games, goalsFor: gf, goalsAgainst: ga, points: c.Points})
+		r := row{name: name, tier: tier(c), group: c.League, rank: c.Rank,
+			games: c.Games, goalsFor: gf, goalsAgainst: ga, points: c.Points, prevLeague: newLeague}
+		if p, ok := prev[name]; ok {
+			r.prevLeague, r.prevStrength = prevLeague[name], p.Strength
+		}
+		rows = append(rows, r)
 	}
 	// The German clubs of the season before that the file lacks fill what
 	// is left, in their order there.
-	prev := map[string]assets.ClubRecord{}
 	for i, c := range in.Previous.Clubs[:numGerman] {
 		name := assets.FromCP437(c.Name)
-		prev[name] = c
 		if _, ok := tm[name]; !ok {
-			rows = append(rows, row{name: name, tier: fillTier, rank: i})
+			rows = append(rows, row{name: name, tier: fillTier, rank: i, prevLeague: leagueOf(i), prevStrength: c.Strength})
 		}
 	}
 	places, err := placeClubs(rows)
@@ -304,7 +314,21 @@ const (
 	outside   = 6
 	numGerman = league1 + league2 + league3 + outside
 	fillTier  = 5 // a club of the season before that the file lacks
+	newLeague = 4 // the league of a club that was not in the season before
 )
+
+// leagueOf is the league of place i of a season: 0..2, 3 = outside.
+func leagueOf(i int) int {
+	switch {
+	case i < league1:
+		return 0
+	case i < league1+league2:
+		return 1
+	case i < league1+league2+league3:
+		return 2
+	}
+	return 3
+}
 
 // Strength ranges of the original per place, measured in its clubs.json.
 var strengthRange = [4][2]int{{73, 95}, {46, 74}, {20, 49}, {26, 44}}
@@ -318,6 +342,22 @@ type row struct {
 	games                  int
 	goalsFor, goalsAgainst int
 	points                 int
+	prevLeague             int    // its league in the season before, newLeague if none
+	prevStrength           [3]int // its strengths there
+}
+
+// unplayed compares two clubs without games by the season before, the
+// better first: by the league they played in, then by their strength k
+// there (-1: the sum of the three); clubs new to the game come last.
+func unplayed(x, y row, k int) int {
+	if x.prevLeague != y.prevLeague {
+		return x.prevLeague - y.prevLeague
+	}
+	sx, sy := x.prevStrength[0]+x.prevStrength[1]+x.prevStrength[2], y.prevStrength[0]+y.prevStrength[1]+y.prevStrength[2]
+	if k >= 0 {
+		sx, sy = x.prevStrength[k], y.prevStrength[k]
+	}
+	return sy - sx
 }
 
 func perGame(v, games int) float64 {
@@ -329,10 +369,18 @@ func perGame(v, games int) float64 {
 
 // ordered sorts the rows of a tier best first: by place, so that the
 // groups of a tier alternate, then points and goal difference per game.
+// Before the first game the places say nothing: clubs without games go by
+// the season before (unplayed); those the file lacks keep their order.
 func ordered(rows []row) []row {
 	out := append([]row(nil), rows...)
 	sort.SliceStable(out, func(a, b int) bool {
 		x, y := out[a], out[b]
+		if x.games == 0 && y.games == 0 && x.tier != fillTier {
+			if c := unplayed(x, y, -1); c != 0 {
+				return c < 0
+			}
+			return x.name < y.name
+		}
 		if x.rank != y.rank {
 			return x.rank < y.rank
 		}
@@ -414,7 +462,9 @@ func placeClubs(rows []row) ([]placed, error) {
 // midfield, attack): their goals against, points and goals per game,
 // ranked within the place and spread over the range of the original. A
 // club from a higher tier ranks before those of the place's own, one from
-// a lower tier after them; without games the order of the place counts.
+// a lower tier after them. Two clubs without games (before the first game
+// of the season) rank by the season before (unplayed); else without games
+// the order of the place counts.
 func strengths(clubs []placed) map[string][3]int {
 	out := map[string][3]int{}
 	for lg := 0; lg < 4; lg++ {
@@ -439,6 +489,12 @@ func strengths(clubs []placed) map[string][3]int {
 				ra, rb := rows[idx[a]], rows[idx[b]]
 				if ra.tier != rb.tier {
 					return ra.tier < rb.tier
+				}
+				if ra.games == 0 && rb.games == 0 {
+					if c := unplayed(ra, rb, k); c != 0 {
+						return c < 0
+					}
+					return idx[a] < idx[b]
 				}
 				if ra.games == 0 || rb.games == 0 {
 					return idx[a] < idx[b]
