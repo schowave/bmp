@@ -232,7 +232,7 @@ func buildSeason(s *source.Season, cur map[string]curated, images map[string]str
 		default:
 			logos[i] = "crest:" + strings.ToLower(s.Colors[p.article])
 		}
-		players := pickPlayers(s.Squads[p.row.Club])
+		players := pickPlayers(s.Squads[p.row.Club], s.TM[p.row.Club])
 		for _, n := range players {
 			cp, err := assets.ToCP437(n)
 			if err != nil {
@@ -248,43 +248,77 @@ func buildSeason(s *source.Season, cur map[string]curated, images map[string]str
 	return clubs, logos, nil
 }
 
-// pickPlayers chooses the 20 player names of a club: per position the
-// players with the most games, else those who joined last, in the slots of MANA.DAT (2 goalkeepers,
-// 6 defenders, 7 midfielders, 5 forwards). Missing ones stay empty; the
-// game gives those slots random names.
-func pickPlayers(ps []source.Player) []string {
-	var byPos [4][]source.Player
+// pickPlayers chooses the 20 player names of a club in the slots of
+// MANA.DAT (2 goalkeepers, 6 defenders, 7 midfielders, 5 forwards). With a
+// Transfermarkt squad (tm) its players fill the slots of their position,
+// those with the most games of the Wikipedia/Wikidata squad (ps) first,
+// else in the order of Transfermarkt; ps fills a position tm has too few
+// players for. Without tm, ps alone: the most games first, else those who
+// joined last. Missing ones stay empty; the game gives those slots random
+// names.
+func pickPlayers(ps, tm []source.Player) []string {
+	known := map[string]source.Player{} // by name in the game, the most games
+	for _, p := range ps {
+		k := playerName(p.Surname)
+		if q, ok := known[k]; !ok || p.Games > q.Games {
+			known[k] = p
+		}
+	}
+	type cand struct {
+		source.Player
+		tm    bool
+		order int
+	}
+	var byPos [4][]cand
+	inTM := map[string]bool{}
+	for _, p := range tm {
+		k := playerName(p.Surname)
+		if p.Pos == source.PosNone || k == "" {
+			continue
+		}
+		inTM[k] = true
+		if q, ok := known[k]; ok {
+			p.Games, p.Since, p.Name = q.Games, q.Since, q.Name
+		}
+		byPos[p.Pos-1] = append(byPos[p.Pos-1], cand{p, true, len(byPos[p.Pos-1])})
+	}
 	seen := map[string]bool{}
 	for _, p := range ps {
-		if p.Pos == source.PosNone || seen[p.Name] {
+		// A player Transfermarkt lists is the same in both.
+		if p.Pos == source.PosNone || inTM[playerName(p.Surname)] || seen[p.Name] {
 			continue
 		}
 		seen[p.Name] = true
-		byPos[p.Pos-1] = append(byPos[p.Pos-1], p)
+		byPos[p.Pos-1] = append(byPos[p.Pos-1], cand{p, false, len(byPos[p.Pos-1])})
 	}
-	var out []string
 	surnames := map[string]int{}
 	var chosen []source.Player
 	for k, n := range rosterSizes {
 		list := byPos[k]
 		sort.SliceStable(list, func(a, b int) bool {
-			if list[a].Games != list[b].Games {
-				return list[a].Games > list[b].Games
+			x, y := list[a], list[b]
+			switch {
+			case x.tm != y.tm:
+				return x.tm
+			case x.Games != y.Games:
+				return x.Games > y.Games
+			case x.tm:
+				return x.order < y.order
+			case x.Since != y.Since:
+				return x.Since > y.Since
 			}
-			if list[a].Since != list[b].Since {
-				return list[a].Since > list[b].Since
-			}
-			return list[a].Name < list[b].Name
+			return x.Name < y.Name
 		})
 		for i := 0; i < n; i++ {
 			if i < len(list) {
-				chosen = append(chosen, list[i])
+				chosen = append(chosen, list[i].Player)
 				surnames[playerName(list[i].Surname)]++
 			} else {
 				chosen = append(chosen, source.Player{})
 			}
 		}
 	}
+	var out []string
 	for _, p := range chosen {
 		name := playerName(p.Surname)
 		if name != "" && surnames[name] > 1 {

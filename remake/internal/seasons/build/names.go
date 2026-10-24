@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/schowave/bmp/remake/internal/seasons/source"
 )
 
 // Lengths of the names in MANA.DAT, without the NUL.
@@ -11,21 +13,6 @@ const (
 	clubNameMax   = 22
 	playerNameMax = 25
 )
-
-// translit spells letters the fonts of the game do not have with those it
-// has. The fonts have A–Z, digits, some punctuation and Ä Ö Ü ß.
-var translit = map[rune]string{
-	'À': "A", 'Á': "A", 'Â': "A", 'Ã': "A", 'Å': "A", 'Ą': "A", 'Ă': "A", 'Ā': "A",
-	'Æ': "AE", 'Ç': "C", 'Ć': "C", 'Č': "C", 'Ď': "D", 'Đ': "D", 'Ð': "D",
-	'È': "E", 'É': "E", 'Ê': "E", 'Ë': "E", 'Ę': "E", 'Ě': "E", 'Ė': "E", 'Ē': "E",
-	'Ğ': "G", 'Ģ': "G", 'Ì': "I", 'Í': "I", 'Î': "I", 'Ï': "I", 'İ': "I", 'Ī': "I", 'Į': "I",
-	'Ķ': "K", 'Ł': "L", 'Ľ': "L", 'Ĺ': "L", 'Ļ': "L", 'Ñ': "N", 'Ń': "N", 'Ň': "N", 'Ņ': "N",
-	'Ò': "O", 'Ó': "O", 'Ô': "O", 'Õ': "O", 'Ø': "O", 'Ō': "O", 'Ő': "Ö", 'Œ': "OE",
-	'Ř': "R", 'Ŕ': "R", 'Ś': "S", 'Š': "S", 'Ş': "S", 'Ș': "S", 'Ť': "T", 'Ţ': "T", 'Ț': "T",
-	'Ù': "U", 'Ú': "U", 'Û': "U", 'Ů': "U", 'Ū': "U", 'Ų': "U", 'Ű': "Ü",
-	'Ý': "Y", 'Ÿ': "Y", 'Ź': "Z", 'Ž': "Z", 'Ż': "Z", 'Þ': "TH",
-	'’': "'", '‘': "'", '´': "'", '`': "'", '–': "-", '—': "-", '·': ".",
-}
 
 // upper writes s in capitals with only the letters of the game's fonts.
 func upper(s string) string {
@@ -39,8 +26,8 @@ func upper(s string) string {
 		switch {
 		case r < 0x80 || r == 'Ä' || r == 'Ö' || r == 'Ü':
 			b.WriteRune(r)
-		case translit[r] != "":
-			b.WriteString(translit[r])
+		case source.Translit[r] != "":
+			b.WriteString(source.Translit[r])
 		case unicode.IsSpace(r):
 			b.WriteByte(' ')
 		}

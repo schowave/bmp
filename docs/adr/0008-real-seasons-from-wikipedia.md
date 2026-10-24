@@ -19,9 +19,16 @@ clubs, 20 players per club.
   `internal/seasons`. CC BY-SA and CC0, standard library only.
 - Wikidata alone: rejected, it lacks the participants of several seasons of
   the 2. Bundesliga and of every Oberliga and Regionalliga season.
-- transfermarkt.de: rejected, it blocks automated access and its terms
-  forbid extracting its database. The CC0 dataset built from it covers only
-  the Bundesliga from 2012 on.
+- transfermarkt.de fetched by `bmpseasons`: rejected, it blocks automated
+  access and its terms forbid extracting its database. The CC0 dataset built
+  from it covers only the Bundesliga from 2012 on.
+- Squads of Transfermarkt that the owner of the repository collected
+  themselves, one file per season: taken in by `bmpseasons import-tm` as
+  `transfermarkt.csv` next to the Wikipedia data. They cover all tiers,
+  also the Oberliga and Regionalliga of the 1990s, and are taken as the most
+  correct squads; the owner decided to publish them in this public
+  repository, knowing that Transfermarkt's terms forbid reusing its
+  database.
 - OpenLigaDB: rejected, ODbL (share-alike) and no squads.
 
 ## Consequences
@@ -34,8 +41,10 @@ clubs, 20 players per club.
   into the amateur tiers before 2008 only when the places cannot be filled
   without them. Strengths come from the goals and points
   per game, spread over the ranges of the original.
-- Squads of small clubs are incomplete; their empty slots get random names
-  like in the original.
+- Squads come from Transfermarkt where it has the club, ranked by the
+  games Wikipedia knows; Wikipedia and Wikidata fill the rest. Squads of
+  small clubs outside the files (the Regionalliga from 2008 on) are
+  incomplete; their empty slots get random names like in the original.
 - `remake/data/README.md` lists sources and licences; `logos/index.csv`
   credits every logo.
 - A new season means `mise run remake:seasons-fetch -- -from Y -to Y` and

@@ -183,3 +183,29 @@ func TestSquadLogoIsNoPhoto(t *testing.T) {
 		t.Fatalf("got %+v", got)
 	}
 }
+
+func TestMatchTM(t *testing.T) {
+	tables := []TierRow{
+		{Row: Row{Club: "VfB Stuttgart", Label: "VfB Stuttgart"}},
+		{Row: Row{Club: "VfB Stuttgart II", Label: "VfB Stuttgart II"}},
+		{Row: Row{Club: "FC Bayern München", Label: "FC Bayern München Amateure"}},
+		{Row: Row{Club: "1. FC Köln", Label: "1. FC Köln"}},
+		{Row: Row{Club: "SC Viktoria Köln", Label: "Viktoria Köln"}},
+		{Row: Row{Club: "FSV Frankfurt", Label: "FSV Frankfurt"}},
+		{Row: Row{Club: "SC Freiburg", Label: "SC Freiburg"}},
+	}
+	names := []string{"FREIBURGER FC", "VFB STUTTGART II", "VFB STUTTGART", "FC BAYERN MÜNCHEN II", "1.FC KÖLN",
+		"SC VIKTORIA KÖLN (- 1994)", "FC SCHALKE 04", "FC VORWÄRTS FRANKFURT/ODER", "SC FREIBURG"}
+	want := []string{"", "VfB Stuttgart II", "VfB Stuttgart", "FC Bayern München Amateure", "1. FC Köln",
+		"SC Viktoria Köln", "", "", "SC Freiburg"}
+	var clubs []TMClub
+	for _, n := range names {
+		clubs = append(clubs, TMClub{Name: n})
+	}
+	got := MatchTM(clubs, tables)
+	for i := range names {
+		if got[i] != want[i] {
+			t.Errorf("%q: %q, want %q", names[i], got[i], want[i])
+		}
+	}
+}

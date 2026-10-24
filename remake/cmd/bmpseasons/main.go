@@ -4,6 +4,9 @@
 //	bmpseasons fetch   fetches tables, squads, European cups and logos from
 //	                   Wikipedia and Wikidata into data/ (network; the running
 //	                   season always anew, the others from data/.cache)
+//	bmpseasons import-tm -tm DIR
+//	                   takes the Transfermarkt squads of DIR (YYYY-YY.json)
+//	                   into data/seasons/*/transfermarkt.csv
 //	bmpseasons build   writes internal/seasons/data from every season in
 //	                   data/ (offline, deterministic)
 package main
@@ -44,6 +47,10 @@ func main() {
 		parse(fl)
 		c := &source.Client{Dir: filepath.Join(*data, ".cache"), Delay: *delay, Log: logf}
 		err = fetch(c, *data, *from, *to, *refresh)
+	case "import-tm":
+		tm := fl.String("tm", "", "directory of the Transfermarkt season files (YYYY-YY.json)")
+		parse(fl)
+		err = importTM(*data, *tm)
 	case "build":
 		orig := fl.String("orig", "internal/embedded/data", "extract of the original")
 		out := fl.String("out", "internal/seasons/data", "output directory")
@@ -73,7 +80,7 @@ func parse(fl *flag.FlagSet) {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: bmpseasons fetch [-from Y] [-to Y] [-refresh] | bmpseasons build (flags after the subcommand)")
+	fmt.Fprintln(os.Stderr, "usage: bmpseasons fetch [-from Y] [-to Y] [-refresh] | import-tm -tm DIR | build (flags after the subcommand)")
 	os.Exit(2)
 }
 
@@ -225,4 +232,51 @@ func writeCSV(file string, rows [][]string) error {
 		return err
 	}
 	return fo.Close()
+}
+
+// importTM matches the clubs of the Transfermarkt season files in dir with
+// the clubs of the tables in data and writes their squads next to them.
+func importTM(data, dir string) error {
+	if dir == "" {
+		return errors.New("import-tm: -tm DIR missing")
+	}
+	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		sea, err := seasons.ParseID(strings.TrimSuffix(filepath.Base(f), ".json"))
+		if err != nil {
+			continue
+		}
+		sdir := filepath.Join(data, "seasons", sea.ID)
+		s, err := source.ReadSeason(os.DirFS(sdir), sea.Year)
+		if err != nil {
+			return fmt.Errorf("%s: %w", sea.ID, err)
+		}
+		clubs, err := source.ReadTM(f)
+		if err != nil {
+			return fmt.Errorf("%s: %w", f, err)
+		}
+		squads, names := map[string][]source.Player{}, map[string]string{}
+		match := source.MatchTM(clubs, s.Tables)
+		unmatched := 0
+		for i, c := range clubs {
+			ps := c.Squad()
+			if len(ps) == 0 || squads[match[i]] != nil {
+				continue // no players, or the same club twice in the file
+			}
+			if match[i] == "" {
+				unmatched++
+				logf("  %s: no club for %s (%s)", sea.ID, c.Name, c.League)
+				continue
+			}
+			squads[match[i]], names[match[i]] = ps, c.Name
+		}
+		if err := source.WriteTM(sdir, squads, names); err != nil {
+			return err
+		}
+		logf("season %s: %d clubs, %d without a match", sea.Label(), len(squads), unmatched)
+	}
+	return nil
 }
