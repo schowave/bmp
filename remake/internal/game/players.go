@@ -88,6 +88,23 @@ type Slot struct {
 // Empty reports whether the slot holds no player.
 func (s *Slot) Empty() bool { return s.Person == 0 }
 
+// InTeam reports a player of the team: lineup number 1..11.
+func (s *Slot) InTeam() bool { return s.Person != 0 && s.Lineup >= 1 && s.Lineup <= 11 }
+
+// Status bits of a slot for an offer of a club: OfferSquad on a squad slot,
+// OfferListed on the market slot of a listed player.
+const (
+	OfferSquad  = 0x40
+	OfferListed = 0x80
+)
+
+// HasOffer reports an offer of a club for the player of the slot.
+func (s *Slot) HasOffer() bool { return s.Status&(OfferSquad|OfferListed) != 0 }
+
+// AsksForContract reports a player who offers to extend his contract and
+// waits for the answer (Nego 100 + the years, as the contract list reads it).
+func (s *Slot) AsksForContract() bool { return s.Nego&0x7f > 99 }
+
 // Strength is the strength shown for a player: the average of his skills.
 func (s *Slot) Strength() int { return (s.Skill[0] + s.Skill[1] + s.Skill[2]) / 3 }
 

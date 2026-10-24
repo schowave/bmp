@@ -78,6 +78,10 @@ func TestOptimizeLineupNotWorse(t *testing.T) {
 		if res.After < res.Before {
 			t.Errorf("team %d: %d after, %d before", team, res.After, res.Before)
 		}
+		// A new lineup must gain lineupMinGain against the old one too.
+		if res.After != res.Before && res.After < res.Before+lineupMinGain {
+			t.Errorf("team %d: %d after, %d before: less than the minimum gain", team, res.After, res.Before)
+		}
 		for f, a := range res.Auto {
 			if res.After < a {
 				t.Errorf("team %d: %d after, %d for %s", team, res.After, a, FormationNames[f])
