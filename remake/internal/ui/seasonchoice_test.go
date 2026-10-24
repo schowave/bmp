@@ -8,7 +8,7 @@ import (
 )
 
 func TestSeasonChoiceHover(t *testing.T) {
-	c := newSeasonChoice(nil, "", make([]seasons.Season, 40))
+	c := newSeasonChoice(nil, "", make([]seasons.Season, 2*seasonRows+2))
 	for _, h := range []struct{ x, y, want int }{
 		{seasonLeftX, seasonTopY, 0},
 		{seasonLeftX + 5, seasonTopY + fileRowH, 1},
