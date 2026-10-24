@@ -132,8 +132,8 @@ mouse button confirms in some places (setup, lineup reserves, sponsors) but
 does not leave screens, which close with the HAUPT MENU or WEITER button.
 
 1. **Season:** when real seasons are built in (`internal/seasons`), the
-   first screen after the title lists them; ORIGINAL plays with the clubs
-   of the original.
+   first screen after the title lists them; ORIGINAL (1991/92) plays with
+   the clubs of the original, which are those of 1991/92.
 2. **Setup:** click the name field below a face and type the name. Click
    left or right of the middle of the logo strip to scroll it (hold the
    button to keep it moving), and click the empty field above the face to
