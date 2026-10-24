@@ -88,7 +88,7 @@ func (c *SeasonChoice) rows(h int) []seasonRow {
 func (c *SeasonChoice) Update(app *App) error {
 	in := &app.Input
 	if c.original.Hit(in) {
-		app.Replace(NewSetup(c.mana, c.saveDir))
+		app.Replace(c.withBack(NewSetup(c.mana, c.saveDir)))
 		return nil
 	}
 	i := c.hover(in)
@@ -101,8 +101,15 @@ func (c *SeasonChoice) Update(app *App) error {
 		app.Push(NewMessage("An Alle:", "Die Saison "+s.Label()+" ist nicht lesbar."))
 		return nil
 	}
-	app.Replace(NewSeasonSetup(c.mana, m, c.saveDir, s.ID, s.Year))
+	app.Replace(c.withBack(NewSeasonSetup(c.mana, m, c.saveDir, s.ID, s.Year)))
 	return nil
+}
+
+// withBack lets a right click in setup s come back here while nothing is
+// chosen, to look at the clubs of another season.
+func (c *SeasonChoice) withBack(s *Setup) *Setup {
+	s.back = func() Scene { return newSeasonChoice(c.mana, c.saveDir, c.entries) }
+	return s
 }
 
 // LoadGame restores a saved game with the clubs it was started with: those

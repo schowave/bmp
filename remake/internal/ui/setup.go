@@ -31,6 +31,9 @@ type Setup struct {
 	stripX int
 	slotsX [4]int
 	held   int // frames the left button has been held on the strip
+	// back is the season choice the setup came from; a right click goes
+	// back to it while nothing is chosen. Nil without one (and for NEU).
+	back func() Scene
 }
 
 type setupClub struct {
@@ -159,6 +162,8 @@ func (s *Setup) Update(app *App) error {
 			s.addManagers(app)
 		case s.ready():
 			app.Push(newSetupOptions(s))
+		case in.Right && s.back != nil && s.untouched():
+			app.Replace(s.back())
 		}
 	}
 	return nil
@@ -185,6 +190,16 @@ func (s *Setup) typeName(in *Input) bool {
 		return in.Enter || in.Escape
 	}
 	return len(in.Chars) > 0 || in.Backspace
+}
+
+// untouched reports whether no name and no club is chosen yet.
+func (s *Setup) untouched() bool {
+	for i := range s.names {
+		if s.names[i] != "" || s.teams[i] >= 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *Setup) ready() bool {

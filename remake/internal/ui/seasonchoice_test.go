@@ -35,6 +35,19 @@ func TestSeasonChoiceOriginalOpensTheSetup(t *testing.T) {
 	if !ok || s.opts.Season != "" || s.orig != mana {
 		t.Fatalf("got %T", top(app))
 	}
+	// Nothing chosen: a right click goes back to the seasons.
+	step(t, app, rclick())
+	if _, ok := top(app).(*SeasonChoice); !ok {
+		t.Fatalf("right click: %T", top(app))
+	}
+	// With a club chosen it stays in the setup.
+	step(t, app, click(c.original.X+2, c.original.Y+2))
+	s = top(app).(*Setup)
+	s.teams[0] = s.center
+	step(t, app, rclick())
+	if _, ok := top(app).(*Setup); !ok {
+		t.Fatalf("right click with a club: %T", top(app))
+	}
 }
 
 // TestSeasonSetupStartsTheSeason starts a game with the clubs of the
