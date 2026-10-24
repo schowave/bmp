@@ -146,8 +146,28 @@ mise run remake:seasons-games              # 1995/96 to 2003/04
 Transfermarkt squad its players come from, fetches only for those clubs
 their performance data (`YYYY-YY.squads.json`, the most games first, then
 the most minutes), and `cmd/bmpseasons squads` gives the clubs those players
-and changes nothing else. Run it again after `remake:seasons-update` of one
-of these seasons.
+and changes nothing else. `remake:seasons-update` of one of these seasons
+takes the squads of its `YYYY-YY.squads.json` too, so it keeps the order by
+games; `remake:seasons-games` fetches them anew.
+
+How the pieces fit, a pipeline of files: each stage reads the files of the
+one before and can run, resume and be tested on its own.
+
+```text
+transfermarkt.de ── tm_fetch.py (reads the pages)
+  → .cache/YYYY/*.json                            tables, squads, games, cups
+  → tm_json.py, tm_games.py
+  → YYYY-YY.json, .europe.json, .squads.json      in $BMP_TM_DIR
+  → bmpseasons update | squads
+  → internal/seasons/data/YYYY-YY.json            what the game reads
+```
+
+`internal/seasons/update` is the core: plain functions from these files and
+the season before to a season (`Season`, `SetSquads`), with no file access;
+`cmd/bmpseasons` reads and writes the files. `match.go` and `names.go` turn
+the names of Transfermarkt into those of the game, so that its spellings do
+not leak into the seasons. New data belongs in a new stage, new rules for
+the places, strengths or squads in `update`.
 
 When Transfermarkt changes its pages, `tools/transfermarkt/tm_fetch.py`
 reads nothing or too little; the output of step 1 shows it.

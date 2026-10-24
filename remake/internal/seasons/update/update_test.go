@@ -257,3 +257,22 @@ func TestSetSquads(t *testing.T) {
 		t.Errorf("other clubs changed: %v, %v", m.Clubs[1], m.Clubs[100])
 	}
 }
+
+// A season with a squads file takes the squads by games for the clubs it
+// names, under their names in the season, and those of the file for the rest.
+func TestSeasonWithSquads(t *testing.T) {
+	clubs := []Club{club("SV WERDER BREMEN", "L1", 1), club("FIRST 2", "L1", 2)}
+	prev := previousSeason()
+	squads := map[string]Squad{"WERDER BREMEN": {Goalkeepers: []string{"REINKE"}}}
+	out, err := Season(Input{Year: 1997, Clubs: clubs, Previous: prev, Known: []*assets.Mana{prev}, NextLogo: 2000, Squads: squads})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := out.Mana.Clubs
+	if c[0].Name != "WERDER BREMEN" || c[0].Players[0] != "REINKE" || c[0].Players[1] != "" {
+		t.Errorf("club 0: %+v", c[0])
+	}
+	if c[1].Name != "FIRST 2" || c[1].Players[0] != "KEEPERF" {
+		t.Errorf("club 1: %+v", c[1])
+	}
+}

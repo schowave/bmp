@@ -8,7 +8,8 @@
 //
 // update writes internal/seasons/data/YYYY-YY.json for each DIR/YYYY-YY.json
 // between the seasons from and to, and the logos of new clubs, the season
-// before first (see internal/seasons/update). logo gives the club NAME (as
+// before first (see internal/seasons/update); a DIR/YYYY-YY.squads.json
+// gives its clubs their squads by games. logo gives the club NAME (as
 // the game shows it; several spellings separated by "|") the logo of an
 // image, drawn in the colours of the logos of the original, in every
 // season where it has a plain shield, and notes its source in
@@ -122,7 +123,11 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
-	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Known: known, NextLogo: next})
+	squads, err := update.ReadSquads(filepath.Join(dir, s.ID+".squads.json"))
+	if err != nil {
+		return err
+	}
+	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Known: known, NextLogo: next, Squads: squads})
 	if err != nil {
 		return err
 	}
