@@ -3,8 +3,6 @@ package ui
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/schowave/bmp/remake/internal/assets"
-	"github.com/schowave/bmp/remake/internal/game"
 	"github.com/schowave/bmp/remake/internal/seasons"
 )
 
@@ -39,9 +37,6 @@ func newSeasonChoice(from *Setup) *SeasonChoice {
 	return &SeasonChoice{from: from, entries: from.seasons}
 }
 
-// seasonLabel is the text of a season in the list.
-func seasonLabel(s seasons.Season) string { return s.Label() }
-
 // seasonCell is the top-left corner of the row of entry i.
 func seasonCell(i int) (x, y int) {
 	return seasonLeftX + i/seasonRows*seasonColW, seasonTopY + i%seasonRows*fileRowH
@@ -72,7 +67,7 @@ func (c *SeasonChoice) rows(h int) []seasonRow {
 	out := make([]seasonRow, len(c.entries))
 	for i, s := range c.entries {
 		x, y := seasonCell(i)
-		r := seasonRow{x: x, y: y, text: seasonLabel(s), colour: ColLight, bar: i == h}
+		r := seasonRow{x: x, y: y, text: s.Label(), colour: ColLight, bar: i == h}
 		if r.bar {
 			r.colour ^= 31
 		}
@@ -102,7 +97,7 @@ func (c *SeasonChoice) Update(app *App) error {
 		app.Push(NewMessage("An Alle:", "Die Saison "+s.Label()+" ist nicht lesbar."))
 		return nil
 	}
-	app.Replace(c.setup(NewSeasonSetup(orig, m, dir, s.ID, s.Year)))
+	app.Replace(c.setup(NewSeasonSetup(orig, m, dir, s)))
 	return nil
 }
 
@@ -111,20 +106,6 @@ func (c *SeasonChoice) Update(app *App) error {
 func (c *SeasonChoice) setup(s *Setup) *Setup {
 	s.seasons, s.names = c.entries, c.from.names
 	return s
-}
-
-// LoadGame restores a saved game with the clubs it was started with: those
-// of the original (orig) or of its real season.
-func LoadGame(data []byte, orig *assets.Mana) (*game.State, error) {
-	id, err := game.SaveSeason(data)
-	if err != nil {
-		return nil, err
-	}
-	m, err := seasons.ManaOr(orig, id)
-	if err != nil {
-		return nil, err
-	}
-	return game.Load(data, m)
 }
 
 func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {

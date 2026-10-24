@@ -78,12 +78,12 @@ func NewStart(mana *assets.Mana, saveDir string) *Setup {
 	return s
 }
 
-// NewSeasonSetup creates the setup of a new game of real season id that
+// NewSeasonSetup creates the setup of a new game of real season sn that
 // starts in year; mana holds its clubs, orig those of the original.
-func NewSeasonSetup(orig, mana *assets.Mana, saveDir, id string, year int) *Setup {
+func NewSeasonSetup(orig, mana *assets.Mana, saveDir string, sn seasons.Season) *Setup {
 	s := NewSetup(mana, saveDir)
 	s.orig = orig
-	s.opts.Season, s.opts.Year = id, year
+	s.opts.Season, s.opts.Year = sn.ID, sn.Year
 	return s
 }
 
@@ -222,13 +222,25 @@ func (s *Setup) choosesSeason(in *Input) bool {
 	return false
 }
 
-// modeLabel is the clubs the setup plays with, for the hint below the
-// club name: "ORIGINAL 1991/92" or "SAISON 1995/96".
-func (s *Setup) modeLabel() string {
-	if id, err := seasons.ParseID(s.opts.Season); err == nil {
-		return "SAISON " + id.Label()
+// season is the real season the setup plays, ok false with the clubs of
+// the original.
+func (s *Setup) season() (sn seasons.Season, ok bool) {
+	sn, err := seasons.ParseID(s.opts.Season)
+	return sn, err == nil
+}
+
+// seasonHint is the hint left and right of the club name: the clubs the
+// setup plays with ("ORIGINAL 1991/92" or "SAISON 1995/96") and the key
+// that changes them; empty without built-in seasons.
+func (s *Setup) seasonHint() (left, right string) {
+	if len(s.seasons) == 0 {
+		return "", ""
 	}
-	return "ORIGINAL 1991/92"
+	left = "ORIGINAL 1991/92"
+	if sn, ok := s.season(); ok {
+		left = "SAISON " + sn.Label()
+	}
+	return left, "S: SAISON WÄHLEN"
 }
 
 func (s *Setup) ready() bool {
@@ -286,9 +298,9 @@ func (s *Setup) Draw(app *App, dst *ebiten.Image) {
 		Draw(dst, g.Pic(s.clubs[s.clubAt(k)].logo, false), s.stripX+12+41*k, stripY+7)
 	}
 	g.TextCentered(dst, FontNormal, s.stripX+1, stripY+52, 309, s.clubs[s.center].name, g.PalColor(ColBlack))
-	if len(s.seasons) > 0 {
-		g.TextMid(dst, FontSmall, hintLeftX0, hintLeftX1, seasonHintY, s.modeLabel(), ColBeige, ColBlack)
-		g.TextMid(dst, FontSmall, hintRightX0, hintRightX1, seasonHintY, "S: SAISON WÄHLEN", ColBeige, ColBlack)
+	if left, right := s.seasonHint(); left != "" {
+		g.TextMid(dst, FontSmall, hintLeftX0, hintLeftX1, seasonHintY, left, ColBeige, ColBlack)
+		g.TextMid(dst, FontSmall, hintRightX0, hintRightX1, seasonHintY, right, ColBeige, ColBlack)
 	}
 	for i, x := range s.slotsX {
 		Draw(dst, g.Pic(35, false), x, slotY)
@@ -356,11 +368,10 @@ func drawOptDigit(g *Gfx, dst *ebiten.Image, x, y, k int, on bool) {
 // seasonLabel is the row that replaces the historic start in a game of a
 // real season ("Saison 1995/96"), empty for the clubs of the original.
 func (o *setupOptions) seasonLabel() string {
-	s, err := seasons.ParseID(o.s.opts.Season)
-	if err != nil {
-		return ""
+	if sn, ok := o.s.season(); ok {
+		return "Saison " + sn.Label()
 	}
-	return "Saison " + s.Label()
+	return ""
 }
 
 var optLengths = []game.GameLength{game.Endless, game.OneYear, game.ThreeYears}
@@ -382,11 +393,13 @@ func (o *setupOptions) Update(app *App) error {
 	}
 	// A real season has its own year: no historic start.
 	y := optLengthY + 3*18
-	if in.Clicked(optLeftX, y, 24, 17) && o.seasonLabel() == "" {
-		opt.Historic = true
-	}
-	if in.Clicked(optRightX, y, 24, 17) && o.seasonLabel() == "" {
-		opt.Historic = false
+	if _, ok := o.s.season(); !ok {
+		if in.Clicked(optLeftX, y, 24, 17) {
+			opt.Historic = true
+		}
+		if in.Clicked(optRightX, y, 24, 17) {
+			opt.Historic = false
+		}
 	}
 	if in.Right || in.Enter {
 		app.Pop()

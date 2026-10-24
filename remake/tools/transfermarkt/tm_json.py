@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Holt die Tabellen und Kader der 1. bis 3. Liga einer oder mehrerer Saisons
-von transfermarkt.de und schreibt pro Saison OUT/YYYY-YY.json: je Verein Liga,
-Stufe, Tabellenplatz, Spiele, Tore, Punkte und die Spieler nach Position, die
-wertvollsten zuerst; ab 2008 auch die Regionalliga (Stufe 4). Dazu
-OUT/YYYY-YY.europe.json mit den auslaendischen Vereinen der Europapokale. remake/cmd/bmpseasons macht daraus die Saisons des Spiels
+"""Fetches the tables and squads of the 1st to 3rd league of one or more
+seasons from transfermarkt.de and writes per season OUT/YYYY-YY.json: per club
+league, tier, table place, games, goals, points and the players by position,
+the most valuable first; from 2008 also the Regionalliga (tier 4). Besides
+OUT/YYYY-YY.europe.json with the foreign clubs of the European cups.
+remake/cmd/bmpseasons makes the seasons of the game from them
 (mise run remake:seasons-update).
 
-Wiederaufnehmbar: Tabellen und Kader landen in OUT/.cache, vorhandene Saisons
-werden uebersprungen; --refresh holt die gewaehlten Saisons neu, --offline
-liest nur den Cache.
+Resumable: tables and squads land in OUT/.cache, seasons already written are
+skipped; --refresh fetches the chosen seasons anew, --offline reads the cache
+only.
 
-Aufruf: python3 tm_json.py --out DIR [--from Y] [--to Y] [--refresh] [--offline]
-Braucht requests und beautifulsoup4 (der mise-Task stellt sie mit uv bereit)."""
+Usage: python3 tm_json.py --out DIR [--from Y] [--to Y] [--refresh] [--offline]
+Needs requests and beautifulsoup4 (the mise task provides them with uv)."""
 import argparse, datetime, json, os, re, shutil, sys, time
 import random
 import requests
@@ -22,7 +23,7 @@ GROUP = {"Torwart": "goalkeepers", "Abwehr": "defenders", "Mittelfeld": "midfiel
 
 
 def group(position):
-    """Transfermarkt nennt die genaue Position (Innenverteidiger, Linksaussen, ...)."""
+    """The group of a position; Transfermarkt names the exact one (Innenverteidiger, Linksaußen, ...)."""
     position = position.lower()
     if "torwart" in position:
         return "goalkeepers"
@@ -32,7 +33,7 @@ def group(position):
         return "midfielders"
     if "stürmer" in position or "spitze" in position or "außen" in position or position == "sturm":
         return "forwards"
-    print("unbekannte Position:", position, flush=True)
+    print("unknown position:", position, flush=True)
     return None
 
 
@@ -47,7 +48,7 @@ def split(name):
 
 
 def value(text):
-    """'7,00 Mio. €' -> 7000000; -1, wenn Transfermarkt keinen Wert kennt."""
+    """'7,00 Mio. €' -> 7000000; -1 when Transfermarkt knows no value."""
     m = re.match(r"([\d.,]+)\s*(Mrd|Mio|Tsd)?", text)
     if not m:
         return -1
@@ -56,9 +57,9 @@ def value(text):
 
 
 def convert(players):
-    """Nachnamen in Grossbuchstaben; bei gleichem Nachnamen im Verein Initial davor."""
-    # Teuerste zuerst; ohne Marktwert (vor 2004) bleibt es bei der Reihenfolge von Transfermarkt,
-    # tm_games.py ordnet diese Saisons nach Einsaetzen.
+    """Surnames in capitals; the initial before a surname two players of the club share."""
+    # The most valuable first; without market values (before 2004) the order of Transfermarkt stays,
+    # tm_games.py orders these seasons by games.
     players = sorted(players, key=lambda p: -value(p["marktwert"]))
     pairs = [(split(p["name"]), group(p["position"])) for p in players]
     counts = {}
@@ -76,20 +77,20 @@ def convert(players):
 
 
 def number(text):
-    """'14' -> 14; 0, wenn es keine Zahl ist."""
+    """'14' -> 14; 0 when it is no number."""
     m = re.match(r"-?\d+", str(text).strip())
     return int(m.group(0)) if m else 0
 
 
 def running_season():
-    """Erstes Jahr der laufenden Saison; eine Saison beginnt im Juli."""
+    """The first year of the running season; a season starts in July."""
     today = datetime.date.today()
     return today.year if today.month >= 7 else today.year - 1
 
 
 def third_tier(year):
-    """Dritte Ebene: Oberligen (bis 1993), Regionalligen (1994-2007), 3. Liga (ab 2008).
-    Codes von Transfermarkt; die Kuerzel gelten nur fuer die genannten Saisons."""
+    """The third tier: Oberligen (to 1993), Regionalligen (1994-2007), 3. Liga (from 2008).
+    Codes of Transfermarkt; they hold only for the seasons named."""
     if year == 1990:
         return ["NO93", "OLNA", "OL6B", "SW93", "OL7", "OBW3", "BA93", "BO91", "OLNS"]
     if year <= 1993:
@@ -101,14 +102,14 @@ def third_tier(year):
     return ["L3"]
 
 
-OUT = CACHE = None  # main setzt sie aus --out
+OUT = CACHE = None  # main sets them from --out
 OFFLINE = False
 PAUSE = 2.0
 MAX_PASSES = 5
 
 
 def write_json(path, data):
-    """Atomar schreiben, damit ein Abbruch keine halbe Datei hinterlaesst."""
+    """Writes atomically, so that an abort leaves no half file."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
@@ -117,7 +118,7 @@ def write_json(path, data):
 
 
 def cached(path, fn, *args):
-    """Liefert den Cache-Eintrag oder holt ihn; bei Fehler None (wird nicht gecacht)."""
+    """Returns the cache entry or fetches it; None on a failure (not cached)."""
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
@@ -128,28 +129,28 @@ def cached(path, fn, *args):
 
 
 def fetch(fn, session, *args):
-    """Mehrere Versuche mit wachsender Wartezeit. Bei Sperre (403/429) lange warten,
-    bei anderen Fehlern kurz. None, wenn alle Versuche scheitern oder --offline gilt."""
+    """Several attempts with growing waits: long when blocked (403/429), short on
+    other failures. None when all attempts fail or with --offline."""
     if OFFLINE:
-        print(f"nicht im Cache: {fn.__name__} {args}", flush=True)
+        print(f"not in the cache: {fn.__name__} {args}", flush=True)
         return None
     for attempt in range(6):
         try:
             return fn(session, *args, PAUSE)
         except t.Blocked as e:
             wait = min(60 * 2 ** attempt, 1800)
-            print(f"gesperrt ({e}), warte {wait} s", flush=True)
+            print(f"blocked ({e}), waiting {wait} s", flush=True)
         except (requests.RequestException, ValueError, AttributeError, TypeError) as e:
             wait = min(10 * 2 ** attempt, 300)
-            print(f"Fehler {args[:2]} (Versuch {attempt + 1}): {e!r}, warte {wait} s", flush=True)
+            print(f"failure {args[:2]} (attempt {attempt + 1}): {e!r}, waiting {wait} s", flush=True)
         time.sleep(wait + random.uniform(0, 5))
     return None
 
 
 def season(session, year):
-    """Eine Saison; (clubs, Fehlerliste). Cache pro Tabelle und Kader. Die
-    Regionalliga ab 2008 (Stufe 4) ist optional: sie fuellt die Plaetze ausserhalb
-    der Ligen, ohne sie nimmt das Spiel die Vereine der Vorsaison."""
+    """A season; (clubs, failures). One cache file per table and squad. The
+    Regionalliga from 2008 (tier 4) is optional: it fills the places outside
+    the leagues; without it the game takes the clubs of the season before."""
     clubs, failed = [], []
     comps = [("L1", 1), ("L2", 2)] + [(c, 3) for c in third_tier(year)]
     if year >= 2008:
@@ -157,10 +158,10 @@ def season(session, year):
         if codes:
             comps += [(c, 4) for c in codes]
         else:
-            print(f"{year}: Regionalliga nicht gefunden, weiter ohne", flush=True)
+            print(f"{year}: Regionalliga not found, going on without", flush=True)
     for comp, tier in comps:
         rows = cached(os.path.join(CACHE, str(year), f"{comp}.table.json"), t.table, session, comp, year)
-        if not rows:  # None (Fehler) oder leer: nicht cachen, spaeter nochmal
+        if not rows:  # None (failure) or empty: do not cache, try again later
             if tier < 4:
                 failed.append(comp)
             if rows is not None:
@@ -173,17 +174,17 @@ def season(session, year):
             entry = {"name": r["verein"].upper(), "league": comp, "tier": tier, "rank": number(r["platz"]),
                      "games": number(r["spiele"]), "goals": r["tore"], "points": number(r["punkte"]),
                      "players": {g: [] for g in GROUP.values()}}
-            # Aus der Regionalliga kommen nur die Ersten ins Spiel: Kader nur fuer sie.
+            # Only the first of the Regionalliga enter the game: squads only for them.
             if tier < 4 or entry["rank"] <= 3:
-                kader = cached(os.path.join(CACHE, str(year), f"{comp}-{r['verein_id']}.squad.json"), t.squad, session, r["verein_id"], year)
-                if kader is None:
+                squad = cached(os.path.join(CACHE, str(year), f"{comp}-{r['verein_id']}.squad.json"), t.squad, session, r["verein_id"], year)
+                if squad is None:
                     if tier < 4:
                         failed.append(f"{comp}/{r['verein']}")
                     continue
-                entry["players"] = convert(kader)
+                entry["players"] = convert(squad)
             ok += 1
             clubs.append(entry)
-        print(f"{year} {comp}: {ok}/{len(rows)} Vereine", flush=True)
+        print(f"{year} {comp}: {ok}/{len(rows)} clubs", flush=True)
     return clubs, failed
 
 
@@ -191,9 +192,9 @@ EUROPE = ["CL", "EL", "UCOL", "CLQ", "ELQ", "ECLQ"]
 
 
 def europe(session, year):
-    """Die auslaendischen Vereine der Europapokale einer Saison, die Hauptrunden
-    vor den Qualifikationen; [] wenn nichts zu holen ist (dann nimmt das Spiel die
-    der Vorsaison)."""
+    """The foreign clubs of the European cups of a season, the main rounds
+    before the qualifications; [] when there is nothing to fetch (then the game
+    takes those of the season before)."""
     out, seen = [], set()
     for comp in EUROPE:
         rows = cached(os.path.join(CACHE, str(year), f"{comp}.teilnehmer.json"), t.participants, session, comp, year)
@@ -207,12 +208,12 @@ def europe(session, year):
 
 def main():
     global OUT, CACHE, OFFLINE
-    ap = argparse.ArgumentParser(description="Tabellen und Kader von transfermarkt.de je Saison")
-    ap.add_argument("--out", required=True, help="Verzeichnis der Saisondateien (mit .cache)")
+    ap = argparse.ArgumentParser(description="tables and squads per season from transfermarkt.de")
+    ap.add_argument("--out", required=True, help="directory of the season files (with .cache)")
     ap.add_argument("--from", dest="first", type=int, default=running_season())
     ap.add_argument("--to", dest="last", type=int)
-    ap.add_argument("--refresh", action="store_true", help="die gewaehlten Saisons neu holen")
-    ap.add_argument("--offline", action="store_true", help="nur den Cache lesen")
+    ap.add_argument("--refresh", action="store_true", help="fetch the chosen seasons anew")
+    ap.add_argument("--offline", action="store_true", help="read the cache only")
     a = ap.parse_args()
     last = a.first if a.last is None else a.last
     OUT, OFFLINE = os.path.abspath(os.path.expanduser(a.out)), a.offline
@@ -236,19 +237,19 @@ def main():
             clubs, failed = season(session, year)
             if failed:
                 open_seasons += 1
-                print(f"{year}: unvollstaendig, nicht geschrieben ({len(failed)} Fehler: {failed[:5]})", flush=True)
+                print(f"{year}: incomplete, not written ({len(failed)} failures: {failed[:5]})", flush=True)
                 continue
             write_json(path, clubs)
             foreign = europe(session, year)
             if foreign:
                 write_json(os.path.join(OUT, f"{year}-{str(year + 1)[2:]}.europe.json"), foreign)
-            print(f"{year}: geschrieben ({len(clubs)} Vereine, {len(foreign)} auslaendische)", flush=True)
+            print(f"{year}: written ({len(clubs)} clubs, {len(foreign)} foreign)", flush=True)
         if not open_seasons:
-            print("fertig", flush=True)
+            print("done", flush=True)
             return
         if a.offline:
             sys.exit(1)
-        print(f"Durchgang {n}: {open_seasons} Saisons offen, neuer Versuch", flush=True)
+        print(f"pass {n}: {open_seasons} seasons open, trying again", flush=True)
         time.sleep(300)
     sys.exit(1)
 

@@ -22,8 +22,9 @@ func TestSeasonChoiceHover(t *testing.T) {
 			t.Errorf("(%d,%d): %d, want %d", h.x, h.y, got, h.want)
 		}
 	}
-	if seasonLabel(seasons.Season{ID: "1999-00", Year: 1999}) != "1999/00" {
-		t.Error("label")
+	c = &SeasonChoice{entries: []seasons.Season{seasons.ForYear(1999)}}
+	if r := c.rows(-1); r[0].text != "1999/00" {
+		t.Errorf("label %q", r[0].text)
 	}
 }
 
@@ -50,14 +51,17 @@ func TestSetupKeyOpensTheSeasonChoice(t *testing.T) {
 	if !ok || s.opts.Season != "1995-96" || s.orig != mana || s.names[0] != "TEST" || s.teams[0] != -1 || len(s.seasons) != 1 {
 		t.Fatalf("season: %T %+v", top(app), s)
 	}
-	if s.modeLabel() != "SAISON 1995/96" {
-		t.Errorf("label %q", s.modeLabel())
+	if l, r := s.seasonHint(); l != "SAISON 1995/96" || r != "S: SAISON WÄHLEN" {
+		t.Errorf("hint %q %q", l, r)
 	}
 	step(t, app, Input{Chars: []rune{'s'}})
 	step(t, app, click(originalButton.X+2, originalButton.Y+2))
 	s = top(app).(*Setup)
-	if s.opts.Season != "" || s.mana != mana || s.names[0] != "TEST" || s.modeLabel() != "ORIGINAL 1991/92" {
+	if s.opts.Season != "" || s.mana != mana || s.names[0] != "TEST" {
 		t.Fatalf("original: %+v", s)
+	}
+	if l, _ := s.seasonHint(); l != "ORIGINAL 1991/92" {
+		t.Errorf("hint %q", l)
 	}
 	// While a name is typed, S is a letter of it.
 	s.edit = 1
@@ -67,10 +71,13 @@ func TestSetupKeyOpensTheSeasonChoice(t *testing.T) {
 	}
 }
 
-// Without built-in seasons S does nothing.
+// Without built-in seasons S does nothing and the setup shows no hint.
 func TestSetupWithoutSeasons(t *testing.T) {
 	app, mana := testApp(t)
 	setup := NewSetup(mana, t.TempDir())
+	if l, r := setup.seasonHint(); l != "" || r != "" {
+		t.Errorf("hint %q %q", l, r)
+	}
 	app.Reset(setup)
 	step(t, app, Input{Chars: []rune{'s'}})
 	if top(app) != setup {
@@ -82,7 +89,7 @@ func TestSetupWithoutSeasons(t *testing.T) {
 // original as a stand-in for a real season.
 func TestSeasonSetupStartsTheSeason(t *testing.T) {
 	app, mana := testApp(t)
-	setup := NewSeasonSetup(mana, mana, t.TempDir(), "2008-09", 2008)
+	setup := NewSeasonSetup(mana, mana, t.TempDir(), seasons.ForYear(2008))
 	app.Reset(setup)
 	setup.names[0], setup.teams[0] = "TEST", setup.center
 	step(t, app, rclick())
@@ -105,7 +112,7 @@ func TestSeasonSetupStartsTheSeason(t *testing.T) {
 	}
 	data, err := s.Save()
 	if err != nil {
-		t.Skip("not in a turn yet:", err)
+		t.Fatal("save:", err)
 	}
 	l, err := LoadGame(data, mana)
 	if err != nil || l.Season != "2008-09" {

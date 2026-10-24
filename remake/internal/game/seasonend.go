@@ -247,9 +247,10 @@ func (s *State) announceChanges(prev int) {
 
 // HistoryBaseYear is the year the history screen shows for the first
 // record: the original counts from 1963, and in a modern game from 1991,
-// one year before its first season (f_262f_390e).
+// one year before its first season (f_262f_390e); a real season from the
+// year it starts in, the year of its league names.
 func (s *State) HistoryBaseYear() int {
-	if s.Modern {
+	if s.Modern && s.Season == "" {
 		return s.FirstYear - 1
 	}
 	return s.FirstYear
