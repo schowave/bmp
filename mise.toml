@@ -156,6 +156,74 @@ description = "Build remake/bin/bmp"
 dir = "{{config_root}}/remake"
 run = "go build -o bin/bmp ./cmd/bmp"
 
+[tasks."remake:dist"]
+description = "Build the remake as a Windows program and (on macOS) a Mac app, in remake/bin/dist"
+dir = "{{config_root}}/remake"
+# The game files are embedded, so each program is a single file. Ebitengine
+# needs no cgo on Windows, so the .exe cross-compiles anywhere; the Mac app
+# needs the macOS toolchain (cgo, lipo, codesign, iconutil). The app is signed
+# ad hoc only: on another Mac, Gatekeeper asks before the first start (right
+# click → Open). go-winres writes the icon and version of the .exe into a
+# .syso file, which go build links into the Windows program only.
+run = '''
+set -e
+out=bin/dist
+version="$(cat ../VERSION)"
+rm -rf "$out"
+mkdir -p "$out"
+trap 'rm -f cmd/bmp/rsrc_windows_*.syso' EXIT
+go run github.com/tc-hib/go-winres@v0.3.3 simply --arch amd64 --out cmd/bmp/rsrc \
+  --icon cmd/bmp/icon.png --manifest gui \
+  --product-name "Bundesliga Manager Professional" --file-description "Bundesliga Manager Professional" \
+  --product-version "$version" --file-version "$version" --original-filename bmp.exe
+GOOS=windows GOARCH=amd64 go build -trimpath -ldflags=-H=windowsgui -o "$out/bmp.exe" ./cmd/bmp
+echo "$out/bmp.exe"
+if [ "$(uname)" != Darwin ]; then
+  echo "Mac app skipped: it needs macOS"
+  exit 0
+fi
+app="$out/Bundesliga Manager Professional.app"
+mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+iconset="$out/bmp.iconset"
+mkdir -p "$iconset"
+for px in 16 32 128 256 512; do
+  sips -z $px $px cmd/bmp/icon.png --out "$iconset/icon_${px}x${px}.png" >/dev/null
+  sips -z $((px * 2)) $((px * 2)) cmd/bmp/icon.png --out "$iconset/icon_${px}x${px}@2x.png" >/dev/null
+done
+iconutil -c icns -o "$app/Contents/Resources/bmp.icns" "$iconset"
+rm -r "$iconset"
+GOOS=darwin GOARCH=arm64 go build -trimpath -o "$out/bmp-arm64" ./cmd/bmp
+GOOS=darwin GOARCH=amd64 go build -trimpath -o "$out/bmp-amd64" ./cmd/bmp
+lipo -create -output "$app/Contents/MacOS/bmp" "$out/bmp-arm64" "$out/bmp-amd64"
+rm "$out/bmp-arm64" "$out/bmp-amd64"
+cat > "$app/Contents/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key><string>Bundesliga Manager Professional</string>
+  <key>CFBundleIdentifier</key><string>com.github.schowave.bmp</string>
+  <key>CFBundleExecutable</key><string>bmp</string>
+  <key>CFBundleIconFile</key><string>bmp</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>$version</string>
+  <key>CFBundleVersion</key><string>$version</string>
+  <key>LSMinimumSystemVersion</key><string>12.0</string>
+  <key>NSHighResolutionCapable</key><true/>
+</dict>
+</plist>
+EOF
+codesign --force --deep --sign - "$app"
+(cd "$out" && ditto -c -k --keepParent "Bundesliga Manager Professional.app" "Bundesliga Manager Professional.zip")
+echo "$app"
+echo "$out/Bundesliga Manager Professional.zip"
+'''
+
+[tasks."remake:icon"]
+description = "Draw the icon of the remake from the title banner into remake/cmd/bmp/icon.png"
+dir = "{{config_root}}/remake"
+run = "go run ./cmd/bmpicon"
+
 [tasks."remake:extract"]
 description = "Extract the files the remake needs from bmp/ into remake/internal/embedded/data"
 dir = "{{config_root}}/remake"
