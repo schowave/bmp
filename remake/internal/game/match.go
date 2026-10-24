@@ -26,6 +26,7 @@ type MatchEvent struct {
 	Side    int    // 0 home, 1 away
 	Player  string // scorer, booked or injured player (human teams only)
 	Assist  string
+	Goals   int // season goals of the scorer after the goal, 0 for a shoot-out kick
 	Text    string
 	Manager int // manager concerned, -1 for AI teams
 }
@@ -707,6 +708,7 @@ func (md *MatchDay) chanceEvent(fi int, f *Fixture, side, minute int, goal, pena
 				}
 				sl.CareerGoals[comp]++
 				sl.Goals[comp]++
+				ev.Goals = sl.Goals[0] + sl.Goals[1] + sl.Goals[2]
 				sl.Rating += 15
 			} else if !goal {
 				sl.Rating -= 10

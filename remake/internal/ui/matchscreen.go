@@ -646,6 +646,9 @@ func (m *MatchScreen) drawScene(app *App, dst *ebiten.Image, minute int) {
 		if goal {
 			Draw(dst, g.Sub(8, rectWH(0x7c, 0x66, 39, 40)), iconX, u+0x3d)
 			line = "Torschütze: " + ev.Player
+			if ev.Kind == game.EvGoal { // not for a shoot-out kick
+				line += " (" + itoa(ev.Goals) + ")" // f_1a58_0ca3: league, cup and Europe goals
+			}
 		}
 		if ev.Player == "" {
 			line = ""
