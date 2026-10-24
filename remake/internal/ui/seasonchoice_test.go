@@ -31,7 +31,7 @@ func TestSeasonChoiceOriginalOpensTheSetup(t *testing.T) {
 	app, mana := testApp(t)
 	c := newSeasonChoice(mana, t.TempDir(), []seasons.Season{{ID: "1995-96", Year: 1995}})
 	app.Reset(c)
-	step(t, app, click(origX+2, origY+2))
+	step(t, app, click(originalButton.X+2, originalButton.Y+2))
 	s, ok := top(app).(*Setup)
 	if !ok || s.opts.Season != "" || s.orig != mana {
 		t.Fatalf("got %T", top(app))
@@ -42,7 +42,7 @@ func TestSeasonChoiceOriginalOpensTheSetup(t *testing.T) {
 		t.Fatalf("right click: %T", top(app))
 	}
 	// With a club chosen it stays in the setup.
-	step(t, app, click(origX+2, origY+2))
+	step(t, app, click(originalButton.X+2, originalButton.Y+2))
 	s = top(app).(*Setup)
 	s.teams[0] = s.center
 	step(t, app, rclick())
