@@ -1,0 +1,2608 @@
+[
+	{
+		"name": "FC BAYERN MÜNCHEN",
+		"league": "L1",
+		"rank": 1,
+		"games": 6,
+		"goals": "22:5",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"URBIG",
+				"NEUER",
+				"ULREICH"
+			],
+			"defenders": [
+				"UPAMECANO",
+				"BROWN",
+				"DAVIES",
+				"STANISIC",
+				"LAIMER",
+				"TAH",
+				"KIM",
+				"ITO",
+				"BOEY"
+			],
+			"midfielders": [
+				"PAVLOVIC",
+				"MUSIALA",
+				"KARL",
+				"SAIBARI",
+				"BISCHOF",
+				"KIMMICH",
+				"NDIAYE"
+			],
+			"forwards": [
+				"OLISE",
+				"DÍAZ",
+				"KANE",
+				"GNABRY"
+			]
+		}
+	},
+	{
+		"name": "BORUSSIA DORTMUND",
+		"league": "L1",
+		"rank": 2,
+		"games": 6,
+		"goals": "11:4",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"KOBEL",
+				"MEYER",
+				"DREWES",
+				"OSTRZINSKI"
+			],
+			"defenders": [
+				"SCHLOTTERBECK",
+				"GADOU",
+				"RYERSON",
+				"SVENSSON",
+				"ANTON",
+				"REGGIANI",
+				"PRATES",
+				"BENSEBAINI",
+				"MANE",
+				"CAN"
+			],
+			"midfielders": [
+				"NMECHA",
+				"BELLINGHAM",
+				"NWANERI",
+				"KARETSAS",
+				"VEERMAN",
+				"KONSTANTELIAS",
+				"CHUKWUEMEKA",
+				"SABITZER",
+				"LERMA",
+				"DOS SANTOS",
+				"KABA"
+			],
+			"forwards": [
+				"BEIER",
+				"GUIRASSY",
+				"SILVA",
+				"INÁCIO",
+				"ALBERT"
+			]
+		}
+	},
+	{
+		"name": "SC FREIBURG",
+		"league": "L1",
+		"rank": 3,
+		"games": 6,
+		"goals": "15:6",
+		"points": 13,
+		"players": {
+			"goalkeepers": [
+				"BACKHAUS",
+				"MÜLLER",
+				"HUTH"
+			],
+			"defenders": [
+				"TREU",
+				"OGBUS",
+				"LIENHART",
+				"MAKENGO",
+				"ROSENFELDER",
+				"YILMAZ",
+				"GINTER",
+				"GÜNTER",
+				"KÜBLER",
+				"JUNG"
+			],
+			"midfielders": [
+				"ENGELHARDT",
+				"OSTERHAGE",
+				"EGGESTEIN",
+				"YAMAMOTO",
+				"TARNUTZER"
+			],
+			"forwards": [
+				"MATANOVIC",
+				"SUZUKI",
+				"SCHERHANT",
+				"BESTE",
+				"GOTO",
+				"IRIÉ",
+				"GRIFO",
+				"HÖLER",
+				"MUSLIJA"
+			]
+		}
+	},
+	{
+		"name": "BAYER 04 LEVERKUSEN",
+		"league": "L1",
+		"rank": 4,
+		"games": 6,
+		"goals": "16:9",
+		"points": 13,
+		"players": {
+			"goalkeepers": [
+				"FLEKKEN",
+				"BLASWICH",
+				"LOMB"
+			],
+			"defenders": [
+				"QUANSAH",
+				"TAPSOBA",
+				"DOUÉ",
+				"GUTIÉRREZ",
+				"MEDINA",
+				"BADÉ",
+				"OERMANN",
+				"VÁZQUEZ"
+			],
+			"midfielders": [
+				"MAZA",
+				"TILLMAN",
+				"FERNÁNDEZ",
+				"EICHHORN",
+				"GARCÍA",
+				"ANDRICH",
+				"HOFMANN"
+			],
+			"forwards": [
+				"KOFANE",
+				"MOREIRA",
+				"DIABY",
+				"SEGHIR",
+				"SCHICK",
+				"TELLA",
+				"CULBREATH",
+				"TERRIER",
+				"BONIFACE",
+				"BOMBA"
+			]
+		}
+	},
+	{
+		"name": "1.FSV MAINZ 05",
+		"league": "L1",
+		"rank": 5,
+		"games": 6,
+		"goals": "14:10",
+		"points": 10,
+		"players": {
+			"goalkeepers": [
+				"ZENTNER",
+				"SCHWOLOW",
+				"KINZIG"
+			],
+			"defenders": [
+				"POTULSKI",
+				"CACI",
+				"POSCH",
+				"GRUBER",
+				"KOHR",
+				"MWENE",
+				"DA COSTA",
+				"WIDMER",
+				"BELL",
+				"NAKUZOLA"
+			],
+			"midfielders": [
+				"SANO",
+				"NEBEL",
+				"AMIRI",
+				"MARTEL",
+				"MALONEY",
+				"KAWASAKI",
+				"LEE",
+				"RUOPPI"
+			],
+			"forwards": [
+				"HOLLERBACH",
+				"TIETZ",
+				"KÖNIGSDÖRFFER",
+				"BECKER",
+				"SILAS",
+				"HAIDARA"
+			]
+		}
+	},
+	{
+		"name": "SV 07 ELVERSBERG",
+		"league": "L1",
+		"rank": 6,
+		"games": 6,
+		"goals": "12:11",
+		"points": 10,
+		"players": {
+			"goalkeepers": [
+				"KRISTOF",
+				"BOSS",
+				"LEHMANN",
+				"ETRINGER"
+			],
+			"defenders": [
+				"GÜNTHER",
+				"PINCKERT",
+				"SIRCH",
+				"ROHR",
+				"MICKELSON",
+				"GYAMERAH",
+				"LE JONCOUR",
+				"SEIFERT"
+			],
+			"midfielders": [
+				"ONYEKA",
+				"KEIDEL",
+				"DARVICH",
+				"POREBA",
+				"CONDÉ",
+				"SCHMAHL"
+			],
+			"forwards": [
+				"MOKWA",
+				"CAMPBELL",
+				"FUTKEU",
+				"KRATTENMACHER",
+				"PETKOV",
+				"ZIMMERSCHIED",
+				"ADAM",
+				"PFEIFFER",
+				"SCHNELLBACHER"
+			]
+		}
+	},
+	{
+		"name": "RB LEIPZIG",
+		"league": "L1",
+		"rank": 7,
+		"games": 6,
+		"goals": "16:11",
+		"points": 9,
+		"players": {
+			"goalkeepers": [
+				"VANDEVOORDT",
+				"NYLAND",
+				"ZINGERLE"
+			],
+			"defenders": [
+				"LUKEBA",
+				"ESTÈVE",
+				"RAUM",
+				"KONÉ",
+				"BAKU",
+				"HENRICHS",
+				"ORBÁN",
+				"FINKGRÄFE",
+				"KLOSTERMANN"
+			],
+			"midfielders": [
+				"BAUMGARTNER",
+				"EL AYNAOUI",
+				"GRUDA",
+				"SEIWALD",
+				"BANZUZI",
+				"OUÉDRAOGO",
+				"REITZ",
+				"MAKSIMOVIC",
+				"GEBEL",
+				"KALTEFLEITER"
+			],
+			"forwards": [
+				"NUSA",
+				"RÔMULO",
+				"NKUNKU",
+				"BAKAYOKO",
+				"GOMIS",
+				"GUIU",
+				"KONATÉ"
+			]
+		}
+	},
+	{
+		"name": "SV WERDER BREMEN",
+		"league": "L1",
+		"rank": 8,
+		"games": 6,
+		"goals": "12:12",
+		"points": 9,
+		"players": {
+			"goalkeepers": [
+				"HEIN",
+				"SCHLAGER",
+				"KOLKE",
+				"SMARKALEV"
+			],
+			"defenders": [
+				"FRIEDL",
+				"ARTHUR",
+				"WÓJCIK",
+				"DEMAN",
+				"PIEPER",
+				"NDIAYE",
+				"AGU",
+				"SCHMETGENS",
+				"WEISER",
+				"STARK"
+			],
+			"midfielders": [
+				"STAGE",
+				"CHUKI",
+				"LYNEN",
+				"REGEER",
+				"REIS",
+				"STALMACH",
+				"ALVERO",
+				"SOYLU"
+			],
+			"forwards": [
+				"DINKÇI",
+				"GRÜLL",
+				"NJINMAH",
+				"FÜLLKRUG",
+				"TOPP",
+				"QUETANT",
+				"MUSAH",
+				"ITTEN",
+				"EREVBENAGIE"
+			]
+		}
+	},
+	{
+		"name": "HAMBURGER SV",
+		"league": "L1",
+		"rank": 9,
+		"games": 6,
+		"goals": "6:15",
+		"points": 9,
+		"players": {
+			"goalkeepers": [
+				"TANGVIK",
+				"FERNANDES",
+				"DICKES",
+				"LAHTI"
+			],
+			"defenders": [
+				"WOLFE",
+				"EL OUAHDI",
+				"CAPALDO",
+				"BORNAUW",
+				"LEMKE",
+				"OMARI",
+				"TORUNARIGHA",
+				"MUHEIM",
+				"NANDJA",
+				"VUSKOVIC"
+			],
+			"midfielders": [
+				"VIEIRA",
+				"LOKONGA",
+				"REMBERG",
+				"NADIR",
+				"ADELINE",
+				"GRØNBAEK",
+				"AMOAKO",
+				"PHERAI",
+				"JATTA"
+			],
+			"forwards": [
+				"RØSSING-LELESIIT",
+				"MOFFI",
+				"STANGE",
+				"DAKA",
+				"POULSEN"
+			]
+		}
+	},
+	{
+		"name": "FC AUGSBURG",
+		"league": "L1",
+		"rank": 10,
+		"games": 6,
+		"goals": "16:12",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"DAHMEN",
+				"LABROVIC",
+				"WISBEREIT"
+			],
+			"defenders": [
+				"MATSIMA",
+				"BANKS",
+				"BAH",
+				"BEHRENS",
+				"SEOL",
+				"BRACKELMANN",
+				"WOLF",
+				"GOUWELEEUW"
+			],
+			"midfielders": [
+				"KADE",
+				"RIEDER",
+				"KÖMÜR",
+				"CLAUDE-MAURICE",
+				"MASSENGO",
+				"FELLHAUER",
+				"SUSO",
+				"KEITEL",
+				"BREITHAUPT",
+				"SCHNITZER"
+			],
+			"forwards": [
+				"IBRAHIMOVIC",
+				"RIBEIRO",
+				"OGUNDU",
+				"GREGORITSCH",
+				"MOUNIÉ",
+				"SAKAR"
+			]
+		}
+	},
+	{
+		"name": "EINTRACHT FRANKFURT",
+		"league": "L1",
+		"rank": 11,
+		"games": 6,
+		"goals": "10:16",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"ATUBOLU",
+				"SANTOS",
+				"SILJEVIC",
+				"GRAHL"
+			],
+			"defenders": [
+				"COLLINS",
+				"BRASSIER",
+				"KOCH",
+				"KOSUGI",
+				"BAUM",
+				"OTÁVIO",
+				"MALUZE",
+				"CHANDLER"
+			],
+			"midfielders": [
+				"UZUN",
+				"ONYEDIKA",
+				"HØJLUND",
+				"CHAÏBI",
+				"ASÉKO",
+				"ARRHOV",
+				"GÖTZE"
+			],
+			"forwards": [
+				"BURKARDT",
+				"EBNOUTALIB",
+				"DOAN",
+				"KNAUFF",
+				"AMAIMOUNI-ECHGHOUYAB",
+				"PIMPONG",
+				"NGANKAM"
+			]
+		}
+	},
+	{
+		"name": "1.FC KÖLN",
+		"league": "L1",
+		"rank": 12,
+		"games": 6,
+		"goals": "8:11",
+		"points": 7,
+		"players": {
+			"goalkeepers": [
+				"SCHWÄBE",
+				"ZIELER",
+				"JAMES",
+				"KÖBBING"
+			],
+			"defenders": [
+				"SIMPSON-PUSEY",
+				"SEBULONSEN",
+				"VAN DEN BERG",
+				"LOCHOSHVILI",
+				"MENSAH",
+				"SOSA",
+				"SCHMIED",
+				"CASTRO-MONTES",
+				"HÜBERS"
+			],
+			"midfielders": [
+				"JÓHANNESSON",
+				"KRAUSS",
+				"SKHIRI",
+				"OKON-ENGSTLER",
+				"NEVES"
+			],
+			"forwards": [
+				"S.EL MALA",
+				"MOORE",
+				"ACHE",
+				"DALLINGA",
+				"THIELMANN",
+				"MAINA",
+				"HESKEY",
+				"WALDSCHMIDT",
+				"BÜLTER",
+				"RONDIC",
+				"M.EL MALA"
+			]
+		}
+	},
+	{
+		"name": "TSG 1899 HOFFENHEIM",
+		"league": "L1",
+		"rank": 13,
+		"games": 6,
+		"goals": "11:14",
+		"points": 6,
+		"players": {
+			"goalkeepers": [
+				"BAUMANN",
+				"PHILIPP",
+				"PETERSSON"
+			],
+			"defenders": [
+				"HAJDARI",
+				"ROTS",
+				"KABAK",
+				"HRANAC",
+				"MACHIDA",
+				"GENDREY",
+				"BERNARDO",
+				"COUFAL",
+				"DULIC",
+				"ABRAHA"
+			],
+			"midfielders": [
+				"AVDULLAHU",
+				"DE CAT",
+				"BURGER",
+				"LENZ",
+				"PRASS",
+				"CONTÉ",
+				"ENGELNS"
+			],
+			"forwards": [
+				"ASLLANI",
+				"LEMPERLE",
+				"DAGHIM",
+				"WIMMER",
+				"HLOZEK",
+				"MOERSTEDT",
+				"KRAMARIC"
+			]
+		}
+	},
+	{
+		"name": "VFB STUTTGART",
+		"league": "L1",
+		"rank": 14,
+		"games": 7,
+		"goals": "10:13",
+		"points": 6,
+		"players": {
+			"goalkeepers": [
+				"SEIMEN",
+				"BREDLOW",
+				"FUNK",
+				"DRLJACA"
+			],
+			"defenders": [
+				"JELTSCH",
+				"HENDRIKS",
+				"MITTELSTÄDT",
+				"CHABOT",
+				"VAGNOMAN",
+				"JAQUEZ",
+				"ASSIGNON",
+				"AL-DAKHIL",
+				"ZAGADOU",
+				"STERGIOU"
+			],
+			"midfielders": [
+				"STILLER",
+				"EL KHANNOUSS",
+				"NARTEY",
+				"KARAZOR",
+				"SPALT",
+				"PRÖMEL",
+				"MALANGA",
+				"YIGIT"
+			],
+			"forwards": [
+				"LEWELING",
+				"PEJCINOVIC",
+				"DEMIROVIC",
+				"UNDAV",
+				"SAUER",
+				"TOMÁS",
+				"FÜHRICH",
+				"DIEHL"
+			]
+		}
+	},
+	{
+		"name": "FC SCHALKE 04",
+		"league": "L1",
+		"rank": 15,
+		"games": 6,
+		"goals": "4:7",
+		"points": 5,
+		"players": {
+			"goalkeepers": [
+				"KARIUS",
+				"MÜLLER",
+				"SIEBEKING"
+			],
+			"defenders": [
+				"AYHAN",
+				"GOSENS",
+				"WÖBER",
+				"V.BECKER",
+				"KURUÇAY",
+				"KATIC",
+				"T.BECKER",
+				"GANTENBEIN"
+			],
+			"midfielders": [
+				"EL-FAOUZI",
+				"AOUCHICHE",
+				"TANAKA",
+				"EBIMBE",
+				"LJUBICIC",
+				"SCHALLENBERG",
+				"KARAMAN",
+				"VOZAR",
+				"PORATH",
+				"BACHMANN"
+			],
+			"forwards": [
+				"SYLLA",
+				"HWANG",
+				"ADAMU",
+				"DZEKO",
+				"LASME",
+				"HØJLUND"
+			]
+		}
+	},
+	{
+		"name": "SC PADERBORN 07",
+		"league": "L1",
+		"rank": 16,
+		"games": 6,
+		"goals": "5:9",
+		"points": 5,
+		"players": {
+			"goalkeepers": [
+				"NOLL",
+				"SCHUBERT",
+				"PRUHS"
+			],
+			"defenders": [
+				"HANSEN",
+				"SCHELLER",
+				"GÖTZE",
+				"TER HORST",
+				"HOFFMEIER",
+				"STICKER",
+				"AWORTWIE-GRANT",
+				"ZOBEL"
+			],
+			"midfielders": [
+				"CASTAÑEDA",
+				"CURDA",
+				"ULRICH",
+				"OBERMAIR",
+				"MÜLLER",
+				"LIPPMANN",
+				"KLAAS",
+				"DURIC",
+				"BAACK",
+				"MOHR",
+				"GAYRET"
+			],
+			"forwards": [
+				"ZEITLER",
+				"PHILIPPE",
+				"VIDOVIC",
+				"PIERINGER",
+				"MEIER",
+				"MARINO",
+				"TIGGES",
+				"MICHEL",
+				"MILLGRAMM",
+				"EICKEL"
+			]
+		}
+	},
+	{
+		"name": "1.FC UNION BERLIN",
+		"league": "L1",
+		"rank": 17,
+		"games": 6,
+		"goals": "5:17",
+		"points": 5,
+		"players": {
+			"goalkeepers": [
+				"RÖNNOW",
+				"RAAB",
+				"KLAUS"
+			],
+			"defenders": [
+				"QUERFELD",
+				"ROTHE",
+				"VAN DEN BOSCH",
+				"KÖHN",
+				"UDUOKHAI",
+				"NSOKI",
+				"JURANOVIC",
+				"M.FRIEDRICH",
+				"TRIMMEL",
+				"MARKGRAF"
+			],
+			"midfielders": [
+				"KEMLEIN",
+				"SCHÄFER",
+				"AEBISCHER",
+				"JEONG",
+				"KHEDIRA",
+				"HABERER",
+				"IMERI",
+				"SKOV"
+			],
+			"forwards": [
+				"LATH",
+				"ILIC",
+				"BURCU",
+				"BURKE",
+				"LJUBICIC",
+				"SKARKE",
+				"GÜTHER",
+				"GRAY",
+				"J.FRIEDRICH"
+			]
+		}
+	},
+	{
+		"name": "BORUSSIA MÖNCHENGLADBACH",
+		"league": "L1",
+		"rank": 18,
+		"games": 7,
+		"goals": "11:22",
+		"points": 3,
+		"players": {
+			"goalkeepers": [
+				"NICOLAS",
+				"OLSCHOWSKY",
+				"BATZ",
+				"SIPPEL"
+			],
+			"defenders": [
+				"ULLRICH",
+				"DIKS",
+				"KONOPLYA",
+				"SCALLY",
+				"ITAKURA",
+				"HEROLD",
+				"CHIARODIA",
+				"LESZCZYŃSKI",
+				"HASHIOKA"
+			],
+			"midfielders": [
+				"MOHYA",
+				"CASTROP",
+				"SANDER",
+				"LEOPOLD",
+				"NGUEFACK",
+				"NEUHAUS",
+				"STÖGER",
+				"UNO",
+				"FLECK"
+			],
+			"forwards": [
+				"KÜHN",
+				"KLEINDIENST",
+				"BOLIN",
+				"HONORAT",
+				"HACK",
+				"LIDBERG",
+				"MACHINO",
+				"DANFA"
+			]
+		}
+	},
+	{
+		"name": "HERTHA BSC",
+		"league": "L2",
+		"rank": 1,
+		"games": 8,
+		"goals": "19:8",
+		"points": 22,
+		"players": {
+			"goalkeepers": [
+				"GERSBECK",
+				"GOLLER",
+				"HEIDE",
+				"ÖZKANLI"
+			],
+			"defenders": [
+				"GECHTER",
+				"EITSCHBERGER",
+				"DÁRDAI",
+				"KLEMENS",
+				"ZEEFUIK",
+				"KOLBE",
+				"PEDERSEN",
+				"DIALLO",
+				"GROTHE"
+			],
+			"midfielders": [
+				"GOURAM",
+				"ADEWUMI",
+				"LUM",
+				"SESSA",
+				"SEGUIN",
+				"TELIB",
+				"TODOROVIC"
+			],
+			"forwards": [
+				"BREKALO",
+				"ALFA-RUPRECHT",
+				"NILSSON",
+				"THORSTEINSSON",
+				"GRÖNNING",
+				"SCHULER",
+				"NDI",
+				"HILDEBRANDT"
+			]
+		}
+	},
+	{
+		"name": "1.FC NÜRNBERG",
+		"league": "L2",
+		"rank": 2,
+		"games": 8,
+		"goals": "21:11",
+		"points": 18,
+		"players": {
+			"goalkeepers": [
+				"REICHERT",
+				"LISEWSKI",
+				"MATHENIA",
+				"ORTEGEL"
+			],
+			"defenders": [
+				"FAYE",
+				"KALOGEROPOULOS",
+				"OTTO",
+				"PORSTNER",
+				"JANISCH",
+				"MANDIC",
+				"MKRTCHYAN",
+				"MASOURAS",
+				"CERESOLI",
+				"HESS",
+				"EL HAIJA"
+			],
+			"midfielders": [
+				"MARKHIEV",
+				"FERNÁNDEZ",
+				"LUBACH",
+				"JUSTVAN",
+				"BECKER",
+				"SOLDIC",
+				"OSAWE",
+				"BARJUAN"
+			],
+			"forwards": [
+				"ZOMA",
+				"BØVING",
+				"SCOBEL",
+				"GHRIEB",
+				"HAUGEN",
+				"GRIMALDI",
+				"MOUSTFA"
+			]
+		}
+	},
+	{
+		"name": "VFL WOLFSBURG",
+		"league": "L2",
+		"rank": 3,
+		"games": 9,
+		"goals": "23:14",
+		"points": 16,
+		"players": {
+			"goalkeepers": [
+				"WELLENREUTHER",
+				"ZIELIŃSKI",
+				"PERVAN"
+			],
+			"defenders": [
+				"KUMBEDI",
+				"MAEHLE",
+				"ADJETEY",
+				"ZEHNTER",
+				"FISCHER",
+				"WAHL",
+				"ANGÉLY",
+				"CLEITON",
+				"ROGÉRIO"
+			],
+			"midfielders": [
+				"SOUZA",
+				"SVANBERG",
+				"DÁRDAI",
+				"DAMAR",
+				"VRANCKX",
+				"REXHBECAJ",
+				"ARNOLD",
+				"HENSEL",
+				"GERHARDT"
+			],
+			"forwards": [
+				"REESE",
+				"SHIOGAI",
+				"BERNHARDSSON",
+				"HORNBY",
+				"BESIO",
+				"GLATZEL",
+				"KATZ",
+				"BENEDICT"
+			]
+		}
+	},
+	{
+		"name": "1.FC KAISERSLAUTERN",
+		"league": "L2",
+		"rank": 4,
+		"games": 8,
+		"goals": "8:4",
+		"points": 15,
+		"players": {
+			"goalkeepers": [
+				"KRAHL",
+				"KAMGA",
+				"ONOHIOL"
+			],
+			"defenders": [
+				"HAAS",
+				"JOLY",
+				"MURPHY",
+				"GYAMFI",
+				"RASMUSSEN",
+				"ASTA",
+				"ELVEDI",
+				"FREES"
+			],
+			"midfielders": [
+				"SKYTTÄ",
+				"SAHIN",
+				"SAUER",
+				"KUNZE",
+				"HOFMEISTER",
+				"ROBINSON",
+				"RITTER",
+				"SCHRAMM",
+				"GIBS",
+				"SCHEER"
+			],
+			"forwards": [
+				"LUKOVIC",
+				"YARDIMCI",
+				"KANATÉ",
+				"TAZEMETA",
+				"PRTAJIN",
+				"BERISHA",
+				"JUNGFLEISCH",
+				"MÜLLER"
+			]
+		}
+	},
+	{
+		"name": "1.FC HEIDENHEIM 1846",
+		"league": "L2",
+		"rank": 5,
+		"games": 8,
+		"goals": "15:15",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"FELLER",
+				"DÄHNE",
+				"TSCHERNUTH",
+				"MARK"
+			],
+			"defenders": [
+				"HEULE",
+				"MAINKA",
+				"MHAMDI",
+				"SIERSLEBEN",
+				"FÖHRENBACH",
+				"BUSCH",
+				"KÖLLE",
+				"PAÇARADA"
+			],
+			"midfielders": [
+				"SCHÖPPNER",
+				"NIEHUES",
+				"KERBER",
+				"ZRILIĆ"
+			],
+			"forwards": [
+				"VOGT",
+				"HONSAK",
+				"KAUFMANN",
+				"HENNRICH",
+				"C.CONTEH",
+				"ZIVZIVADZE",
+				"WAGNER",
+				"S.CONTEH",
+				"COSTLY",
+				"BREUNIG"
+			]
+		}
+	},
+	{
+		"name": "1.FC MAGDEBURG",
+		"league": "L2",
+		"rank": 6,
+		"games": 8,
+		"goals": "14:11",
+		"points": 13,
+		"players": {
+			"goalkeepers": [
+				"REIMANN",
+				"KRUTH",
+				"KAMPA",
+				"MÖBIUS"
+			],
+			"defenders": [
+				"MACNULTY",
+				"NOLLENBERGER",
+				"JAECKEL",
+				"NADJOMBE",
+				"MÜLLER",
+				"MUSONDA",
+				"BOCKHORN",
+				"HEBER",
+				"DZOGOVIC",
+				"CHAHED"
+			],
+			"midfielders": [
+				"CHÁVEZ",
+				"HYRYLÄINEN",
+				"MICHEL",
+				"KWARTENG",
+				"MÜSEL",
+				"REITZ",
+				"MERGNER"
+			],
+			"forwards": [
+				"ZUKOWSKI",
+				"SIMIC",
+				"ATIK",
+				"IYOHA",
+				"YOON",
+				"TACHIE",
+				"BAARS",
+				"LEE",
+				"MANTHEY"
+			]
+		}
+	},
+	{
+		"name": "FC ST. PAULI",
+		"league": "L2",
+		"rank": 7,
+		"games": 9,
+		"goals": "11:9",
+		"points": 12,
+		"players": {
+			"goalkeepers": [
+				"VOLL",
+				"MITOV",
+				"SPARI"
+			],
+			"defenders": [
+				"PYRKA",
+				"SMITH",
+				"NEMETH",
+				"ANDO",
+				"OPPIE",
+				"MATHISEN",
+				"RITZKA",
+				"DZWIGALA",
+				"JANSSON"
+			],
+			"midfielders": [
+				"FUJITA",
+				"RASMUSSEN",
+				"METCALFE",
+				"THÓRDARSON",
+				"KLEIN",
+				"HRGOTA",
+				"AHLSTRAND",
+				"SCHMITZ",
+				"SCHMIDT"
+			],
+			"forwards": [
+				"KAARS",
+				"LAGE",
+				"NIANG",
+				"CEESAY",
+				"HARA",
+				"JONES",
+				"BANKS"
+			]
+		}
+	},
+	{
+		"name": "ARMINIA BIELEFELD",
+		"league": "L2",
+		"rank": 8,
+		"games": 8,
+		"goals": "13:13",
+		"points": 11,
+		"players": {
+			"goalkeepers": [
+				"KERSKEN",
+				"OPPERMANN",
+				"HILDESHEIM"
+			],
+			"defenders": [
+				"BAUER",
+				"GROSSER",
+				"KOUDOSSOU",
+				"SCHNEIDER",
+				"HANDWERKER",
+				"FELIX",
+				"HAGMANN",
+				"SICKER"
+			],
+			"midfielders": [
+				"RUSSO",
+				"WÖRL",
+				"JENSEN",
+				"MEHLEM",
+				"WEGENER",
+				"SCHRECK",
+				"KUNZE",
+				"YAŞAR"
+			],
+			"forwards": [
+				"MOMULUH",
+				"MIN",
+				"BOAKYE",
+				"GRODOWSKI",
+				"ROCHELT",
+				"RICHTER",
+				"YOUNG",
+				"OCANSEY"
+			]
+		}
+	},
+	{
+		"name": "FC ENERGIE COTTBUS",
+		"league": "L2",
+		"rank": 9,
+		"games": 8,
+		"goals": "16:17",
+		"points": 9,
+		"players": {
+			"goalkeepers": [
+				"LOTKA",
+				"KRATZSCH",
+				"BÖHNKE",
+				"WILKE"
+			],
+			"defenders": [
+				"ERLEIN",
+				"MANU",
+				"DOUMBIA",
+				"ZAYDAN",
+				"RORIG",
+				"CAMPULKA",
+				"BORGMANN",
+				"LUCOQUI",
+				"MALONE",
+				"GUWARA",
+				"TAUBENECK"
+			],
+			"midfielders": [
+				"MICHELBRINK",
+				"BITTENCOURT",
+				"CIGERCI",
+				"BOZIARIS",
+				"PELIVAN",
+				"GUTTAU",
+				"HOFMANN",
+				"RESCHKE"
+			],
+			"forwards": [
+				"BOGDANOV",
+				"COPADO",
+				"ENGELHARDT",
+				"HANNEMANN",
+				"BUTLER",
+				"KINSOMBI"
+			]
+		}
+	},
+	{
+		"name": "SPVGG GREUTHER FÜRTH",
+		"league": "L2",
+		"rank": 10,
+		"games": 8,
+		"goals": "12:13",
+		"points": 9,
+		"players": {
+			"goalkeepers": [
+				"HELLSTERN",
+				"PRÜFROCK",
+				"ORTAG"
+			],
+			"defenders": [
+				"BLANK",
+				"REICH",
+				"HEUER",
+				"ITTER",
+				"KERESZTES",
+				"DEHM",
+				"BENKARA",
+				"GIANDOMENICO",
+				"DAL"
+			],
+			"midfielders": [
+				"APPELKAMP",
+				"POHLMANN",
+				"KELLER",
+				"ADEMI",
+				"WALLENTOWITZ",
+				"BANSÉ",
+				"WILL",
+				"ARIFI",
+				"KLAUS",
+				"MÜLLER",
+				"AVLAYICI",
+				"MEGEED"
+			],
+			"forwards": [
+				"JORDAN",
+				"SILLAH",
+				"SRBENY",
+				"ZANK"
+			]
+		}
+	},
+	{
+		"name": "SG DYNAMO DRESDEN",
+		"league": "L2",
+		"rank": 11,
+		"games": 8,
+		"goals": "11:15",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"SCHREIBER",
+				"BETHKE",
+				"GRILL",
+				"MESENHÖLER"
+			],
+			"defenders": [
+				"MÜLLER",
+				"KELLER",
+				"SCHMIDT",
+				"STERNER",
+				"MUHAMEDBEGOVIC",
+				"ROSSIPAL",
+				"NEININGER",
+				"BOEDER",
+				"BÜNNING",
+				"STRAUDI",
+				"EZEH"
+			],
+			"midfielders": [
+				"COVIC",
+				"WAGNER",
+				"RAPP",
+				"HAUPTMANN",
+				"RASCHL",
+				"HERRMANN",
+				"ENOLD"
+			],
+			"forwards": [
+				"BOBZIEN",
+				"OKPALA",
+				"INANOGLU",
+				"LEMMER",
+				"DAFERNER",
+				"FRÖLING",
+				"VERMEIJ"
+			]
+		}
+	},
+	{
+		"name": "VFL OSNABRÜCK",
+		"league": "L2",
+		"rank": 11,
+		"games": 8,
+		"goals": "11:15",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"KRUMREY",
+				"SAUTER",
+				"BÖGGEMANN"
+			],
+			"defenders": [
+				"GÓMEZ",
+				"FABINSKI",
+				"WIEMANN",
+				"MÜLLER",
+				"HANNA",
+				"BAKATUKANDA",
+				"JANOTTA"
+			],
+			"midfielders": [
+				"FLACH",
+				"BECK",
+				"BADJIE",
+				"OPITZ",
+				"WAGNER",
+				"FABER",
+				"MÜNST",
+				"KAMMERBAUER",
+				"KYEREH",
+				"HENNING",
+				"LESUEUR",
+				"JACOBSEN",
+				"WENSING"
+			],
+			"forwards": [
+				"MEISSNER",
+				"RAIMUND",
+				"RIESSELMANN"
+			]
+		}
+	},
+	{
+		"name": "KARLSRUHER SC",
+		"league": "L2",
+		"rank": 13,
+		"games": 8,
+		"goals": "10:14",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"BERNAT",
+				"HIMMELMANN",
+				"GEBERT"
+			],
+			"defenders": [
+				"PEDROSA",
+				"OFLI",
+				"HÉLITON",
+				"SCHOLL",
+				"KOBALD",
+				"BERGH",
+				"FRANKE",
+				"TRÉMOULET",
+				"JUNG"
+			],
+			"midfielders": [
+				"ZOR",
+				"EGLOFF",
+				"WANITZEK",
+				"KWON",
+				"WIETHAUP",
+				"VÄÄNÄNEN",
+				"EICHINGER",
+				"CIVEJA"
+			],
+			"forwards": [
+				"FARHAT",
+				"FUKUDA",
+				"MEYER",
+				"LAGHRISSI",
+				"PONENTE-RAMIREZ",
+				"BROSCHINSKI"
+			]
+		}
+	},
+	{
+		"name": "VFL BOCHUM",
+		"league": "L2",
+		"rank": 14,
+		"games": 9,
+		"goals": "6:10",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"HORN",
+				"CASALI",
+				"RÖLLEKE"
+			],
+			"defenders": [
+				"STEINWENDER",
+				"MBOM",
+				"OLSEN",
+				"WITTEK",
+				"KLAIBER",
+				"STROMPF",
+				"METS",
+				"KARADEMIR",
+				"SAWAS"
+			],
+			"midfielders": [
+				"PANNEWIG",
+				"MEYER",
+				"COKAJ",
+				"MIYOSHI",
+				"TAZ",
+				"PATIÑO",
+				"ISBRUCH"
+			],
+			"forwards": [
+				"STEUCKERS",
+				"RASMUSSEN",
+				"HOLTMANN",
+				"HANSLIK",
+				"OURO-TAGBA",
+				"HOFMANN",
+				"CRIMALDI",
+				"PICK",
+				"DRAKAS"
+			]
+		}
+	},
+	{
+		"name": "HANNOVER 96",
+		"league": "L2",
+		"rank": 15,
+		"games": 8,
+		"goals": "8:13",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"LORETZ",
+				"WEINKAUF",
+				"SCHWANKE"
+			],
+			"defenders": [
+				"OKON",
+				"GHIȚĂ",
+				"TOMIAK",
+				"ALLGEIER",
+				"HUGONET",
+				"SIEWERT"
+			],
+			"midfielders": [
+				"HARTEL",
+				"THÓRDARSON",
+				"OUDENNE",
+				"MATSUDA",
+				"GINDORF",
+				"TAÏBI",
+				"NEUBAUER",
+				"ROGGOW",
+				"IKARI",
+				"REINHOLD",
+				"ENGELBRETH",
+				"VOGEL",
+				"STEINMANN",
+				"MHANGO"
+			],
+			"forwards": [
+				"KÄLLMAN",
+				"CHAKROUN",
+				"BUNDU",
+				"SAHITI",
+				"PICHLER",
+				"ETCIBASI",
+				"HOBRECHT",
+				"ÜNAL",
+				"KURT"
+			]
+		}
+	},
+	{
+		"name": "SV DARMSTADT 98",
+		"league": "L2",
+		"rank": 16,
+		"games": 9,
+		"goals": "8:18",
+		"points": 8,
+		"players": {
+			"goalkeepers": [
+				"SCHUHEN",
+				"BRUNST",
+				"BÖRNER"
+			],
+			"defenders": [
+				"MIKELBRENCIS",
+				"PFEIFFER",
+				"NÜRNBERGER",
+				"VUKOTIC",
+				"LÜHRS",
+				"PETRETTA",
+				"KLEINHANSL",
+				"BADER",
+				"LANNERT",
+				"DRESKOVIC",
+				"DETTONI",
+				"PFISTER"
+			],
+			"midfielders": [
+				"AKIYAMA",
+				"KLEFISCH",
+				"RICHTER",
+				"DUIJVESTIJN",
+				"KEHL",
+				"SICKINGER",
+				"PAPELA",
+				"VERKOOIJEN",
+				"HERBST"
+			],
+			"forwards": [
+				"SMIT",
+				"MARSEILER",
+				"WEISSHAUPT",
+				"LEE",
+				"FURUKAWA",
+				"EL KADIRI",
+				"LAKENMACHER",
+				"MERX"
+			]
+		}
+	},
+	{
+		"name": "EINTRACHT BRAUNSCHWEIG",
+		"league": "L2",
+		"rank": 17,
+		"games": 8,
+		"goals": "13:15",
+		"points": 7,
+		"players": {
+			"goalkeepers": [
+				"HOFFMANN",
+				"UPHOFF",
+				"BODON"
+			],
+			"defenders": [
+				"AYDIN",
+				"EHLERS",
+				"FRENKERT",
+				"SANCHEZ",
+				"HOTI",
+				"KATTERBACH",
+				"JÄKEL",
+				"KOVACEVIC",
+				"KOUTSIDIS",
+				"BA"
+			],
+			"midfielders": [
+				"MARIE",
+				"DI BENEDETTO",
+				"FLICK",
+				"TEMPELMANN",
+				"HEUSSER",
+				"RAEBIGER",
+				"WAGNER"
+			],
+			"forwards": [
+				"MIJATOVIC",
+				"STURM",
+				"ZÉ",
+				"OPOKU",
+				"URBICH",
+				"SANÉ",
+				"ENTRUP"
+			]
+		}
+	},
+	{
+		"name": "HOLSTEIN KIEL",
+		"league": "L2",
+		"rank": 18,
+		"games": 8,
+		"goals": "7:11",
+		"points": 5,
+		"players": {
+			"goalkeepers": [
+				"WEINER",
+				"ROTHENHAGEN",
+				"ENGELHARDT",
+				"SCHMIT"
+			],
+			"defenders": [
+				"ZEC",
+				"TOLKIN",
+				"SEKINE",
+				"MADSEN",
+				"NEKIC",
+				"ROSENBOOM",
+				"ROSLYNG",
+				"PARDUZI",
+				"TAKAHASHI",
+				"SCHONLAU",
+				"MEDLIN"
+			],
+			"midfielders": [
+				"DAVIDSEN",
+				"ABE",
+				"THERKELSEN",
+				"BALZI",
+				"MEFFERT",
+				"UGOH",
+				"MUQAJ",
+				"TASDELEN"
+			],
+			"forwards": [
+				"HARRES",
+				"DE REGT",
+				"KAPRÁLIK",
+				"KVILITAIA",
+				"KELATI",
+				"ALIDOU",
+				"REIMERS",
+				"SKRZYBSKI"
+			]
+		}
+	},
+	{
+		"name": "MSV DUISBURG",
+		"league": "L3",
+		"rank": 1,
+		"games": 10,
+		"goals": "27:12",
+		"points": 25,
+		"players": {
+			"goalkeepers": [
+				"BRAUNE",
+				"STAHL",
+				"JENNISSEN"
+			],
+			"defenders": [
+				"CHRISTENSEN",
+				"ENS",
+				"FLECKSTEIN",
+				"SCHLICKE",
+				"COSKUN",
+				"BITTER",
+				"JESSEN"
+			],
+			"midfielders": [
+				"BULIC",
+				"NOSS",
+				"CASAR",
+				"VIET",
+				"BESUSCHKOW",
+				"BOOKJANS"
+			],
+			"forwards": [
+				"LOBINGER",
+				"KOTHER",
+				"KRÜGER",
+				"REMMERT",
+				"SUSSEK",
+				"SYMALLA",
+				"SAFI",
+				"BORKOWSKI",
+				"ZAHMEL"
+			]
+		}
+	},
+	{
+		"name": "ROT-WEISS ESSEN",
+		"league": "L3",
+		"rank": 2,
+		"games": 11,
+		"goals": "19:13",
+		"points": 21,
+		"players": {
+			"goalkeepers": [
+				"GOLZ",
+				"WIENAND",
+				"VERSTAPPEN",
+				"GERRES"
+			],
+			"defenders": [
+				"GESCHWILL",
+				"HÜNING",
+				"HOFMANN",
+				"ALONSO",
+				"BOUEBARI",
+				"KOSTKA",
+				"BAZZOLI",
+				"CELEBI",
+				"GNAGNON"
+			],
+			"midfielders": [
+				"MENZEL",
+				"PESCH",
+				"BÄTZNER",
+				"SIETAN",
+				"PÖPPERL",
+				"REISIG"
+			],
+			"forwards": [
+				"DARDARI",
+				"TELALOVIC",
+				"OBUZ",
+				"ABIAMA",
+				"BRUMME",
+				"JANSSEN",
+				"POTOCNIK",
+				"MALAEB",
+				"VASIC"
+			]
+		}
+	},
+	{
+		"name": "FC VIKTORIA KÖLN",
+		"league": "L3",
+		"rank": 3,
+		"games": 10,
+		"goals": "27:14",
+		"points": 20,
+		"players": {
+			"goalkeepers": [
+				"SCHULZ",
+				"WYCIOK",
+				"HILL"
+			],
+			"defenders": [
+				"KLOSS",
+				"FALLMANN",
+				"EISENHUTH",
+				"SPONSEL",
+				"GREGER",
+				"BOBOY",
+				"PLEDL",
+				"JAKOB",
+				"ALBERS"
+			],
+			"midfielders": [
+				"SWIDER",
+				"WOLF",
+				"TONYE",
+				"CASTELLE",
+				"DUMAN",
+				"JAHN",
+				"GUEYE",
+				"PROKOPENKO",
+				"AMANN",
+				"PERRI"
+			],
+			"forwards": [
+				"OTTO",
+				"MABOULOU",
+				"SACHSE"
+			]
+		}
+	},
+	{
+		"name": "1.FC SAARBRÜCKEN",
+		"league": "L3",
+		"rank": 4,
+		"games": 10,
+		"goals": "24:17",
+		"points": 17,
+		"players": {
+			"goalkeepers": [
+				"BIGNETTI",
+				"BROLL",
+				"LADE"
+			],
+			"defenders": [
+				"VOET",
+				"CVJETINOVIC",
+				"KAMARA",
+				"FAHRNER",
+				"BRETSCHNEIDER",
+				"BÄUERLE",
+				"RIZZUTO",
+				"ARACIC",
+				"KRÄMER"
+			],
+			"midfielders": [
+				"SONTHEIMER",
+				"GLEIBER",
+				"VASILIADIS",
+				"CALISKANER",
+				"GÜRPÜZ",
+				"SHUAIB"
+			],
+			"forwards": [
+				"STAFF",
+				"PICK",
+				"NANKISHI",
+				"BRÜNKER",
+				"KÜHLWETTER",
+				"MULTHAUP",
+				"OWUSU",
+				"BAUMANN",
+				"LEE",
+				"SCHMIDT"
+			]
+		}
+	},
+	{
+		"name": "TSG 1899 HOFFENHEIM II",
+		"league": "L3",
+		"rank": 5,
+		"games": 10,
+		"goals": "20:15",
+		"points": 16,
+		"players": {
+			"goalkeepers": [
+				"PETERSSON",
+				"BIEDERMANN",
+				"TRAUTNER",
+				"PHILIPP",
+				"SCHLOSSER"
+			],
+			"defenders": [
+				"ABRAHA",
+				"LÄSSIG",
+				"SPRANGER",
+				"PISTROL",
+				"THEUER",
+				"MÜLLER",
+				"HILDMANN",
+				"STROBL",
+				"NDONG-PENDA",
+				"SHERLOCK"
+			],
+			"midfielders": [
+				"ENGELNS",
+				"POLLER",
+				"MOORE",
+				"CIZEK",
+				"MICHELER",
+				"GJASULA",
+				"DAĞDEVIREN",
+				"HONAJZER"
+			],
+			"forwards": [
+				"ZOR",
+				"DEDIC",
+				"ALEKSA",
+				"FIELDS",
+				"HENCKE",
+				"MAKANDA",
+				"BIAZID",
+				"LABES",
+				"JINDAOUI",
+				"WAGENBACH"
+			]
+		}
+	},
+	{
+		"name": "FC HANSA ROSTOCK",
+		"league": "L3",
+		"rank": 6,
+		"games": 10,
+		"goals": "17:19",
+		"points": 15,
+		"players": {
+			"goalkeepers": [
+				"UNBEHAUN",
+				"JANTUNEN",
+				"STEIN",
+				"KLEWIN",
+				"MAURER"
+			],
+			"defenders": [
+				"GÜRLEYEN",
+				"CARSTENS",
+				"BOHNERT",
+				"WALLNER",
+				"KÖLLE",
+				"REICHARDT",
+				"PFANNE",
+				"KARADA",
+				"BRZOZOWSKI"
+			],
+			"midfielders": [
+				"DIETZE",
+				"FATKIC",
+				"SCHUSTER",
+				"DIRKNER",
+				"KOPACZ",
+				"STOCK",
+				"FALK",
+				"SPROGIS"
+			],
+			"forwards": [
+				"HOLTEN",
+				"DAJAKU",
+				"KRAUSS",
+				"VOGLSAMMER",
+				"KIEDL",
+				"LENNEMANN",
+				"BOCK",
+				"MICHAELIS",
+				"HUMMEL"
+			]
+		}
+	},
+	{
+		"name": "VFB STUTTGART II",
+		"league": "L3",
+		"rank": 7,
+		"games": 10,
+		"goals": "17:18",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"VON DER FELSEN",
+				"BOCK",
+				"DRABAND"
+			],
+			"defenders": [
+				"HERWERTH",
+				"BUNGI",
+				"KÖHLER",
+				"GLÜCK",
+				"PREU",
+				"SCHRAMM",
+				"NOTHNAGEL",
+				"GROISS",
+				"BERRETH",
+				"JANJIC",
+				"REINHARDT",
+				"SANTOS"
+			],
+			"midfielders": [
+				"SPALT",
+				"MALANGA",
+				"YIGIT",
+				"LÜERS",
+				"STANGE",
+				"SESSA"
+			],
+			"forwards": [
+				"VAN DER LEIJ",
+				"REDZEPI",
+				"PENNA",
+				"RÖLKE",
+				"KENMOE",
+				"MAJCHRZAK",
+				"BUJUPI",
+				"AKAEGBOBI",
+				"ZEZELJ"
+			]
+		}
+	},
+	{
+		"name": "ALEMANNIA AACHEN",
+		"league": "L3",
+		"rank": 8,
+		"games": 10,
+		"goals": "15:16",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"BAJIC",
+				"RIEMANN",
+				"HENDRIKS"
+			],
+			"defenders": [
+				"BAGKALIANIS",
+				"LEONARD",
+				"KIALA",
+				"JUNG",
+				"WEGMANN",
+				"HANRATHS"
+			],
+			"midfielders": [
+				"KOSCIERSKI",
+				"VON DER HITZ",
+				"OEHMICHEN",
+				"LOUNE",
+				"WÄSCHENBACH",
+				"WAGNER",
+				"KÖSTER",
+				"BITUMAZALA",
+				"WIEBE",
+				"SCEPANIK",
+				"POBRIC"
+			],
+			"forwards": [
+				"SCHROERS",
+				"TORSIELLO",
+				"IZEKOR",
+				"ERMOLAEV",
+				"STARODID",
+				"SULEJMANI"
+			]
+		}
+	},
+	{
+		"name": "FC INGOLSTADT 04",
+		"league": "L3",
+		"rank": 9,
+		"games": 10,
+		"goals": "13:15",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"KLEIN",
+				"PONATH",
+				"ESSLINGER"
+			],
+			"defenders": [
+				"ANTZOULAS",
+				"LORENZ",
+				"SCHOLZ",
+				"DECKER",
+				"PLATH",
+				"BENNETTS",
+				"ROSENLÖCHER",
+				"DEICHMANN",
+				"MALJOJOKI",
+				"SEKULOVIC",
+				"BAGARIC",
+				"LAKATOS"
+			],
+			"midfielders": [
+				"KAYGIN",
+				"SAPINA",
+				"CARLSEN",
+				"FRÖDE",
+				"KANURIC",
+				"DURAKOV"
+			],
+			"forwards": [
+				"VELUPILLAY",
+				"LOKOTSCH",
+				"TOYE",
+				"UGONDU",
+				"GÜL",
+				"SEO",
+				"DRAKULIC",
+				"GANDA"
+			]
+		}
+	},
+	{
+		"name": "FORTUNA DÜSSELDORF",
+		"league": "L3",
+		"rank": 10,
+		"games": 10,
+		"goals": "11:13",
+		"points": 14,
+		"players": {
+			"goalkeepers": [
+				"RIESS",
+				"LORD",
+				"CZAKÓ"
+			],
+			"defenders": [
+				"E.EGOULI",
+				"OBERDORF",
+				"VAN DER SLOOT",
+				"HEINTZ",
+				"WEKESSER",
+				"RISCH",
+				"ZIMMERMANN",
+				"BORNSCHEIN",
+				"MEISER",
+				"AMANIAMPONG",
+				"N.EGOULI"
+			],
+			"midfielders": [
+				"MÜLLER",
+				"BOUCHAMA",
+				"HENDRIX",
+				"CONSBRUCH",
+				"FÖRSTER",
+				"BENGER",
+				"SLIMANI",
+				"SAUCK",
+				"ARDEN",
+				"GONÇALVES",
+				"ANHARI"
+			],
+			"forwards": [
+				"PAULINA",
+				"HOTTMANN",
+				"SCHLEUSENER",
+				"EIXLER",
+				"GEREZGIHER"
+			]
+		}
+	},
+	{
+		"name": "SV WALDHOF MANNHEIM",
+		"league": "L3",
+		"rank": 11,
+		"games": 10,
+		"goals": "16:16",
+		"points": 13,
+		"players": {
+			"goalkeepers": [
+				"NIJHUIS",
+				"NIEMANN",
+				"HAWRYLUK",
+				"ZIMMER"
+			],
+			"defenders": [
+				"OGBEMUDIA",
+				"KEUMO",
+				"KAMMERKNECHT",
+				"KLÜNTER",
+				"HÖR",
+				"SECHELMANN",
+				"POLTE",
+				"OKEKE",
+				"MENDES"
+			],
+			"midfielders": [
+				"MÜLLER",
+				"THILL",
+				"DIAKHABY",
+				"RIECKMANN",
+				"MICHEL",
+				"THALHAMMER",
+				"REXHEPI",
+				"KRYEZIU"
+			],
+			"forwards": [
+				"BIERSCHENK",
+				"GREGÓRIO",
+				"MASCA",
+				"BAZEE",
+				"MICKELS",
+				"ULBRICHT",
+				"ASALLARI",
+				"BOYD",
+				"BRANDT",
+				"N'TUMBA",
+				"RAMADANI"
+			]
+		}
+	},
+	{
+		"name": "PREUSSEN MÜNSTER",
+		"league": "L3",
+		"rank": 12,
+		"games": 10,
+		"goals": "18:21",
+		"points": 12,
+		"players": {
+			"goalkeepers": [
+				"BEHRENS",
+				"HARSMAN",
+				"ERVENS"
+			],
+			"defenders": [
+				"TIKVIC",
+				"KOULIS",
+				"BOLAY",
+				"PAETOW",
+				"SCHERDER",
+				"ZELLER",
+				"VARELMANN",
+				"KOLBE",
+				"DIETRICH",
+				"TASOV"
+			],
+			"midfielders": [
+				"M.SCHULZ",
+				"PREISSINGER",
+				"ALTHAUS",
+				"ADEH",
+				"MAIER",
+				"KORTE",
+				"DEMIRHAN"
+			],
+			"forwards": [
+				"VILHELMSSON",
+				"MEES",
+				"MAKRIDIS",
+				"BATMAZ",
+				"RÖSCH",
+				"JOHANSSON",
+				"HIGL",
+				"NDIKOM",
+				"M.SCHULZ",
+				"STUHLMACHER"
+			]
+		}
+	},
+	{
+		"name": "SV WEHEN WIESBADEN",
+		"league": "L3",
+		"rank": 13,
+		"games": 10,
+		"goals": "12:15",
+		"points": 12,
+		"players": {
+			"goalkeepers": [
+				"STRITZEL",
+				"BRDAR",
+				"LUDWIG"
+			],
+			"defenders": [
+				"JANITZEK",
+				"HERCHER",
+				"GILLEKENS",
+				"NINK",
+				"MAY",
+				"GREILINGER",
+				"SCHULTZ",
+				"NEUBERT",
+				"HÜBNER"
+			],
+			"midfielders": [
+				"GÖZÜSIRIN",
+				"CHAIKHOUN",
+				"SCHLEIMER",
+				"BRANDT",
+				"SUÁREZ",
+				"FECHNER",
+				"BOGICEVIC"
+			],
+			"forwards": [
+				"FLOTHO",
+				"MASSIMO",
+				"MÜLLER",
+				"PAULA",
+				"KARWEINA",
+				"KALEM",
+				"STEHLE",
+				"ALLAH"
+			]
+		}
+	},
+	{
+		"name": "SC VERL",
+		"league": "L3",
+		"rank": 14,
+		"games": 10,
+		"goals": "15:19",
+		"points": 12,
+		"players": {
+			"goalkeepers": [
+				"SCHLIECK",
+				"PEKRUHL",
+				"FUEST"
+			],
+			"defenders": [
+				"BERNER",
+				"KIJEWSKI",
+				"KÖNIG",
+				"SEIDEL",
+				"HOFFMANN",
+				"LEHMANN",
+				"VOGLER",
+				"ARAOYE",
+				"BAMBA"
+			],
+			"midfielders": [
+				"EZE",
+				"WAIDNER",
+				"CLAUSEN",
+				"OTTO",
+				"YALCINKAYA",
+				"MESANOVIC",
+				"WESSIG"
+			],
+			"forwards": [
+				"LEIPOLD",
+				"FOTI",
+				"HEIKE",
+				"RABIHIC",
+				"MARTINOVIC",
+				"FAROUK",
+				"JAPAUR",
+				"KAUBE"
+			]
+		}
+	},
+	{
+		"name": "SG SONNENHOF GROSSASPACH",
+		"league": "L3",
+		"rank": 15,
+		"games": 10,
+		"goals": "12:18",
+		"points": 12,
+		"players": {
+			"goalkeepers": [
+				"REULE",
+				"DITTRICH",
+				"SCHULZ"
+			],
+			"defenders": [
+				"AIDONIS",
+				"MOLINARI",
+				"RAHN",
+				"NURAJ",
+				"L.MAIER",
+				"UHL",
+				"LANDWEHR",
+				"GASHI",
+				"SCHWARZ"
+			],
+			"midfielders": [
+				"CELIKTAS",
+				"BLEICHER",
+				"POLLEX",
+				"MISTL",
+				"KUNDE",
+				"STOPPEL",
+				"LORCH"
+			],
+			"forwards": [
+				"ROSSMANN",
+				"L.MAIER",
+				"EISELE",
+				"ZOGRAFAKIS",
+				"FASS",
+				"HAJDINI",
+				"SCHÜRER",
+				"ENDER"
+			]
+		}
+	},
+	{
+		"name": "WÜRZBURGER KICKERS",
+		"league": "L3",
+		"rank": 16,
+		"games": 10,
+		"goals": "15:19",
+		"points": 11,
+		"players": {
+			"goalkeepers": [
+				"RAJKOVACIC",
+				"HIPPER"
+			],
+			"defenders": [
+				"BREUNIG",
+				"ABRANGAO",
+				"OMORE",
+				"EBERLE",
+				"FARAHNAK",
+				"DE MEDINA",
+				"HEMMERICH",
+				"HÄGELE",
+				"KARAKAYA"
+			],
+			"midfielders": [
+				"KINSOMBI",
+				"EVINA",
+				"KIEFERSAUER",
+				"KRAUS",
+				"EMBAYE",
+				"FRANJIC",
+				"BERISHA",
+				"MUTEBA",
+				"OCHS",
+				"ZEJNULLAHU",
+				"MEISEL",
+				"GÖGCE",
+				"DEPPNER",
+				"MIKRUT"
+			],
+			"forwards": [
+				"NISCHALKE",
+				"KASTANARAS",
+				"BONGA",
+				"DE MOURA"
+			]
+		}
+	},
+	{
+		"name": "SV MEPPEN",
+		"league": "L3",
+		"rank": 17,
+		"games": 10,
+		"goals": "12:17",
+		"points": 11,
+		"players": {
+			"goalkeepers": [
+				"PÜNT",
+				"OBERBECK",
+				"SCHMITZ"
+			],
+			"defenders": [
+				"SPREKELMEYER",
+				"MISSNER",
+				"BÄHR",
+				"FEDL",
+				"RANKIC",
+				"DOMRÖSE",
+				"TOUGLO",
+				"GOLDENSTEIN"
+			],
+			"midfielders": [
+				"DETERS",
+				"ZEHIR",
+				"GHAWILU",
+				"NADJ",
+				"BORSUM",
+				"WESSELS",
+				"ZENGA",
+				"WITTROCK"
+			],
+			"forwards": [
+				"SCHMITT",
+				"PRASSE",
+				"EHLERS",
+				"AKONO",
+				"MEIER",
+				"ENGELMANN",
+				"HERRMANN"
+			]
+		}
+	},
+	{
+		"name": "SSV JAHN REGENSBURG",
+		"league": "L3",
+		"rank": 18,
+		"games": 11,
+		"goals": "20:20",
+		"points": 10,
+		"players": {
+			"goalkeepers": [
+				"SCHMITT",
+				"HERMANN",
+				"WEIDINGER"
+			],
+			"defenders": [
+				"WURM",
+				"OLIVEIRA",
+				"STRAUSS",
+				"BAUER",
+				"KARBSTEIN",
+				"SCHÖNFELDER",
+				"MÜHL",
+				"ZIEGELE",
+				"MÄTZLER",
+				"STOLZE",
+				"KIEFFER",
+				"ASANTE"
+			],
+			"midfielders": [
+				"FEIN",
+				"JANO",
+				"MAJETSCHAK",
+				"PHILIPP",
+				"BOUJELLAB",
+				"SALLER",
+				"HINGERL",
+				"SEIBOLD"
+			],
+			"forwards": [
+				"WÖRNER",
+				"HOBSCH",
+				"HERMES",
+				"DIETZ",
+				"POSSELT",
+				"DIZDAREVIC"
+			]
+		}
+	},
+	{
+		"name": "SC FORTUNA KÖLN",
+		"league": "L3",
+		"rank": 19,
+		"games": 10,
+		"goals": "8:11",
+		"points": 10,
+		"players": {
+			"goalkeepers": [
+				"WINKLER",
+				"ZICH",
+				"STOLLENWERK"
+			],
+			"defenders": [
+				"TELLE",
+				"LÖFFELSEND",
+				"FISCHER",
+				"AFAMEFUNA",
+				"KRUMME",
+				"FÜNGER",
+				"HEISTER",
+				"STATOVCI",
+				"AL-AZZAWE",
+				"BRECHMANN"
+			],
+			"midfielders": [
+				"BRÖGER",
+				"HARENBROCK",
+				"STRAUCH",
+				"GEERKENS",
+				"STANILEWICZ",
+				"THIER",
+				"MICHELBRINK",
+				"SAVIC",
+				"MAJETIC",
+				"GARCÍA",
+				"NAJAR"
+			],
+			"forwards": [
+				"MAUSE",
+				"AIGBEKAEN",
+				"WIRTZ",
+				"BORNEMANN",
+				"AL GHADDIOUI"
+			]
+		}
+	},
+	{
+		"name": "TSV HAVELSE",
+		"league": "L3",
+		"rank": 20,
+		"games": 10,
+		"goals": "13:23",
+		"points": 6,
+		"players": {
+			"goalkeepers": [
+				"HANIN",
+				"OPITZ",
+				"QUINDT",
+				"WOLTER",
+				"KRUG"
+			],
+			"defenders": [
+				"BELKAHIA",
+				"MAUSEHUND",
+				"LAMBY",
+				"SOMMER-DEISS",
+				"DUAH",
+				"NDUKA",
+				"FRIEDRICH",
+				"BEHRENS"
+			],
+			"midfielders": [
+				"TAUER",
+				"GRZYWACZ",
+				"TUGBENYO",
+				"BERGER",
+				"POSADAS",
+				"OLTROGGE",
+				"AWOYALE",
+				"HANKE",
+				"AMPEM"
+			],
+			"forwards": [
+				"GUIDDIR",
+				"SCHUMACHER",
+				"MÜLLER",
+				"PALDINO",
+				"VELASCO",
+				"VOUFACK",
+				"WRIEDT",
+				"RICHTER",
+				"WARDAK",
+				"KISZKA",
+				"SVITEK",
+				"ENGELKING"
+			]
+		}
+	}
+]

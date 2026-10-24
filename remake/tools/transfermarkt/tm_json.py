@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Holt die Tabellen und Kader der 1. bis 3. Liga einer oder mehrerer Saisons
 von transfermarkt.de und schreibt pro Saison OUT/YYYY-YY.json: je Verein Liga,
-Tabellenplatz, Spiele, Tore, Punkte und die Spieler nach Position, die
-wertvollsten zuerst. remake/cmd/bmpseasons macht daraus die Saisons des Spiels
+Stufe, Tabellenplatz, Spiele, Tore, Punkte und die Spieler nach Position, die
+wertvollsten zuerst; ab 2008 auch die Regionalliga (Stufe 4). Dazu
+OUT/YYYY-YY.europe.json mit den auslaendischen Vereinen der Europapokale. remake/cmd/bmpseasons macht daraus die Saisons des Spiels
 (mise run remake:seasons-update).
 
 Wiederaufnehmbar: Tabellen und Kader landen in OUT/.cache, vorhandene Saisons
@@ -145,12 +146,22 @@ def fetch(fn, session, *args):
 
 
 def season(session, year):
-    """Eine Saison; (clubs, Fehlerliste). Cache pro Tabelle und Kader."""
+    """Eine Saison; (clubs, Fehlerliste). Cache pro Tabelle und Kader. Die
+    Regionalliga ab 2008 (Stufe 4) ist optional: sie fuellt die Plaetze ausserhalb
+    der Ligen, ohne sie nimmt das Spiel die Vereine der Vorsaison."""
     clubs, failed = [], []
-    for comp in ["L1", "L2"] + third_tier(year):
+    comps = [("L1", 1), ("L2", 2)] + [(c, 3) for c in third_tier(year)]
+    if year >= 2008:
+        codes = cached(os.path.join(CACHE, str(year), "regionalligas.json"), t.regionalligas, session, year)
+        if codes:
+            comps += [(c, 4) for c in codes]
+        else:
+            print(f"{year}: Regionalliga nicht gefunden, weiter ohne", flush=True)
+    for comp, tier in comps:
         rows = cached(os.path.join(CACHE, str(year), f"{comp}.table.json"), t.table, session, comp, year)
         if not rows:  # None (Fehler) oder leer: nicht cachen, spaeter nochmal
-            failed.append(comp)
+            if tier < 4:
+                failed.append(comp)
             if rows is not None:
                 os.remove(os.path.join(CACHE, str(year), f"{comp}.table.json"))
             continue
@@ -158,16 +169,39 @@ def season(session, year):
         for r in rows:
             if not r["verein_id"]:
                 continue
-            kader = cached(os.path.join(CACHE, str(year), f"{comp}-{r['verein_id']}.squad.json"), t.squad, session, r["verein_id"], year)
-            if kader is None:
-                failed.append(f"{comp}/{r['verein']}")
-                continue
+            entry = {"name": r["verein"].upper(), "league": comp, "tier": tier, "rank": number(r["platz"]),
+                     "games": number(r["spiele"]), "goals": r["tore"], "points": number(r["punkte"]),
+                     "players": {g: [] for g in GROUP.values()}}
+            # Aus der Regionalliga kommen nur die Ersten ins Spiel: Kader nur fuer sie.
+            if tier < 4 or entry["rank"] <= 3:
+                kader = cached(os.path.join(CACHE, str(year), f"{comp}-{r['verein_id']}.squad.json"), t.squad, session, r["verein_id"], year)
+                if kader is None:
+                    if tier < 4:
+                        failed.append(f"{comp}/{r['verein']}")
+                    continue
+                entry["players"] = convert(kader)
             ok += 1
-            clubs.append({"name": r["verein"].upper(), "league": comp, "rank": number(r["platz"]),
-                          "games": number(r["spiele"]), "goals": r["tore"], "points": number(r["punkte"]),
-                          "players": convert(kader)})
+            clubs.append(entry)
         print(f"{year} {comp}: {ok}/{len(rows)} Vereine", flush=True)
     return clubs, failed
+
+
+EUROPE = ["CL", "EL", "UCOL", "CLQ", "ELQ", "ECLQ"]
+
+
+def europe(session, year):
+    """Die auslaendischen Vereine der Europapokale einer Saison, die Hauptrunden
+    vor den Qualifikationen; [] wenn nichts zu holen ist (dann nimmt das Spiel die
+    der Vorsaison)."""
+    out, seen = [], set()
+    for comp in EUROPE:
+        rows = cached(os.path.join(CACHE, str(year), f"{comp}.teilnehmer.json"), t.participants, session, comp, year)
+        for r in rows or []:
+            if r["verein_id"] in seen or r["land"] in ("Deutschland", "Germany"):
+                continue
+            seen.add(r["verein_id"])
+            out.append({"name": r["verein"].upper(), "country": r["land"], "cup": comp})
+    return out
 
 
 def main():
@@ -187,9 +221,10 @@ def main():
     if a.refresh and not a.offline:
         for year in years:
             shutil.rmtree(os.path.join(CACHE, str(year)), ignore_errors=True)
-            path = os.path.join(OUT, f"{year}-{str(year + 1)[2:]}.json")
-            if os.path.exists(path):
-                os.remove(path)
+            for suffix in (".json", ".europe.json"):
+                path = os.path.join(OUT, f"{year}-{str(year + 1)[2:]}{suffix}")
+                if os.path.exists(path):
+                    os.remove(path)
     session = requests.Session()
     for n in range(1, MAX_PASSES + 1):
         open_seasons = 0
@@ -203,7 +238,10 @@ def main():
                 print(f"{year}: unvollstaendig, nicht geschrieben ({len(failed)} Fehler: {failed[:5]})", flush=True)
                 continue
             write_json(path, clubs)
-            print(f"{year}: geschrieben ({len(clubs)} Vereine)", flush=True)
+            foreign = europe(session, year)
+            if foreign:
+                write_json(os.path.join(OUT, f"{year}-{str(year + 1)[2:]}.europe.json"), foreign)
+            print(f"{year}: geschrieben ({len(clubs)} Vereine, {len(foreign)} auslaendische)", flush=True)
         if not open_seasons:
             print("fertig", flush=True)
             return

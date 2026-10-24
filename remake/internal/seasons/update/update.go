@@ -7,7 +7,9 @@ package update
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"math"
 	"os"
 	"sort"
@@ -22,7 +24,8 @@ import (
 // valuable first, surnames in capitals.
 type Club struct {
 	Name    string `json:"name"`
-	League  string `json:"league"` // Transfermarkt: L1, L2, L3, or a group of the third tier
+	League  string `json:"league"` // Transfermarkt: L1, L2, L3, or a group of the third or fourth tier
+	Tier    int    `json:"tier"`   // 1..4; 0 in files before the Regionalliga was fetched
 	Rank    int    `json:"rank"`
 	Games   int    `json:"games"`
 	Goals   string `json:"goals"` // "59:23"
@@ -53,10 +56,14 @@ func ReadClubs(file string) ([]Club, error) {
 	return clubs, nil
 }
 
-// tier is the tier of a Transfermarkt league: 1, 2, else 3 (the 3. Liga
-// or a group of the Oberliga or Regionalliga).
-func tier(league string) int {
-	switch league {
+// tier is the tier of a club of a Transfermarkt file: as the file says,
+// else by its league: 1, 2, else 3 (the 3. Liga or a group of the Oberliga
+// or Regionalliga).
+func tier(c Club) int {
+	if c.Tier > 0 {
+		return c.Tier
+	}
+	switch c.League {
 	case "L1":
 		return 1
 	case "L2":
@@ -73,10 +80,37 @@ func goals(s string) (forGoals, against int) {
 	return forGoals, against
 }
 
+// Foreign is a foreign club of the European cups of a season
+// (YYYY-YY.europe.json): the main rounds of CL, EL, UCOL first, then their
+// qualifications, each in the order of Transfermarkt.
+type Foreign struct {
+	Name    string `json:"name"`
+	Country string `json:"country"`
+	Cup     string `json:"cup"`
+}
+
+// ReadForeign reads the European cup file of a season; none when there is
+// no file.
+func ReadForeign(file string) ([]Foreign, error) {
+	b, err := os.ReadFile(file)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var out []Foreign
+	if err := json.Unmarshal(b, &out); err != nil {
+		return nil, fmt.Errorf("%s: %w", file, err)
+	}
+	return out, nil
+}
+
 // Input is what a season is made of.
 type Input struct {
 	Year     int
 	Clubs    []Club         // the Transfermarkt file of the season
+	Foreign  []Foreign      // the foreign clubs of its European cups, if fetched
 	Previous *assets.Mana   // the season before (or the clubs of the original)
 	Known    []*assets.Mana // every season, for the logos of clubs by name
 	NextLogo int            // the number of the next new logo
@@ -127,7 +161,7 @@ func Season(in Input) (*Output, error) {
 		}
 		tm[name] = c
 		gf, ga := goals(c.Goals)
-		rows = append(rows, row{name: name, tier: tier(c.League), group: c.League, rank: c.Rank,
+		rows = append(rows, row{name: name, tier: tier(c), group: c.League, rank: c.Rank,
 			games: c.Games, goalsFor: gf, goalsAgainst: ga, points: c.Points})
 	}
 	// The German clubs of the season before that the file lacks fill what
@@ -175,9 +209,55 @@ func Season(in Input) (*Output, error) {
 			next++
 		}
 	}
-	// The foreign clubs stay those of the season before.
-	copy(out.Mana.Clubs[numGerman:], in.Previous.Clubs[numGerman:])
+	copy(out.Mana.Clubs[numGerman:], foreignClubs(in.Foreign, in.Previous, out.Mana.Clubs[:numGerman]))
 	return out, nil
+}
+
+// foreignStrength is the strength range of the clubs of a European cup.
+var foreignStrength = map[string][2]int{"CL": {72, 99}, "EL": {52, 84}, "UCOL": {40, 70},
+	"CLQ": {50, 76}, "ELQ": {38, 64}, "ECLQ": {34, 56}}
+
+// foreignClubs are the 136 foreign clubs of a season: those of its
+// European cups, by cup and in the order of Transfermarkt, the best of a
+// cup the strongest; the foreign clubs of the season before fill the rest
+// (and all of them without a European cup file).
+func foreignClubs(cups []Foreign, prev *assets.Mana, german []assets.ClubRecord) []assets.ClubRecord {
+	n := assets.NumClubs - numGerman
+	taken := map[string]bool{}
+	for _, c := range german {
+		taken[c.Name] = true
+	}
+	perCup := map[string]int{}
+	for _, f := range cups {
+		perCup[f.Cup]++
+	}
+	rank := map[string]int{}
+	var out []assets.ClubRecord
+	for _, f := range cups {
+		r, ok := foreignStrength[f.Cup]
+		name, err := assets.ToCP437(clubName(f.Name))
+		if !ok || err != nil || name == "" || taken[name] || len(out) == n {
+			continue
+		}
+		taken[name] = true
+		p := 1.0
+		if perCup[f.Cup] > 1 {
+			p = 1 - float64(rank[f.Cup])/float64(perCup[f.Cup]-1)
+		}
+		rank[f.Cup]++
+		v := r[0] + int(math.Round(float64(p*float64(r[1]-r[0]))))
+		out = append(out, assets.ClubRecord{Name: name, Strength: [3]int{v, v, v}})
+	}
+	for _, c := range prev.Clubs[numGerman:] {
+		if len(out) == n {
+			break
+		}
+		if !taken[c.Name] {
+			taken[c.Name] = true
+			out = append(out, c)
+		}
+	}
+	return out
 }
 
 // knownLogos maps the names of the German clubs of every season to their
@@ -283,7 +363,8 @@ func placeClubs(rows []row) ([]placed, error) {
 	for _, r := range rows {
 		tiers[r.tier] = append(tiers[r.tier], r)
 	}
-	cands := [][]row{ordered(tiers[1]), ordered(tiers[2]), append(ordered(tiers[3]), ordered(tiers[fillTier])...)}
+	lower := append(ordered(tiers[3]), ordered(tiers[4])...)
+	cands := [][]row{ordered(tiers[1]), ordered(tiers[2]), append(lower, ordered(tiers[fillTier])...)}
 	sizes := []int{league1, league2, league3 + outside}
 	var out []placed
 	used := map[string]bool{}
