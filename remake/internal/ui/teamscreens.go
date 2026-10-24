@@ -28,9 +28,6 @@ var (
 
 func tsSum(v [4]int) int { return v[0] + v[1] + v[2] + v[3] }
 
-// tenthsText writes n tenths with a decimal comma, "41,0".
-func tenthsText(n int) string { return decimalText(n, 1) }
-
 func (t *TrainingScreen) Update(app *App) error {
 	in := &app.Input
 	m := t.ss.M()
@@ -39,13 +36,10 @@ func (t *TrainingScreen) Update(app *App) error {
 		return nil
 	}
 	// A hidden key of the remake, not of the original: the optimal training
-	// (game.State.OptimizeTraining), with its strength and the one before.
-	for _, c := range in.Chars {
-		if c == 'o' {
-			res := t.ss.S.OptimizeTraining(t.ss.Mgr())
-			t.note = []string{"OPTIMAL " + tenthsText(res.After) + "  BISHER " + tenthsText(res.Before)}
-			return nil
-		}
+	// (game.State.OptimizeTraining).
+	if optimizeKey(in) {
+		t.note = trainingNote(t.ss.S.OptimizeTraining(t.ss.Mgr()))
+		return nil
 	}
 	if !in.Left {
 		return nil

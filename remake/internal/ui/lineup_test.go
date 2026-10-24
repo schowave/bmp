@@ -545,13 +545,44 @@ func TestToastLayout(t *testing.T) {
 
 // The note says GEGEN for a home match and BEI for an away match.
 func TestOpponentNote(t *testing.T) {
-	if got := opponentNote("X", 5, true); len(got) != 1 || got[0] != "GEGEN X" {
+	_, s, _ := lineupApp(t)
+	name := s.Teams[5].Name
+	if got := opponentNote(s, 5, true); len(got) != 1 || got[0] != "GEGEN "+name {
 		t.Errorf("home %q", got)
 	}
-	if got := opponentNote("X", 5, false); len(got) != 1 || got[0] != "BEI X" {
+	if got := opponentNote(s, 5, false); len(got) != 1 || got[0] != "BEI "+name {
 		t.Errorf("away %q", got)
 	}
-	if got := opponentNote("X", -1, true); got != nil {
+	if got := opponentNote(s, -1, true); got != nil {
 		t.Errorf("no opponent %q", got)
+	}
+}
+
+// A note is cut to its width line by line; the footer leaves out the parts
+// that do not fit instead of cutting one.
+func TestNoteCuts(t *testing.T) {
+	app, _, _ := lineupApp(t)
+	g := app.Gfx
+	long := "GEGEN WWWWWWWWWWWWWWWWWWWWWW"
+	for _, l := range noteLines(g, FontSmall, 0, 60, []string{long, "OK"}) {
+		if g.TextWidth(FontSmall, l) > 60 {
+			t.Errorf("%q is wider than 60", l)
+		}
+	}
+	if got := fitParts(g, FontSmall, g.TextWidth(FontSmall, "A  B"), "A", "B", long); got != "A  B" {
+		t.Errorf("fitParts %q", got)
+	}
+	if got := fitParts(g, FontSmall, 1, "AAAA"); got != "" {
+		t.Errorf("a part wider than the footer: %q", got)
+	}
+}
+
+// The gain of the ticket price has its sign.
+func TestPriceLine(t *testing.T) {
+	if got := priceLine(game.OptimalPrice{After: 12, BeforeGate: 100, AfterGate: 12257}); got != "EINTRITT 12 +12.157" {
+		t.Errorf("gain %q", got)
+	}
+	if got := priceLine(game.OptimalPrice{After: 10, BeforeGate: 5000, AfterGate: 5000}); got != "EINTRITT 10 +0" {
+		t.Errorf("no gain %q", got)
 	}
 }

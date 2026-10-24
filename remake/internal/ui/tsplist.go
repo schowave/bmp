@@ -166,10 +166,10 @@ func (l *tsList) rowColor(s *game.State, sl *game.Slot) int {
 // squad list as well as the market list), or in the contract list a player
 // who asks for a longer contract.
 func (l *tsList) nameColor(s *game.State, sl *game.Slot, cur, base int) int {
-	if l.mode <= 2 && sl.Status&0xc0 != 0 && s.Persons[sl.Person].Owner == cur {
+	if l.mode <= 2 && sl.HasOffer() && s.Persons[sl.Person].Owner == cur {
 		return ColBeige
 	}
-	if l.mode == 3 && sl.Message && sl.Nego&0x7f > 99 {
+	if l.mode == 3 && sl.Message && sl.AsksForContract() {
 		return ColBeige
 	}
 	return base

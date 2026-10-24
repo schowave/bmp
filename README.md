@@ -73,7 +73,7 @@ are listed under *Deviations from the original* in
 [remake/README.md](remake/README.md), which also has the command-line options,
 the project layout and the [hidden keys](remake/README.md#hidden-keys-cheats):
 those of the original's options screen and the remake's own key `o`, which
-sets the optimal lineup and training.
+sets the optimal lineup, training and ticket price.
 
 ## Deployment
 

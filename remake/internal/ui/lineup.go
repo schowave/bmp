@@ -229,11 +229,11 @@ func (q *SquadScreen) Update(app *App) error {
 			return nil
 		}
 		// A hidden key of the remake, not of the original.
-		for _, c := range in.Chars {
-			if c == 'o' && q.md == nil {
-				q.optimize(app)
-				return nil
-			}
+		if q.md == nil && optimizeKey(in) {
+			q.note = lineupNote(q.ss.S, q.ss.S.OptimizeLineup(q.mi()))
+			q.picked = -1
+			q.vac = game.BoardCell{}
+			return nil
 		}
 	}
 	if !in.Left && !in.Right {
@@ -307,51 +307,6 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 		q.picked = -1
 	}
 	return true
-}
-
-// optimize sets the best lineup (game.State.OptimizeLineup) and notes in the
-// footer what it is worth, as expected points per match: the new lineup and
-// the automatic lineups of the three formations, against the next opponent,
-// who is named, or else against the clubs of the league.
-func (q *SquadScreen) optimize(app *App) {
-	s := q.ss.S
-	res := s.OptimizeLineup(q.mi())
-	q.picked = -1
-	q.vac = game.BoardCell{}
-	q.note = []string{"OPTIMAL " + pointsText(res.After),
-		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2])}
-	if res.Opponent >= 0 {
-		q.note = append(q.note, opponentNote(s.Teams[res.Opponent].Name, res.Opponent, res.Home)...)
-	}
-}
-
-// pointsText writes n hundredths of a point with a decimal comma, "1,35".
-func pointsText(n int) string { return decimalText(n, 2) }
-
-// signedDecimal is decimalText with a plus for a gain: "+0,21", "-0,05".
-func signedDecimal(n, places int) string {
-	if n >= 0 {
-		return "+" + decimalText(n, places)
-	}
-	return decimalText(n, places)
-}
-
-// decimalText writes n with places digits after a decimal comma:
-// decimalText(135, 2) is "1,35", decimalText(410, 1) "41,0".
-func decimalText(n, places int) string {
-	pre := ""
-	if n < 0 {
-		pre, n = "-", -n
-	}
-	div := 1
-	for range places {
-		div *= 10
-	}
-	frac := itoa(n % div)
-	for len(frac) < places {
-		frac = "0" + frac
-	}
-	return pre + itoa(n/div) + "," + frac
 }
 
 func (q *SquadScreen) setView(v int) {
@@ -637,7 +592,7 @@ func (q *SquadScreen) boardSlots() []int {
 	var out []int
 	for i := 0; i < game.SquadMax; i++ {
 		sl := &q.ss.S.Squads[q.mi()][i]
-		if sl.Empty() || sl.Lineup < 1 || sl.Lineup > 11 || sl.Col < 0 || i == q.out {
+		if !sl.InTeam() || sl.Col < 0 || i == q.out {
 			continue
 		}
 		out = append(out, i)
