@@ -115,11 +115,12 @@ func ReadForeign(file string) ([]Foreign, error) {
 // Input is what a season is made of.
 type Input struct {
 	Year     int
-	Clubs    []Club         // the Transfermarkt file of the season
-	Foreign  []Foreign      // the foreign clubs of its European cups, if fetched
-	Previous *assets.Mana   // the season before (or the clubs of the original)
-	Known    []*assets.Mana // every season, for the logos of clubs by name
-	NextLogo int            // the number of the next new logo
+	Clubs    []Club           // the Transfermarkt file of the season
+	Foreign  []Foreign        // the foreign clubs of its European cups, if fetched
+	Previous *assets.Mana     // the season before (or the clubs of the original)
+	Known    []*assets.Mana   // every season, for the logos of clubs by name
+	NextLogo int              // the number of the next new logo
+	Squads   map[string]Squad // squads by games for clubs by name (tm_games.py), if fetched
 }
 
 // Output is a season and the logos it adds.
@@ -220,6 +221,10 @@ func Season(in Input) (*Output, error) {
 			logos[p.row.name] = next
 			next++
 		}
+	}
+	// Seasons without market values: the squads by games instead.
+	if _, err := SetSquads(out.Mana, in.Squads); err != nil {
+		return nil, err
 	}
 	copy(out.Mana.Clubs[numGerman:], foreignClubs(in.Foreign, in.Previous, out.Mana.Clubs[:numGerman]))
 	return out, nil
@@ -322,9 +327,13 @@ func squadRecord(s Squad) ([]string, error) {
 }
 
 // ReadSquads reads a squads file of tools/transfermarkt/tm_games.py: per
-// German club of a season, by its name in the season, its squad.
+// German club of a season, by its name in the season, its squad; nil
+// without the file.
 func ReadSquads(file string) (map[string]Squad, error) {
 	b, err := os.ReadFile(file)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
