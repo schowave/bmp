@@ -8,13 +8,14 @@ import (
 )
 
 func TestSeasonChoiceHover(t *testing.T) {
-	c := newSeasonChoice(nil, "", make([]seasons.Season, 37))
+	c := newSeasonChoice(nil, "", make([]seasons.Season, 40))
 	for _, h := range []struct{ x, y, want int }{
 		{seasonLeftX, seasonTopY, 0},
 		{seasonLeftX + 5, seasonTopY + fileRowH, 1},
 		{seasonLeftX + seasonColW, seasonTopY, seasonRows},
-		{seasonLeftX + seasonColW, seasonTopY + 17*fileRowH, 36},
-		{seasonLeftX + seasonColW, seasonTopY + 18*fileRowH, -1}, // after the last entry
+		{seasonLeftX + 2*seasonColW, seasonTopY + fileRowH, 2*seasonRows + 1},
+		{seasonLeftX + 2*seasonColW, seasonTopY + 2*fileRowH, -1}, // after the last entry
+		{seasonLeftX + 3*seasonColW, seasonTopY, -1},
 		{seasonLeftX - 1, seasonTopY, -1},
 	} {
 		if got := c.hover(&Input{X: h.x, Y: h.y}); got != h.want {
@@ -30,7 +31,7 @@ func TestSeasonChoiceOriginalOpensTheSetup(t *testing.T) {
 	app, mana := testApp(t)
 	c := newSeasonChoice(mana, t.TempDir(), []seasons.Season{{ID: "1995-96", Year: 1995}})
 	app.Reset(c)
-	step(t, app, click(c.original.X+2, c.original.Y+2))
+	step(t, app, click(origX+2, origY+2))
 	s, ok := top(app).(*Setup)
 	if !ok || s.opts.Season != "" || s.orig != mana {
 		t.Fatalf("got %T", top(app))
@@ -41,7 +42,7 @@ func TestSeasonChoiceOriginalOpensTheSetup(t *testing.T) {
 		t.Fatalf("right click: %T", top(app))
 	}
 	// With a club chosen it stays in the setup.
-	step(t, app, click(c.original.X+2, c.original.Y+2))
+	step(t, app, click(origX+2, origY+2))
 	s = top(app).(*Setup)
 	s.teams[0] = s.center
 	step(t, app, rclick())
