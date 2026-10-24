@@ -21,13 +21,14 @@ type SeasonChoice struct {
 }
 
 // Geometry of the screen: the original in a window on the left, the
-// seasons in three columns of 19 rows (57 seasons) on the right.
+// seasons under a heading in three columns of 17 rows (51 seasons) on the
+// right, with the rule that changes below them.
 const (
-	seasonRows  = 19
+	seasonRows  = 17
 	seasonCols  = 3
 	seasonColW  = 64
 	seasonLeftX = 124
-	seasonTopY  = 37
+	seasonTopY  = 46
 )
 
 // originalButton is the WEITER button of the original, in the middle of
@@ -134,20 +135,22 @@ func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Background(dst)
 	g.TextMid(dst, FontBig, 0, 320, 20, "WELCHE SAISON", ColBeige, ColBlack)
-	// Left: the clubs of the original and the button to play them.
+	// Left: the clubs and rules of the original and the button to play them.
 	g.Window(dst, 6, 33, 110, 172, ColBlue)
-	g.TextMid(dst, FontNormal, 6, 110, 70, "ORIGINAL", ColLight, NoShadow)
+	g.TextMid(dst, FontNormal, 6, 110, 62, "ORIGINAL", ColLight, NoShadow)
 	g.DrawIconButton(dst, IconWeiter, originalButton.X, originalButton.Y)
-	g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+12, "VEREINE STAND 1991/92", ColGrey2, NoShadow)
-	g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+20, "2 PUNKTE PRO SIEG", ColGrey2, NoShadow)
-	g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+28, "LIGEN DES ORIGINALS", ColGrey2, NoShadow)
+	for i, l := range []string{"VEREINE UND REGELN", "DES ORIGINALS,", "STAND 1991/92"} {
+		g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+12+8*i, l, ColGrey2, NoShadow)
+	}
 	// Right: the real seasons.
 	g.Window(dst, 116, 33, 314, 172, ColBlue)
+	g.TextAt(dst, FontSmall, seasonLeftX, 42, "ECHTE SAISONS", ColOrange, NoShadow)
 	for _, r := range c.rows(c.hover(&app.Input)) {
 		if r.bar {
 			FillRect(dst, r.x-2, r.y, seasonColW-4, 5, g.PalColor(ColBlue^31))
 		}
 		g.TextAt(dst, FontSmall, r.x, r.y+4, r.text, r.colour, NoShadow)
 	}
-	g.TextMid(dst, FontNormal, 0, 320, 196, "Mit welchen Vereinen wird gespielt?", ColBeige, ColBlack)
+	g.TextAt(dst, FontSmall, seasonLeftX, 170, "AB 1995/96 3 PUNKTE PRO SIEG", ColGrey2, NoShadow)
+	g.TextMid(dst, FontNormal, 0, 320, 196, "Saison anklicken oder WEITER für das Original", ColBeige, ColBlack)
 }
