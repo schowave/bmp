@@ -31,6 +31,10 @@ const UEFAPlaces = 4
 // PointsPerWin is D:0x2271 (2-point rule).
 const PointsPerWin = 2
 
+// firstReserveClub is the first of the ids 58..63, reserve clubs outside
+// the leagues (LeagueOf counts them to league 2).
+const firstReserveClub = 58
+
 // LeagueOf returns the league of a club id (f_17c2_1bb5 >> 1). Ids 58..63
 // are reserve clubs outside the leagues and count as league 2 there.
 func LeagueOf(id int) int {

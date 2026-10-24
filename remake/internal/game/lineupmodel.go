@@ -72,7 +72,7 @@ func (s *State) humanTeam(t int) bool {
 func (s *State) newLeagueRater(m int) *lineupRater {
 	lr := &lineupRater{s: s, m: m, mood: s.Teams[s.Managers[m].Team].Mood, venues: []bool{true, false}, opp: -1}
 	l := LeagueOf(s.Managers[m].Team)
-	first, end := FirstID[l], 58
+	first, end := FirstID[l], firstReserveClub
 	if l < NumLeagues-1 {
 		end = FirstID[l+1]
 	}
@@ -111,6 +111,8 @@ func (lr *lineupRater) ofValues(v lineupValues) int {
 	return lr.ofValuesAgainst(v, lr.refs)
 }
 
+// ofValuesAgainst is ofValues against the clubs refs instead of those of
+// the rater.
 func (lr *lineupRater) ofValuesAgainst(v lineupValues, refs []Team) int {
 	return int(math.Round(lr.points(v, refs) * 100))
 }

@@ -138,17 +138,9 @@ func (st *StadiumScreen) Update(app *App) error {
 
 	// A hidden key of the remake, not of the original: the optimal ticket
 	// price (game.State.OptimizeTicketPrice).
-	for _, c := range in.Chars {
-		if c == 'o' {
-			tp := s.OptimizeTicketPrice(mi)
-			if tp.Opponent < 0 {
-				st.note = []string{"KEIN HEIMSPIEL MEHR IN DER SAISON"}
-				return nil
-			}
-			st.note = append([]string{priceLine(tp) + "  EINNAHME " + game.FormatMoney(tp.AfterGate)},
-				opponentNote(s.Teams[tp.Opponent].Name, tp.Opponent, true)...)
-			return nil
-		}
+	if optimizeKey(in) {
+		st.note = priceNote(s, s.OptimizeTicketPrice(mi))
+		return nil
 	}
 	st.hover = -1
 	if in.X > 6 && in.X < 0x121 && in.Y > 0x72 && in.Y < 0xb9 {
@@ -470,15 +462,4 @@ func (n *deskNumber) update(app *App) {
 func (n *deskNumber) draw(g *Gfx, dst *ebiten.Image) {
 	Draw(dst, g.Pic(21, false), n.x, n.y)
 	g.TextMid(dst, FontNormal, n.x, n.x+0x46, n.y-2+0x18, numText(n.value, 1, false), 9, ColBlack)
-}
-
-// priceLine names the optimal ticket price and what it gains at the next
-// home match: "EINTRITT 14 +12.000".
-func priceLine(tp game.OptimalPrice) string {
-	gain := tp.AfterGate - tp.BeforeGate
-	sign := "+"
-	if gain < 0 {
-		sign = ""
-	}
-	return "EINTRITT " + itoa(tp.After) + " " + sign + game.FormatMoney(gain)
 }

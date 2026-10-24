@@ -16,8 +16,11 @@ type OptimalPrice struct {
 }
 
 // ticketRuns is the number of fixed series of dice the gate money is the
-// mean of.
-const ticketRuns = 32
+// mean of, ticketSeed the seed of the first.
+const (
+	ticketRuns = 32
+	ticketSeed = 20240501
+)
 
 // OptimizeTicketPrice sets the ticket price (5..25 DM) with the most
 // expected gate money at the next home match of manager m: today's match if
@@ -49,7 +52,7 @@ func (s *State) expectedGate(m, opp, imp, price int) int64 {
 	defer func() { s.Rand = saved }()
 	var sum int64
 	for r := 0; r < ticketRuns; r++ {
-		s.Rand = Rand{Seed: trainingSeed + uint32(r)}
+		s.Rand = Rand{Seed: ticketSeed + uint32(r)}
 		sum += s.Attendance(m, s.Managers[m].Team, opp, imp, false, price) * int64(price)
 	}
 	return sum / ticketRuns

@@ -21,7 +21,7 @@ func NewTurnMenu(ss *Session) *MainMenu {
 	}}
 	m.NewMessages = func() bool { return ss.S.TakeNewMessages(ss.Mgr()) }
 	m.Key = func(app *App, c rune) bool {
-		if c != 'o' {
+		if c != optimizeRune {
 			return false
 		}
 		m.Note = optimizeTurn(ss)
@@ -113,19 +113,11 @@ func turnHeader(ss *Session) Header {
 // optimizeTurn is the hidden key o of the main menu (the remake's): it sets
 // the optimal training (game.State.OptimizeTraining), the optimal lineup
 // (game.State.OptimizeLineup) and the optimal ticket price
-// (game.State.OptimizeTicketPrice), and returns the note of what each is
-// worth and gained against the one before, and the opponent of the lineup.
+// (game.State.OptimizeTicketPrice) and returns the note of them (turnNote).
 func optimizeTurn(ss *Session) []string {
 	s, mi := ss.S, ss.Mgr()
 	tr := s.OptimizeTraining(mi)
 	ln := s.OptimizeLineup(mi)
 	tp := s.OptimizeTicketPrice(mi)
-	note := []string{
-		"AUFSTELLUNG " + pointsText(ln.After) + " " + signedDecimal(ln.After-ln.Before, 2),
-		"TRAINING " + tenthsText(tr.After) + " " + signedDecimal(tr.After-tr.Before, 1),
-	}
-	if tp.Opponent >= 0 {
-		note = append(note, priceLine(tp))
-	}
-	return append(note, opponentNote(s.Teams[max(ln.Opponent, 0)].Name, ln.Opponent, ln.Home)...)
+	return turnNote(s, ln, tr, tp)
 }
