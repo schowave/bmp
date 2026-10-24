@@ -36,6 +36,3 @@ __pycache__/
 .vscode/
 # Windows resources that mise run remake:dist writes for the .exe
 remake/cmd/bmp/rsrc_windows_*.syso
-
-# Python caches of tools/transfermarkt
-remake/tools/transfermarkt/__pycache__/

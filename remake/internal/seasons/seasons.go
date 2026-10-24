@@ -16,7 +16,7 @@ import (
 	"github.com/schowave/bmp/remake/internal/assets"
 )
 
-//go:embed data
+//go:embed data/*.json data/pic
 var data embed.FS
 
 var files = mustSub(data)
