@@ -68,7 +68,7 @@ type Season struct {
 	Squads map[string][]Player // by club
 	Logos  map[string]string   // by club: the logo file of the season
 	Colors map[string]string   // by club: its colours, "Schwarz-Gelb"
-	// TM are the Transfermarkt squads by club (import-tm), which the build
+	// TM are the Transfermarkt squads by club (import-tm, TMFile), which the build
 	// prefers to Squads.
 	TM       map[string][]Player
 	Europe   []EuroClub

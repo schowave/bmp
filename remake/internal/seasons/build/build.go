@@ -106,6 +106,9 @@ func All(cfg Config) error {
 		if err != nil {
 			return fmt.Errorf("season %s: %w", id, err)
 		}
+		if s.TM, err = source.ReadTMSquads(data, source.TMFile(id)); err != nil {
+			return fmt.Errorf("season %s: %w", id, err)
+		}
 		clubs, logos, err := buildSeason(s, cur, images, origMana, logf)
 		if err != nil {
 			return fmt.Errorf("season %s: %w", id, err)

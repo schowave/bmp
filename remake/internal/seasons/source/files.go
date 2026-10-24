@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -20,7 +21,6 @@ const (
 	squadsFile   = "squads.csv"
 	logosFile    = "logos.csv"
 	europeFile   = "europe.csv"
-	tmFile       = "transfermarkt.csv"
 	articlesFile = "articles.txt"
 	missingFile  = "missing.txt"
 )
@@ -110,17 +110,44 @@ func WriteSeason(dir string, s *Season) error {
 	return os.WriteFile(filepath.Join(dir, missingFile), []byte(strings.Join(s.Missing, "\n")+"\n"), 0o644)
 }
 
-// WriteTM writes the Transfermarkt squads of a season into dir: per club
+// TMFile is the file of the Transfermarkt squads of season id in the raw
+// data: kept apart from the openly licensed data of the seasons.
+func TMFile(id string) string { return path.Join("transfermarkt", id+".csv") }
+
+// WriteTM writes the Transfermarkt squads of a season into file: per club
 // (its article) the name Transfermarkt gives it and the players in their
 // order.
-func WriteTM(dir string, squads map[string][]Player, names map[string]string) error {
+func WriteTM(file string, squads map[string][]Player, names map[string]string) error {
 	var rows [][]string
 	for _, club := range sortedKeys(squads) {
 		for _, p := range squads[club] {
 			rows = append(rows, []string{club, names[club], p.Name, posCodes[p.Pos]})
 		}
 	}
-	return writeCSV(filepath.Join(dir, tmFile), []string{"club", "tm_name", "name", "position"}, rows)
+	if err := os.MkdirAll(filepath.Dir(file), 0o755); err != nil {
+		return err
+	}
+	return writeCSV(file, []string{"club", "tm_name", "name", "position"}, rows)
+}
+
+// ReadTMSquads reads the Transfermarkt squads of file in fsys by club; none
+// when there is no file.
+func ReadTMSquads(fsys fs.FS, file string) (map[string][]Player, error) {
+	out := map[string][]Player{}
+	rows, err := ReadCSV(fsys, file)
+	if errors.Is(err, fs.ErrNotExist) {
+		return out, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	for i, r := range rows {
+		if len(r) != 4 {
+			return nil, fmt.Errorf("%s line %d: %d fields", file, i+2, len(r))
+		}
+		out[r[0]] = append(out[r[0]], Player{Name: r[2], Surname: r[2], Pos: posOf(r[3]), Games: -1, Source: "transfermarkt"})
+	}
+	return out, nil
 }
 
 // ReadSeason reads the season of year from fsys (the directory of the
@@ -156,16 +183,6 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 			return nil, fmt.Errorf("%s line %d: %d fields", logosFile, i+2, len(r))
 		}
 		s.Logos[r[0]], s.Colors[r[0]] = r[1], r[2]
-	}
-	if rows, err = ReadCSV(fsys, tmFile); err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return nil, err
-	}
-	s.TM = map[string][]Player{}
-	for i, r := range rows {
-		if len(r) != 4 {
-			return nil, fmt.Errorf("%s line %d: %d fields", tmFile, i+2, len(r))
-		}
-		s.TM[r[0]] = append(s.TM[r[0]], Player{Name: r[2], Surname: r[2], Pos: posOf(r[3]), Games: -1, Source: "transfermarkt"})
 	}
 	if rows, err = ReadCSV(fsys, europeFile); err != nil {
 		return nil, err
