@@ -129,6 +129,7 @@ type tsPanel struct {
 	field  tsNumField
 	edit   int // 0 years, 1 salary while typing
 	thanks int // frames left of "Ihr Angebot wurde angenommen !"
+	none   int // frames left of the note of the key o that no offer is sure
 	wait   bool
 }
 
@@ -161,10 +162,17 @@ func (p *tsPanel) Update(app *App) error {
 		}
 		return nil
 	}
+	if p.none > 0 {
+		p.none--
+	}
 	if p.field.active {
 		if p.field.update(in) {
 			p.commit()
 		}
+		return nil
+	}
+	if optimizeKey(in) {
+		p.optimize()
 		return nil
 	}
 	switch {
@@ -214,7 +222,20 @@ func (p *tsPanel) commit() {
 	p.shownS = itoa64(v)
 }
 
-// offer evaluates NEUER VERTRAG.
+// optimize is the remake's key o: it fills in the cheapest offer the player
+// surely accepts for the typed length, or for the longest one
+// (game.State.OptimalContract), or notes in the name line that there is
+// none.
+func (p *tsPanel) optimize() {
+	oc := p.ss.S.OptimalContract(p.m, p.si, p.years)
+	if !oc.OK {
+		p.none = 90
+		return
+	}
+	p.years, p.salary = oc.Years, oc.Salary
+	p.shownY, p.shownS = itoa(oc.Years), itoa64(oc.Salary)
+}
+
 // forced is the contract length the player insists on, or 0.
 func (p *tsPanel) forced() int {
 	if sl := p.slot(); sl.Nego >= 100 && sl.Nego&0x80 == 0 {
@@ -251,6 +272,7 @@ func (p *tsPanel) cancel(app *App) {
 	p.close(app, false)
 }
 
+// offer evaluates NEUER VERTRAG.
 func (p *tsPanel) offer(app *App) {
 	s := p.ss.S
 	sl := p.slot()
@@ -318,8 +340,11 @@ func (p *tsPanel) Draw(app *App, dst *ebiten.Image) {
 		g.TextMid(dst, FontNormal, 6, 0xf4, 0xda, "Ihr Angebot wurde angenommen !", ColLight, ColBlue)
 		return
 	}
-	g.TextAt(dst, FontSmall, 8, 0xcf, ps.Name+", "+itoa(ps.Age)+" JAHRE ALT, "+itoa(sl.Games[0])+" LIGASPIELE",
-		ColLight, NoShadow)
+	head := ps.Name + ", " + itoa(ps.Age) + " JAHRE ALT, " + itoa(sl.Games[0]) + " LIGASPIELE"
+	if p.none > 0 {
+		head = "KEIN SICHERES ANGEBOT"
+	}
+	g.TextAt(dst, FontSmall, 8, 0xcf, head, ColLight, NoShadow)
 	FillRect(dst, 8, 0xd1, 0xb4-8+1, 1, g.PalColor(ColLight))
 	g.TextAt(dst, FontSmall, 8, 0xd9, "VERTRAGSDAUER (IN SAISONS)", ColGrey2, NoShadow)
 	g.TextAt(dst, FontSmall, 0x82, 0xd9, ":", ColGrey2, NoShadow)

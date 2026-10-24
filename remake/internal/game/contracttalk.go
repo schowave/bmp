@@ -11,6 +11,65 @@ func (s *State) CancelNegotiation(m, si int) {
 	sl.Nego = s.Rand.Between(10, 18)
 }
 
+// OptimalContract is the offer of the contract key o: the cheapest one the
+// player accepts whatever the generator draws.
+type OptimalContract struct {
+	Years  int
+	Salary int64
+	OK     bool // false: no sure offer for the asked length
+}
+
+// OptimalContract returns the cheapest sure offer for squad slot si of
+// squad m and y years, or with y == 0 for the longest length that has one.
+// A player who asks for a length himself takes it at his salary
+// (NegotiateContract); otherwise only a longer contract extends it. The
+// generator is not used.
+func (s *State) OptimalContract(m, si, y int) OptimalContract {
+	sl := &s.Squads[m][si]
+	if sl.Loan != 0 {
+		return OptimalContract{}
+	}
+	if sl.Nego >= 100 && sl.Nego&0x80 == 0 {
+		forced := sl.Nego - 100
+		if y != 0 && y != forced {
+			return OptimalContract{}
+		}
+		return OptimalContract{Years: forced, Salary: sl.Salary, OK: true}
+	}
+	if y != 0 {
+		sal, ok := s.sureSalary(m, si, y)
+		return OptimalContract{Years: y, Salary: sal, OK: ok}
+	}
+	for y := 4; y > sl.Years; y-- {
+		if sal, ok := s.sureSalary(m, si, y); ok {
+			return OptimalContract{Years: y, Salary: sal, OK: true}
+		}
+	}
+	return OptimalContract{}
+}
+
+// sureSalary returns the lowest salary, in full 100 DM, that playerAccepts
+// (f_2277_2270) takes for a contract of y years longer than the current
+// one with every draw: above the highest threshold d it can draw, which
+// must stay below 100,000 DM, and not below the current salary.
+func (s *State) sureSalary(m, si, y int) (int64, bool) {
+	sl := &s.Squads[m][si]
+	if y <= sl.Years || y > 4 {
+		return 0, false
+	}
+	yp := s.contractYp(m, y)
+	k := (yp/6 + 110) * 8 / 10
+	d := s.PlayerValue(m, si, 5) * int64(k+4) / 100
+	if s.Day > 321 {
+		d = d * int64(152-s.Persons[sl.Person].Age) / 100
+	}
+	if d >= 100000 {
+		return 0, false
+	}
+	sal := max(d+1, sl.Salary)
+	return (sal + 99) / 100 * 100, true
+}
+
 // Scorer is a line of the list of the best scorers of a league.
 type Scorer struct {
 	Person int

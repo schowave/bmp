@@ -263,6 +263,7 @@ rate by the engine of the original: [ADR 0006](../docs/adr/0006-rate-lineups-by-
 | Training screen | `o` | Sets the training plan with the strongest eleven over the rest of the season |
 | Stadium screen | `o` | Sets the ticket price with the most gate money at the next home match |
 | Main menu of a turn | `o` | All three: the training, the lineup, the ticket price |
+| Negotiation panel of a contract (contract list, season end, purchase) | `o` | Fills in the cheapest offer the player accepts for sure |
 | Setup of a new game, with real seasons built in | `s` | Opens the choice of the season to play, or of the original |
 
 #### The lineup key
@@ -336,6 +337,42 @@ fixed series of its dice. The note names the price, its gain against the
 price before and the gate money (`EINTRITT 12 +12.157  EINNAHME 132.157`)
 and the opponent; without a home match left the price
 stays. The price changes nothing else in the original.
+
+#### The contract key
+
+Click a player in the contract list, press `o` in the panel below it and
+then NEUER VERTRAG; at the season end and in a purchase the panel opens by
+itself. The key fills in the length and the lowest salary that the player
+accepts whatever the dice of the original draw (`f_2277_2270`,
+`OptimalContract` in `internal/game/contracttalk.go`); it negotiates
+nothing itself and uses no dice. With a length typed in first, it fills in
+the salary for that length; otherwise it takes the longest length up to 4
+that has a sure salary. A player who asks for a length himself gets it at
+his salary. Otherwise the player draws a threshold of about
+`value × (88 + 13 × seasons left) %` in a range of 10 points, at the
+season end also times (132 − age) to (152 − age) %, and takes a salary
+above it as long as the threshold stays below 100,000 DM: the key offers
+1 DM above the highest threshold, rounded up to full 100 DM, and not less
+than the salary so far. With no sure offer, the panel shows
+`KEIN SICHERES ANGEBOT` in place of the player for a moment.
+
+What the rules mean for a game over several seasons:
+
+- A salary never goes down: an extension below it is refused. Every raise
+  stays until the player leaves.
+- The salary a player asks for grows with the cube of his skills, but a
+  longer contract costs only about 13 points more per season. Extend young
+  players who get better early and for 4 seasons.
+- A player whose threshold can reach 100,000 DM refuses every extension, and
+  at the season end he leaves for half his value. Extend stars for long
+  while they still accept.
+- At the season end the age makes a young player up to a third dearer, and
+  players can retire. Extend the contracts with one season left late in the
+  season instead.
+- When a player offers an extension himself (one season left), it costs no
+  raise.
+- Every season left takes 1/7 off a transfer fee: keep players to be sold
+  short.
 
 #### The key of the main menu
 
