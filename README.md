@@ -31,7 +31,7 @@ any browser from a container, and re-implemented in Go.
 |---|---|---|---|
 | **VNC image** `schowave/bmp:latest` | DOSBox in the container, streamed to the browser with [noVNC](https://novnc.com) | Host directory, drive `D:` | [Architecture](#architecture) |
 | **WASM image** `schowave/bmp:wasm` | DOSBox as WebAssembly in the browser ([js-dos](https://js-dos.com/)), the container only serves files and saves | Host directory, one save per browser | [images/wasm/README.md](images/wasm/README.md) |
-| **Go remake** | Native program for macOS, Windows and Linux, built with [Ebitengine](https://ebitengine.org) | `~/Library/Application Support/bmp` and the like | [remake/README.md](remake/README.md) |
+| **Go remake** | Native program for macOS, Windows and Linux, built with [Ebitengine](https://ebitengine.org); [download for Windows and Mac](https://github.com/schowave/bmp/releases/latest) | `~/Library/Application Support/bmp` and the like | [remake/README.md](remake/README.md) |
 
 ## Quick start
 
@@ -57,6 +57,17 @@ Open <http://localhost:8090>. See [images/wasm/README.md](images/wasm/README.md)
 save API and the Synology setup.
 
 ### Go remake
+
+Download the latest [release](https://github.com/schowave/bmp/releases/latest), a single file, no installation:
+
+- [Windows (64-bit)](https://github.com/schowave/bmp/releases/latest/download/bmp-windows-amd64.zip)
+- [macOS (Apple Silicon and Intel)](https://github.com/schowave/bmp/releases/latest/download/bmp-macos.zip)
+
+The programs have no developer signature: Windows SmartScreen warns on the
+first start (*More info* → *Run anyway*), and on a Mac the app opens the first
+time only with right click → *Open*.
+
+Or build it from the sources:
 
 ```bash
 git clone https://github.com/schowave/bmp.git
@@ -260,8 +271,8 @@ Releases are managed through GitHub Actions, and only there; there is no local p
 
 1. Go to **Actions** → **Release** → **Run workflow**, or run `mise run release [version]` (needs the `gh` CLI)
 2. Either enter a version number (e.g. `4.1.0`) or leave it empty to increment the patch version (e.g. `4.0.1` → `4.0.2`). The version must be above the latest tag and not taken yet.
-3. The workflow runs CI first, then builds both images for `linux/amd64` and pushes them under the version tag alone
-4. Only once both images are on Docker Hub does it commit `VERSION`, push the git tag, and move `latest` and `wasm` to the new images
+3. The workflow runs CI first, then builds both images for `linux/amd64` and pushes them under the version tag alone, and builds the Windows and Mac programs of the remake (`mise run remake:dist`)
+4. Only once both images are on Docker Hub and the programs are built does it commit `VERSION`, push the git tag, move `latest` and `wasm` to the new images, and attach `bmp-windows-amd64.zip` and `bmp-macos.zip` to the GitHub release
 5. Watchtower picks up the new image on connected hosts
 
 A run that fails or is cancelled before step 4 leaves no git tag behind and does not change what Watchtower pulls. Only one release runs at a time.

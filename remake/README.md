@@ -59,6 +59,9 @@ programs have no signature from a developer account: Windows SmartScreen warns
 on the first start, and on another Mac the app opens only with right click →
 *Open*. They carry the original files of Software 2000.
 
+The release workflow runs the task on macOS and attaches the programs to the
+GitHub release as `bmp-windows-amd64.zip` and `bmp-macos.zip`.
+
 The icon of both programs and of the game's window is `cmd/bmp/icon.png`: the
 letters of the title banner (PIC/4.VGA) in three lines on its turf, framed by
 the marble of PIC/22.CP, so that it still reads at small sizes.
