@@ -150,7 +150,7 @@ func (o *GameOver) Update(app *App) error {
 		return nil
 	}
 	if app.Input.Left || app.Input.Right || app.Input.Enter || app.Input.Escape {
-		app.Reset(NewTitle().OnDone(func() Scene { return NewSeasonChoice(o.ss.Mana, o.ss.SaveDir) }))
+		app.Reset(NewTitle().OnDone(func() Scene { return NewStart(o.ss.Mana, o.ss.SaveDir) }))
 	}
 	return nil
 }

@@ -69,7 +69,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "bmp:", err)
 		os.Exit(1)
 	}
-	var first ui.Scene = ui.NewTitle().OnDone(func() ui.Scene { return ui.NewSeasonChoice(mana, *saves) })
+	var first ui.Scene = ui.NewTitle().OnDone(func() ui.Scene { return ui.NewStart(mana, *saves) })
 	if *demo != "" {
 		first = ui.Demo(*demo, mana, *saves)
 	}

@@ -14,7 +14,9 @@ import (
 // from the logo strip, enter the names of up to four managers, then the
 // options with the right mouse button; a click on the banner loads a game
 // instead. With NEU in the disk menu the same
-// screen adds managers to a running game.
+// screen adds managers to a running game. With real seasons built in, the
+// key S opens the season choice (not in the original), named left and
+// right of the club name.
 type Setup struct {
 	mana    *assets.Mana // the clubs of the game
 	orig    *assets.Mana // the clubs of the original, for the session
@@ -31,9 +33,9 @@ type Setup struct {
 	stripX int
 	slotsX [4]int
 	held   int // frames the left button has been held on the strip
-	// back is the season choice the setup came from; a right click goes
-	// back to it while nothing is chosen. Nil without one (and for NEU).
-	back func() Scene
+	// seasons are the real seasons the key S chooses from; none without
+	// built-in seasons and for NEU.
+	seasons []seasons.Season
 }
 
 type setupClub struct {
@@ -68,6 +70,14 @@ func newSetup(mana *assets.Mana, saveDir string) *Setup {
 	return s
 }
 
+// NewStart creates the setup of a new game after the title: with the clubs
+// of the original, and the real seasons to choose from with S.
+func NewStart(mana *assets.Mana, saveDir string) *Setup {
+	s := NewSetup(mana, saveDir)
+	s.seasons = seasons.List()
+	return s
+}
+
 // NewSeasonSetup creates the setup of a new game of real season id that
 // starts in year; mana holds its clubs, orig those of the original.
 func NewSeasonSetup(orig, mana *assets.Mana, saveDir, id string, year int) *Setup {
@@ -96,6 +106,11 @@ func NewAddManagers(ss *Session) *Setup {
 const (
 	stripY = 40
 	slotY  = 105
+	// The hint to the season choice: the clubs played with left of the
+	// club name, the key right of it, on the marble of the strip.
+	seasonHintY              = 96
+	hintLeftX0, hintLeftX1   = 5, 85
+	hintRightX0, hintRightX1 = 235, 314
 	// Frames until a held button scrolls the strip again.
 	stripRepeat = 12
 )
@@ -135,6 +150,10 @@ func (s *Setup) Update(app *App) error {
 		return nil
 	}
 	s.held = 0
+	if s.choosesSeason(in) {
+		app.Replace(newSeasonChoice(s))
+		return nil
+	}
 	for i, x := range s.slotsX {
 		if i < s.fixed {
 			continue
@@ -162,8 +181,6 @@ func (s *Setup) Update(app *App) error {
 			s.addManagers(app)
 		case s.ready():
 			app.Push(newSetupOptions(s))
-		case in.Right && s.back != nil && s.untouched():
-			app.Replace(s.back())
 		}
 	}
 	return nil
@@ -192,14 +209,26 @@ func (s *Setup) typeName(in *Input) bool {
 	return len(in.Chars) > 0 || in.Backspace
 }
 
-// untouched reports whether no name and no club is chosen yet.
-func (s *Setup) untouched() bool {
-	for i := range s.names {
-		if s.names[i] != "" || s.teams[i] >= 0 {
-			return false
+// choosesSeason reports the key S of the season choice.
+func (s *Setup) choosesSeason(in *Input) bool {
+	if len(s.seasons) == 0 {
+		return false
+	}
+	for _, c := range in.Chars {
+		if c == 's' || c == 'S' {
+			return true
 		}
 	}
-	return true
+	return false
+}
+
+// modeLabel is the clubs the setup plays with, for the hint below the
+// club name: "ORIGINAL 1991/92" or "SAISON 1995/96".
+func (s *Setup) modeLabel() string {
+	if id, err := seasons.ParseID(s.opts.Season); err == nil {
+		return "SAISON " + id.Label()
+	}
+	return "ORIGINAL 1991/92"
 }
 
 func (s *Setup) ready() bool {
@@ -257,6 +286,10 @@ func (s *Setup) Draw(app *App, dst *ebiten.Image) {
 		Draw(dst, g.Pic(s.clubs[s.clubAt(k)].logo, false), s.stripX+12+41*k, stripY+7)
 	}
 	g.TextCentered(dst, FontNormal, s.stripX+1, stripY+52, 309, s.clubs[s.center].name, g.PalColor(ColBlack))
+	if len(s.seasons) > 0 {
+		g.TextMid(dst, FontSmall, hintLeftX0, hintLeftX1, seasonHintY, s.modeLabel(), ColBeige, ColBlack)
+		g.TextMid(dst, FontSmall, hintRightX0, hintRightX1, seasonHintY, "S: SAISON WÄHLEN", ColBeige, ColBlack)
+	}
 	for i, x := range s.slotsX {
 		Draw(dst, g.Pic(35, false), x, slotY)
 		if t := s.teams[i]; t >= 0 {

@@ -13,9 +13,9 @@ import (
 func Demo(name string, mana *assets.Mana, saveDir string) Scene {
 	switch name {
 	case "setup":
-		return NewSetup(mana, saveDir)
+		return NewStart(mana, saveDir)
 	case "seasons":
-		return NewSeasonChoice(mana, saveDir)
+		return newSeasonChoice(NewStart(mana, saveDir))
 	}
 	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 5})
 	if err != nil {
