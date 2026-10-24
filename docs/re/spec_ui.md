@@ -128,6 +128,49 @@ hovering (s4, s5). Clicked on the original (shots in
 
 During a match day the space bar opens the options (u4).
 
+### Pointer
+
+The original never shows the pointer of the mouse driver (INT 33h function
+1). `f_35ac_1b08` resets the driver, limits the pointer to 0–319 × 0–239,
+puts it at 160,120 and installs an event handler (function 0Ch, mask 0x1f);
+the game draws the pointer itself as a sprite on the screen:
+
+- `f_35ac_17a0` saves the pixels under the pointer, then draws it with the
+  keyed blit `f_35ac_20c8` (index 0 transparent); `f_35ac_1746` puts the
+  saved pixels back. `f_35ac_1a81`/`f_35ac_1ac7` hide and show it around
+  drawing, with a counter; `f_35ac_1971` moves it.
+- `f_076b_02a3(flag)` sets the shape through `f_35ac_1a19` (image, save
+  buffer, hot spot 0,0): flag 1 is an 11×11 arrow at D:0x7e4 (struct
+  D:0x85e: width, height, far pointer), flag 0 a single transparent pixel
+  at D:0x85d (struct D:0x876), i.e. no visible pointer. The setup start
+  `f_08bc_0004` sets the arrow; the alert after a failed read of the editor
+  file "BM-Ed1.3-WK" (`f_14a4_0574`) shows the arrow and then switches to
+  the invisible pointer.
+- The arrow (17 fill, 18 left edge, 19 right edge, . transparent):
+
+  ```
+  17 19 .  .  .  .  .  .  .  .  .
+  18 17 19 19 .  .  .  .  .  .  .
+  .  18 17 17 19 19 .  .  .  .  .
+  .  18 17 17 17 17 19 19 .  .  .
+  .  .  18 17 17 17 17 17 19 19 .
+  .  .  18 17 17 17 17 17 17 17 .
+  .  .  .  18 17 17 17 19 .  .  .
+  .  .  .  18 17 17 18 17 19 .  .
+  .  .  .  .  18 17 .  18 17 19 .
+  .  .  .  .  18 17 .  .  18 17 19
+  .  .  .  .  .  .  .  .  .  18 17
+  ```
+
+- The colours are those of the palette set at the time: on the screens of
+  the game (UI palette) 146,0,16 / 178,0,32 / 195,113,32, on the title
+  (palette 2, o05) others. The pointer is missing in some shots of
+  animations (d3–d5, m4, m5, n2, n3, o07).
+
+The remake hides the system pointer in its window and draws the arrow last
+over the canvas, in the colours of the UI palette (`internal/ui/pointer.go`);
+screenshots of the remake leave it out.
+
 ## 4. Screens
 
 ### Title, setup (f_08bc_2184)
@@ -275,6 +318,8 @@ The shots of the original taken for this work are listed in
   turns.
 - The club information opened from the results screen sits a few pixels
   further right in the original (param_3 = 1).
+- Pointer: the remake draws the arrow always in the UI palette (the title
+  shows it in other colours) and does not hide it during animations.
 - Contract list: players who will not negotiate are not greyed out (colour 3),
   retiring players not drawn in colour 17; the dot after a player on loan is
   missing.

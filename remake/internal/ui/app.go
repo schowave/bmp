@@ -85,6 +85,11 @@ type App struct {
 	ControlDone func()
 	ctlDone     bool
 	ctlErr      string // a step of the last control script failed
+
+	// Pointer draws the mouse pointer of the original over the canvas, for
+	// a window that hides the system pointer. Screenshots leave it out.
+	Pointer bool
+	pointer *ebiten.Image
 }
 
 // TPS is the number of ticks a second the scenes are updated.
@@ -295,6 +300,10 @@ func (a *App) Draw(screen *ebiten.Image) {
 		}
 		a.ShotPath = ""
 		a.quit = true
+	}
+	if a.Pointer {
+		x, y := ebiten.CursorPosition()
+		a.drawPointer(screen, x, y)
 	}
 }
 

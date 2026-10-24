@@ -437,6 +437,10 @@ ties). Deliberate differences:
 - When a 1- or 3-year game is over, ENDE under the high scores returns to the
   title screen, where a new game can start; the original quits the program
   (`f_076b_114c` in `f_1a58_3176`).
+- The mouse pointer, the arrow of the original, is always drawn in the
+  colours of the game's screens (the original shows it in other colours on
+  the title) and stays visible during animations, where the original hides
+  it at times.
 - In a real season the second and third league are called after the real
   tiers of the year: Regionalliga until 1973/74, then Zweite Liga;
   Amateurliga until 1977/78, Am.-Oberliga until 1993/94, Regionalliga until

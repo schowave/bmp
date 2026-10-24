@@ -88,6 +88,9 @@ func main() {
 	}
 	app := ui.NewApp(gfx, first)
 	app.ShotPath, app.ShotFrame = *shot, *shotFrame
+	// The game draws the pointer of the original in place of the system's.
+	ebiten.SetCursorMode(ebiten.CursorModeHidden)
+	app.Pointer = true
 	if *control != "" {
 		startControl(app, *control, *tps)
 	} else {
