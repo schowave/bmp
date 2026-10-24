@@ -132,7 +132,7 @@ func (lr *lineupRater) points(v lineupValues, refs []Team) float64 {
 			if !home {
 				win = loss
 			}
-			sum += PointsPerWin*win + draw
+			sum += float64(lr.s.PointsPerWin())*win + draw
 		}
 	}
 	return sum / float64(len(lr.venues)*len(refs))

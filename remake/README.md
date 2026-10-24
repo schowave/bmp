@@ -414,7 +414,7 @@ ties). Deliberate differences:
   1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
   second teams of professional clubs before 2008 unless the places cannot
   be filled without them. Strengths come from the
-  goals and points per game of the season ([ADR 0006](../docs/adr/0006-real-seasons-from-wikipedia.md)).
+  goals and points per game of the season ([ADR 0008](../docs/adr/0008-real-seasons-from-wikipedia.md)).
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
   from the fourth season on, as in the original's modern start.

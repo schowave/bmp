@@ -303,7 +303,7 @@ func diceRun(lr *lineupRater, v lineupValues, refs []Team, n int) float64 {
 				}
 				switch {
 				case own > other:
-					points += PointsPerWin
+					points += lr.s.PointsPerWin()
 				case own == other:
 					points++
 				}
