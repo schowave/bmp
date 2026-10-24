@@ -9,11 +9,11 @@ import (
 )
 
 // SeasonChoice is the screen before the setup of a new game where the
-// player picks the clubs: on the left those of the original, on the right
-// the list of the real seasons (internal/seasons). Both are picked with a
-// click under the bar of the file screen. The original has no such screen;
-// it is drawn with the windows of the file screen. Without built-in seasons
-// it goes straight to the setup.
+// player picks the clubs: on the left those of the original with the
+// WEITER button, on the right the list of the real seasons
+// (internal/seasons), picked under the bar of the file screen. The original
+// has no such screen; it is drawn with the windows and buttons of the
+// others. Without built-in seasons it goes straight to the setup.
 type SeasonChoice struct {
 	mana    *assets.Mana // the clubs of the original
 	saveDir string
@@ -28,9 +28,11 @@ const (
 	seasonColW  = 64
 	seasonLeftX = 124
 	seasonTopY  = 37
-	// The entry of the original.
-	origX, origY, origW, origH = 12, 84, 92, 13
 )
+
+// originalButton is the WEITER button of the original, in the middle of
+// the left window.
+var originalButton = Button{X: 6 + (104-ButtonW)/2, Y: 78, W: ButtonW, H: ButtonH}
 
 // NewSeasonChoice creates the screen; mana holds the clubs of the original.
 func NewSeasonChoice(mana *assets.Mana, saveDir string) Scene {
@@ -87,12 +89,9 @@ func (c *SeasonChoice) rows(h int) []seasonRow {
 	return out
 }
 
-// onOriginal reports whether the pointer is on the entry of the original.
-func onOriginal(in *Input) bool { return in.In(origX, origY, origW, origH) }
-
 func (c *SeasonChoice) Update(app *App) error {
 	in := &app.Input
-	if in.Left && onOriginal(in) {
+	if originalButton.Hit(in) {
 		app.Replace(c.withBack(NewSetup(c.mana, c.saveDir)))
 		return nil
 	}
@@ -135,17 +134,13 @@ func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Background(dst)
 	g.TextMid(dst, FontBig, 0, 320, 20, "WELCHE SAISON", ColBeige, ColBlack)
-	// Left: the clubs of the original, an entry like those of the list.
+	// Left: the clubs of the original and the button to play them.
 	g.Window(dst, 6, 33, 110, 172, ColBlue)
-	colour := ColLight
-	if onOriginal(&app.Input) {
-		FillRect(dst, origX, origY, origW, origH, g.PalColor(ColBlue^31))
-		colour ^= 31
-	}
-	g.TextMid(dst, FontNormal, origX, origX+origW, origY+10, "ORIGINAL", colour, NoShadow)
-	g.TextMid(dst, FontSmall, 6, 110, 110, "VEREINE STAND 1991/92", ColGrey2, NoShadow)
-	g.TextMid(dst, FontSmall, 6, 110, 118, "2 PUNKTE PRO SIEG", ColGrey2, NoShadow)
-	g.TextMid(dst, FontSmall, 6, 110, 126, "LIGEN DES ORIGINALS", ColGrey2, NoShadow)
+	g.TextMid(dst, FontNormal, 6, 110, 70, "ORIGINAL", ColLight, NoShadow)
+	g.DrawIconButton(dst, IconWeiter, originalButton.X, originalButton.Y)
+	g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+12, "VEREINE STAND 1991/92", ColGrey2, NoShadow)
+	g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+20, "2 PUNKTE PRO SIEG", ColGrey2, NoShadow)
+	g.TextMid(dst, FontSmall, 6, 110, originalButton.Y+ButtonH+28, "LIGEN DES ORIGINALS", ColGrey2, NoShadow)
 	// Right: the real seasons.
 	g.Window(dst, 116, 33, 314, 172, ColBlue)
 	for _, r := range c.rows(c.hover(&app.Input)) {
