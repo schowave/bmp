@@ -9,20 +9,23 @@ import (
 )
 
 // SeasonChoice is the screen before the setup of a new game where the
-// player picks the clubs: those of the original, or those of a real season
-// (internal/seasons). The original has no such screen; it is drawn like the
-// file screen. Without built-in seasons it goes straight to the setup.
+// player picks the clubs: on the left a button for those of the original,
+// on the right the list of the real seasons (internal/seasons). The original
+// has no such screen; it is drawn with the windows and buttons of the file
+// screen. Without built-in seasons it goes straight to the setup.
 type SeasonChoice struct {
-	mana    *assets.Mana // the clubs of the original
-	saveDir string
-	entries []seasons.Season // entries[0] is the original (empty ID)
+	mana     *assets.Mana // the clubs of the original
+	saveDir  string
+	entries  []seasons.Season
+	original Button
 }
 
-// Geometry of the screen: three columns of 18 rows.
+// Geometry of the screen: the original in a window on the left, the
+// seasons in two columns of 19 rows on the right.
 const (
-	seasonRows  = 18
-	seasonColW  = 100
-	seasonLeftX = 12
+	seasonRows  = 19
+	seasonColW  = 96
+	seasonLeftX = 124
 	seasonTopY  = 37
 )
 
@@ -32,18 +35,16 @@ func NewSeasonChoice(mana *assets.Mana, saveDir string) Scene {
 	if len(list) == 0 {
 		return NewSetup(mana, saveDir)
 	}
-	return &SeasonChoice{mana: mana, saveDir: saveDir, entries: append([]seasons.Season{{}}, list...)}
+	return newSeasonChoice(mana, saveDir, list)
 }
 
-// seasonLabel is the text of an entry.
-func seasonLabel(s seasons.Season) string {
-	if s.ID == "" {
-		// The clubs of the original are those of 1991/92 (its modern start
-		// plays them from 1992 on).
-		return "ORIGINAL (1991/92)"
-	}
-	return "SAISON " + s.Label()
+func newSeasonChoice(mana *assets.Mana, saveDir string, list []seasons.Season) *SeasonChoice {
+	return &SeasonChoice{mana: mana, saveDir: saveDir, entries: list,
+		original: Button{X: 18, Y: 92, W: 80, H: 12, Label: "ORIGINAL"}}
 }
+
+// seasonLabel is the text of a season in the list.
+func seasonLabel(s seasons.Season) string { return s.Label() }
 
 // seasonCell is the top-left corner of the row of entry i.
 func seasonCell(i int) (x, y int) {
@@ -52,7 +53,7 @@ func seasonCell(i int) (x, y int) {
 
 // hover returns the entry under the pointer, or -1.
 func (c *SeasonChoice) hover(in *Input) int {
-	if in.X < seasonLeftX || in.X >= seasonLeftX+3*seasonColW || in.Y < seasonTopY || in.Y >= seasonTopY+seasonRows*fileRowH {
+	if in.X < seasonLeftX || in.X >= seasonLeftX+2*seasonColW || in.Y < seasonTopY || in.Y >= seasonTopY+seasonRows*fileRowH {
 		return -1
 	}
 	i := (in.X-seasonLeftX)/seasonColW*seasonRows + (in.Y-seasonTopY)/fileRowH
@@ -76,9 +77,6 @@ func (c *SeasonChoice) rows(h int) []seasonRow {
 	for i, s := range c.entries {
 		x, y := seasonCell(i)
 		r := seasonRow{x: x, y: y, text: seasonLabel(s), colour: ColLight, bar: i == h}
-		if s.ID == "" {
-			r.colour = ColOrange
-		}
 		if r.bar {
 			r.colour ^= 31
 		}
@@ -89,15 +87,15 @@ func (c *SeasonChoice) rows(h int) []seasonRow {
 
 func (c *SeasonChoice) Update(app *App) error {
 	in := &app.Input
+	if c.original.Hit(in) {
+		app.Replace(NewSetup(c.mana, c.saveDir))
+		return nil
+	}
 	i := c.hover(in)
 	if !in.Left || i < 0 {
 		return nil
 	}
 	s := c.entries[i]
-	if s.ID == "" {
-		app.Replace(NewSetup(c.mana, c.saveDir))
-		return nil
-	}
 	m, err := seasons.Mana(s.ID)
 	if err != nil {
 		app.Push(NewMessage("An Alle:", "Die Saison "+s.Label()+" ist nicht lesbar."))
@@ -125,7 +123,14 @@ func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 	g := app.Gfx
 	g.Background(dst)
 	g.TextMid(dst, FontBig, 0, 320, 20, "WELCHE SAISON", ColBeige, ColBlack)
-	g.Window(dst, 6, 33, 314, 172, ColBlue)
+	// Left: the clubs of the original.
+	g.Window(dst, 6, 33, 110, 172, ColBlue)
+	g.TextMid(dst, FontSmall, 6, 110, 70, "VEREINE DES", ColLight, NoShadow)
+	g.TextMid(dst, FontSmall, 6, 110, 78, "ORIGINALS", ColLight, NoShadow)
+	drawDialogButton(app, dst, &c.original)
+	g.TextMid(dst, FontSmall, 6, 110, 116, "STAND 1991/92", ColOrange, NoShadow)
+	// Right: the real seasons.
+	g.Window(dst, 116, 33, 314, 172, ColBlue)
 	for _, r := range c.rows(c.hover(&app.Input)) {
 		if r.bar {
 			FillRect(dst, r.x-2, r.y, seasonColW-4, 5, g.PalColor(ColBlue^31))
