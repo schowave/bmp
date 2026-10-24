@@ -235,6 +235,11 @@ dir = "{{config_root}}/remake"
 run = "tools/transfermarkt/update.sh"
 
 # --- Checks --------------------------------------------------------------------
+[tasks."remake:seasons-games"]
+description = "Order the squads of the seasons 1995/96 to 2003/04 by their games on transfermarkt.de (args: [FROM [TO]])"
+dir = "{{config_root}}/remake"
+run = "tools/transfermarkt/games.sh"
+
 
 [tasks.lint]
 description = "golangci-lint over both Go modules (config: .golangci.yml)"

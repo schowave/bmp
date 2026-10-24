@@ -134,6 +134,21 @@ A new season, step by step:
    clubs and their logos.
 5. `mise run check`, then commit the season, its logos and credits.
 
+Transfermarkt orders a squad by market value only from 2004/05 on; before,
+in the order of its squad page, by position. The seasons 1995/96 to 2003/04
+take their squads by the games in the league instead:
+
+```sh
+mise run remake:seasons-games              # 1995/96 to 2003/04
+```
+
+`tools/transfermarkt/tm_games.py` finds for each German club of a season the
+Transfermarkt squad its players come from, fetches only for those clubs
+their performance data (`YYYY-YY.squads.json`, the most games first, then
+the most minutes), and `cmd/bmpseasons squads` gives the clubs those players
+and changes nothing else. Run it again after `remake:seasons-update` of one
+of these seasons.
+
 When Transfermarkt changes its pages, `tools/transfermarkt/tm_fetch.py`
 reads nothing or too little; the output of step 1 shows it.
 
@@ -323,7 +338,7 @@ the panel with new messages is open, it takes the keys, so close it first.
 | `internal/seasons` | The real seasons 1990/91–2026/27 built into the binary, their credits; `update` makes a season from Transfermarkt |
 | `testdata/original` | Reference screenshots of the original (see its README) |
 | `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
-| `tools/transfermarkt` | Fetches tables and squads of seasons from transfermarkt.de (`mise run remake:seasons-update`) |
+| `tools/transfermarkt` | Fetches tables, squads and games of seasons from transfermarkt.de (`mise run remake:seasons-update`, `remake:seasons-games`) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
 | `tools/playtest.sh` | Plays the game through `-control` for playtests (see [`../docs/playtest.md`](../docs/playtest.md)) |
 

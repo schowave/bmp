@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"math"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -30,12 +31,17 @@ type Club struct {
 	Games   int    `json:"games"`
 	Goals   string `json:"goals"` // "59:23"
 	Points  int    `json:"points"`
-	Players struct {
-		Goalkeepers []string `json:"goalkeepers"`
-		Defenders   []string `json:"defenders"`
-		Midfielders []string `json:"midfielders"`
-		Forwards    []string `json:"forwards"`
-	} `json:"players"`
+	Players Squad  `json:"players"`
+}
+
+// Squad are the players of a club by position, the first the most
+// valuable (or, in a squads file, the most often played), surnames in
+// capitals.
+type Squad struct {
+	Goalkeepers []string `json:"goalkeepers"`
+	Defenders   []string `json:"defenders"`
+	Midfielders []string `json:"midfielders"`
+	Forwards    []string `json:"forwards"`
 }
 
 // ReadClubs reads a Transfermarkt season file.
@@ -199,12 +205,8 @@ func Season(in Input) (*Output, error) {
 		}
 		c.Name, c.Strength = name, str[p.row.name]
 		if t, ok := tm[p.row.name]; ok {
-			for _, n := range pickPlayers(t) {
-				cp, err := assets.ToCP437(n)
-				if err != nil {
-					return nil, fmt.Errorf("%s: %w", t.Name, err)
-				}
-				c.Players = append(c.Players, cp)
+			if c.Players, err = squadRecord(t.Players); err != nil {
+				return nil, fmt.Errorf("%s: %w", t.Name, err)
 			}
 		} else {
 			c.Players = prev[p.row.name].Players
@@ -292,9 +294,9 @@ var rosterSizes = [4]int{2, 6, 7, 5}
 // MANA.DAT (2 goalkeepers, 6 defenders, 7 midfielders, 5 forwards): per
 // position the first of the file, the most valuable. Missing ones stay
 // empty; the game gives those slots random names.
-func pickPlayers(c Club) []string {
+func pickPlayers(s Squad) []string {
 	var out []string
-	for k, names := range [4][]string{c.Players.Goalkeepers, c.Players.Defenders, c.Players.Midfielders, c.Players.Forwards} {
+	for k, names := range [4][]string{s.Goalkeepers, s.Defenders, s.Midfielders, s.Forwards} {
 		for i := 0; i < rosterSizes[k]; i++ {
 			n := ""
 			if i < len(names) {
@@ -304,6 +306,56 @@ func pickPlayers(c Club) []string {
 		}
 	}
 	return out
+}
+
+// squadRecord are the players of s as MANA.DAT keeps them.
+func squadRecord(s Squad) ([]string, error) {
+	var out []string
+	for _, n := range pickPlayers(s) {
+		cp, err := assets.ToCP437(n)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, cp)
+	}
+	return out, nil
+}
+
+// ReadSquads reads a squads file of tools/transfermarkt/tm_games.py: per
+// German club of a season, by its name in the season, its squad.
+func ReadSquads(file string) (map[string]Squad, error) {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	var out map[string]Squad
+	if err := json.Unmarshal(b, &out); err != nil {
+		return nil, fmt.Errorf("%s: %w", file, err)
+	}
+	return out, nil
+}
+
+// SetSquads gives the German clubs of m that squads names their players
+// from it and leaves everything else of m as it is; it returns the number
+// of clubs changed.
+func SetSquads(m *assets.Mana, squads map[string]Squad) (int, error) {
+	n := 0
+	for i := range m.Clubs[:numGerman] {
+		c := &m.Clubs[i]
+		s, ok := squads[assets.FromCP437(c.Name)]
+		if !ok {
+			continue
+		}
+		players, err := squadRecord(s)
+		if err != nil {
+			return n, fmt.Errorf("%s: %w", assets.FromCP437(c.Name), err)
+		}
+		if !slices.Equal(players, c.Players) {
+			c.Players = players
+			n++
+		}
+	}
+	return n, nil
 }
 
 // Places of the game (internal/game: TeamsPerLeague, NumGerman).

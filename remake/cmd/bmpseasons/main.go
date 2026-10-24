@@ -4,6 +4,7 @@
 //
 //	bmpseasons update -tm DIR [-from Y] [-to Y]
 //	bmpseasons logo -club NAME -image FILE [-source TEXT]
+//	bmpseasons squads -tm DIR [-from Y] [-to Y]
 //
 // update writes internal/seasons/data/YYYY-YY.json for each DIR/YYYY-YY.json
 // between the seasons from and to, and the logos of new clubs, the season
@@ -11,7 +12,10 @@
 // the game shows it; several spellings separated by "|") the logo of an
 // image, drawn in the colours of the logos of the original, in every
 // season where it has a plain shield, and notes its source in
-// internal/seasons/credits/logos.csv.
+// internal/seasons/credits/logos.csv. squads gives the clubs of the seasons
+// between from and to their players from DIR/YYYY-YY.squads.json
+// (tools/transfermarkt/tm_games.py, mise run remake:seasons-games) and
+// changes nothing else.
 package main
 
 import (
@@ -41,6 +45,10 @@ func main() {
 		logoMain()
 		return
 	}
+	if len(os.Args) >= 2 && os.Args[1] == "squads" {
+		squadsMain()
+		return
+	}
 	if len(os.Args) < 2 || os.Args[1] != "update" {
 		usage()
 	}
@@ -63,7 +71,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: bmpseasons update -tm DIR [-from Y] [-to Y] | logo -club NAME -image FILE [-source TEXT]")
+	fmt.Fprintln(os.Stderr, "usage: bmpseasons update -tm DIR [-from Y] [-to Y] | logo -club NAME -image FILE [-source TEXT] | squads -tm DIR [-from Y] [-to Y]")
 	os.Exit(2)
 }
 
@@ -196,6 +204,70 @@ func previous(year int) (*assets.Mana, error) {
 		return nil, err
 	}
 	return dir.Mana()
+}
+
+func squadsMain() {
+	fl := flag.NewFlagSet("squads", flag.ExitOnError)
+	tm := fl.String("tm", "", "directory of the squads files (YYYY-YY.squads.json)")
+	from := fl.Int("from", 0, "first season to change (its first year)")
+	to := fl.Int("to", 9999, "last season to change")
+	_ = fl.Parse(os.Args[2:])
+	if fl.NArg() > 0 || *tm == "" {
+		usage()
+	}
+	if _, err := os.Stat(seasonsDir); err != nil {
+		fmt.Fprintln(os.Stderr, "bmpseasons: run it in remake/")
+		os.Exit(2)
+	}
+	if err := setSquads(*tm, *from, *to); err != nil {
+		fmt.Fprintln(os.Stderr, "bmpseasons:", err)
+		os.Exit(1)
+	}
+}
+
+// setSquads gives the seasons between from and to the squads of their
+// files in dir.
+func setSquads(dir string, from, to int) error {
+	files, err := filepath.Glob(filepath.Join(dir, "*.squads.json"))
+	if err != nil {
+		return err
+	}
+	done := 0
+	for _, f := range files {
+		s, err := seasons.ParseID(strings.TrimSuffix(filepath.Base(f), ".squads.json"))
+		if err != nil || s.Year < from || s.Year > to {
+			continue
+		}
+		squads, err := update.ReadSquads(f)
+		if err != nil {
+			return err
+		}
+		file := filepath.Join(seasonsDir, s.ID+".json")
+		b, err := os.ReadFile(file)
+		if err != nil {
+			return err
+		}
+		m, err := assets.DecodeClubs(b)
+		if err != nil {
+			return fmt.Errorf("%s: %w", file, err)
+		}
+		n, err := update.SetSquads(m, squads)
+		if err != nil {
+			return fmt.Errorf("%s: %w", s.ID, err)
+		}
+		if b, err = assets.EncodeClubs(m); err != nil {
+			return err
+		}
+		if err := os.WriteFile(file, b, 0o644); err != nil {
+			return err
+		}
+		fmt.Fprintf(os.Stderr, "season %s: %d of %d squads changed\n", s.Label(), n, len(squads))
+		done++
+	}
+	if done == 0 {
+		return fmt.Errorf("no squads files YYYY-YY.squads.json in %s for these years", dir)
+	}
+	return nil
 }
 
 const creditsFile = "internal/seasons/credits/logos.csv"
