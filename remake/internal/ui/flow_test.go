@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -177,3 +179,31 @@ func openAllMenus(t *testing.T, app *App, m *MainMenu) {
 var _ = game.PhaseTurn
 
 func newTestImage() *ebiten.Image { return ebiten.NewImage(ScreenW, ScreenH) }
+
+func TestSetupBannerLoads(t *testing.T) {
+	app, mana := testApp(t)
+	dir := t.TempDir()
+	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Start()
+	data, err := s.Save()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "TEST.MAN"), data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	app.Reset(NewSetup(mana, dir))
+	step(t, app, click(160, 20))
+	fs, ok := top(app).(*FileScreen)
+	if !ok || fs.save {
+		t.Fatalf("banner opened %T", top(app))
+	}
+	fs.name = "TEST.MAN"
+	step(t, app, Input{X: 100, Y: 178, Right: true})
+	if _, ok := app.stack[0].(*Driver); !ok {
+		t.Fatalf("game not loaded: %T", app.stack[0])
+	}
+}

@@ -11,7 +11,8 @@ import (
 
 // Setup is the start screen of a new game (f_08bc_2184): choose a club
 // from the logo strip, enter the names of up to four managers, then the
-// options with the right mouse button. With NEU in the disk menu the same
+// options with the right mouse button; a click on the banner loads a game
+// instead. With NEU in the disk menu the same
 // screen adds managers to a running game.
 type Setup struct {
 	mana    *assets.Mana
@@ -96,6 +97,13 @@ func (s *Setup) Update(app *App) error {
 		if s.typeName(in) {
 			return nil
 		}
+	}
+	// At the start a left click on the banner opens the load screen
+	// (f_08bc_2184 calls f_322b_120c for y <= 35); without a loaded game it
+	// comes back here.
+	if s.ss == nil && in.Left && in.Y <= 35 {
+		app.Push(NewFileScreen(&Session{Mana: s.mana, SaveDir: s.saveDir}, false))
+		return nil
 	}
 	// A click left of the middle scrolls the strip back, right of it on;
 	// holding the button keeps it moving.

@@ -49,6 +49,7 @@ playtests and are the original:
 | The yellow bar of the file list also covers empty rows | XOR bar of `f_3930_052d` |
 | A club's offer for a listed player is gone and a click takes him back | the offer expires, 1 in 4 a turn day (`spec_transfers.md` §7) |
 | A message about an injury in training or a construction disappears | timed messages live three turns (`spec_players.md` §3.1) |
+| A cup day shows only the flag, then the main menu | without an own match nothing is shown (`spec_match.md` §8), the results only with the option DfB-Pokal / Europapokale (`MatchScreen.periodEnd`) |
 | Extra time is not shown although the cup day has some | it is shown only for a tie of a human team (`spec_match.md` §12.1) |
 
 Add a row when a suspected bug turns out to be the original.

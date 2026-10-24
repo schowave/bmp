@@ -147,6 +147,9 @@ During a match day the space bar opens the options (u4).
   and the digit (colour 4, chosen 19). AN/AUS switches are PIC/33.VGA cells
   24×17 at x=100 (AN off), 124 (AUS off), 148 (AN on), 172 (AUS on), rows at
   y=134, 152, 170, 188. Right click again starts.
+- A left click at y ≤ 35 (the banner) opens the load screen "Spielstand
+  Laden" (f_322b_120c); a loaded game starts, else the setup comes back.
+  Only at the start, not for NEU.
 - NEU in the disk menu opens the same screen with the managers of the game;
   a right click goes back (no option box).
 

@@ -158,7 +158,7 @@ func (f *FileScreen) Update(app *App) error {
 	}
 	// The drive buttons do nothing: the remake has only its save directory.
 	if f.buttons[7].Hit(in) && f.name != "" {
-		app.Push(NewQuestion(f.ss.M().Name, "FILE\n"+f.name+"\nWIRKLICH LöSCHEN ?", "MACH SCHON!", "OH NEIN!",
+		app.Push(NewQuestion(f.asker(), "FILE\n"+f.name+"\nWIRKLICH LöSCHEN ?", "MACH SCHON!", "OH NEIN!",
 			func(app *App, yes bool) {
 				if !yes {
 					return
@@ -242,6 +242,15 @@ func (f *FileScreen) confirm(app *App) {
 	lastFileName = f.name
 	f.ss.S = s
 	app.Reset(NewDriver(f.ss))
+}
+
+// asker is the name over a question: the manager whose turn it is, none
+// before a game runs (the load screen of the setup).
+func (f *FileScreen) asker() string {
+	if f.ss.S == nil {
+		return ""
+	}
+	return f.ss.M().Name
 }
 
 // fail shows an alert over the screen and closes both together.
