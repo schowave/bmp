@@ -530,13 +530,13 @@ ties). Deliberate differences:
 - The high scores at the game end take a manager once, are sorted stably
   and highlight his row; the original can enter him twice
   (`f_1a58_3176`) and highlights row 18 in the menu.
-- Real seasons (see Playing) fit the places of the original: a league with
-  more clubs than places passes its last ones down, one with fewer takes
 - With real seasons built in, the setup of a new game shows the clubs it
   plays with left of the club name ("ORIGINAL 1991/92" or "SAISON
   1995/96") and "S: SAISON WÄHLEN" right of it, and the key S opens the
   season choice, a screen the original does not have; while a name is
   typed, S is a letter of it.
+- Real seasons (see Playing) fit the places of the original: a league with
+  more clubs than places passes its last ones down, one with fewer takes
   the best of the tier below; the third league is the Oberliga until
   1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
   second teams of professional clubs before 2008 unless the places cannot
