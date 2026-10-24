@@ -261,10 +261,12 @@ func (s *State) postpone(l int) {
 		if n <= 0 {
 			return
 		}
+		// before is taken ahead of the clamp: with n = 9 a pass that
+		// schedules nothing does not end the loop.
+		before := n
 		if n > 8 {
 			n = 8
 		}
-		before := n
 		for rec := 0; rec < len(s.Postponed); rec++ {
 			if s.Postponed[rec].Slot != 0 {
 				continue

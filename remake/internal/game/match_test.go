@@ -291,3 +291,55 @@ func TestExtraTimeSilentWithoutHumanTie(t *testing.T) {
 		}
 	}
 }
+
+// f_17c2_1226 applies both DFB tests after 90 and after 120 minutes: a tie
+// level or won 10:0 by the home club goes to extra time.
+func TestDFBExtraTimeTests(t *testing.T) {
+	s := &State{}
+	c := &s.Cups
+	c.Result[CupDFB] = [32]int{1, 1, 10, 0, 2, 1, 21, 11}
+	got := s.needsExtraTime(CupDFB, 8)
+	if len(got) != 3 || got[0] != 0 || got[1] != 2 || got[2] != 6 {
+		t.Fatalf("ties %v", got)
+	}
+	if r := c.Result[CupDFB]; r[0] != 11 || r[2] != 20 || r[4] != 2 || r[6] != 31 {
+		t.Fatalf("results %v", r[:8])
+	}
+}
+
+// f_0310_0463 saves the count before it clamps it to 8: with n = 9 a pass
+// that postpones nothing is followed by a second one.
+func TestPostponeSecondPassAtNine(t *testing.T) {
+	nine := false
+	for seed := uint32(1); seed < 200; seed++ {
+		s := &State{Rand: Rand{Seed: seed}, Event: 44}
+		s.Matchday[0] = 1
+		for p := range s.Results[0][0] {
+			s.Results[0][0][p].Home = Postponed
+		}
+		s.postpone(0)
+
+		want := Rand{Seed: seed}
+		n := 9
+		if want.Between(0, 1) != 0 {
+			n = 8
+		}
+		n = want.Between(0, n)
+		passes := 0
+		if n > 0 {
+			passes = 1
+		}
+		if n == 9 {
+			passes, nine = 2, true
+		}
+		for i := 0; i < passes*len(s.Postponed); i++ {
+			want.Between(0, TeamsPerLeague[0]/2-1)
+		}
+		if s.Rand.Seed != want.Seed {
+			t.Fatalf("seed %d (n=%d): generator at %d, want %d", seed, n, s.Rand.Seed, want.Seed)
+		}
+	}
+	if !nine {
+		t.Fatal("no seed drew n = 9")
+	}
+}

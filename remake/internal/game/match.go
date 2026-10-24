@@ -1228,7 +1228,7 @@ func (md *MatchDay) afterRegularTime() {
 		md.extra = true
 		any := false
 		for c := CupDFB; c < NumCups; c++ {
-			if md.cupMask&(1<<c) != 0 && len(s.needsExtraTime(c, md.cupPairs(c), 0)) > 0 {
+			if md.cupMask&(1<<c) != 0 && len(s.needsExtraTime(c, md.cupPairs(c))) > 0 {
 				any = true
 			}
 		}
@@ -1249,7 +1249,7 @@ func (md *MatchDay) afterRegularTime() {
 			if md.cupMask&(1<<c) == 0 {
 				continue
 			}
-			for _, i := range s.needsExtraTime(c, md.cupPairs(c), 1) {
+			for _, i := range s.needsExtraTime(c, md.cupPairs(c)) {
 				md.shootout(c, i)
 			}
 		}

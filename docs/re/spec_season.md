@@ -388,7 +388,8 @@ n = rand(0, n)
 picked = []                                                     # pair indexes already postponed now
 loop:
     if n == 0: return
-    n = min(n, 8); before = n
+    before = n; n = min(n, 8)      # before is taken first: with n = 9 a pass that
+                                    # schedules nothing does not return
     for r in 0..19:
         if record[r].slot != 0: continue
         p = rand(0, D:225e[l]/2 - 1)
@@ -550,8 +551,8 @@ Each statistic is stored as [home part, away part] (+ a 2-byte snapshot copy whe
 | +0x16/+0x17 | 0xee2/0xee3 | goals scored home / away (snapshot +0x18/+0x19) |
 | +0x1a/+0x1b | 0xee6/0xee7 | goals conceded home / away (snapshot +0x1c/+0x1d) |
 | +0x1e/+0x1f | 0xeea/0xeeb | games played home / away (no snapshot) |
-| +0x26/+0x27 | 0xef2/0xef3 | wins home / away (snapshot +0x28/+0x29) |
-| +0x2a/+0x2b | 0xef6/0xef7 | losses home / away (snapshot +0x2c/+0x2d) |
+| +0x26/+0x27 | 0xef2/0xef3 | wins home / away (snapshot of the home part only, +0x28) |
+| +0x2a/+0x2b | 0xef6/0xef7 | losses home / away (snapshot of the home part only, +0x2c) |
 | +0x2e | 0xefa | current table position (0-based) |
 | +0x32 | 0xefe | long, eternal-table points of the club (accumulated over seasons by f_1a58_4597, NOT reset) |
 
@@ -563,12 +564,13 @@ Precondition: md = D:225a[l] − 1 (0-based row) ≤ D:2262[l] − 1, l < 3.
 
 mode 1 (snapshot, before the matchday): for every pair (h, a) of the current fixture buffer (stop at
 0x46, skip postponed 0x1e): f_2a41_1ef4(t, 0, 2) for both teams = copy current fields (points, goals,
-conceded, wins, losses, form string) to the snapshot slots.
+conceded, form string, and of wins and losses only the home part: +0x26 and +0x2a) to the snapshot slots.
 
-mode 0 (result, at minute 90; also called from the live table): for each played pair with result
+mode 0 (result; called only at minute 90, from f_0310_2303, once per snapshot): for each played pair with result
 (g_h, g_a) (skip 0x1e):
 ```
-restore h and a from their snapshot (f_2a41_1ef4(t,2,0))   # makes the update idempotent
+restore h and a from their snapshot (f_2a41_1ef4(t,2,0))   # games, away wins and away losses are
+                                                            # not restored, so a second call would count them again
 h.goalsHome += g_h; h.concHome += g_a; a.goalsAway += g_a; a.concAway += g_h
 h.gamesHome += 1; a.gamesAway += 1          # (not snapshotted: incremented once per call)
 if g_h > g_a:  h.ptsHome += D:2271 (2); h.winsHome += 1; a.lossesAway += 1; form h 's', a 'N'
@@ -1100,11 +1102,12 @@ which uses cup slot 1).
 - For every cup c whose bit is set and every pair i = 0, 2, ..., n-2: the match is slot[i] (home) against slot[i+1]
   (f_1a58_20b2(home, away, mask, c, i, 0)). Minutes 1-45 and 46-90 are played (f_0310_2303).
 - **After 90 min**: f_17c2_1226(mask, n, 0) returns nonzero if any tie needs extra time:
-  - DFB: if home == away goals, add +10 to the home goals (marks extra time).
+  - DFB: if home == away goals, or home − away == 10, add +10 to the home goals (marks extra time). Both
+    tests apply after 90 and after 120 minutes, so a home win 10:0 after 90 minutes goes to extra time too.
   - Europe/relegation: only on a second leg (F:0x1d17+c != 0) and only when f_17c2_15e8(c,i) == 0x1e.
     Then +10 to the home goals.
   If nonzero, minutes 91-105 and 106-120 are played and f_17c2_1226(mask, n, 1) is called. A tie that is still
-  undecided (DFB: `home - away == 10`; Europe: f_17c2_15e8 == 0x1e again) gets +10 and goes to penalties:
+  undecided (DFB: the same two tests; Europe: f_17c2_15e8 == 0x1e again) gets +10 and goes to penalties:
   f_0310_356d(c, i, mask).
 - **Penalties f_0310_356d**: first, always, `first = rand(0,1)` (the side that shoots first), before the teams are
   checked. Then, with no human team involved, home = rand(2,5) and away = rand(2,5) are re-rolled until they

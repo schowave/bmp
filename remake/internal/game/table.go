@@ -37,14 +37,16 @@ func (c *ClubStats) resetSeason() {
 	*c = stats
 }
 
+// snapshot copies the table fields (f_2a41_1ef4). Of wins and losses it
+// copies only the home part, as the original does.
 func (c *ClubStats) snapshot() {
 	c.PointsSnap, c.GoalsSnap, c.AgainstSn = c.Points, c.Goals, c.Against
-	c.WinsSnap, c.LossesSnap, c.FormSnap = c.Wins, c.Losses, c.Form
+	c.WinsSnap[0], c.LossesSnap[0], c.FormSnap = c.Wins[0], c.Losses[0], c.Form
 }
 
 func (c *ClubStats) restore() {
 	c.Points, c.Goals, c.Against = c.PointsSnap, c.GoalsSnap, c.AgainstSn
-	c.Wins, c.Losses, c.Form = c.WinsSnap, c.LossesSnap, c.FormSnap
+	c.Wins[0], c.Losses[0], c.Form = c.WinsSnap[0], c.LossesSnap[0], c.FormSnap
 }
 
 // addForm appends a result letter (f_2a41_1fb0): 's'/'S' win, 'u'/'U' draw,
@@ -80,8 +82,9 @@ func (s *State) snapshotMatchday(pairs []Pair, results []Score) {
 }
 
 // applyResults adds results to the table (f_2a41_2d33 mode 0). It restores
-// the snapshot first, so calling it again with newer scores is safe; only
-// the games counters are not snapshotted and must be counted once.
+// the snapshot first; games and the away parts of wins and losses are not
+// snapshotted, so it must run once per snapshot, as in the original (minute
+// 90 only).
 func (s *State) applyResults(pairs []Pair, results []Score, countGames bool) {
 	win := s.PointsPerWin()
 	for i, p := range pairs {

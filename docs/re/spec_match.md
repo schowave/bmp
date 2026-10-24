@@ -18,7 +18,8 @@ Game loop `f_1a58_3176`, per day with match flags `b = D:0x2280[F:0x16e]`
 
 1. For each human manager m: `f_0f9d_0002(m,1)` (lineup -> team strengths, see §3),
    `F:0x90c6[m]=0` (substitutions made), `F:0x1d14[m]=0` (plays today flag).
-   `F:0x304a = 0x1e` (no "current manager" during matches!).
+   `F:0x304a = 0` (set by `f_0310_15db` when it starts; `f_1a58_1f75` sets it to m only while
+   the substitution screen is open, then restores it).
 2. if `b&7`: if `b&1` `f_0310_0463(day,0)` (postpone winter matches, §14),
    `f_0310_0463(day,1)`, `f_0310_0463(day,2)`, then `f_0310_0995(b)` = Ligaspiel
    -> `f_0310_15db(leagueMask=b, cupMask=0, ..)`.
@@ -503,8 +504,8 @@ produce one-line ticker messages.
 ## 10. Human-team events per minute – `f_0310_2ee5(lg, idx, home, away, isCup)`
 Only if `F:0x2e99`. For each human m with `F:0x1d14[m]` whose team is home or away:
 ```
-if MGR(F:0x304a)+0x237f == 100: return 0     // BUG: F:0x304a is 0x1e during matches, so this
-                                             // reads F:0x7eeb (a squad byte) – treat as "never"
+if MGR(F:0x304a)+0x237f == 100: return 0     // F:0x304a is 0 during matches: manager 0 with fewer
+                                             // than 8 players stops the events of every human
 if count(m,1) < 4: return 0                  // fewer than 4 on the pitch: no events
 H = clamp(40 - MGR+0x237f, 0, 40)            // high Intensität -> small H -> more events
 // red card
@@ -823,8 +824,6 @@ reproduction with display enabled is not realistic.
 * Who sets slot+0x0d = 100 (pending 1-game suspension) – not found; yellow-card
   accumulation rule unknown (maybe absent).
 * Forfeit exemption "month 5, day >= 10" interpretation (June / relegation) UNCERTAIN.
-* `f_0310_2ee5` early-exit reads `MGR(F:0x304a)` with F:0x304a = 0x1e (garbage byte
-  F:0x7eeb) – presumably intended for the current manager; harmless in practice.
 * Attendance inputs `MGR+0x23b0..0x23d0`, `0x241e` meaning (stadium/club module).
 * Away-human DFB report attendance +200000 (encoding flag?).
 * 3D goal scene `f_14a4_05ec` return value suppresses the "nach Vorlage" line; not

@@ -267,14 +267,16 @@ func (s *State) tieOut(cup Cup, i int) int {
 }
 
 // needsExtraTime marks ties that are level after 90 (pass 0) or 120 (pass
-// 1) minutes with +10 and reports whether there is any (f_17c2_1226).
-func (s *State) needsExtraTime(cup Cup, n, pass int) []int {
+// 1) minutes with +10 and reports whether there is any (f_17c2_1226). The
+// DFB test is the same in both passes: level, or home ahead by exactly 10,
+// so a 10:0 after 90 minutes goes to extra time too.
+func (s *State) needsExtraTime(cup Cup, n int) []int {
 	c := &s.Cups
 	var level []int
 	for i := 0; i < n; i += 2 {
 		if cup == CupDFB {
 			h, a := c.Result[cup][i], c.Result[cup][i+1]
-			if (pass == 0 && h == a) || (pass == 1 && h-a == markExtraTime) {
+			if h == a || h-a == markExtraTime {
 				c.Result[cup][i] += markExtraTime
 				level = append(level, i)
 			}
