@@ -99,6 +99,7 @@ built from the raw data in [`data/`](data/README.md):
 mise run remake:seasons-fetch              # fetch 1990/91 to the running season
 mise run remake:seasons-fetch -- -from 2026 -to 2026   # only one season
 mise run remake:seasons-fetch -- -refresh  # every season anew, not from data/.cache
+go run ./cmd/bmpseasons import-tm -tm DIR  # (in remake/) take the Transfermarkt squads of DIR/YYYY-YY.json
 mise run remake:seasons                    # build internal/seasons/data from all of data/ (offline)
 ```
 
@@ -427,7 +428,8 @@ ties). Deliberate differences:
 ## Legal
 
 The real seasons (`internal/seasons`, `data/`) come from the German
-Wikipedia (CC BY-SA 4.0) and Wikidata (CC0); `data/README.md` names the
+Wikipedia (CC BY-SA 4.0) and Wikidata (CC0), the squads mostly from
+Transfermarkt, whose data is not openly licensed; `data/README.md` names the
 sources and `data/logos/index.csv` the licence and author of every logo.
 Club names and logos are trademarks of the clubs.
 

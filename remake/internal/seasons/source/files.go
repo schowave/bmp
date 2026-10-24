@@ -20,6 +20,7 @@ const (
 	squadsFile   = "squads.csv"
 	logosFile    = "logos.csv"
 	europeFile   = "europe.csv"
+	tmFile       = "transfermarkt.csv"
 	articlesFile = "articles.txt"
 	missingFile  = "missing.txt"
 )
@@ -109,6 +110,19 @@ func WriteSeason(dir string, s *Season) error {
 	return os.WriteFile(filepath.Join(dir, missingFile), []byte(strings.Join(s.Missing, "\n")+"\n"), 0o644)
 }
 
+// WriteTM writes the Transfermarkt squads of a season into dir: per club
+// (its article) the name Transfermarkt gives it and the players in their
+// order.
+func WriteTM(dir string, squads map[string][]Player, names map[string]string) error {
+	var rows [][]string
+	for _, club := range sortedKeys(squads) {
+		for _, p := range squads[club] {
+			rows = append(rows, []string{club, names[club], p.Name, posCodes[p.Pos]})
+		}
+	}
+	return writeCSV(filepath.Join(dir, tmFile), []string{"club", "tm_name", "name", "position"}, rows)
+}
+
 // ReadSeason reads the season of year from fsys (the directory of the
 // season).
 func ReadSeason(fsys fs.FS, year int) (*Season, error) {
@@ -132,13 +146,7 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 		if len(r) != 7 {
 			return nil, fmt.Errorf("%s line %d: %d fields", squadsFile, i+2, len(r))
 		}
-		pos := 0
-		for k, code := range posCodes {
-			if code == r[3] {
-				pos = k
-			}
-		}
-		s.Squads[r[0]] = append(s.Squads[r[0]], Player{Name: r[1], Surname: r[2], Pos: pos, Games: atoi(r[4]), Since: atoi(r[5]), Source: r[6]})
+		s.Squads[r[0]] = append(s.Squads[r[0]], Player{Name: r[1], Surname: r[2], Pos: posOf(r[3]), Games: atoi(r[4]), Since: atoi(r[5]), Source: r[6]})
 	}
 	if rows, err = ReadCSV(fsys, logosFile); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return nil, err
@@ -148,6 +156,16 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 			return nil, fmt.Errorf("%s line %d: %d fields", logosFile, i+2, len(r))
 		}
 		s.Logos[r[0]], s.Colors[r[0]] = r[1], r[2]
+	}
+	if rows, err = ReadCSV(fsys, tmFile); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return nil, err
+	}
+	s.TM = map[string][]Player{}
+	for i, r := range rows {
+		if len(r) != 4 {
+			return nil, fmt.Errorf("%s line %d: %d fields", tmFile, i+2, len(r))
+		}
+		s.TM[r[0]] = append(s.TM[r[0]], Player{Name: r[2], Surname: r[2], Pos: posOf(r[3]), Games: -1, Source: "transfermarkt"})
 	}
 	if rows, err = ReadCSV(fsys, europeFile); err != nil {
 		return nil, err
@@ -159,6 +177,16 @@ func ReadSeason(fsys fs.FS, year int) (*Season, error) {
 		s.Europe = append(s.Europe, EuroClub{Cup: atoi(r[0]), Club: r[1], Label: r[2], Country: r[3], Mentions: atoi(r[4])})
 	}
 	return s, nil
+}
+
+// posOf reads a position code (TW, ABW, MIT, ANG).
+func posOf(code string) int {
+	for k, c := range posCodes {
+		if c == code {
+			return k
+		}
+	}
+	return PosNone
 }
 
 func sortedKeys[V any](m map[string]V) []string {

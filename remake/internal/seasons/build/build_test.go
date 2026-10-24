@@ -128,9 +128,34 @@ func TestPickPlayers(t *testing.T) {
 	add("Thomas Müller", "Müller", source.PosAttack, 30)
 	add("Gerd Müller", "Müller", source.PosAttack, 33)
 	add("Nobody", "Nobody", source.PosNone, 34)
-	got := pickPlayers(ps)
+	got := pickPlayers(ps, nil)
 	if len(got) != 20 || got[0] != "KAHN" || got[1] != "DREHER" || got[2] != "" || got[15] != "G.MÜLLER" || got[16] != "T.MÜLLER" {
 		t.Fatalf("got %q", got)
+	}
+}
+
+func TestPickPlayersPrefersTransfermarkt(t *testing.T) {
+	wiki := []source.Player{
+		{Name: "Oliver Kahn", Surname: "Kahn", Pos: source.PosGoal, Games: 34},
+		{Name: "Old Keeper", Surname: "Keeper", Pos: source.PosGoal, Games: 30},
+		{Name: "Gerd Müller", Surname: "Müller", Pos: source.PosAttack, Games: 33},
+		{Name: "Only Wiki", Surname: "Wiki", Pos: source.PosAttack, Games: 20},
+	}
+	tm := []source.Player{
+		{Name: "TOMIC", Surname: "TOMIC", Pos: source.PosGoal, Games: -1},
+		{Name: "KAHN", Surname: "KAHN", Pos: source.PosGoal, Games: -1},
+		{Name: "SCHEUER", Surname: "SCHEUER", Pos: source.PosGoal, Games: -1},
+		{Name: "MÜLLER", Surname: "MÜLLER", Pos: source.PosMidfield, Games: -1},
+	}
+	got := pickPlayers(wiki, tm)
+	// Kahn has games, then the order of Transfermarkt; the Wikipedia keeper
+	// Transfermarkt does not list stays out.
+	if got[0] != "KAHN" || got[1] != "TOMIC" {
+		t.Errorf("goalkeepers %q", got[:2])
+	}
+	// Transfermarkt's position wins, Wikipedia fills the forwards.
+	if got[8] != "MÜLLER" || got[15] != "WIKI" {
+		t.Errorf("midfield %q, forwards %q", got[8:15], got[15:])
 	}
 }
 

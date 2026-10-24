@@ -64,13 +64,9 @@ func placeClubs(year int, tables []source.TierRow) ([]placed, error) {
 	tier := map[int][]source.TierRow{}
 	article := map[string]string{}
 	for _, r := range tables {
-		article[r.Club] = r.Club
-		// A second team links the article of its club: its name keeps it
-		// apart.
-		if source.IsSecondTeam(r.Label) && !source.IsSecondTeam(r.Club) {
-			article[r.Label] = r.Club
-			r.Club = r.Label
-		}
+		key := r.Team()
+		article[key] = r.Club
+		r.Club = key
 		tier[r.Tier] = append(tier[r.Tier], r)
 	}
 	for k := range tier {

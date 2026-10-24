@@ -40,6 +40,15 @@ type TierRow struct {
 // "Bayern München Amateure"); their articles often redirect to the club's.
 var secondTeam = regexp.MustCompile(`(?i)\b(II|Amateure|U ?2[0-3])\b`)
 
+// Team is the key of the club of a row: its article, or for a second team
+// that links the article of its club, the name the table shows.
+func (r TierRow) Team() string {
+	if IsSecondTeam(r.Label) && !IsSecondTeam(r.Club) {
+		return r.Label
+	}
+	return r.Club
+}
+
 // IsSecondTeam reports whether a club or its name is a second team.
 func IsSecondTeam(s string) bool { return secondTeam.MatchString(s) }
 
@@ -54,11 +63,14 @@ type EuroClub struct {
 
 // Season is everything fetched for one season.
 type Season struct {
-	Year     int
-	Tables   []TierRow
-	Squads   map[string][]Player // by club
-	Logos    map[string]string   // by club: the logo file of the season
-	Colors   map[string]string   // by club: its colours, "Schwarz-Gelb"
+	Year   int
+	Tables []TierRow
+	Squads map[string][]Player // by club
+	Logos  map[string]string   // by club: the logo file of the season
+	Colors map[string]string   // by club: its colours, "Schwarz-Gelb"
+	// TM are the Transfermarkt squads by club (import-tm), which the build
+	// prefers to Squads.
+	TM       map[string][]Player
 	Europe   []EuroClub
 	Articles []string // the articles read, for the credits
 	Missing  []string // problems worth a look by hand
