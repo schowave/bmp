@@ -19,8 +19,10 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -124,14 +126,21 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
-	for n, pic := range out.Logos {
-		b, err := assets.EncodePic(pic, &pals[0])
+	var shields [][]string
+	for _, n := range slices.Sorted(maps.Keys(out.Logos)) {
+		b, err := assets.EncodePic(out.Logos[n], &pals[0])
 		if err != nil {
 			return err
 		}
 		if err := os.WriteFile(filepath.Join(seasonsDir, "pic", strconv.Itoa(n)+".png"), b, 0o644); err != nil {
 			return err
 		}
+		shields = append(shields, []string{strconv.Itoa(n), "shield in the colours ", "", "", ""})
+	}
+	// The new logos are plain shields: in the credits as such, so that
+	// bmpseasons logo may replace them.
+	if err := addCredits(shields...); err != nil {
+		return err
 	}
 	data, err := assets.EncodeClubs(out.Mana)
 	if err != nil {
@@ -289,21 +298,29 @@ func setLogo(club, file, src string) error {
 	if err := os.WriteFile(filepath.Join(seasonsDir, "pic", strconv.Itoa(n)+".png"), pic, 0o644); err != nil {
 		return err
 	}
+	if err := addCredits([]string{strconv.Itoa(n), src, "", "", ""}); err != nil {
+		return err
+	}
+	fmt.Fprintf(os.Stderr, "logo %d for %s in %s\n", n, club, strings.Join(changed, ", "))
+	return nil
+}
+
+// addCredits appends rows (logo, source, license, author, page) to the
+// credits of the logos.
+func addCredits(rows ...[]string) error {
+	if len(rows) == 0 {
+		return nil
+	}
 	cf, err := os.OpenFile(creditsFile, os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}
 	w := csv.NewWriter(cf)
-	if err := w.Write([]string{strconv.Itoa(n), src, "", "", ""}); err != nil {
+	if err := w.WriteAll(rows); err != nil {
 		_ = cf.Close()
 		return err
 	}
-	w.Flush()
-	if err := cf.Close(); err != nil {
-		return err
-	}
-	fmt.Fprintf(os.Stderr, "logo %d for %s in %s\n", n, club, strings.Join(changed, ", "))
-	return nil
+	return cf.Close()
 }
 
 // shieldLogos are the numbers of the plain shields, from the credits.
