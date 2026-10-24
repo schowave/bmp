@@ -173,12 +173,9 @@ type State struct {
 	RelegationLeg2 bool
 
 	Display Display
-	// Draws lists the cups whose new draw the screens still have to
-	// present (f_17c2_0006), in the order of the original.
-	Draws []Cup
-	// Flags are the flags with a word (f_0310_01f2) the screens still
-	// have to show: WINTERPAUSE, SAISONENDE.
-	Flags []string
+	// Notices are the dialogs and screens the UI still has to show, in the
+	// order in which the original shows them (AddNotice, TakeNotices).
+	Notices []Notice `json:",omitempty"`
 	// Highscores are the entries of the managers at the last season end
 	// that the screens still have to put into the high-score table.
 	Highscores []HighscoreEntry
@@ -206,33 +203,6 @@ type Display struct {
 // all but the fades on and speed 40).
 func DefaultDisplay() Display {
 	return Display{Newspaper: true, Speed: 70}
-}
-
-// TakeFlag returns the next flag to show, or false.
-func (s *State) TakeFlag() (string, bool) {
-	if len(s.Flags) == 0 {
-		return "", false
-	}
-	b := s.Flags[0]
-	s.Flags = s.Flags[1:]
-	return b, true
-}
-
-// flag queues a flag, once: a run of days without a turn shows it once.
-func (s *State) flag(text string) {
-	if n := len(s.Flags); n == 0 || s.Flags[n-1] != text {
-		s.Flags = append(s.Flags, text)
-	}
-}
-
-// TakeDraw returns the next cup draw to present, or false.
-func (s *State) TakeDraw() (Cup, bool) {
-	if len(s.Draws) == 0 {
-		return 0, false
-	}
-	c := s.Draws[0]
-	s.Draws = s.Draws[1:]
-	return c, true
 }
 
 // PostponedGame is a league game moved to a later date (F:0x5714).

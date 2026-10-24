@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 // seasonResult is where manager 0 ended a season of his league, and the
 // game at that point (his squad, money, ...).
@@ -74,20 +77,52 @@ func TestOptimalLineupWinsPoints(t *testing.T) {
 // of days, outside it none; the season end queues SAISONENDE.
 func TestFlags(t *testing.T) {
 	s := lineupState(t)
-	s.Flags = nil
+	flags := func() []string {
+		var out []string
+		for _, n := range s.TakeNotices() {
+			if n.Kind == NoticeFlag {
+				out = append(out, n.Title)
+			}
+		}
+		return out
+	}
+	s.TakeNotices()
 	s.Day = 100
 	s.afterEvent()
-	if len(s.Flags) != 0 {
-		t.Fatalf("flags before the winter break: %v", s.Flags)
+	if f := flags(); len(f) != 0 {
+		t.Fatalf("flags before the winter break: %v", f)
 	}
 	s.Day = 140
 	s.afterEvent()
 	s.afterEvent()
-	if b, ok := s.TakeFlag(); !ok || b != "WINTERPAUSE" || len(s.Flags) != 0 {
-		t.Fatalf("winter break: %q %v, left %v", b, ok, s.Flags)
+	if f := flags(); !slices.Equal(f, []string{"WINTERPAUSE"}) {
+		t.Fatalf("winter break: %v", f)
 	}
 	s.seasonEnd1()
-	if b, ok := s.TakeFlag(); !ok || b != "SAISONENDE" {
-		t.Fatalf("season end: %q %v", b, ok)
+	if f := flags(); len(f) == 0 || f[0] != "SAISONENDE" {
+		t.Fatalf("season end: %v", f)
+	}
+}
+
+// The original shows the championship of the last manager in his history
+// step, before SAISONENDE (f_1a58_3176 @3945, then f_1a58_4597 @3c45), and
+// the season report after it (@43b5).
+func TestSeasonEndOrder(t *testing.T) {
+	s := lineupState(t)
+	m := s.Managers[0]
+	m.League = 0
+	s.Clubs[m.Team].Pos = 0
+	s.EndYear = 0
+	s.Loop.Phase, s.Loop.Current, s.Loop.SeasonEnd = PhaseTurn, 0, true
+	s.TakeNotices()
+	s.EndTurn()
+	var kinds []NoticeKind
+	for _, n := range s.TakeNotices() {
+		if n.Kind == NoticeTrophy || n.Kind == NoticeFlag || n.Kind == NoticeSeasonEnd {
+			kinds = append(kinds, n.Kind)
+		}
+	}
+	if want := []NoticeKind{NoticeTrophy, NoticeFlag, NoticeSeasonEnd}; !slices.Equal(kinds, want) {
+		t.Errorf("season end shows %v, want %v", kinds, want)
 	}
 }

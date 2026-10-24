@@ -481,7 +481,9 @@ func (s *State) seasonEnd2() {
 	for c := CupDFB; c < NumCups; c++ {
 		s.drawCup(c)
 	}
-	s.Draws = append(s.Draws, CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA)
+	for c := CupDFB; c < NumCups; c++ {
+		s.queueDraw(c)
+	}
 	s.beginEvent()
 }
 

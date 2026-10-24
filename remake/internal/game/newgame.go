@@ -155,7 +155,9 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	s.driftStrengths(10)
 	s.distributePersons()
 	s.drawCup(CupDFB)
-	s.Draws = []Cup{CupDFB, CupLandesmeister, CupPokalsieger, CupUEFA}
+	for c := CupDFB; c < NumCups; c++ {
+		s.queueDraw(c)
+	}
 	s.Display = DefaultDisplay()
 	s.Day = 0
 	// The table places before the first matchday are the table order.

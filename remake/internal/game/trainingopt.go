@@ -201,6 +201,8 @@ func (s *State) trainingValue(m int, p TrainingPlan, runs, steps int) int {
 // m can run: the arrays are copied with the State, the managers anew.
 func (s *State) trainingCopy(m int) *State {
 	c := *s
+	// The notices of the copy are not shown.
+	c.Notices = nil
 	c.Managers = make([]*Manager, len(s.Managers))
 	for i, mg := range s.Managers {
 		cm := *mg
