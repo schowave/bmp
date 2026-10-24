@@ -312,10 +312,17 @@ func (m *MatchScreen) panelOf(fi int) int {
 }
 
 // periodEnd queues what the original shows after a period (end of
-// f_0310_2303): the results of the leagues, or the cup round.
+// f_0310_2303): the results of the leagues, the Nachholspiele, or the cup
+// round.
 func (m *MatchScreen) periodEnd(to int) {
 	s := m.ss.S
 	md := m.md
+	if md.Replays() {
+		if s.Display.Replays && replayRound != nil {
+			m.end = append(m.end, func(app *App) { app.Push(replayRound(m.ss, md, to, m.next)) })
+		}
+		return
+	}
 	if cups := md.Cups(); cups != 0 {
 		if s.Day > 0x13b || cups&1 != 0 && s.Display.DFB || cups&^1 != 0 && s.Display.Europe {
 			for c := game.CupDFB; c < game.NumCups; c++ {
@@ -331,8 +338,7 @@ func (m *MatchScreen) periodEnd(to int) {
 		if md.Leagues()&(1<<l) == 0 {
 			continue
 		}
-		show := md.Replays() && s.Display.Replays ||
-			!md.Replays() && (to == 45 && s.Display.HalfTime[l] || to == 90 && s.Display.Results[l])
+		show := to == 45 && s.Display.HalfTime[l] || to == 90 && s.Display.Results[l]
 		if show && resultsRound != nil {
 			l := l
 			m.end = append(m.end, func(app *App) { app.Push(resultsRound(m.ss, md, l, to, m.next)) })
@@ -358,13 +364,15 @@ func (m *MatchScreen) matchDayEnd() {
 	})
 }
 
-// resultsRound and tableRound show the results of a league after a period
-// and the table after the match day; set by the league screens.
+// resultsRound and replayRound show the results of a league or of the
+// Nachholspiele after a period, tableRound the table after the match day;
+// set by the league screens.
 var (
 	resultsRound = func(ss *Session, md *game.MatchDay, league, minute int, done func(*App)) Scene {
 		return NewResultsRound(ss, league, minute, done)
 	}
-	tableRound = func(ss *Session, league int, done func(*App)) Scene {
+	replayRound = NewReplayRound
+	tableRound  = func(ss *Session, league int, done func(*App)) Scene {
 		return NewTableRound(ss, league, done)
 	}
 )

@@ -238,13 +238,15 @@ func lgTableLine(r game.TableRow, win int) string {
 
 // ResultsScreen shows the matches of one matchday of a league: from the
 // menu with arrows to page through the matchdays, during the match day
-// with the minute and WEITER.
+// with the minute and WEITER. During a day of Nachholspiele it shows
+// these instead.
 type ResultsScreen struct {
 	ss     *Session
 	league int
 	md     int
 	live   bool
 	minute int
+	replay *game.MatchDay // the day of Nachholspiele, or nil
 	done   func(app *App)
 }
 
@@ -275,6 +277,25 @@ func NewResultsRound(ss *Session, l, minute int, done func(app *App)) Scene {
 	return &ResultsScreen{ss: ss, league: l, md: ss.S.Matchday[l], live: true, minute: minute, done: done}
 }
 
+// NewReplayRound shows the scores of the Nachholspiele of md at the given
+// minute ("NACHHOLSPIELE    45.MINUTE"): f_2a41_120a(0, 2, minute, 0)
+// lists the pairs f_0310_07a2 put into the pair list of league 0.
+func NewReplayRound(ss *Session, md *game.MatchDay, minute int, done func(app *App)) Scene {
+	return &ResultsScreen{ss: ss, live: true, minute: minute, replay: md, done: done}
+}
+
+// pairs returns the matches the screen lists.
+func (r *ResultsScreen) pairs() []game.Pair {
+	if r.replay == nil {
+		return game.Fixtures(r.league, r.md)
+	}
+	pairs := make([]game.Pair, len(r.replay.Fixtures))
+	for i, f := range r.replay.Fixtures {
+		pairs[i] = game.Pair{Home: f.Home, Away: f.Away}
+	}
+	return pairs
+}
+
 func (r *ResultsScreen) Update(app *App) error {
 	in := &app.Input
 	n := game.MatchdaysPerLeague[r.league]
@@ -291,7 +312,7 @@ func (r *ResultsScreen) Update(app *App) error {
 		}
 	case lgInside(in, resX0, resY0, resX1-resX0, resY1-resY0) && in.Y > 0xe:
 		k := (in.Y-0xe)/resRowH*2 + lgB2i(in.X > 0x8c)
-		pairs := game.Fixtures(r.league, r.md)
+		pairs := r.pairs()
 		if k < 2*len(pairs) {
 			p := pairs[k/2]
 			team := p.Home
@@ -314,6 +335,9 @@ func lgB2i(b bool) int {
 // title is the headline of the screen.
 func (r *ResultsScreen) title() string {
 	s := r.ss.S
+	if r.replay != nil {
+		return "NACHHOLSPIELE    " + itoa(r.minute) + ".MINUTE"
+	}
 	t := "SPIELE  " + s.LeagueName(r.league) + "   " + itoa(r.md) + ".SPIELTAG  "
 	if r.live {
 		return t + "  " + itoa(r.minute) + ".MINUTE"
@@ -341,7 +365,7 @@ func (r *ResultsScreen) Draw(app *App, dst *ebiten.Image) {
 	g.TextMid(dst, FontNormal, 7, 0x139, 0xb, r.title(), ColLight, ColGrey7)
 
 	played := r.md < s.Matchday[l]+lgB2i(r.live)
-	for i, p := range game.Fixtures(l, r.md) {
+	for i, p := range r.pairs() {
 		y := i * resRowH
 		c := lgColor(s, p.Home, p.Away)
 		g.TextAt(dst, FontNormal, 3, y+0x18, s.Teams[p.Home].Name, c, NoShadow)
@@ -349,6 +373,13 @@ func (r *ResultsScreen) Draw(app *App, dst *ebiten.Image) {
 		g.TextAt(dst, FontNormal, 0x92, y+0x18, s.Teams[p.Away].Name, c, NoShadow)
 		g.lgTextFig(dst, FontSmall, 5, y+0x1f, lgStrengthLine(s, p.Home), ColGrey4)
 		g.lgTextFig(dst, FontSmall, 0x94, y+0x1f, lgStrengthLine(s, p.Away), ColGrey4)
+		if r.replay != nil {
+			h, a := r.replay.Score(i)
+			g.TextAt(dst, FontNormal, 0x120, y+0x1a, itoa(h), c, NoShadow)
+			g.TextAt(dst, FontNormal, 0x129, y+0x1a, ":", c, NoShadow)
+			g.TextAt(dst, FontNormal, 0x12e, y+0x1a, itoa(a), c, NoShadow)
+			continue
+		}
 		res := s.Results[l][r.md-1][i]
 		switch {
 		case res.Home == game.Postponed:

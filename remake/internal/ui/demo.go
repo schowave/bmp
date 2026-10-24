@@ -34,6 +34,8 @@ func Demo(name string, team int, mana *assets.Mana, saveDir string) Scene {
 		return NewDriver(ss)
 	case "newspaper":
 		return NewspaperDemo(mana, saveDir, team, 1)
+	case "replays":
+		return replayDemo(ss)
 	}
 	// Play some events so that the screens have content.
 	for i := 0; i < 30 && name != "turn"; i++ {
@@ -100,13 +102,38 @@ var playedDemos = map[string]func(ss *Session) Scene{
 	"flag":      func(ss *Session) Scene { return newFlagScreen("Ligaspiel", func(*App) {}) },
 }
 
+// replayDemo plays up to the first day of Nachholspiele and shows their
+// results after the first half.
+func replayDemo(ss *Session) Scene {
+	s := ss.S
+	for range 2000 {
+		switch s.Loop.Phase {
+		case game.PhaseTurn:
+			s.EndTurn()
+		case game.PhaseMatches:
+			md := s.NextMatchDay()
+			if md == nil {
+				continue
+			}
+			if !md.Replays() {
+				md.Run()
+				continue
+			}
+			for md.Step() && md.PeriodEnded() == 0 {
+			}
+			return NewReplayRound(ss, md, 45, func(*App) {})
+		}
+	}
+	return NewTurnMenu(ss)
+}
+
 // DemoTeam is the club of the manager in the demos unless bmp -demo-team
 // names another.
 const DemoTeam = 9
 
 // DemoNames returns the names Demo knows, sorted.
 func DemoNames() []string {
-	names := []string{"title", "setup", "seasons", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup"}
+	names := []string{"title", "setup", "seasons", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup", "replays"}
 	for n := range playedDemos {
 		names = append(names, n)
 	}
