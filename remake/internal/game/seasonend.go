@@ -222,6 +222,29 @@ func (s *State) NameYear(year int) int {
 	return year
 }
 
+// announceChanges tells every manager in the messages what the new season
+// changes against the one that started in prev: the points of a win, the
+// names of the leagues. Only real seasons change them.
+func (s *State) announceChanges(prev int) {
+	if !s.IsReal() {
+		return
+	}
+	var texts []string
+	for l := 1; l < NumLeagues; l++ {
+		if old, now := s.LeagueNameIn(l, prev), s.LeagueNameIn(l, s.StartYear); old != now {
+			texts = append(texts, msgLeagueRenamed(old, now))
+		}
+	}
+	if old, now := s.pointsPerWinIn(prev), s.PointsPerWin(); old != now {
+		texts = append(texts, msgPointsPerWin(now))
+	}
+	for mi := range s.Managers {
+		for _, t := range texts {
+			s.notify(mi, t)
+		}
+	}
+}
+
 // HistoryBaseYear is the year the history screen shows for the first
 // record: the original counts from 1963, and in a modern game from 1991,
 // one year before its first season (f_262f_390e).
@@ -446,6 +469,7 @@ func (s *State) seasonEnd2() {
 	s.Event = 0
 	s.Day = 0
 	s.StartYear++
+	s.announceChanges(s.StartYear - 1)
 	s.Results = [NumLeagues][38][10]Score{}
 	s.Events = seasonEvents
 	s.Postponed = [20]PostponedGame{}

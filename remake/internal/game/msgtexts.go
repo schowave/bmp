@@ -215,3 +215,13 @@ func msgTrophy(club string, trophy int) string {
 func msgReleased(name string, comp int64) string {
 	return name + "\nkehrt Ihrem Verein\nden Rücken...\nSie erhalten eine\nAblösesumme von\n" + FormatMoney(comp) + " DM"
 }
+
+// Messages of a real season when a new season changes a rule (the remake's;
+// the original changes none).
+func msgLeagueRenamed(old, now string) string {
+	return "Aus der " + old + "\nwird ab dieser Saison\ndie " + now + "."
+}
+
+func msgPointsPerWin(n int) string {
+	return "Ab dieser Saison gibt\nes " + itoa(n) + " Punkte für\neinen Sieg."
+}

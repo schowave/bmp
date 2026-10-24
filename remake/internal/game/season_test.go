@@ -106,3 +106,31 @@ func TestEternalBalanceKeepsTwoPoints(t *testing.T) {
 		}
 	}
 }
+
+// A new real season tells the managers what changes.
+func TestAnnounceChanges(t *testing.T) {
+	for _, c := range []struct {
+		year int
+		want []string
+	}{
+		{1994, []string{"Aus der Am.-Oberliga\nwird ab dieser Saison\ndie Regionalliga."}},
+		{1995, []string{"Ab dieser Saison gibt\nes 3 Punkte für\neinen Sieg."}},
+		{2008, []string{"Aus der Regionalliga\nwird ab dieser Saison\ndie 3. Liga."}},
+		{2009, nil},
+	} {
+		s := &State{Season: "1990-91", StartYear: c.year, Managers: []*Manager{{}}}
+		s.announceChanges(c.year - 1)
+		var got []string
+		for _, m := range s.Managers[0].Inbox {
+			got = append(got, m.Text)
+		}
+		if len(got) != len(c.want) || (len(got) > 0 && got[0] != c.want[0]) {
+			t.Errorf("%d: %q", c.year, got)
+		}
+	}
+	s := &State{StartYear: 1995, Managers: []*Manager{{}}}
+	s.announceChanges(1994)
+	if len(s.Managers[0].Inbox) != 0 {
+		t.Error("the clubs of the original announce changes")
+	}
+}

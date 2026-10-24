@@ -427,7 +427,8 @@ ties). Deliberate differences:
   from the fourth season on, as in the original's modern start.
 - In a real season a win counts 3 points from 1995/96 on, as in the real
   leagues (the original's variable D:0x2271); with the clubs of the
-  original it stays 2. The balance of the eternal table (points and minus
+  original it stays 2. When a new real season changes the points of a win
+  or the name of a league, every manager gets a message about it. The balance of the eternal table (points and minus
   points) keeps counting by the 2-point rule, so that a game across
   1995/96 adds up one kind of points.
 
