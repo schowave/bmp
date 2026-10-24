@@ -3,15 +3,21 @@
 // mise run remake:seasons-update:
 //
 //	bmpseasons update -tm DIR [-from Y] [-to Y]
+//	bmpseasons logo -club NAME -image FILE [-source TEXT]
 //
-// For each DIR/YYYY-YY.json between the seasons from and to it writes
-// internal/seasons/data/YYYY-YY.json and the logos of new clubs, the season
-// before first (see internal/seasons/update).
+// update writes internal/seasons/data/YYYY-YY.json for each DIR/YYYY-YY.json
+// between the seasons from and to, and the logos of new clubs, the season
+// before first (see internal/seasons/update). logo gives the club NAME (as
+// the game shows it) the logo of an image, drawn in the colours of the
+// logos of the original, in every season, and notes its source in
+// internal/seasons/credits/logos.csv.
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
+	"image"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -28,6 +34,10 @@ const (
 )
 
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "logo" {
+		logoMain()
+		return
+	}
 	if len(os.Args) < 2 || os.Args[1] != "update" {
 		usage()
 	}
@@ -50,7 +60,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: bmpseasons update -tm DIR [-from Y] [-to Y]")
+	fmt.Fprintln(os.Stderr, "usage: bmpseasons update -tm DIR [-from Y] [-to Y] | logo -club NAME -image FILE [-source TEXT]")
 	os.Exit(2)
 }
 
@@ -172,4 +182,111 @@ func previous(year int) (*assets.Mana, error) {
 		return nil, err
 	}
 	return dir.Mana()
+}
+
+const creditsFile = "internal/seasons/credits/logos.csv"
+
+func logoMain() {
+	fl := flag.NewFlagSet("logo", flag.ExitOnError)
+	club := fl.String("club", "", "the club as the game shows its name, e.g. \"SPVGG WEIDEN\"")
+	file := fl.String("image", "", "the logo, PNG, JPEG or GIF")
+	src := fl.String("source", "", "where the logo comes from, for the credits (default: the file name)")
+	_ = fl.Parse(os.Args[2:])
+	if fl.NArg() > 0 || *club == "" || *file == "" {
+		usage()
+	}
+	if _, err := os.Stat(seasonsDir); err != nil {
+		fmt.Fprintln(os.Stderr, "bmpseasons: run it in remake/")
+		os.Exit(2)
+	}
+	if *src == "" {
+		*src = filepath.Base(*file)
+	}
+	if err := setLogo(*club, *file, *src); err != nil {
+		fmt.Fprintln(os.Stderr, "bmpseasons:", err)
+		os.Exit(1)
+	}
+}
+
+// setLogo draws the image file as a logo with the next free number and
+// gives it to every German club named club in the seasons.
+func setLogo(club, file, src string) error {
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	img, _, err := image.Decode(f)
+	_ = f.Close()
+	if err != nil {
+		return fmt.Errorf("%s: %w", file, err)
+	}
+	dir, err := assets.OpenDir(os.DirFS(origDir))
+	if err != nil {
+		return err
+	}
+	pals, err := dir.Palettes()
+	if err != nil {
+		return err
+	}
+	_, n, err := current()
+	if err != nil {
+		return err
+	}
+	files, err := filepath.Glob(filepath.Join(seasonsDir, "*.json"))
+	if err != nil {
+		return err
+	}
+	var changed []string
+	for _, sf := range files {
+		b, err := os.ReadFile(sf)
+		if err != nil {
+			return err
+		}
+		m, err := assets.DecodeClubs(b)
+		if err != nil {
+			return fmt.Errorf("%s: %w", sf, err)
+		}
+		hit := false
+		for i := range m.Clubs[:assets.NumGermanClubs] {
+			if assets.FromCP437(m.Clubs[i].Name) == club {
+				m.Clubs[i].Logo, hit = n, true
+			}
+		}
+		if !hit {
+			continue
+		}
+		out, err := assets.EncodeClubs(m)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(sf, out, 0o644); err != nil {
+			return err
+		}
+		changed = append(changed, strings.TrimSuffix(filepath.Base(sf), ".json"))
+	}
+	if len(changed) == 0 {
+		return fmt.Errorf("no season has a club named %q", club)
+	}
+	pic, err := assets.EncodePic(update.ConvertLogo(img, &pals[0]), &pals[0])
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(seasonsDir, "pic", strconv.Itoa(n)+".png"), pic, 0o644); err != nil {
+		return err
+	}
+	cf, err := os.OpenFile(creditsFile, os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	w := csv.NewWriter(cf)
+	if err := w.Write([]string{strconv.Itoa(n), src, "", "", ""}); err != nil {
+		_ = cf.Close()
+		return err
+	}
+	w.Flush()
+	if err := cf.Close(); err != nil {
+		return err
+	}
+	fmt.Fprintf(os.Stderr, "logo %d for %s in %s\n", n, club, strings.Join(changed, ", "))
+	return nil
 }

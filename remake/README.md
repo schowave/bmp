@@ -114,6 +114,13 @@ tables lack (the places outside the leagues from 2008/09 on), the logos and
 the foreign clubs come from the season before. It needs `uv` for the Python
 packages `requests` and `beautifulsoup4`.
 
+A club with a plain shield gets a logo of an image, drawn in the colours of
+the logos of the original, in every season it plays in:
+
+```sh
+go run ./cmd/bmpseasons logo -club "SPVGG WEIDEN" -image weiden.png -source "where it comes from"   # in remake/
+```
+
 ## Command-line options
 
 | Flag | Default | Purpose |
