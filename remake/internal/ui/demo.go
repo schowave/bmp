@@ -9,15 +9,17 @@ import (
 
 // Demo returns a scene for screenshots during development
 // (bmp -demo NAME -shot FILE). Most demos start a game with one manager
-// at Borussia Dortmund and play matchdays first.
-func Demo(name string, mana *assets.Mana, saveDir string) Scene {
+// at club team (DemoTeam: Borussia Dortmund) and play matchdays first.
+func Demo(name string, team int, mana *assets.Mana, saveDir string) Scene {
 	switch name {
+	case "title":
+		return NewTitle()
 	case "setup":
 		return NewStart(mana, saveDir)
 	case "seasons":
 		return newSeasonChoice(NewStart(mana, saveDir))
 	}
-	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 5})
+	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: team}}, Level: 2, Seed: 5})
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +33,7 @@ func Demo(name string, mana *assets.Mana, saveDir string) Scene {
 	case "start":
 		return NewDriver(ss)
 	case "newspaper":
-		return NewspaperDemo(mana, saveDir, 1)
+		return NewspaperDemo(mana, saveDir, team, 1)
 	}
 	// Play some events so that the screens have content.
 	for i := 0; i < 30 && name != "turn"; i++ {
@@ -98,9 +100,13 @@ var playedDemos = map[string]func(ss *Session) Scene{
 	"flag":      func(ss *Session) Scene { return newFlagScreen("Ligaspiel", func(*App) {}) },
 }
 
+// DemoTeam is the club of the manager in the demos unless bmp -demo-team
+// names another.
+const DemoTeam = 9
+
 // DemoNames returns the names Demo knows, sorted.
 func DemoNames() []string {
-	names := []string{"setup", "seasons", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup"}
+	names := []string{"title", "setup", "seasons", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup"}
 	for n := range playedDemos {
 		names = append(names, n)
 	}
