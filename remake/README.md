@@ -349,6 +349,8 @@ the panel with new messages is open, it takes the keys, so close it first.
 ```sh
 mise run remake:test       # go vet, gofmt -l and go test -short -timeout 300s
 mise run remake:test-long  # all tests, also those that play whole seasons (CI)
+mise run remake:test-tm    # the Transfermarkt scripts, offline with python3
+mise run remake:test-amd64 # on Apple Silicon: seasons and extract as amd64, as in CI
 ```
 
 Why the season tests are not in `check`: [ADR 0007](../docs/adr/0007-season-tests-outside-check.md).
@@ -361,8 +363,9 @@ built-in files. Tests of
 The timeout turns a screen that never closes into a failure instead of a
 hang.
 
-`mise run hooks` enables the pre-commit hook, which builds, vets and
-checks the formatting of the staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
+`mise run hooks` enables the pre-commit hook, which rejects file names
+that differ only in case and builds, vets and checks the formatting of the
+staged remake. CI ([`../.github/workflows/ci.yml`](../.github/workflows/ci.yml))
 runs `mise run check` (golangci-lint, then this task and the tests of the save
 server in `../wasm`) under xvfb, and uploads all demo screens as the
 `remake-shots` artifact and the package docs (`go doc -all`) as

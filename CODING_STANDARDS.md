@@ -27,6 +27,18 @@ writes it, and `TestBuiltInSeasonsLoad` checks every season. Review the
 updater (`remake/internal/seasons/update`, `remake/cmd/bmpseasons`) and look
 at a changed season by samples.
 
+## Committed output comes from integer maths
+
+Code whose output is committed (`remake/internal/seasons/update`,
+`remake/internal/assets`, `remake/cmd/bmp*`) computes colours, strengths and
+choices with integers, or converts a float result explicitly before it
+decides. Go fuses multiply and add on arm64 and not on amd64, so float maths
+can write other files on a Mac than in CI; `remake:test-amd64` catches it
+only where a test compares the output.
+
+Example: `nearest` in `remake/internal/seasons/update/logo.go` compares
+colours by `dr*dr + dg*dg + db*db` on ints.
+
 ## A rule of the original is in its spec
 
 A diff whose code relies on a rule of the original (a comment names

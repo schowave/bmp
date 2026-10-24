@@ -1,0 +1,9 @@
+#!/bin/sh
+# Fails when two files of the index differ only in case: macOS and Windows
+# keep only one of them, so the checkout there misses a file or shows a change
+# nobody made. Run by the pre-commit hook and by `mise run lint`.
+same=$(git ls-files | sort -f | uniq -di)
+[ -z "$same" ] && exit 0
+echo "files that differ only in case (rename one with git mv -f):" >&2
+git ls-files | grep -ixF "$same" >&2
+exit 1

@@ -10,9 +10,11 @@ or `mise run wasm:run-docker`; `mise tasks` lists every task.
 ## Verify your work
 
 Run `mise run check` after every change. It runs golangci-lint
-(`.golangci.yml`) over both Go modules, then vet, the gofmt check and the
-tests of `remake/` (`remake:test`) and of the save server in `wasm/`
-(`wasm:test`). Fix every failure it reports.
+(`.golangci.yml`) over both Go modules and a check for file names that
+differ only in case, then vet, the gofmt check and the tests of `remake/`
+(`remake:test`, on Apple Silicon also as amd64 in `remake:test-amd64`), of
+the Transfermarkt scripts (`remake:test-tm`) and of the save server in
+`wasm/` (`wasm:test`). Fix every failure it reports.
 
 The slower stages, which CI runs on every pull request and push to `main`:
 
@@ -33,8 +35,8 @@ enforced).
 
 Enforced by: the CI job `remake` (`mise run check`, `mise run
 remake:test-long`), the jobs `vnc` and `wasm` (bench and smoke test), and the
-pre-commit hook of `mise run hooks` (build, vet and gofmt of the staged
-remake).
+pre-commit hook of `mise run hooks` (file names, build, vet and gofmt of the
+staged remake).
 
 ## Working with the platform
 
