@@ -24,6 +24,9 @@ func NewspaperDemo(mana *assets.Mana, saveDir string, team, n int) Scene {
 				md.Run()
 				if md.HasNewspaper(0) {
 					if n--; n <= 0 {
+						// The flags and dialogs of the days played through
+						// are not shown after the newspaper.
+						s.TakeNotices()
 						return NewNewspaper(ss, md, 0, func(app *App) { app.Reset(NewDriver(ss)) })
 					}
 				}

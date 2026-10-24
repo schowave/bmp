@@ -2,6 +2,22 @@ package game
 
 import "testing"
 
+// f_0310_0995 shows the flag of the competition before it plays the matches,
+// so before the forfeit of f_1a58_2051.
+func TestMatchFlagBeforeForfeit(t *testing.T) {
+	s := lineupState(t)
+	s.EndTurn()
+	s.Managers[0].Effort = ForfeitEffort
+	s.TakeNotices()
+	if md := s.NextMatchDay(); md == nil || md.Title != "Ligaspiel" {
+		t.Fatalf("first match day %+v", md)
+	}
+	q := s.TakeNotices()
+	if len(q) != 2 || q[0].Kind != NoticeFlag || q[0].Title != "Ligaspiel" || q[1].Kind != NoticeAlert {
+		t.Fatalf("notices %+v", q)
+	}
+}
+
 // An AI shoot-out (f_0310_356d) draws who shoots first before it looks at
 // the teams, then the goals of both sides until they differ.
 func TestAIShootoutDraws(t *testing.T) {

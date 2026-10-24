@@ -291,8 +291,8 @@ func drawFlag(g *Gfx, dst *ebiten.Image) {
 
 // flagScreen is f_0310_01f2: before the matches of a competition the flag
 // with its name in the big font ("Ligaspiel", "DFB-Pokal", ...), for
-// f_3930_01e7(0x32); then next opens the matches. The winter break and the
-// season end show it too (game.NoticeFlag).
+// f_3930_01e7(0x32); then next runs. The winter break and the season end
+// show it too (game.NoticeFlag).
 type flagScreen struct {
 	text   string
 	frames int
@@ -316,22 +316,6 @@ func (b *flagScreen) Update(app *App) error {
 func (b *flagScreen) Draw(app *App, dst *ebiten.Image) {
 	drawFlag(app.Gfx, dst)
 	app.Gfx.TextMid(dst, FontBig, 0, 0x13f, 0x80, b.text, ColWhite, ColBlack)
-}
-
-// flagText is the name f_0310_0995, f_0310_0261, f_0310_0290, f_0310_02bf
-// and f_0310_07a2 show before the matches of md.
-func flagText(md *game.MatchDay) string {
-	switch {
-	case md.Replays():
-		return "Nachholspiele"
-	case md.Relegation():
-		return "Relegationsspiel"
-	case md.Cups() == 1:
-		return "DFB-Pokal"
-	case md.Cups() != 0:
-		return "Europapokal"
-	}
-	return "Ligaspiel"
 }
 
 // seasonEndScreen is the season report of f_0cb5_0012 on the backdrop of

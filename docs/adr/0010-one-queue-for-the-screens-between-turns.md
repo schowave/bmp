@@ -31,6 +31,9 @@ after.
 
 - The order the player sees is decided by `remake/internal/game` and tested
   there (`TestSeasonEndOrder`); the driver only shows the queue.
+- `NextMatchDay` queues the flag of the competition (Ligaspiel, DFB-Pokal …)
+  before a forfeit of its matches (`TestMatchFlagBeforeForfeit`); the driver
+  opens the matches after the queue.
 - The queue is a field of `State` and goes into saved games (it is empty at
   the turns, where the game is saved). Games saved before keep loading; a
   flag or draw still in their old fields is dropped.

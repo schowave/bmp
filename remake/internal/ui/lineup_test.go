@@ -453,10 +453,7 @@ func TestMatchLineupSubstitutesByName(t *testing.T) {
 // Before the matches the flag names the competition for f_3930_01e7(0x32),
 // then the matches open.
 func TestFlagScreen(t *testing.T) {
-	app, _, _, md, _ := matchApp(t)
-	if got := flagText(md); got != "Ligaspiel" {
-		t.Errorf("flag %q, want Ligaspiel", got)
-	}
+	app, _, _, _, _ := matchApp(t)
 	opened := false
 	b := newFlagScreen("Ligaspiel", func(*App) { opened = true })
 	app.Push(b)

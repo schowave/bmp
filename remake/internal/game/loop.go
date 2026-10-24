@@ -128,27 +128,32 @@ func (s *State) NextMatchDay() *MatchDay {
 				}
 				s.postpone(1)
 				s.postpone(2)
+				s.matchFlag("Ligaspiel") // f_0310_0995
 				md := s.newMatchDay(int(ev&7), 0, false)
 				md.Title = "Ligaspiel"
 				return md
 			}
 		case stepDFB:
 			if ev&EvDFB != 0 {
+				s.matchFlag("DFB-Pokal") // f_0310_0261
 				md := s.newMatchDay(0, 1, false)
 				md.Title = CupNames[CupDFB] + " " + RoundNames[s.Cups.Round[CupDFB]]
 				return md
 			}
 		case stepEurope:
 			if ev&EvEurope == EvRelegation {
+				s.matchFlag("Relegationsspiel") // f_0310_02bf
 				return s.relegationDay()
 			}
 			if ev&EvEurope != 0 {
+				s.matchFlag("Europapokal") // f_0310_0290
 				md := s.newMatchDay(0, 0x0e, false)
 				md.Title = "Europapokal " + RoundNames[s.Cups.Round[CupLandesmeister]]
 				return md
 			}
 		case stepReplay:
 			if ev&EvReplay != 0 && s.hasReplays() {
+				s.matchFlag("Nachholspiele") // f_0310_07a2
 				return s.newMatchDay(0, 0, true)
 			}
 		}
@@ -156,6 +161,13 @@ func (s *State) NextMatchDay() *MatchDay {
 	s.finishReplays()
 	s.afterMatches()
 	return nil
+}
+
+// matchFlag queues the flag with the name of a competition that the
+// original shows before its matches (f_0310_01f2), so before a forfeit of
+// those matches.
+func (s *State) matchFlag(text string) {
+	s.AddNotice(Notice{Kind: NoticeFlag, Manager: -1, Title: text})
 }
 
 // afterMatches continues the loop after the matches of an event.

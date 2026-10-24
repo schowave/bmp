@@ -51,17 +51,10 @@ func (d *Driver) Update(app *App) error {
 	case game.PhaseTurn:
 		app.Push(NewTurnMenu(d.ss))
 	case game.PhaseMatches:
-		md := s.NextMatchDay()
-		if md != nil {
-			// The flag with the competition comes first, then the forfeit
-			// NextMatchDay may have queued, then the matches.
-			app.Push(newFlagScreen(flagText(md), func(app *App) {
-				if s.HasNotices() {
-					ShowNotices(app, d.ss, func(app *App) { app.Push(NewMatchScreen(d.ss, md)) })
-				} else {
-					app.Push(NewMatchScreen(d.ss, md))
-				}
-			}))
+		// NextMatchDay queues the flag with the competition and a forfeit;
+		// the matches follow them.
+		if md := s.NextMatchDay(); md != nil {
+			ShowNotices(app, d.ss, func(app *App) { app.Push(NewMatchScreen(d.ss, md)) })
 		}
 	case game.PhaseContracts:
 		app.Push(NewContractScreen(d.ss, true))
