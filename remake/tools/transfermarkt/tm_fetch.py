@@ -1,31 +1,20 @@
 #!/usr/bin/env python3
-"""Holt Abschlusstabellen und Kader von transfermarkt.de für den eigenen
-Gebrauch (einmalig, langsam) und schreibt sie als CSV.
-
-Aufruf:
-    pip install requests beautifulsoup4
-    python3 tm_fetch.py --out ~/tm-daten --from 1990 --to 2008 L1 L2 RLN RLS
+"""Holt Seiten von transfermarkt.de und liest sie aus: Abschlusstabellen,
+Kader, Leistungsdaten, die Staffeln der Regionalliga und die Teilnehmer der
+Europapokale. tm_json.py und tm_games.py rufen diese Funktionen auf.
 
 Wettbewerbe (Transfermarkt-Kürzel, bitte im Browser prüfen):
     L1 = 1. Bundesliga, L2 = 2. Bundesliga, L3 = 3. Liga (ab 2008),
     Regionalliga 1994-2008 und Oberligen haben eigene Kürzel; die sieht
     man in der Adresse der Wettbewerbsseite (".../wettbewerb/KÜRZEL").
 
-Ausgabe in --out:
-    tables.csv  saison,wettbewerb,platz,verein,verein_id,spiele,tore,punkte
-    squads.csv  saison,verein,verein_id,name,position,geburtsdatum,marktwert
-
-Das Skript wartet --pause Sekunden zwischen zwei Seiten und bricht bei
-HTTP 403/429 ab. Die HTML-Struktur von Transfermarkt ändert sich; die
-Selektoren unten sind nicht getestet und müssen eventuell angepasst
-werden (Seite im Browser öffnen, "Element untersuchen").
+Jede Funktion wartet pause Sekunden vor der Seite und meldet HTTP 403/429
+als Blocked. Die HTML-Struktur von Transfermarkt ändert sich; liest eine
+Funktion nichts mehr, die Selektoren anpassen (Seite im Browser öffnen,
+"Element untersuchen").
 """
 
-import argparse
-import csv
-import os
 import re
-import sys
 import time
 
 import requests
@@ -145,42 +134,3 @@ def games(session, club_id, comp, year, pause):
         out.append({"name": name.get_text(strip=True), "einsaetze": tds[-10], "minuten": tds[-1]})
     return out
 
-
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--from", dest="first", type=int, default=1990)
-    ap.add_argument("--to", dest="last", type=int, default=2008)
-    ap.add_argument("--pause", type=float, default=4.0)
-    ap.add_argument("comps", nargs="+")
-    a = ap.parse_args()
-    os.makedirs(a.out, exist_ok=True)
-    s = requests.Session()
-    tf = open(os.path.join(a.out, "tables.csv"), "w", newline="", encoding="utf-8")
-    sf = open(os.path.join(a.out, "squads.csv"), "w", newline="", encoding="utf-8")
-    tw = csv.DictWriter(tf, ["saison", "wettbewerb", "platz", "verein", "verein_id", "spiele", "tore", "punkte"])
-    sw = csv.DictWriter(sf, ["saison", "verein", "verein_id", "name", "position", "geburtsdatum", "marktwert"])
-    tw.writeheader()
-    sw.writeheader()
-    try:
-        for year in range(a.first, a.last + 1):
-            for comp in a.comps:
-                rows = table(s, comp, year, a.pause)
-                print(f"{year} {comp}: {len(rows)} Vereine", file=sys.stderr)
-                tw.writerows(rows)
-                tf.flush()
-                for r in rows:
-                    if not r["verein_id"]:
-                        continue
-                    for p in squad(s, r["verein_id"], year, a.pause):
-                        sw.writerow({"saison": year, "verein": r["verein"], "verein_id": r["verein_id"], **p})
-                    sf.flush()
-    except Blocked as e:
-        print(f"Abbruch, die Seite sperrt: {e}", file=sys.stderr)
-    finally:
-        tf.close()
-        sf.close()
-
-
-if __name__ == "__main__":
-    main()
