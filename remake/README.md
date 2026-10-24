@@ -165,11 +165,12 @@ The controls follow the original: the left mouse button selects; the right
 mouse button confirms in some places (setup, lineup reserves, sponsors) but
 does not leave screens, which close with the HAUPT MENU or WEITER button.
 
-1. **Season:** when real seasons are built in (`internal/seasons`), the
-   first screen after the title lists them; ORIGINAL (1991/92) plays with
-   the clubs of the original, which are those of 1991/92. In the setup a
-   right click goes back to the seasons as long as no name and no club is
-   chosen, to look at the clubs of another season.
+1. **Season:** after the title, as in the original, comes the setup with
+   the clubs of the original, which are those of 1991/92. When real seasons
+   are built in (`internal/seasons`), left of the club name stands the
+   season played with, right of it the key `S` that lists them; a season or
+   ORIGINAL goes back to the setup with their clubs, keeping the names typed
+   so far, and a right click goes back unchanged.
 2. **Setup:** click the name field below a face and type the name. Click
    left or right of the middle of the logo strip to scroll it (hold the
    button to keep it moving), and click the empty field above the face to
@@ -224,6 +225,7 @@ rate by the engine of the original: [ADR 0006](../docs/adr/0006-rate-lineups-by-
 | Training screen | `o` | Sets the training plan with the strongest eleven over the rest of the season |
 | Stadium screen | `o` | Sets the ticket price with the most gate money at the next home match |
 | Main menu of a turn | `o` | All three: the training, the lineup, the ticket price |
+| Setup of a new game, with real seasons built in | `s` | Opens the choice of the season to play, or of the original |
 
 #### The lineup key
 

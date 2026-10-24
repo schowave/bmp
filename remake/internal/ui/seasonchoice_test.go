@@ -8,7 +8,7 @@ import (
 )
 
 func TestSeasonChoiceHover(t *testing.T) {
-	c := newSeasonChoice(nil, "", make([]seasons.Season, 2*seasonRows+2))
+	c := &SeasonChoice{entries: make([]seasons.Season, 2*seasonRows+2)}
 	for _, h := range []struct{ x, y, want int }{
 		{seasonLeftX, seasonTopY, 0},
 		{seasonLeftX + 5, seasonTopY + fileRowH, 1},
@@ -27,27 +27,54 @@ func TestSeasonChoiceHover(t *testing.T) {
 	}
 }
 
-func TestSeasonChoiceOriginalOpensTheSetup(t *testing.T) {
+// The key S in the setup opens the season choice; a season or the
+// original goes back to the setup with their clubs and the names typed so
+// far, a right click goes back unchanged.
+func TestSetupKeyOpensTheSeasonChoice(t *testing.T) {
 	app, mana := testApp(t)
-	c := newSeasonChoice(mana, t.TempDir(), []seasons.Season{{ID: "1995-96", Year: 1995}})
-	app.Reset(c)
-	step(t, app, click(originalButton.X+2, originalButton.Y+2))
-	s, ok := top(app).(*Setup)
-	if !ok || s.opts.Season != "" || s.orig != mana {
-		t.Fatalf("got %T", top(app))
-	}
-	// Nothing chosen: a right click goes back to the seasons.
-	step(t, app, rclick())
+	setup := NewSetup(mana, t.TempDir())
+	setup.seasons = []seasons.Season{{ID: "1995-96", Year: 1995}}
+	setup.names[0], setup.teams[0] = "TEST", setup.center
+	app.Reset(setup)
+	step(t, app, Input{Chars: []rune{'s'}})
 	if _, ok := top(app).(*SeasonChoice); !ok {
+		t.Fatalf("key S: %T", top(app))
+	}
+	step(t, app, rclick())
+	if top(app) != setup {
 		t.Fatalf("right click: %T", top(app))
 	}
-	// With a club chosen it stays in the setup.
+	step(t, app, Input{Chars: []rune{'S'}})
+	step(t, app, click(seasonLeftX+2, seasonTopY+2))
+	s, ok := top(app).(*Setup)
+	if !ok || s.opts.Season != "1995-96" || s.orig != mana || s.names[0] != "TEST" || s.teams[0] != -1 || len(s.seasons) != 1 {
+		t.Fatalf("season: %T %+v", top(app), s)
+	}
+	if s.modeLabel() != "SAISON 1995/96" {
+		t.Errorf("label %q", s.modeLabel())
+	}
+	step(t, app, Input{Chars: []rune{'s'}})
 	step(t, app, click(originalButton.X+2, originalButton.Y+2))
 	s = top(app).(*Setup)
-	s.teams[0] = s.center
-	step(t, app, rclick())
-	if _, ok := top(app).(*Setup); !ok {
-		t.Fatalf("right click with a club: %T", top(app))
+	if s.opts.Season != "" || s.mana != mana || s.names[0] != "TEST" || s.modeLabel() != "ORIGINAL 1991/92" {
+		t.Fatalf("original: %+v", s)
+	}
+	// While a name is typed, S is a letter of it.
+	s.edit = 1
+	step(t, app, Input{Chars: []rune{'S'}})
+	if top(app) != s || s.names[1] != "S" {
+		t.Fatalf("typing: %T %q", top(app), s.names[1])
+	}
+}
+
+// Without built-in seasons S does nothing.
+func TestSetupWithoutSeasons(t *testing.T) {
+	app, mana := testApp(t)
+	setup := NewSetup(mana, t.TempDir())
+	app.Reset(setup)
+	step(t, app, Input{Chars: []rune{'s'}})
+	if top(app) != setup {
+		t.Fatalf("key S: %T", top(app))
 	}
 }
 

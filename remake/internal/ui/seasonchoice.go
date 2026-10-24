@@ -8,15 +8,15 @@ import (
 	"github.com/schowave/bmp/remake/internal/seasons"
 )
 
-// SeasonChoice is the screen before the setup of a new game where the
-// player picks the clubs: on the left those of the original with the
-// WEITER button, on the right the list of the real seasons
-// (internal/seasons), picked under the bar of the file screen. The original
-// has no such screen; it is drawn with the windows and buttons of the
-// others. Without built-in seasons it goes straight to the setup.
+// SeasonChoice is the screen the key S opens in the setup of a new game,
+// where the player picks the clubs: on the left those of the original
+// with the WEITER button, on the right the list of the real seasons
+// (internal/seasons), picked under the bar of the file screen. Either goes
+// back to the setup with those clubs and the names typed so far; a right
+// click goes back unchanged. The original has no such screen; it is drawn
+// with the windows and buttons of the others.
 type SeasonChoice struct {
-	mana    *assets.Mana // the clubs of the original
-	saveDir string
+	from    *Setup // the setup it was opened from
 	entries []seasons.Season
 }
 
@@ -35,17 +35,8 @@ const (
 // the left window.
 var originalButton = Button{X: 6 + (104-ButtonW)/2, Y: 78, W: ButtonW, H: ButtonH}
 
-// NewSeasonChoice creates the screen; mana holds the clubs of the original.
-func NewSeasonChoice(mana *assets.Mana, saveDir string) Scene {
-	list := seasons.List()
-	if len(list) == 0 {
-		return NewSetup(mana, saveDir)
-	}
-	return newSeasonChoice(mana, saveDir, list)
-}
-
-func newSeasonChoice(mana *assets.Mana, saveDir string, list []seasons.Season) *SeasonChoice {
-	return &SeasonChoice{mana: mana, saveDir: saveDir, entries: list}
+func newSeasonChoice(from *Setup) *SeasonChoice {
+	return &SeasonChoice{from: from, entries: from.seasons}
 }
 
 // seasonLabel is the text of a season in the list.
@@ -92,8 +83,13 @@ func (c *SeasonChoice) rows(h int) []seasonRow {
 
 func (c *SeasonChoice) Update(app *App) error {
 	in := &app.Input
+	orig, dir := c.from.orig, c.from.saveDir
+	if in.Right || in.Escape {
+		app.Replace(c.from)
+		return nil
+	}
 	if originalButton.Hit(in) {
-		app.Replace(c.withBack(NewSetup(c.mana, c.saveDir)))
+		app.Replace(c.setup(NewSetup(orig, dir)))
 		return nil
 	}
 	i := c.hover(in)
@@ -106,14 +102,14 @@ func (c *SeasonChoice) Update(app *App) error {
 		app.Push(NewMessage("An Alle:", "Die Saison "+s.Label()+" ist nicht lesbar."))
 		return nil
 	}
-	app.Replace(c.withBack(NewSeasonSetup(c.mana, m, c.saveDir, s.ID, s.Year)))
+	app.Replace(c.setup(NewSeasonSetup(orig, m, dir, s.ID, s.Year)))
 	return nil
 }
 
-// withBack lets a right click in setup s come back here while nothing is
-// chosen, to look at the clubs of another season.
-func (c *SeasonChoice) withBack(s *Setup) *Setup {
-	s.back = func() Scene { return newSeasonChoice(c.mana, c.saveDir, c.entries) }
+// setup is s, the setup with the chosen clubs, with the seasons and the
+// names typed so far; the clubs are chosen anew.
+func (c *SeasonChoice) setup(s *Setup) *Setup {
+	s.seasons, s.names = c.entries, c.from.names
 	return s
 }
 
@@ -152,5 +148,5 @@ func (c *SeasonChoice) Draw(app *App, dst *ebiten.Image) {
 		g.TextAt(dst, FontSmall, r.x, r.y+4, r.text, r.colour, NoShadow)
 	}
 	g.TextAt(dst, FontSmall, seasonLeftX, 170, "AB 1995/96 3 PUNKTE PRO SIEG", ColGrey2, NoShadow)
-	g.TextMid(dst, FontNormal, 0, 320, 196, "Saison anklicken oder WEITER für das Original", ColBeige, ColBlack)
+	g.TextMid(dst, FontNormal, 0, 320, 196, "Saison anklicken, WEITER: Original, rechts: zurück", ColBeige, ColBlack)
 }
