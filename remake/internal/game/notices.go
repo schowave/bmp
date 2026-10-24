@@ -26,8 +26,8 @@ const (
 	// NoticePopup is the message panel of f_3091_05c4 called with a single
 	// text: Lines are the message, Day its date.
 	NoticePopup
-	// NoticeFlag is the flag with a word of f_0310_01f2 between the turns:
-	// Title is the word (WINTERPAUSE, SAISONENDE).
+	// NoticeFlag is the flag with a word of f_0310_01f2: Title is the word
+	// (WINTERPAUSE, SAISONENDE, or the competition before its matches).
 	NoticeFlag
 	// NoticeDraw is the presentation of a cup draw (f_17c2_0006): Cup is
 	// the game.Cup drawn.
