@@ -408,7 +408,7 @@ the panel with new messages is open, it takes the keys, so close it first.
 ### Tests
 
 ```sh
-mise run remake:test       # go vet, gofmt -l and go test -short -timeout 300s
+mise run remake:test       # go mod tidy -diff, go vet, gofmt -l and go test -short -timeout 300s
 mise run remake:test-long  # all tests, also those that play whole seasons (CI)
 mise run remake:test-tm    # the Transfermarkt scripts, offline with python3
 mise run remake:test-amd64 # on Apple Silicon: seasons and extract as amd64, as in CI

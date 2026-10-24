@@ -83,9 +83,9 @@ run = [
 ]
 
 [tasks."wasm:test"]
-description = "Vet, format check and unit tests of the save server"
+description = "go.mod tidiness, vet, format check and unit tests of the save server"
 dir = "{{config_root}}/wasm"
-run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test ./..."]
+run = ["go mod tidy -diff", "go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test ./..."]
 
 [tasks."wasm:clean"]
 description = "Remove the generated web root"
@@ -120,9 +120,9 @@ exit "$status"
 '''
 
 [tasks."remake:test"]
-description = "Test the Go re-implementation (without the tests that play whole seasons)"
+description = "go.mod tidiness, vet, format check and tests of the Go re-implementation (without the tests that play whole seasons)"
 dir = "{{config_root}}/remake"
-run = ["go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test -short -timeout 300s ./..."]
+run = ["go mod tidy -diff", "go vet ./...", "test -z \"$(gofmt -l .)\" || { gofmt -l .; exit 1; }", "go test -short -timeout 300s ./..."]
 
 [tasks."remake:test-long"]
 description = "All tests of the Go re-implementation, also those that play whole seasons (CI)"

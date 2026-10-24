@@ -11,7 +11,7 @@ or `mise run wasm:run-docker`; `mise tasks` lists every task.
 
 Run `mise run check` after every change. It runs golangci-lint
 (`.golangci.yml`) over both Go modules and a check for file names that
-differ only in case, then vet, the gofmt check and the tests of `remake/`
+differ only in case, then `go mod tidy -diff`, vet, the gofmt check and the tests of `remake/`
 (`remake:test`, on Apple Silicon also as amd64 in `remake:test-amd64`), of
 the Transfermarkt scripts (`remake:test-tm`) and of the save server in
 `wasm/` (`wasm:test`). Fix every failure it reports.
