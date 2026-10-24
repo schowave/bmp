@@ -235,6 +235,7 @@ The animation at the top is rendered from the remake's demo screens with
 | `docs/adr/`, `docs/glossary.md` | Architecture decisions and the terms of the game |
 | `docs/agent-readiness/` | Agent-readiness report of the repository |
 | `AGENTS.md` | Notes for coding agents |
+| `go.work` | Go workspace of both modules (`remake/`, `images/wasm/`), so gopls and `go` work across them from the root |
 
 ### CI
 
