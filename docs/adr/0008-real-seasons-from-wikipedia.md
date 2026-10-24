@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by 0009
 ---
 
 # Real seasons from Wikipedia and Wikidata

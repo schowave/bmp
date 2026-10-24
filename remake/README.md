@@ -92,23 +92,27 @@ stay an indexed PNG.
 
 ### The real seasons
 
-`internal/seasons/data` holds the clubs of the seasons 1990/91 to 2026/27,
-built from the raw data in [`data/`](data/README.md):
+`internal/seasons/data` holds the clubs of the seasons 1990/91 to 2026/27 as
+club databases in the format of `clubs.json`, with the logos of the clubs the
+original does not have (`pic/`). These files are the data of the seasons; the
+sources of the logos and of the tables of the first versions are in
+`internal/seasons/credits` ([ADR 0009](../docs/adr/0009-real-seasons-from-transfermarkt.md)).
+
+A season is updated or added from transfermarkt.de:
 
 ```sh
-mise run remake:seasons-fetch              # fetch 1990/91 to the running season
-mise run remake:seasons-fetch -- -from 2026 -to 2026   # only one season
-mise run remake:seasons-fetch -- -refresh  # every season anew, not from data/.cache
-go run ./cmd/bmpseasons import-tm -tm DIR  # (in remake/) take the Transfermarkt squads of DIR/YYYY-YY.json
-mise run remake:seasons                    # build internal/seasons/data from all of data/ (offline)
+mise run remake:seasons-update             # the running season
+mise run remake:seasons-update -- 2027     # one season
+mise run remake:seasons-update -- 2025 2026   # several
 ```
 
-The fetch takes the running season always from the network, the others
-from the cache `data/.cache` when they are there; a season or logo that
-fails is reported, the others are written. The build always writes every
-season, since the logos are numbered across them.
-
-A test fails when the built-in seasons differ from a build of `data/`.
+The task fetches tables and squads with `tools/transfermarkt` into
+`$BMP_TM_DIR` (default `~/tm-daten`, with its cache) and writes the seasons
+with `cmd/bmpseasons update`: the clubs on the places of the game with
+strengths from their table and their most valuable players; clubs the
+tables lack (the places outside the leagues from 2008/09 on), the logos and
+the foreign clubs come from the season before. It needs `uv` for the Python
+packages `requests` and `beautifulsoup4`.
 
 ## Command-line options
 
@@ -277,15 +281,15 @@ the panel with new messages is open, it takes the keys, so close it first.
 | `cmd/bmpextract` | Extracts the original files into open formats in `internal/embedded/data` |
 | `cmd/bmpicon` | Draws the icon `cmd/bmp/icon.png` from the embedded title banner |
 | `cmd/scenepreview` | Plays a single goal scene in a window, for development |
-| `cmd/bmpseasons` | Fetches the real seasons into `data/` and builds `internal/seasons/data` from it |
+| `cmd/bmpseasons` | Writes real seasons into `internal/seasons/data` from Transfermarkt season files |
 | `internal/assets` | Readers of the original files (EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT`, goal scenes) and of the extract |
 | `internal/game` | The rules: calendar, fixtures, match engine, cups, finances, stadium, players, transfers, season end. Deterministic (the random generator of the MS C runtime), saved as JSON |
 | `internal/ui` | The screens on the 320×240 canvas |
 | `internal/embedded` | The original files built into the binary |
-| `internal/seasons` | The real seasons 1990/91–2026/27 built into the binary; `source` fetches them, `build` writes them |
-| `data` | Raw data of the real seasons from Wikipedia and Wikidata, with sources and licences (see [`data/README.md`](data/README.md)) |
+| `internal/seasons` | The real seasons 1990/91–2026/27 built into the binary, their credits; `update` makes a season from Transfermarkt |
 | `testdata/original` | Reference screenshots of the original (see its README) |
 | `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
+| `tools/transfermarkt` | Fetches tables and squads of seasons from transfermarkt.de (`mise run remake:seasons-update`) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
 | `tools/playtest.sh` | Plays the game through `-control` for playtests (see [`../docs/playtest.md`](../docs/playtest.md)) |
 
@@ -415,7 +419,7 @@ ties). Deliberate differences:
   1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
   second teams of professional clubs before 2008 unless the places cannot
   be filled without them. Strengths come from the
-  goals and points per game of the season ([ADR 0008](../docs/adr/0008-real-seasons-from-wikipedia.md)).
+  goals and points per game of the season ([ADR 0009](../docs/adr/0009-real-seasons-from-transfermarkt.md)).
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come
   from the fourth season on, as in the original's modern start.
@@ -427,11 +431,11 @@ ties). Deliberate differences:
 
 ## Legal
 
-The real seasons (`internal/seasons`, `data/`) come from the German
-Wikipedia (CC BY-SA 4.0) and Wikidata (CC0), the squads mostly from
-Transfermarkt, whose data is not openly licensed; `data/README.md` names the
-sources and `data/logos/index.csv` the licence and author of every logo.
-Club names and logos are trademarks of the clubs.
+The real seasons (`internal/seasons`) come from transfermarkt.de, whose data
+is not openly licensed, and in their first versions also from the German
+Wikipedia (CC BY-SA 4.0, the articles in `internal/seasons/credits/articles.txt`)
+and Wikidata (CC0). `internal/seasons/credits/logos.csv` names the licence
+and author of every logo. Club names and logos are trademarks of the clubs.
 
 The original game files are copyrighted by Software 2000.
 `internal/embedded/data` and every binary contain them; converted into PNG

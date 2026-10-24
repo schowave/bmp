@@ -101,7 +101,7 @@ func (r *rosterJSON) blocks() [4]*[]string {
 func EncodeClubs(m *Mana) ([]byte, error) {
 	out := make([]clubJSON, len(m.Clubs))
 	for i, c := range m.Clubs {
-		out[i] = clubJSON{Name: cp437ToUTF8(c.Name), Logo: c.Logo, Strength: c.Strength}
+		out[i] = clubJSON{Name: FromCP437(c.Name), Logo: c.Logo, Strength: c.Strength}
 		if i >= NumGermanClubs {
 			continue
 		}
@@ -111,7 +111,7 @@ func EncodeClubs(m *Mana) ([]byte, error) {
 		r := &rosterJSON{}
 		for k, b := range r.blocks() {
 			for _, name := range c.Players[rosterBlocks[k]:rosterBlocks[k+1]] {
-				*b = append(*b, cp437ToUTF8(name))
+				*b = append(*b, FromCP437(name))
 			}
 		}
 		out[i].Players = r

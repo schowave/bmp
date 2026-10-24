@@ -229,15 +229,10 @@ description = "Extract the files the remake needs from bmp/ into remake/internal
 dir = "{{config_root}}/remake"
 run = "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data"
 
-[tasks."remake:seasons-fetch"]
-description = "Fetch the real seasons (tables, squads, cups, logos) from Wikipedia and Wikidata into remake/data"
+[tasks."remake:seasons-update"]
+description = "Fetch seasons from transfermarkt.de and write them into remake/internal/seasons/data (args: [FROM [TO]], default the running season)"
 dir = "{{config_root}}/remake"
-run = "go run ./cmd/bmpseasons fetch"
-
-[tasks."remake:seasons"]
-description = "Build the real seasons of remake/internal/seasons/data from remake/data (offline)"
-dir = "{{config_root}}/remake"
-run = "go run ./cmd/bmpseasons build"
+run = "tools/transfermarkt/update.sh"
 
 # --- Checks --------------------------------------------------------------------
 
