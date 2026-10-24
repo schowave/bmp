@@ -137,7 +137,9 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
 
 1. **Season:** when real seasons are built in (`internal/seasons`), the
    first screen after the title lists them; ORIGINAL (1991/92) plays with
-   the clubs of the original, which are those of 1991/92.
+   the clubs of the original, which are those of 1991/92. In the setup a
+   right click goes back to the seasons as long as no name and no club is
+   chosen, to look at the clubs of another season.
 2. **Setup:** click the name field below a face and type the name. Click
    left or right of the middle of the logo strip to scroll it (hold the
    button to keep it moving), and click the empty field above the face to
