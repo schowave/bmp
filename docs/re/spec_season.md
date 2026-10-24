@@ -36,7 +36,7 @@ Notation: `F:x` = far data segment 0x4238, `D:x` = DGROUP 0x4cb3 (segment checke
 | D:0x07e0 | 0x07ab = 1963 (word) | year in which the current season started (set to 1992 unless "Histor. Start"), +1 per season. |
 | D:0x07e2 | 0 (word) | number of completed seasons. |
 | D:0x07ac..0x07b0 | 7,0,0,0,0 | cup-holder references (team id + 1, 0 = none), see §6. |
-| D:0x53d0[3] / D:0x53d4[3] | days 24,19,12 / months 12,11,4 | special dates: 24 Dec (Christmas), 19 Nov, 12 Apr (birthdays of the two programmers). |
+| D:0x53d0[3] / D:0x53d4[3] | days 24,12,19 / months 12,11,4 | special dates: 24 Dec (Christmas), 12 Nov, 19 Apr (birthdays of the two programmers). |
 | D:0x4a28 | 2 | Spiel-Level (internal value, see 1.2). |
 | D:0x05fe..0x060c | 1,1,1,1,1,1,1,1,1,1,1,1,1,1,0 | display toggles (see 1.3). |
 | D:0x063a | 40 (word) | Spielgeschwindigkeit slider value, 0..70. |
@@ -73,12 +73,15 @@ Run-time state:
    - **initial league composition**: `F:535a[l][i] = D:226e[l] + i`, i.e. ids 0..17 = 1. Liga,
      18..37 = 2. Liga, 38..57 = Amateur-Oberliga, ids 58..63 = non-league reserve clubs
      (MANA.DAT order; see list in Appendix A).
-2. D:7ab = 0; f_08bc_01fb (clears F:9336 head-to-head table, sets M(m)+0x2376..0x2378 = 0x1e,
-   M(m)+0x225f = m+1); **f_0310_09c5 (id shuffle, 1.3)**; f_17c2_0ef2 (European qualification, §6);
+2. D:7ab = 0; f_08bc_01fb (zeroes F:9336, 0x1394 bytes, then sets the head-to-head entries of all
+   4 managers × 64 clubs × 5 × 2 bytes (the first 0xa00 bytes) to 0xff; sets M(m)+0x2376..0x2378 =
+   0x1e only for m < D:7ab, i.e. for none here; M(m)+0x225f = m+1 for m = 0..3); **f_0310_09c5 (id shuffle, 1.3)**; f_17c2_0ef2 (European qualification, §6);
    f_17c2_1b6d; f_17c2_09e0(c,0) for c=1..3 (European draws).
 3. f_08bc_2184(…) = new-game dialog (or load). Returns 0 for a new game.
-4. New game: D:225a = 1; f_14a4_19fb(); f_17c2_09e0(0,0) (DFB draw); f_17c2_09e0(c,1) c=1..3;
-   day = D:224c (=0); f_2277_1e38(); f_14a4_0419(); then the main loop f_1a58_3176.
+4. New game: f_0f9d_0697(10) (AI strength drift, uses rand, §5.5); f_076b_0cf0(); D:225a[0] = 1;
+   f_14a4_19fb(); f_17c2_09e0(0,0) (DFB draw); f_17c2_09e0(c,1) c=1..3; day = D:224c (=0);
+   f_2277_1e38(); f_08bc_034d(2) (loaded game: f_08bc_034d(1)); f_14a4_0419(); then the main loop
+   f_1a58_3176.
 
 ### 1.2 New-game dialog f_08bc_2184
 
@@ -207,7 +210,8 @@ while doy > monthLen[month]: doy -= monthLen[month]; month = (month+1) % 12
 F:2eba = doy (1-based day of month); F:2e8e = month (0=Jan); F:a7a0 = year
 ```
 day 0 = **29 July**; weekday shown in the calendar (f_0310_0fb6) = name[(day+5) % 7] (Mon=0) → day 0
-is a Saturday. (f_1a58_2a06 uses name[(day+4)%7] — inconsistent, display only.)
+is a Saturday. (f_1a58_2a06 uses name[(day+4)%7]; it runs after `day += 1` with the date of the
+previous day, so this is the same weekday.)
 Event e happens on day `(e>>1)*7 + (e odd ? 4 : 0)`: even e = Saturday, odd e = Wednesday.
 
 ### 2.2 Event table D:2280 (93 entries, e = 0..92)
@@ -572,9 +576,9 @@ elif g_h == g_a: h.ptsHome += 1; a.ptsAway += 1; form h 'u', a 'U'
 else: a.ptsAway += D:2271; a.winsAway += 1; h.lossesHome += 1; form h 'n', a 'S'
 ```
 plus series/record bookkeeping (F:9d36, F:a2ca via f_2a41_37cf, f_2a41_2073, and per-manager
-maxima F:a276) and TEAM+0x17 adjustment f_2a41_1fec: `TEAM[t]+0x17 += ±rand(0, 2*f_3091_10d5(diff))`
-(sign of the goal difference from t's view; result clamped to 47..53 by f_3091_1009) — UNCERTAIN
-details of f_3091_10d5 (probably |x|).
+maxima F:a276) and TEAM+0x17 adjustment f_2a41_1fec: `TEAM[t]+0x17 += ±rand(0, 2*|diff|)`
+(f_3091_10d5 = |a−b|; diff = goal difference from t's view; negated when diff ≤ 0; rand is called
+also for diff = 0, as rand(0,0); result clamped to 47..53 (0x2f..0x35) by f_3091_1009).
 
 Sorting (always, both modes), `which`: 0 = home only, 1 = total, 2 = away only (always 1 from the
 game code). Value(x) = home part (if which<2) + away part (if which≠0). Exchange sort:
@@ -743,8 +747,12 @@ When day counter D:0x7dc > D:0x224c + 0x142 (322), after the last manager turn
        if the cup winner byte (D:0x7ad / 0x7ae / 0x7af for c = 1/2/3) == team+1:
        byte3 += 0x80 and `M.0x227c[c]++` (0x227d / 0x227e / 0x227f). Only the last
        participating cup survives (a club is in at most one).
-     History records are initialised to 0xff (all 50) for managers added at setup
-     (f_08bc_2184); byte0 == 0xff means "EXISTIERTEN SIE NOCH GAR NICHT ALS MANAGER".
+       byte3 is written only there (@1a58:3a88); without a European cup it keeps its
+       old value. After the shift (k > 49) slot 49 therefore keeps the byte3 of the
+       season before (faithful quirk).
+     f_08bc_2184 sets only byte0 of each of the 50 records to 0xff for managers added
+     at setup (@08bc:3365; bytes 1..3 untouched); byte0 == 0xff means "EXISTIERTEN SIE
+     NOCH GAR NICHT ALS MANAGER".
    Title counters: 0x227b Meisterschaften, 0x227c DFB-Pokale, 0x227d Landesmeister-,
    0x227e Pokalsieger-, 0x227f UEFA-Pokale (labels D-slots 0x4a6c..0x4a7c).
 2. For each manager: remember `before[m] = X(team)+0x32` (long, eternal points),
@@ -821,7 +829,9 @@ f_262f_18e7:
 * **Ewige Tabelle**: the 64 German clubs sorted by `X(t)+0x32` (unsigned long)
   descending with an exchange sort: for i in 0..62, for j in i..63: if
   `val[list[i]] < val[list[j]]` swap list[i], list[j] (strict, so ties keep the
-  lower team id first). Shown: top 23 rows plus any rows of human clubs; points
+  lower team id first). Shown: rows i < 23 + h, where h counts the human clubs met
+  so far in rows 0..22 (each one lets one more row in), plus every row of a human
+  club further down; points
   printed as `value % 100000` (f_3a01_1c70, UNCERTAIN: unsigned long mod).
   Initial eternal points: 0 for every club (F segment zero; the 320-byte block in
   MANA.DAT is read into a temporary buffer in f_262f_36ec and discarded - UNCERTAIN
@@ -847,9 +857,13 @@ f_262f_390e (manager history "Sais. Pl. Liga DfB-Pokal Europapokal" +
   0x24d4 "Halbfinale ", 0x24d8 "Endspiel "; 0x24c4 is empty).
 * Europe: byte3 & 0xf8 == 0 -> "nicht im wettbewerb"; else cup name slot
   `0x24dc + ((byte3>>3)&3)*4` (1 Landesmeister, 2 Pokalsieger, 3 UEFA) + ("SIEGER "
-  if 0x80 else round text `0x24c4 + (byte3&7)*4`).
-* Bar graph: height from byte0 (overall rank), colour by league band (rank <= 18,
-  <= 38, else).
+  if 0x80 else round text `0x24c4 + (byte3&7)*4`). If bit 0x80 is clear and
+  `byte3&7 == 0` the round-text buffer is not rewritten, so the cup name is followed
+  by the stale text of the buffer (the DFB round text of the same row, or the league
+  name if the club won the DFB-Pokal).
+* Bar graph: one column per season, pixel rows r = 58 down to byte0 (overall rank)
+  are drawn, each in the colour of its own band: r <= D:0x226f (18) colour 0x19,
+  r <= D:0x2270 (38) 0x1a, else 0x1b. A bar can thus have up to three colours.
 
 ### 5.4 High score (HIGH.xy) - f_322b_21c4, f_322b_2366, f_322b_2a2a, f_322b_2864
 
@@ -1063,7 +1077,8 @@ The second pass only shows the draw. New game: f_08bc_0418 draws c=1..3 before t
      It is re-rolled while it equals a team already in DFB slots 0..s-1 or any manager's team. So 32 entrants
      are drawn at random from the 58 teams of all three leagues (ids 58..63 never play), and human clubs always take part.
    - **Europe (c=1..3):** each slot s gets `rand(64,199)` (foreign). It is re-rolled while it equals a team
-     in this cup's slots 0..s-1 or in ANY slot of the other three cup arrays. Cups not yet redrawn still hold last season's
+     in this cup's slots 0..s-1 or in ANY slot of the other two European cup arrays (cups 1..3; the DFB array is not
+     checked, which makes no difference as it holds only ids <= 57). Cups not yet redrawn still hold last season's
      teams, so those count too (keep this quirk; minor), and it is also re-rolled if it equals a manager team.
      Then F:0x1d17+c = 0, and for each German qualifier q in list c (until 0x80): pick `r = rand(1,31)`, re-roll
      while slot r already holds a German team (< 0x40), and set slot[r] = q. Slot 0 is never replaced.
@@ -1091,9 +1106,10 @@ which uses cup slot 1).
   If nonzero, minutes 91-105 and 106-120 are played and f_17c2_1226(mask, n, 1) is called. A tie that is still
   undecided (DFB: `home - away == 10`; Europe: f_17c2_15e8 == 0x1e again) gets +10 and goes to penalties:
   f_0310_356d(c, i, mask).
-- **Penalties f_0310_356d**: with no human team involved, home = rand(2,5) and away = rand(2,5) are re-rolled until they
-  differ, and the stored home value is home+20. With a human team the shootout is played interactively (5 rounds, then
-  sudden death). The final shootout score (+20 marker) REPLACES the match score in F:0x4c7e.
+- **Penalties f_0310_356d**: first, always, `first = rand(0,1)` (the side that shoots first), before the teams are
+  checked. Then, with no human team involved, home = rand(2,5) and away = rand(2,5) are re-rolled until they
+  differ, and the stored home value is home+20. With a human team the shootout is played interactively from side
+  `first` (5 rounds, then sudden death; each kick scores if rand(0,2) >= 1). The final shootout score (+20 marker) REPLACES the match score in F:0x4c7e.
 - **Tie decision f_17c2_15e8(c, i)** (first-leg data must be stored per slot, see below):
   `h2 = F:4c7e[i] mod 10, a2 = F:4c7f[i], f1 = F:21c2[c][i], f2 = F:21c2[c][i+1]`.
   slot i = team Q (home in leg 2, away in leg 1), slot i+1 = team P.

@@ -12,9 +12,12 @@ The original runs in the browser through the WASM image (js-dos). The tools
 are in `remake/tools/re/refgame/wasm` and `remake/tools/re/pixcmp`.
 
 ```sh
-cd remake/tools/re/refgame/wasm && npm install && npx playwright install chromium
-remake/tools/re/refgame/wasm/serve.sh --driver   # build wasm/dist, expose window.ci, serve :8000, driver on :9333
-./cmd.sh '[["newgame","TEST"],["shot","/abs/menu.png"]]'
+# from the repository root, once:
+(cd remake/tools/re/refgame/wasm && npm install && npx playwright install chromium)
+# shell 1 (stays in the foreground): build wasm/dist, expose window.ci, serve :8000, driver on :9333
+remake/tools/re/refgame/wasm/serve.sh --driver
+# shell 2:
+remake/tools/re/refgame/wasm/cmd.sh '[["newgame","TEST"],["shot","/abs/menu.png"]]'
 ```
 
 Without `--driver` serve.sh only serves :8000 (then `node driver.mjs` by
@@ -25,13 +28,14 @@ backend ("memory access out of bounds"), then restart serve.sh.
 
 Driver commands (one JSON array per request, run in order): `["click",x,y]`,
 `["rclick",x,y]`, `["move",x,y]` in game coordinates (320×240), `["type","TEXT"]`,
-`["press","Enter"]`, `["wait",ms]`, `["shot","/abs/file.png"]` (the canvas of
+`["press","Enter"]` (Playwright key), `["key",code]` (js-dos key code), `["wait",ms]`, `["shot","/abs/file.png"]` (the canvas of
 the game, 2× = 640×480), `["eval","js"]` (e.g. `ci.sendMouseButton(0,true)` to
 hold the left button). The mouse goes through the js-dos command interface
 and lands exactly. `["state"]` names the screen from a few pixels (title,
 setup, options, question, menu or unknown), `["waitfor","question/menu",ms]`
 waits for one of them, `["newgame","NAME"]` goes from the title or the setup
-to the main menu of a new game (the steps below), `["quit"]` stops the
+to the main menu of a new game (the steps below), `["size"]` prints the
+size of the game canvas, `["quit"]` stops the
 driver and, with `--driver`, the server.
 
 Into a game: wait ~15 s, click 160,120 (title), click the name field 40,229,
@@ -43,7 +47,8 @@ or WEITER at 295,213. The turn ends on the calendar sheet at 275,75.
 
 The remake side: `bmp -scale 1 -demo NAME -shot f.png` or
 `-script file` (`internal/ui/script.go`: `click X Y`, `rclick X Y`, `move X Y`,
-`type TEXT`, `key enter`, `wait N` frames, `shot FILE`). Demo names are in
+`type TEXT`, `key enter|escape|backspace|space`, `wait N` frames, `shot FILE`,
+`dump`). Demo names are in
 `internal/ui/demo.go` (`start` runs a new game from the first cup draw,
 `menu` the main menu after some events, `dfb0`/`uefa0` the first cup round).
 The demo game is another random game, so compare layout, not data.
@@ -58,7 +63,8 @@ The decompilation is in `remake/tools/re/work/` (`mise run re:build`);
 listing when Ghidra failed, as for the main menu f_08bc_0b5f), its callers
 (`calls`) and constants of the data segments (`seg D 24c4 ptrs:7`).
 
-`mise run remake:shot DEMO OUT [SCRIPT]` takes one shot, `remake/tools/shots.sh`
+`mise run remake:shot DEMO OUT [SCRIPT]` takes one shot (with SCRIPT, OUT is
+ignored: the script's `shot FILE` writes the picture), `remake/tools/shots.sh`
 renders every demo screen (CI uploads them as the artifact remake-shots).
 Ebitengine needs a monitor: with the display asleep `bmp` fails with "no
 monitor was found"; `caffeinate -u -t 2` wakes it (the mise task does this),
@@ -75,8 +81,8 @@ monitor was found"; `caffeinate -u -t 2` wakes it (the mise task does this),
 | f_06c7_09b0(img, x0, y0, x1, y1, c) | line | `FillRect` / `drawLine` |
 | f_06c7_083c(img, x0, y0, x1, y1, c) | filled box, inclusive | `FillRect` |
 | f_06c7_0753(img, x0, y0, x1, y1, c) | rectangle outline | `FrameRect` |
-| f_3930_0991(src, sx, sy, dst, dx, dy, w−1, h−1) | blit | `Draw(dst, g.Sub(...))` |
-| f_3091_146c | dialog with title, lines and two buttons | `NewQuestion`, `NewMessage` |
+| f_3930_0991(src, sx, sy, dst, dx, dy, w, h) | blit of w×h pixels (counts, not w−1: f_35ac_1d1c copies w bytes per row, h rows) | `Draw(dst, g.Sub(...))` |
+| f_3091_146c | dialog with title, three lines and two buttons | `NewQuestion`, `NewMessage` |
 | f_3091_0e3a | 4-line alert without title, OKAY at 178,160 | `NewAlert`, `NewAlertText` |
 
 Most light texts have a 1-pixel shadow to the right: colour 7 for light
@@ -97,11 +103,16 @@ top of the frame, horizontally centred. The cobweb (unavailable item) is the
 only cell on black and is drawn keyed on blue. The HAUPT MENU / WEITER button
 is at 268,193.
 
-Dialog f_3091_146c: 156 pixels wide at x=75, centred on y=143, height
-42 + 8·lines, title (flow, colour 11) at baseline y+9, line under it at y+11,
-lines (micro, colour 10) from baseline y+21 every 8, line at h−21, buttons
-57×12 at x+14 and x+84 (one button centred), text colour 17, 1 under the
-pointer. Texts are centred over box and shadow (x0=75+2, x1=75+157).
+Dialog f_3091_146c: always three lines and two buttons. Window
+f_06c7_00a7(75, 110, 155, 65, fill 16), i.e. 75,110–230,175, centred on
+y=143; title (flow, colour 11) at baseline y+9 = 119: the manager's name, or
+"An Alle:" for param_1 ≥ 5; line under it at y+11 from x 77 to 228; the lines
+(micro, colour 10) at baselines y+21, +29, +37; line at y+45 = 155; buttons
+(f_3091_123d) 57×12 at x+14 = 89 and x+84 = 159, y = 160, text left button
+colour 17, right button colour 1 (drawn once, no change under the pointer).
+Texts are centred in [79,230]. A left click in x 90..145 (+70 for the right
+button), y 160..171 answers. (The remake's variants with other line counts or
+one centred button have no counterpart in this function.)
 
 ## 3. Mouse
 
@@ -176,8 +187,12 @@ screenshots of the remake leave it out.
 ### Title, setup (f_08bc_2184)
 - Title 47.CP with palette 2 of PIC/1.PAL; any click.
 - Banner PIC/4.VGA at y=−3, drawn after the strip; strip PIC/34.VGA (309×65)
-  at 5,40 with the logos at 5+12+41k, 47 (the frame of the middle cell is
-  part of the picture); club name centred at baseline ≈ 92.
+  at 5,40 (the frame of the middle cell is part of the picture). The seven
+  logos (38×38, f_08bc_1cdd) are drawn into a 287×38 buffer at x=41k+1, each
+  with a black 2-pixel column to its right, and the buffer goes to 17,48: logo
+  k at 18+41k, 48 (from the code; not yet measured against a shot). Club name
+  centred in [85,235] at baseline 98, colour 0, over a box 85,89–235,99 in
+  colour 5.
 - Slots PIC/35.VGA at x=12,92,172,252, y=105; logo of the chosen club at +10,+9;
   face cell i*41+1 (39 wide) at +9,+65; name field: text left-aligned at
   slot+8, baseline 230, colour 19, block cursor 3×5 two pixels after the text.
@@ -202,9 +217,12 @@ the same; every new round once per cup. Marble, title (big font, colour 11,
 shadow 0, centred in [0,320] at baseline 20), the question "MöCHTEN SIE DEM
 UNÜBERTROFFENEM / SCHAUSPIEL EINER DFB-POKAL- (EUROPA-POKAL-) / AUSLOSUNG
 BEIWOHNEN ?" with ABER KLAR / KEIN GEDANKE. DFB semi-final and final: no
-question, only the round. Board PIC/47.VGA at 19,26; plates 113×7 at x=37/167,
-y=38+10·row, beige, name (DFB: "NAME (league)") in colour 0/7/26 for league
-1/2/3; then "TASTE DRÜCKEN" (micro, white, shadow 0, centred [90,237] at 217),
+question, only the round. Board PIC/47.VGA at 19,26; plates 113×7 at x=37/167
+(D:0x5348), y = 118 + 10·row − 5·n/2 with n = D:0x7d6[round] (32, 16, 8, 4,
+…; n even), so 38+10·row only for n = 32, smaller rounds centred lower;
+beige; name centred in the plate: DFB "NAME (league)" in colour 0/7/26 for
+league 1/2/3 (D:0x5356), Europe German clubs colour 18, foreign clubs colour
+(average of the 3 strengths − 75)·7/20 + 2 (f_17c2_0378); then "TASTE DRÜCKEN" (micro, white, shadow 0, centred [90,237] at 217),
 click, the round. The options DfB-Pokal and Europapokale switch it off.
 
 ### Cup round (f_17c2_1ccb)
@@ -219,8 +237,9 @@ in beige; result "(h:a)" at 268 (Europe 249, first leg at 285). A click on a
 club opens its information.
 
 ### Main menu (f_08bc_0b5f; the decompiler failed on it, read BMMAIN.lst)
-- Header PIC/23.VGA at y=41; face at 15,59; matchday text centred in [66,172]
-  at top 52; manager at top 92.
+- Header PIC/23.VGA at y=41; face (39×40, cell 41·manager+1) at 16,59; logo
+  38×38 at 187,60; matchday text centred in [74,165] at baseline 58, manager
+  name centred in [62,178] at baseline 98, both colour 0 with shadow 4.
 - Calendar sheet: weekday, month, year colour 4 with shadow 7, the day in the
   big font colour 6 with shadow 8, lines at y=54, 65, 84, 94.
 - Box under the matchday: the table places of the manager's league after each
@@ -231,7 +250,8 @@ club opens its information.
 - Disk menu: LADEN, SPEICHERN, HIGHSCORE | OPTIONEN, NEU.
 - The manager tearing his hair: a **right** click asks "MöCHTEN SIE / DAS SPIEL
   WIRKLICH / BEENDEN ?" LEIDER JA / KEIN GEDANKE (the icon shows the screaming
-  manager of PIC/37.VGA, 0,31, 32×23, while it is open; LEIDER JA ends the
+  manager of PIC/37.VGA, 0,31, 32×21, icon code 0xc8 of f_06c7_00a7, at
+  266,196 while it is open (f_08bc_1c1d); LEIDER JA ends the
   program); a left click does nothing. The turn ends on the calendar sheet only (not
   while the message panel is open).
 - Message panel f_3091_05c4: fill 0x3b,0x72–0xf5,0xea colour 4, outline
@@ -246,9 +266,13 @@ club opens its information.
 ### Flag with a word (f_0310_01f2)
 
 The German flag of `f_0310_00fa` over the whole screen (beige border; black
-1..0x4f, red 0x50..0xa0, gold 0xa1..0xee), the word in newbold centred on
-baseline 0x80, colour 0x1d with shadow 0; then `f_3930_01e7(0x32)` (not with
-the auto play D:0x5d4), no click needed. Shown before the matches of every
+1..0x4f, red 0x50..0xa0, gold 0xa1..0xee), drawn only when
+D:0x2252 == D:0x224e and D:0x2254 == D:0x2250, otherwise the screen is
+cleared to black without a flag (the same check sets the height of the
+setup's option box); the word in newbold centred on baseline 0x80, colour
+0x1d with shadow 0; then `f_3930_01e7(0x32)` (not with the auto play
+D:0x5d4), no click needed. Relegationsspiel waits `f_3930_01e7(0x32)` a
+second time. Shown before the matches of every
 competition of a match day: "Ligaspiel" (`f_0310_0995`), "DFB-Pokal"
 (`f_0310_0261`), "Europapokal" (`f_0310_0290`), "Relegationsspiel"
 (`f_0310_02bf`), "Nachholspiele" (`f_0310_07a2`); in the loop `f_1a58_3176`

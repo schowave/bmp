@@ -99,14 +99,15 @@ Credit slot (0x12 bytes) at `0x243e + (k*3+j)*0x12` (written by f_112a_1039):
 ---------------------------------------------------------------------------------------
 ## 2. Time structure (who calls what) – f_1a58_3176
 
-* Every simulated day, for every human manager m (in order 0..n-1): `f_0310_1190` (calendar)
-  then **f_112a_0a6d** (daily bank/booking, §3). Also during the summer break until
-  28 July (day 28, month 6).
+* Every simulated day: `f_0310_1190` (calendar) once, then for every human manager m (in
+  order 0..n-1) **f_112a_0a6d** (daily bank/booking, §3); then `D:0x7dc++`. Also during the
+  summer break until 28 July (day 28, month 6).
 * On each special date (`day == D:0x53d0[i] && month == D:0x53d4[i]-1`) `f_1a58_2a06(i)`
   (§8; i=0 Christmas). Checked every day.
-* The day loop stops at "turn days": `(day - D:0x224c) % 7 == 0 || (day - 4) % 7 == 0`
-  (D:0x224c = 0) → for every manager **f_0cb5_13bd** (weekly events incl. riots, §9), and if
-  `(day - D:0x224c) % 14 == 0` **f_14a4_2cb4** (new sponsor offers, §5.2).
+* The day loop stops at turn days, tested on the season day counter `n = D:0x7dc` (not the
+  calendar day F:0x2eba): `(n - D:0x224c) % 7 == 0 || (n - 4) % 7 == 0` (D:0x224c = 0) →
+  for every manager **f_0cb5_13bd** (weekly events incl. riots, §9), and if
+  `(n - D:0x224c) % 14 == 0` **f_14a4_2cb4** (new sponsor offers, §5.2).
 * Matches: f_1a58_20b2 (gate money, §4) per fixture involving a human team.
 * Season end (after last matchday): popularity update (§6.2), licence check (§10),
   promotion/relegation, `f_14a4_2cb4` per manager, `f_0cb5_0012` (season summary with
@@ -203,10 +204,14 @@ comp 0 = league, 1 = DFB-Pokal, ≥2 = European cups. For each human manager m i
     from a higher league): `att += rand(att / (8 - 3*(L-b)), att)` (16-bit rand bounds),
     then `att = min(att, Sitz + Steh)`.
   * **money += att * M.0x234c / split**.
-* Away manager in a split cup tie: if the home side is human its `att` is reused and the
-  away manager gets `att * homePrice / 2`; otherwise
+* Away manager in a split cup tie (not the final): `att` is a single variable, zeroed once
+  before the loop over managers (@1a58:20d9) and set when the loop reaches the home manager.
+  If `att != 0` (home side human with a lower manager index) the away manager gets
+  `att * homePrice / 2`; if `att == 0` (home side AI, **or** human with a higher index)
   `price = D:0x5390[bucket(home)] + rand(0,1)`,
-  `att = f_0f9d_11e0(awayMgr, home, away, 1, 2, 1, price)` and money += `price*att/2`.
+  `att = f_0f9d_11e0(awayMgr, home, away, 1, 2, 1, price)` (generic capacity, away manager's
+  own stadium) and money += `price*att/2` (@1a58:243b..2507). The home manager processed
+  later computes his own `att` again.
 * Riot roll (only for the home manager, still before the game: the end of the per-manager
   block of f_1a58_20b2 @1a58:291a, after the gate and the squad update):
   `x = clamp((int16)(Steh.lo - Sitz.lo) / 1000, 0, 30)`;
@@ -241,7 +246,7 @@ md = D:0x225a[L]; total = D:0x2262[L]
 cap = capFlag ? rand(T - T/3, T + T/3)*10  (T = D:0x2c8[bucket(h)]) : Sitz + Steh
 c = min(c,3); if L == 2: c = 0; if strA < 90 and c > 1: c--
 if price < 22: att = att*(c+2)/3
-if md + 5 > total and price < 22:          // last 4 matchdays
+if md + 5 > total and price < 22:          // last 5 matchdays (md >= total-4)
     if md == total: att = cap               // last matchday sold out
     else:
         if posH < 7 - 2*(L!=0):

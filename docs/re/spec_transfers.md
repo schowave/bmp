@@ -172,15 +172,18 @@ f_14a4_1798 calls it with a *person* index as slot (bug, see §4.4).
    to a German club, and each round moves one more non-human person.
    (f_2277_25de is called with the person index as slot index of the current manager – original bug;
    value is effectively garbage-ish.)
-3. Writes a 3-int result `out[k] = cnt_k*100/T*G/100` to the caller's buffer (bytes): cnt_k = squad
+3. Writes a 3-int result `out[k] = cnt_k*100/T*G/100` to the caller's buffer (16-bit words,
+   14a4:19e3; the counters cnt_k are bytes): cnt_k = squad
    sizes of the humans in league k (counted before step 1), T = sum of cnt_k + #foreign persons after
    step 2 (min 1), G = 150-T.
 4. f_0cb5_2756 (end of f_0cb5_0012, before the summer days) calls f_14a4_1798, then per range k of
    D:0x2272 ({0,17},{18,37},{38,57},{58,255}; out[3] = 0) counts the persons with a team in the range
    (each lowers out[k] while > 0) and lists those with owner > 3. For k = 0..3, while out[k] > 0 (at
-   most 1000 rounds), it takes from every other range j, while j has listed persons left: a random
-   still listed entry (`rand(0, count_j-1)`, at most 1001 tries), `team = f_0cb5_2987(k)`. Then it
-   calls f_14a4_1798 again.
+   most 1000 rounds), it takes from every other range j, while j has listed persons left and
+   out[k] > 0: a random listed entry `rand(0, count_j-1)`, where count_j is the number listed at
+   the start, never decremented (0cb5:28a4; the remaining count is a separate copy); it re-draws
+   while the entry is already taken (0xff), at most 1001 draws, then uses the last draw anyway;
+   `team = f_0cb5_2987(k)`, remaining_j--, out[k]--. Then it calls f_14a4_1798 again.
    f_14a4_19fb (new game, after f_0f9d_0697(10) and srand(time)) calls f_14a4_1798, then for
    p = 1..150 whose team has no human manager and is 0xff or F:0xa7a0 (the year, set by f_0310_1190,
    still 0 in a new game) is not 0: for k = 0..2 with out[k] > 0, `team = f_0cb5_2987(k)`,
@@ -201,12 +204,14 @@ Hover texts:
 * market row: `"VON " + (owner==4 ? team name : manager name) + ", " + age + " J."`
 * own-squad row (via f_1ecd_29c6 → f_1ecd_2897): `"STÄRKE:" (s10+s11+s12)/3 ", " age " JAHRE"`.
 
-Name column of both lists (f_1ecd_06af column 2): the name of an own player with an offer
-of a club (`+9 & 0xc0`: 0x40 an offer for a squad player, 0x80 one for a listed player) is drawn
-light (beige) instead of the colour of his position; the rest of the row keeps its colour. The
-remake's port first limited this to the market list; as 0x40 is only set on squad slots, the
-rule covers the squad list too (the jump table of the columns is not in the listing, so this is
-read from the bits, not from the code).
+Name column of both lists (f_1ecd_06af column 2, 1ecd:0b05; jump table at 1ecd:1001, not in
+`BMMAIN.lst`): the name of an own player (`person.owner == F:0x5358`) with an offer of a club
+(`+9 & 0xc0`: 0x40 an offer for a squad player, 0x80 one for a listed player) is drawn light
+(beige, colour 0xb) instead of the colour of his position; the rest of the row keeps its colour. The
+rule applies in display modes 1/2 (market list) and 4 (squad list of the market screen; mode 4
+sets a flag and is then drawn as mode 0, 1ecd:06cb), so it covers both lists. In mode 3
+(contract screen) the name is drawn light instead when a message `+0x30` exists and
+`(+0x18 & 0x7f) > 99` (pending extension request).
 
 Price column of the market list (f_1ecd_06af column 17, 1ecd:0eeb):
 `price = (owner==4) ? slot.+0x28 : f_2277_25de(slot,0) computed as manager 4`; in LEIHEN view
@@ -407,7 +412,8 @@ hint= max(hint, current salary)
 ### 8.4 Player acceptance `f_2277_2270(slot, Y, sal)` (manager = F:0x304a)
 ```
 cy = slot.+0x0b ; cs = slot.+0x28 ; age = person.age ; lg = league(mgr)
-if Y == cy and sal > cs:            ACCEPT
+if Y == 0: Y = cy ; if sal == 0: sal = cs          (2277:22a8..2321)
+if Y == cy and sal > cs:            ACCEPT     (sal == cs falls through to the formula)
 if Y == cy and sal < cs:            REJECT
 if cy > Y and cs*120/100 < sal:     ACCEPT     (unsigned)
 if cy > Y and cs*105/100 >= sal:    REJECT
@@ -422,14 +428,19 @@ So: longer contracts cost ~13 %/season more, demands fall during the season, are
 season-end phase for young players; any player whose demand reaches 100 000 DM/month refuses.
 
 ### 8.5 Season end (`f_0cb5_0012`), contract parts
-* Manager-0 pass, for every person 1..150 located in a squad (`f_3091_17b7`): `age++`; delete
-  message, `+9 &= 0x3f`; `+0x0b--` (unless option `D:0x5d4`, then age := rand(18,25), +0x18 = 0).
+* Manager-0 pass, for every person 1..150: `age++` (all persons, before the squad lookup,
+  0cb5:08d0); then, if located in a squad (`f_3091_17b7`): delete message, `+9 &= 0x3f`;
+  `+0x0b--` (unless option `D:0x5d4`, then age := rand(18,25), +0x18 = 0).
   **Loan return**: if `person.owner != holder`: owner < 4 → `f_1ecd_37d8(p,1,0,0,0,25)` into the
   owner's squad + memcpy of the slot; owner >= 4 → `owner = 5`. Remove from holder with limit
   `(2 - (slotIndex==4))*12` (original compares the slot index, not the manager — quirk). Then clears
   `+0x18` and `+0x0c` of `SLOT(0, newIndex)` (only correct if the owner is manager 0 — quirk).
-* Retirement (each manager pass): persons with contract 0 and `+0x18&0x80` are removed (owner 5);
-  persons not in a squad with `rand(32,34) < age` are re-generated as young players.
+* Retirement (each manager pass, 0cb5:0925..0b0b), for p = 1..150 not in another manager's squad:
+  `r = rand(32,34)` (drawn for every such p). Retires if in this manager's squad with contract 0
+  and `+0x18&0x80`, or if in no squad and `age > r`. A retiring squad player gets a message, is
+  removed (`f_1ecd_10ee(s,1,24)`) and gets owner 5. Every retiring person is then re-generated:
+  `age = rand(18,25)`, `v = rand(30,92)`, `57f9 = rand(v-5,v+5)`, `rand(0,6)` (written to `57fd`
+  of another person index, quirk), `57fa = rand(v-5,v+5)`.
 * "Vertragsverhandlungen": for every human squad slot with `+0x0b == 0`:
   `f_2277_2a8f(s, 1, …)`. Failure → "<name> kehrt Ihrem Verein den Rücken...",
   **compensation `((f_2277_25de(s,0) >> 1) / 1000) * 1000` credited** ("Sie erhalten eine
@@ -471,6 +482,8 @@ Purchases require `balance >= bid` (no credit check beyond that).
   name to `F:0x4cfe/0x4d18`; `score = f_322b_2864(m) + (Σ squad values f_2277_25de(s,0)
   + f_14a4_2bba()*135000 + balance - f_112a_0f8d(0,99)) / 80000 + 40*[+0x227b] + 20*[+0x227c]
   - (500 - 60*([+0x227d]+[+0x227e]+[+0x227f])) + (flag==0 ? 300 : 0)`, min 1, stored in `F:0x4d32`.
+  The sum runs over the occupied slots of m (`f_3091_1109(m)`), but f_2277_25de reads the slots
+  of manager `F:0x304a` (322b:2a90..2acc); same result only when m == `F:0x304a`.
   (The "dem Transfermarkt" annotation is a false string match on F:0x4d30.)
 * `f_262f_2be8`, `f_262f_29a8`, `f_262f_2551`, `f_262f_281f` — **sponsorship / advertising
   contracts** (shirt + boards), not manager job offers: offers at `F:0x2e + ((m*2+cat)*10+k)*4`

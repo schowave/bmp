@@ -131,7 +131,9 @@ set in param_6):
 
 1. `cupFinal = (comp == 1 && F:0x8 > 4)` -> attendance = D:0x2256 = 76000 and every human participant
    gets a flat **+532,000 DM** (0x81e20); no other income, no records.
-2. If m's team is **home** (and not the special "fired/bankrupt" case 0x237f == 'd' -> f_1a58_2051):
+2. If m's team is **home**: forfeit first if `F:M+0x237f == 'd'` (fewer than 8 players, set by
+   f_0f9d_0002) and not (month == 5 and day >= 10) -> f_1a58_2051 (0:2, money -= 200,000) and
+   f_1a58_20b2 returns at once, for all managers (same check for the away manager). Otherwise:
    * `P4 = 1`; if `comp > 1` then `P4 = 2`, and if `F:0x9 > 4` then `P4 = 3`.
    * `att = Attendance(m, home, away, P4, P5=gateDiv, generic=0, priceOverride=0)` (§3.2).
    * League game (`comp == 0`): history byte `F:M+0x238c+count = att/1000`; `0x2426 += att`;
@@ -141,13 +143,16 @@ set in param_6):
      `b < L` (opponent from a higher German league): `att += rand(att/(8 - 3*(L-b)), att)` (both
      arguments truncated to int16! — overflow possible above 32767), then `att = min(att, Sitz+Steh)`.
    * Income: `money += price * att / gateDiv` (long arithmetic, price = F:M+0x234c).
-3. If m's team is **away** and `gateDiv == 2` (cup, first/only leg):
-   * if no attendance has been computed yet in this call (home is AI):
+3. If m's team is **away** and `gateDiv == 2` (cup, first/only leg; not the final):
+   `att` is one variable, zeroed once before the manager loop (@1a58:20d9) and set when the loop
+   reaches the home manager (@1a58:243b tests it).
+   * if `att == 0` (home is AI, **or** human with a higher manager index than m):
      `priceAI = D:0x5390[j(home)] + rand(0,1)`;
      `att = Attendance(m, home, away, P4=1, P5=2, generic=1, priceOverride=priceAI)`;
      `money += priceAI * att / 2`.
-   * else (home is also human): `money += homePrice * att / 2` using the home manager's price and the
-     home attendance.
+     The home manager processed later computes his own `att` again.
+   * else (home is human with a lower index): `money += homePrice * att / 2` using the home
+     manager's price and the home attendance.
    League away games give no gate money.
 4. Match-report bookkeeping (only for the human's displayed match, UNCERTAIN gating via
    f_0310_32b1): for a human home match, report flag "sold out" (report+0x0c) is set when
@@ -265,9 +270,9 @@ Messages (D:0x28d8+4k): "Der Ausbau der Sitzplätze" / "Der Ausbau der Stehplät
 Delivery: popup immediately if `0x80+7*D:0x224d < day < 0xcf-14*D:0x224d` or `day > 0x142`,
 otherwise queued into the mailbox (f_0000_239e) — UI only.
 
-### 4.2 Per turn: f_0cb5_13bd (called for each human after the day loop; the calendar stops when
-`day % 7 == D:0x224c (0)` or `day % 7 == 4`, i.e. twice a week). Whole function is skipped when
-day counter D:0x7dc >= 322.
+### 4.2 Per turn: f_0cb5_13bd (called for each human after the day loop; the calendar stops on
+turn days, `n % 7 == D:0x224c (0)` or `n % 7 == 4` with `n` = season day counter D:0x7dc, not the
+calendar day; i.e. twice a week). Whole function is skipped when D:0x7dc >= 322.
 
 ### 4.3 Riots ("Randalierer im Stadion")
 
@@ -296,7 +301,7 @@ if rand(0, 442 - 52*Komfort) == 0 and Komfort > 1 and L == 0 (1. Bundesliga only
     Komfort -= 1; message "In der neuen Komfortbewertung" / "wird ihr Stadion um eine Note" /
                           "schlechter beurteilt."
 ```
-(Probability 1/131 at SEHR GUT, 1/391 at MANGELHAFT per turn.)
+(Probability 1/131 at SEHR GUT, 1/339 at MANGELHAFT per turn; never at UNGENUEGEND.)
 
 ### 4.5 Monthly upkeep (part of f_14a4_2822 = monthly expenses, paid on the last day of each month,
 D:0x7b8 = month lengths)
@@ -402,9 +407,11 @@ Open/closed: `D:0x620[i]` > 0 = closed ("<name> hat nicht geöffnet..."), <= 0 o
 `s = sign; v -= sign(v); if v == 0: v = rand(20,70) * (old>0 ? -1 : +1)` (open/closed periods of
 20-70 days alternate; a 0 value would stay 0).
 
-Booking: menu entry disabled while `F:M+0x237b != 0`. Click camp i: closed -> message; second
-booking in the same screen -> "Einmal pro Woche reicht doch..."; money < price -> "Keine finanzielle
-Möglichkeit gegeben..."; else money -= price, run effect, close screen.
+Booking: menu entry disabled while `F:M+0x237b != 0`. Click camp i: closed -> message; money < price
+-> "Keine finanzielle Möglichkeit gegeben..."; else money -= price, run effect, close screen
+(f_112a_072d returns 1 into the booked flag `[bp-0x42]`, which ends the screen loop @112a:06f6).
+"Einmal pro Woche reicht doch..." needs that flag set while the screen is still open, so it is
+unreachable.
 
 Effect f_112a_072d(i) (W = D:0x52a6, rows j = E,F,P,R; V has no effect):
 ```

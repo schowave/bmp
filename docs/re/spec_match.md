@@ -13,7 +13,8 @@ writes the absolute address of manager 0, e.g. `MGR+0x2260` = team id).
 ## 0. Overview / call graph for one match day
 
 Game loop `f_1a58_3176`, per day with match flags `b = D:0x2280[F:0x16e]`
-(bit0..2 league 0..2, bit3 DFB-Pokal, bits4..6 Europapokal, bit7 Nachholspiele):
+(bit0..2 league 0..2, bit3 DFB-Pokal, bits4..6 Europapokal, bit7 Nachholspiele);
+`b == 9` exactly is treated as `b = 0` (no matches that day):
 
 1. For each human manager m: `f_0f9d_0002(m,1)` (lineup -> team strengths, see §3),
    `F:0x90c6[m]=0` (substitutions made), `F:0x1d14[m]=0` (plays today flag).
@@ -634,8 +635,9 @@ delays, scenes) only when a tie of a human team goes to it; otherwise periods 91
 without display, also for a human match that was decided after 90 minutes.
 
 ### 12.2 Shoot-out – `f_0310_356d(c, idx, mask)`
+* Always first: `first = rnd(0,1)`, drawn before the human check (also for AI ties).
 * No human: repeat `H=rnd(2,5); A=rnd(2,5)` until H != A; `H += 20`.
-* Human: screen "Elfmeterschiessen"; H=A=0; `first = rnd(0,1)` (drawn first);
+* Human: screen "Elfmeterschiessen"; H=A=0;
   `side = first; rounds = 0`; while `rounds < 5 or H == A or side != first`:
   `goal = min(rnd(0,2),1)` (2/3); `f_1a58_0ca3(goal, c+10, idx, home, away, side, 120, comp, side, 1)`;
   score[side] += goal; side ^= 1; if side == first: rounds++.
@@ -689,6 +691,7 @@ goals against home/away (+0x1c/+0x1d backup), +0x1e/+0x1f games home/away,
 
 ### 13.3 AI goal scorers – `f_14a4_1662(lg)` -> `f_14a4_14d4(team, goals)` (teams without human manager)
 ```
+if goals == 0: return                  // no games counted, no rnd drawn
 cand = []
 for p in 1..150 with PERSON[p].team == team:
     if rnd(0,100) < 94: PERSON[p].games++
@@ -729,7 +732,7 @@ update `f_0cb5_13bd` (not part of the match engine; also creates training injuri
 
 ---------------------------------------------------------------------------------
 ## 14. Postponements and Nachholspiele
-* `f_0310_0463(day, lg)` for date slots 25 < day < 70 (winter): `k = |day-44|`,
+* `f_0310_0463(day, lg)` for date slots 25 <= day <= 69 (winter): `k = |day-44|`,
   `n = 9 - k/3`, if n != 0 and rnd(0,1): `n = 8 - k/3`; `n = rnd(0,n)` (max 8 per pass).
   Repeatedly picks a free Nachhol entry (20 entries of 5 bytes at `F:0x5715`:
   day, matchday, league, pairIdx) and a random pair `rnd(0, teams/2-1)` not yet postponed,

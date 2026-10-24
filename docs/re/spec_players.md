@@ -111,7 +111,7 @@ others are listed with what was observed.
 | 0x132 | 2374 | 5 | UNCERTAIN, init 30 each |
 | 0x135 | 2377 | 1 | set to 1 in the 1964/1993 scenario |
 | 0x138 | 237a | 1 | league 0=1.Liga, 1=2.Liga, 2=Amateur-Oberliga |
-| 0x139 | 237b | 1 | training-camp cooldown (weeks); set rand(7,18) after a camp, -1 on the last day of every month (f_112a_0a6d); camp menu disabled while != 0 |
+| 0x139 | 237b | 1 | training-camp cooldown (days); set rand(7,18) after a camp, -1 every day while != 0 (f_112a_0a6d, which runs daily per human manager, outside its month-end branch); camp menu disabled while != 0 |
 | 0x13a,0x13b | 237c,237d | 2 | UNCERTAIN |
 | 0x13d | 237f | 1 | match "effort" value 0..40 computed by f_0f9d_0002 (4.5); 100 = fewer than 8 players in lineup |
 | 0x13e | 2380 | 1 | bit0 = riot damage pending (f_0cb5_13bd) |
@@ -123,7 +123,7 @@ others are listed with what was observed.
 | 0x14a | 238c | 1 | UNCERTAIN |
 | 0x15e..0x191 | 23a0..23d2 | longs | stadium/finance values (0x23a0 = 3000*(2-lg)[+5000 scen], 0x23a8 = 4000*(5-lg)[+10000], 0x23b0 = 3500*(2-lg), 0x23b8, 0x23c0, 0x23c8 = 4+scen (reduced by riots), 0x23d0 = 3+scen (stadium comfort grade, reduced by events)). Not player topic |
 | 0x1a4..0x1c0 | 23e6..2402 | 8×4 | written by game loop, UNCERTAIN |
-| 0x1dc | 241e | 2 | UNCERTAIN (init 50-20*league; +rand(1,3) monthly while <95) |
+| 0x1dc | 241e | 2 | UNCERTAIN (init 50-20*league; on the last day of a month, if < 95 and `rand(0,22) < D:0x68c[m]/2500` (long, D:0x68c + m*0x24): += rand(1,3); f_112a_0a6d) |
 | 0x1de | 2420 | 2 | monthly cost component (f_14a4_2822), UNCERTAIN |
 | 0x1e0 | 2422 | 2 | written by f_14a4_2636 (income) |
 | 0x1e2 | 2424 | 2 | youth pool: += slider(0x2381)*4 on the last day of each month; used at season end (6.4) |
@@ -137,7 +137,8 @@ others are listed with what was observed.
 
 ### 2.1 New game: f_322b_035c (called from f_08bc_2184 on "new game")
 
-Constants: `D:0x7a6[0..4] = {0,20,64,106,151}` (person block bounds),
+Constants: `D:0x7a6[0..4] = {1,20,64,106,151}` (person block bounds; f_322b_035c reads
+only D:0x7a7.., the add-manager pick in 2.4 also reads D:0x7a6[0] = 1),
 `D:0x9438[k] = {2,5,8,5}` (squad players per position k), `D:0x943c[k] = {19,44,42,45}`
 (running counters, never re-initialised), `D:0x9432[0..4] = {0,2,8,15,20}` (MANA.DAT
 name slots per position: GK 0-1, ABW 2-7, MIT 8-14, ANG 15-19).
@@ -422,8 +423,9 @@ Camps (D:0x2394): Kickfelder Mühle, Trlg. Hackstedt, Hof Schweißperle, Fitness
 Krone, Scola Ludum Pilae, Sportschule Träne, Hotel Medium, Luxushotel La Preux.
 Price `D:0x5258[c]` (long) = factor × count(m) × 2000 with factors {5,6,7,10,11,10,13,15}
 (converted once when the first entry < 10). Availability: `D:0x620[c]` counter (≥1 =
-closed); every month-end each counter moves toward 0 by 1 and when it hits 0 is reset to
-`±rand(20,70)` (sign flips). Initial {-80,-50,-100,-60,80,50,70,60}. Needs money ≥ price,
+closed); every call of f_112a_0a6d (daily, once per human manager, so nHumans steps per
+day) each counter moves toward 0 by 1 and when it hits 0 is reset to `±rand(20,70)` (sign
+flips). Initial {-80,-50,-100,-60,80,50,70,60}. Needs money ≥ price,
 manager.0x237b == 0 (menu) and one camp per visit.
 Params `CP` = D:0x527e + 5c (bytes 0..3 used): {1,2,1,1},{1,2,3,1},{1,3,2,1},{2,4,3,2},
 {2,1,2,4},{2,4,3,2},{3,2,2,3},{5,3,2,4}; matrix `CM` = D:0x52a6 rows
@@ -437,7 +439,7 @@ for each slot s < count:
         x = (rand(2L+87, 2L+117) + C[j] - 100) / 10
         a = rand(0, x*20/30);  b = rand(0, x);  x = x + b - a
         slot[0x10+j] += x >> 2  (arithmetic shift, byte add);  if > 99: = 99
-    x += x*C1/200            (x of j=2)
+    x += x*C2/200            (x of j=2; 112a:0995 imul [bp-0x16] = C[2])
     if rand(0,4)==0: +0x0e += rand(155,300)*x/800
     f_2277_000a(slot)        (re-rolls tendency; makes the line above ineffective)
 manager.0x237b = rand(7,18)
@@ -490,8 +492,10 @@ f_0cb5_25d5 (swap lineup players to better match preferred side), renumber.
 pick(k) = f_1ecd_3635: among slots 0..23 with person, `+0x0a == 0` and available
 (3.9), choose the one with the highest (K+T+F)/3 among players of position k (ties →
 later slot). If none, try the next position (k+1 cyclic; −1 cyclic for k==3, and for
-k==2 when mode < 4), until back at k. A goalkeeper offered for a field position gets
-score −1 (first GK) / 1 (further GKs). Returns −1 if no available player.
+k==2 when mode < 4). A goalkeeper offered for a field position gets score −1 (first GK) /
+1 (further GKs). Loop end (likely): stop as soon as a slot is chosen; return −1 when a pass
+finds no available player of any position; also stop when back at k after a goalkeeper
+was seen in a field-position pass. It does NOT stop merely because it is back at k.
 
 ### 4.4 Ineffective / side helpers
 `sideDiff(s) = |person.side − col|` (f_0310_1bd7).
@@ -620,7 +624,8 @@ if Y > 30 and rand(0,2)==0 and f_112a_00b4(m) < 23:
     repeat p = rand(1,150) until person.owner == 5
     Y = clamp(Y, 10, 90)
     side = rand(0,6); age = rand(17,19); F = rand(45,55); T = rand(Y-3,Y+3); K = rand(Y-3,Y+3)
-    club = manager.team;  s = f_1ecd_37d8(p, contract=0, 0, 24);  owner = m
+    club = m (manager INDEX, bug, 0cb5:0505);  s = f_1ecd_37d8(p, contract=0, 0, 24);  owner = m
+    (f_1ecd_37d8 then finds club != manager.team: resets person +0x22/+0x23, club = manager.team)
     +0x28 = value(s,1)*50/100;  +0x0b = rand(2,3)
 ```
 (Position comes from the chosen person's block, so it is random weighted by block size.)
@@ -660,7 +665,7 @@ Daily until the new season: f_112a_0a6d per manager and f_0cb5_2b88 for every sl
 | f_2277_01a9 | free training points (20 − Σ / 10 − Σ) |
 | f_0f9d_1122 | squad K/T/fatigue averages for the training screen |
 | f_112a_0145 / f_112a_072d | training camp menu / effect |
-| f_112a_0a6d | month/turn upkeep (camp cooldown, youth pool, camp availability) |
+| f_112a_0a6d | daily upkeep per human manager (camp cooldown, camp availability; month end: youth pool, money) |
 | f_1a58_20b2 | after match day: fatigue, games, suspension countdown |
 | f_1ecd_1560 | lineup screen (rules) ; f_1ecd_14c7 disable auto lineup |
 | f_1ecd_3360 / f_1ecd_3635 | auto lineup / best available player of position |
