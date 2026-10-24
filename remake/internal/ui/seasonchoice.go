@@ -38,7 +38,9 @@ func NewSeasonChoice(mana *assets.Mana, saveDir string) Scene {
 // seasonLabel is the text of an entry.
 func seasonLabel(s seasons.Season) string {
 	if s.ID == "" {
-		return "ORIGINAL (1992/93)"
+		// The clubs of the original are those of 1991/92 (its modern start
+		// plays them from 1992 on).
+		return "ORIGINAL (1991/92)"
 	}
 	return "SAISON " + s.Label()
 }

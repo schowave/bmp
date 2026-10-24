@@ -21,7 +21,7 @@ func TestSeasonChoiceHover(t *testing.T) {
 			t.Errorf("(%d,%d): %d, want %d", h.x, h.y, got, h.want)
 		}
 	}
-	if seasonLabel(seasons.Season{}) != "ORIGINAL (1992/93)" || seasonLabel(seasons.Season{ID: "1999-00", Year: 1999}) != "SAISON 1999/00" {
+	if seasonLabel(seasons.Season{}) != "ORIGINAL (1991/92)" || seasonLabel(seasons.Season{ID: "1999-00", Year: 1999}) != "SAISON 1999/00" {
 		t.Error("labels")
 	}
 }
