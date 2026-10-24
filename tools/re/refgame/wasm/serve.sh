@@ -3,10 +3,10 @@
 # window.ci (the driver needs it) and serves it on port 8000.
 # With --driver it also runs driver.mjs and stops both together (Ctrl-C, or
 # the driver's ["quit"] command).
-# Usage: remake/tools/re/refgame/wasm/serve.sh [--driver]   (from anywhere)
+# Usage: tools/re/refgame/wasm/serve.sh [--driver]   (from anywhere)
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-ROOT="$(cd "$HERE/../../../../.." && pwd)"
+ROOT="$(cd "$HERE/../../../.." && pwd)"
 "$ROOT/images/wasm/build-bundle.sh" "$ROOT/images/wasm/dist"
 sed -i.bak 's/if (event === "ci-ready") {/if (event === "ci-ready") { window.ci = ci;/' "$ROOT/images/wasm/dist/index.html"
 rm -f "$ROOT/images/wasm/dist/index.html.bak"

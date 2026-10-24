@@ -4,20 +4,20 @@ What the screens of the original look like and how they behave, collected
 while the remake's screens were rebuilt against the running original. The
 other specs cover the rules; this one is for whoever fixes a screen or a
 screen test. Addresses are of the unpacked image (see
-`remake/tools/re/CONTEXT.md`).
+`tools/re/CONTEXT.md`).
 
 ## 1. Comparing a screen with the original
 
 The original runs in the browser through the WASM image (js-dos). The tools
-are in `remake/tools/re/refgame/wasm` and `remake/tools/re/pixcmp`.
+are in `tools/re/refgame/wasm` and `tools/re/pixcmp`.
 
 ```sh
 # from the repository root, once:
-(cd remake/tools/re/refgame/wasm && npm install && npx playwright install chromium)
+(cd tools/re/refgame/wasm && npm install && npx playwright install chromium)
 # shell 1 (stays in the foreground): build images/wasm/dist, expose window.ci, serve :8000, driver on :9333
-remake/tools/re/refgame/wasm/serve.sh --driver
+tools/re/refgame/wasm/serve.sh --driver
 # shell 2:
-remake/tools/re/refgame/wasm/cmd.sh '[["newgame","TEST"],["shot","/abs/menu.png"]]'
+tools/re/refgame/wasm/cmd.sh '[["newgame","TEST"],["shot","/abs/menu.png"]]'
 ```
 
 Without `--driver` serve.sh only serves :8000 (then `node driver.mjs` by
@@ -58,8 +58,8 @@ picture) and `pixcmp/find.py original.png remake.png x0 y0 x1 y1 [r]` (where
 a region of the remake lies in the original: the way to measure offsets when
 the data differ). `idx.py` dumps palette indices row or column wise.
 
-The decompilation is in `remake/tools/re/work/` (`mise run re:build`);
-`remake/tools/re/q.py` finds strings (`str`), prints a function (`fn`, with the
+The decompilation is in `tools/re/work/` (`mise run re:build`);
+`tools/re/q.py` finds strings (`str`), prints a function (`fn`, with the
 listing when Ghidra failed, as for the main menu f_08bc_0b5f), its callers
 (`calls`) and constants of the data segments (`seg D 24c4 ptrs:7`).
 

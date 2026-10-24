@@ -149,8 +149,8 @@ fi
 '''
 
 [tasks."re:build"]
-description = "Disassemble and (with GHIDRA set) decompile BMMAIN.EXE into remake/tools/re/work"
-run = "remake/tools/re/run.sh"
+description = "Disassemble and (with GHIDRA set) decompile BMMAIN.EXE into tools/re/work"
+run = "tools/re/run.sh"
 
 [tasks."remake:build"]
 description = "Build remake/bin/bmp"

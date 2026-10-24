@@ -7,7 +7,7 @@
 # needs: python3 with capstone; optional GHIDRA=<ghidra install dir>
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-root=$(cd "$here/../../.." && pwd)
+root=$(cd "$here/../.." && pwd)
 work=${1:-$here/work}
 mkdir -p "$work"
 work=$(cd "$work" && pwd)

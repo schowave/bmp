@@ -11,8 +11,8 @@ pitfalls) and the screen's section in §4. Read both first.
 1. **Start the original** (once per session), from the repository root:
 
    ```sh
-   (cd remake/tools/re/refgame/wasm && npm install && npx playwright install chromium)
-   remake/tools/re/refgame/wasm/serve.sh --driver
+   (cd tools/re/refgame/wasm && npm install && npx playwright install chromium)
+   tools/re/refgame/wasm/serve.sh --driver
    ```
 
    Run it in the background and wait for "ci ready". Shots while DOSBox boots or
@@ -21,7 +21,7 @@ pitfalls) and the screen's section in §4. Read both first.
 2. **Shoot the original**: drive it to the screen and shoot it, absolute paths:
 
    ```sh
-   remake/tools/re/refgame/wasm/cmd.sh '[["newgame","TEST"],["shot","/abs/orig.png"]]'
+   tools/re/refgame/wasm/cmd.sh '[["newgame","TEST"],["shot","/abs/orig.png"]]'
    ```
 
    Click positions of the menus are in spec_ui.md §1.
@@ -36,7 +36,7 @@ pitfalls) and the screen's section in §4. Read both first.
    With a script, its `shot FILE` line writes the picture instead of OUT.
    It needs an awake display (`caffeinate -u`); on Linux `xvfb-run`.
 
-4. **Compare**, from `remake/tools/re/pixcmp`:
+4. **Compare**, from `tools/re/pixcmp`:
    - `python3 diff.py orig.png remake.png diff.png`: number of differing pixels
      and a side-by-side picture with the differences in red. Look at it.
    - `python3 find.py orig.png remake.png x0 y0 x1 y1 [r]`: where a region of

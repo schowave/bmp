@@ -231,6 +231,7 @@ The animation at the top is rendered from the remake's demo screens with
 | `images/vnc/bench/` | Benchmark for the VNC image with Playwright, see [images/vnc/bench/README.md](images/vnc/bench/README.md) |
 | `images/wasm/` | WASM image and its save server, see [images/wasm/README.md](images/wasm/README.md) |
 | `remake/` | Re-implementation of the game in Go, see [remake/README.md](remake/README.md) |
+| `tools/re/` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE`, see [tools/re/README.md](tools/re/README.md) |
 | `docs/re/` | Rules and screens of the original, reverse-engineered from `BMMAIN.EXE` |
 | `docs/adr/`, `docs/glossary.md` | Architecture decisions and the terms of the game |
 | `docs/agent-readiness/` | Agent-readiness report of the repository |

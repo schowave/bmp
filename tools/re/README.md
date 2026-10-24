@@ -41,11 +41,11 @@ only; `tcpproxy.py` forwards port 5902 to it:
 
 ```sh
 podman run -d --name bmp-ref -p 5991:5902 bmp
-podman cp remake/tools/re/refgame/tcpproxy.py bmp-ref:/tmp/
+podman cp tools/re/refgame/tcpproxy.py bmp-ref:/tmp/
 podman exec -d bmp-ref python3 /tmp/tcpproxy.py
 pip install vncdotool pillow
-BMP_SHOTS=shots python3 remake/tools/re/refgame/ctl.py click 320 300 3   # right click
-BMP_SHOTS=shots python3 remake/tools/re/refgame/ctl.py shot menu.png
+BMP_SHOTS=shots python3 tools/re/refgame/ctl.py click 320 300 3   # right click
+BMP_SHOTS=shots python3 tools/re/refgame/ctl.py shot menu.png
 ```
 
 Coordinates are in the 640×480 VNC picture (twice the 320×240 of the game).

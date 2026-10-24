@@ -13,8 +13,8 @@ images/wasm/dist/
 
 # Go re-implementation
 remake/bin/
-# Output of remake/tools/re/run.sh (mise run re:build): disassembly and decompilation
-remake/tools/re/work/
+# Output of tools/re/run.sh (mise run re:build): disassembly and decompilation
+tools/re/work/
 
 # Screenshots of the original game (its graphics), see remake/testdata/original/README.md
 remake/testdata/original/*.png

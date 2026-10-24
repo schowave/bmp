@@ -8,11 +8,11 @@ description: Looks up how the original BMMAIN.EXE does something in its decompil
 The specs in `docs/re/spec_*.md` come first; go to the decompilation when they
 are silent or in doubt, and correct the spec with what you find.
 
-1. **Make sure the work directory exists**: `remake/tools/re/work/` (gitignored).
+1. **Make sure the work directory exists**: `tools/re/work/` (gitignored).
    Without it run `mise run re:build`; the decompilation needs `GHIDRA` set,
    the disassembly does not.
 
-2. **Query**, from `remake/`:
+2. **Query**, from the repository root:
 
    | Question | Command |
    | --- | --- |
@@ -23,7 +23,7 @@ are silent or in doubt, and correct the spec with what you find.
    | A table of constants | `python3 tools/re/q.py seg D 24c4 '<5h'` (or `str`, `ptrs:N`) |
 
    Notation and pitfalls (segments, umlaut encoding, 32-bit helpers) are in
-   `remake/tools/re/CONTEXT.md`. Ghidra often gets 32-bit arithmetic wrong: check
+   `tools/re/CONTEXT.md`. Ghidra often gets 32-bit arithmetic wrong: check
    formulas against the listing.
 
 3. **Name the function** in a comment of the code you port (`f_SSSS_OOOO`), and

@@ -3,9 +3,9 @@
 Shots of the original game (WASM image, js-dos) taken while the screens of
 the remake were rebuilt, 640×480 = 2× the 320×240 canvas (the first few are
 1×). They show the game's graphics, so the PNG files are not part of the
-repository (`.gitignore`); take them again with `remake/tools/re/refgame/wasm`
+repository (`.gitignore`); take them again with `tools/re/refgame/wasm`
 (see `docs/re/spec_ui.md`, section 1). The pixel tools in
-`remake/tools/re/pixcmp` read both scales.
+`tools/re/pixcmp` read both scales.
 
 The game: one manager "TEST" with VfB Stuttgart, level 2, endless game (so
 Stuttgart plays in the Amateur-Oberliga), modern start (1992).

@@ -398,7 +398,6 @@ the panel with new messages is open, it takes the keys, so close it first.
 | `internal/embedded` | The original files built into the binary |
 | `internal/seasons` | The real seasons 1990/91–2026/27 built into the binary, their credits; `update` makes a season from Transfermarkt |
 | `testdata/original` | Reference screenshots of the original (see its README) |
-| `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
 | `tools/transfermarkt` | Fetches tables, squads and games of seasons from transfermarkt.de (`mise run remake:seasons-update`, `remake:seasons-games`) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
 | `tools/readme-gif.sh` | Renders the tour of screens at the top of [`../README.md`](../README.md) (`../docs/screens.gif`) |
@@ -449,8 +448,8 @@ Linux use `xvfb-run`.
   to drive the original in the browser and compare pixels, the original's
   drawing functions, layouts and mouse rules.
 - **Rules:** `../docs/re/spec_*.md`.
-- **Decompilation:** `mise run re:build` writes it to `tools/re/work/`;
-  `python3 tools/re/q.py` queries strings, functions, callers and data
+- **Decompilation:** `mise run re:build` writes it to `../tools/re/work/`;
+  `python3 ../tools/re/q.py` queries strings, functions, callers and data
   constants.
 
 Notes for coding agents are in [`CLAUDE.md`](CLAUDE.md) and, for the whole
