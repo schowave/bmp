@@ -31,6 +31,7 @@ func main() {
 	shot := flag.String("shot", "", "save a screenshot of the canvas to this PNG file and quit")
 	shotFrame := flag.Int("shot-frame", 10, "frame to take the screenshot at")
 	demo := flag.String("demo", "", "show a development demo scene (see -demos)")
+	demoTeam := flag.Int("demo-team", ui.DemoTeam, "club number of the manager in the -demo scenes (0: 1.FC Kaiserslautern)")
 	demos := flag.Bool("demos", false, "list the demo scenes and quit")
 	script := flag.String("script", "", "play the input of this development script (see ui.ParseScript) and quit")
 	control := flag.String("control", "", "development: play the scripts written to DIR/cmd while running, at -tps ticks a second")
@@ -71,7 +72,7 @@ func main() {
 	}
 	var first ui.Scene = ui.NewTitle().OnDone(func() ui.Scene { return ui.NewStart(mana, *saves) })
 	if *demo != "" {
-		first = ui.Demo(*demo, mana, *saves)
+		first = ui.Demo(*demo, *demoTeam, mana, *saves)
 	}
 	if *load != "" {
 		data, err := os.ReadFile(*load)

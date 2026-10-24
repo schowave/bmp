@@ -189,6 +189,7 @@ go run ./cmd/bmpseasons logo -club "SPVGG WEIDEN" -image weiden.png -source "whe
 | `-saves DIR` | user config directory | Save games and the high-score tables (`HIGH.xy` in the format of the original, so the tables of `../bmp` can be copied there) |
 | `-scale N` | `3` | Window size as a multiple of 320×240 |
 | `-demo NAME` | | Open a development demo screen |
+| `-demo-team N` | `9` (Borussia Dortmund) | Club of the manager in the demo screens (`0`: 1.FC Kaiserslautern) |
 | `-demos` | | List the demo screens and quit |
 | `-shot FILE` | | Save the canvas as a PNG and quit (with `-shot-frame N`, default 10) |
 | `-script FILE` | | Play a development input script and quit (see `internal/ui/script.go`) |
@@ -362,6 +363,7 @@ the panel with new messages is open, it takes the keys, so close it first.
 | `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
 | `tools/transfermarkt` | Fetches tables, squads and games of seasons from transfermarkt.de (`mise run remake:seasons-update`, `remake:seasons-games`) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
+| `tools/readme-gif.sh` | Renders the tour of screens at the top of [`../README.md`](../README.md) (`../docs/screens.gif`) |
 | `tools/playtest.sh` | Plays the game through `-control` for playtests (see [`../docs/playtest.md`](../docs/playtest.md)) |
 
 ## Development

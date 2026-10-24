@@ -5,11 +5,11 @@ import (
 	"github.com/schowave/bmp/remake/internal/game"
 )
 
-// NewspaperDemo starts the demo game of Demo, plays until the n-th league
+// NewspaperDemo starts the demo game of Demo at club team, plays until the n-th league
 // match day of the manager (n >= 1) and shows his newspaper; closing it
 // goes on with the game.
-func NewspaperDemo(mana *assets.Mana, saveDir string, n int) Scene {
-	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 5})
+func NewspaperDemo(mana *assets.Mana, saveDir string, team, n int) Scene {
+	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: team}}, Level: 2, Seed: 5})
 	if err != nil {
 		panic(err)
 	}

@@ -4,63 +4,94 @@
 [![GitHub Release](https://img.shields.io/github/v/release/schowave/bmp)](https://github.com/schowave/bmp/releases/latest)
 [![Docker Image](https://img.shields.io/docker/v/schowave/bmp?sort=semver&label=Docker%20Hub)](https://hub.docker.com/r/schowave/bmp)
 
-The classic 90s DOS football management game — containerized and playable in the browser via [noVNC](https://novnc.com).
-
-`remake/` holds a re-implementation of the game in Go, see [remake/README.md](remake/README.md).
+The classic 1990s DOS football management game by Software 2000, playable in
+any browser from a container, and re-implemented in Go.
 
 <p align="center">
-  <img src="docs/bmp.png" alt="Bundesliga Manager Professional" width="700">
+  <img src="docs/screens.gif" alt="Screens of the Go remake: title, club choice, season choice, main menu, squad, training, stadium, sponsor, transfer market, a league match, newspaper, table and statistics" width="640">
+  <br>
+  <sub>The Go remake, one season with 1.FC Kaiserslautern</sub>
 </p>
 
-## Features
+## Contents
 
-- **Browser-based** — play directly in any browser, no client installation needed
-- **Persistent savegames** — game saves are stored on the host via Docker volume (`D:` drive in-game)
-- **Auto-updates** — [Watchtower](https://containrrr.dev/watchtower/)-compatible via container labels
-- **Optimized for streaming** — tuned DOSBox config for low-latency VNC (640x480, 16-bit, frameskip)
-- **Idle when unused** — DOSBox is paused while no browser is connected, so the container uses next to no CPU between sessions
+- [Ways to play](#ways-to-play)
+- [Quick start](#quick-start)
+- [Features](#features)
+- [The remake](#the-remake)
+- [Deployment](#deployment)
+- [Savegames](#savegames)
+- [Development](#development)
+- [Releases](#releases)
+- [Legal](#legal)
 
-## Quick Start
+## Ways to play
 
-### Docker
+| | How it runs | Saves | Details |
+|---|---|---|---|
+| **VNC image** `schowave/bmp:latest` | DOSBox in the container, streamed to the browser with [noVNC](https://novnc.com) | Host directory, drive `D:` | [Architecture](#architecture) |
+| **WASM image** `schowave/bmp:wasm` | DOSBox as WebAssembly in the browser ([js-dos](https://js-dos.com/)), the container only serves files and saves | Host directory, one save per browser | [wasm/README.md](wasm/README.md) |
+| **Go remake** | Native program for macOS, Windows and Linux, built with [Ebitengine](https://ebitengine.org) | `~/Library/Application Support/bmp` and the like | [remake/README.md](remake/README.md) |
+
+## Quick start
+
+### VNC image
 
 ```bash
-docker run -d \
-  -v ./savegame:/savegame \
-  -p 8080:8080 \
-  schowave/bmp:latest
+docker run -d -p 8080:8080 -v ./savegame:/savegame schowave/bmp:latest
 ```
 
-Open [http://localhost:8080](http://localhost:8080)
+Open <http://localhost:8080> and save to `D:` in the game.
 
-### From Source
+<p align="center">
+  <img src="docs/bmp.png" alt="The original game in the browser: club choice with 1.FC Kaiserslautern" width="640">
+</p>
+
+### WASM image
+
+```bash
+docker run -d -p 8090:8080 -v ./bmp-saves:/data schowave/bmp:wasm
+```
+
+Open <http://localhost:8090>. See [wasm/README.md](wasm/README.md) for the
+save API and the Synology setup.
+
+### Go remake
 
 ```bash
 git clone https://github.com/schowave/bmp.git
 cd bmp
-mise run vnc:run
+mise run remake:run
 ```
 
-## Architecture
+Needs [mise](https://mise.jdx.dev/), which installs Go; on Linux also the
+GL and X11 headers.
 
-```
-Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :5901
-                                                       │
-                                                  Ratpoison WM
-                                                       │
-                                                  DOSBox 0.74-3
-                                                   ├── C: /dos/bmp     (game files)
-                                                   └── D: /savegame    (persistent saves)
+### From source (images)
+
+```bash
+mise run vnc:run          # VNC image on port 8080, saves in savegame/
+mise run wasm:run-docker  # WASM image on port 8090, saves in wasm/savegame/
 ```
 
-## Remake
+## Features
 
-Next to the two images there is a re-implementation of the game in Go with
-[Ebitengine](https://ebitengine.org), in `remake/`. The rules come from the
-decompiled `BMMAIN.EXE` (`docs/re/spec_*.md`) and the screens are compared
-pixel by pixel with the running original. Pictures, fonts and club data are
-extracted from `bmp/` and built into the binary, so the original files are
-only needed to extract them again.
+- **Browser-based**: play in any browser, nothing to install on the client
+- **Persistent savegames**: saves live on the host through a Docker volume (`D:` in the game)
+- **Auto-updates**: [Watchtower](https://containrrr.dev/watchtower/)-compatible through container labels
+- **Tuned for streaming**: DOSBox config for low-latency VNC (640x480, 16-bit, frameskip)
+- **Idle when unused**: DOSBox is paused while no browser is connected, so the container uses next to no CPU between sessions
+- **German quick reference** at `/hilfe.html` in both images, see [Help page](#help-page)
+- **Go remake** with the rules of the original and real seasons from 1990/91 to today
+
+## The remake
+
+`remake/` holds a re-implementation of the game in Go with
+[Ebitengine](https://ebitengine.org). The rules come from the decompiled
+`BMMAIN.EXE` (`docs/re/spec_*.md`) and the screens are compared pixel by
+pixel with the running original. Pictures, fonts and club data are extracted
+from `bmp/` and built into the binary, so the original files are only needed
+to extract them again.
 
 ```bash
 mise run remake:run     # play it (Go and, on Linux, the GL/X11 headers)
@@ -78,6 +109,22 @@ sets the optimal lineup, training and ticket price.
 
 ## Deployment
 
+### Architecture
+
+The VNC image:
+
+```
+Browser (noVNC) ──WebSocket──▸ websockify :8080 ──▸ TigerVNC :5901
+                                                       │
+                                                  Ratpoison WM
+                                                       │
+                                                  DOSBox 0.74-3
+                                                   ├── C: /dos/bmp     (game files)
+                                                   └── D: /savegame    (persistent saves)
+```
+
+The WASM image is described in [wasm/README.md](wasm/README.md#architecture).
+
 ### Synology NAS
 
 1. Create a project folder on your NAS (e.g. `/volume1/docker/bmp/`)
@@ -90,15 +137,9 @@ sets the optimal lineup, training and ticket price.
    | `Upgrade` | `$http_upgrade` |
    | `Connection` | `$connection_upgrade` |
 
-The container is labeled for [Watchtower](https://containrrr.dev/watchtower/) — if a Watchtower instance is running on the NAS, it will automatically pull new images on release.
+The container is labeled for [Watchtower](https://containrrr.dev/watchtower/): if a Watchtower instance runs on the NAS, it pulls new images on release.
 
-### Access control
-
-Neither image asks for a password. The VNC server runs with `-SecurityTypes None`, so anyone who reaches its port is in the running game, with mouse and keyboard, and can overwrite the saves on `D:`. There is only one game, so whoever connects plays it alongside you. The WASM image gives each browser its own save, but anyone who knows or guesses a slot name can read and overwrite it through the API, see [wasm/README.md](wasm/README.md#save-files).
-
-That is fine on a home network. Do not forward the port to the internet as it is. To play from outside, reach the NAS through a VPN such as WireGuard or Tailscale, or put a reverse proxy with its own login in front, for example nginx with basic auth or Authelia. The reverse proxy built into DSM forwards requests but does not ask for a login by itself.
-
-### Other Platforms
+### Other platforms
 
 The Docker image `schowave/bmp` is built for `linux/amd64`.
 
@@ -117,84 +158,32 @@ services:
     restart: unless-stopped
 ```
 
-## Releases
+### Access control
 
-Releases are managed via GitHub Actions, and only there — there is no local push:
+> [!WARNING]
+> Neither image asks for a password. Do not forward the port to the internet as it is.
 
-1. Go to **Actions** → **Release** → **Run workflow**, or run `mise run release [version]` (needs the `gh` CLI)
-2. Either enter a version number (e.g. `4.1.0`) or leave empty to auto-increment the patch version (e.g. `4.0.1` → `4.0.2`). The version must be above the latest tag and not taken yet.
-3. The workflow runs CI first, then builds both images for `linux/amd64` and pushes them under the version tag alone
-4. Only once both images are on Docker Hub does it commit `VERSION`, push the git tag, and move `latest` and `wasm` to the new images
-5. Watchtower picks up the new image automatically on connected hosts
+The VNC server runs with `-SecurityTypes None`, so anyone who reaches its port is in the running game, with mouse and keyboard, and can overwrite the saves on `D:`. There is only one game, so whoever connects plays it alongside you. The WASM image gives each browser its own save, but anyone who knows or guesses a slot name can read and overwrite it through the API, see [wasm/README.md](wasm/README.md#save-files).
 
-A run that fails or is cancelled before step 4 leaves no git tag behind and does not change what Watchtower pulls. Only one release runs at a time.
-
-> Requires GitHub Secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
-
-### CI
-
-Every push to `main` and every pull request runs `mise run check` (lint and tests of the Go code, see [Development](#development)), builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
-
-The WASM image gets a smoke test without a browser, `wasm/smoke.sh`: page and bundle are served, a save comes back byte for byte, invalid names and oversized saves are refused, and the server does not run as root. Locally: `mise run wasm:smoke`.
-
-## Development
-
-Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mise tasks` lists them all, including the `wasm:*` tasks for the WASM image.
-
-### Layout
-
-| Path | Contents |
-|---|---|
-| `bmp/` | Game files, used by both images |
-| `web/` | Help page and favicon, served by both images |
-| `vnc/` | VNC image: `Dockerfile`, start script, DOSBox config, noVNC player page, `docker-compose.yml` |
-| `vnc/bench/` | Benchmark for the VNC image with Playwright, see [vnc/bench/README.md](vnc/bench/README.md) |
-| `wasm/` | WASM image and its save server, see [wasm/README.md](wasm/README.md) |
-| `remake/` | Re-implementation of the game in Go, see [remake/README.md](remake/README.md) |
-| `docs/re/` | Rules and screens of the original, reverse-engineered from `BMMAIN.EXE` |
-| `docs/adr/`, `docs/glossary.md` | Architecture decisions and the terms of the game |
-| `docs/agent-readiness/` | Agent-readiness report of the repository |
-| `AGENTS.md` | Notes for coding agents |
-
-Both Dockerfiles build with the repository root as context, e.g. `docker build -f vnc/Dockerfile .`
-
-| Command | Description |
-|---|---|
-| `mise run check` | All fast checks: golangci-lint, then vet, format and tests of `remake/` and the save server |
-| `mise run hooks` | Enable the pre-commit hook (builds and vets the staged remake) |
-| `mise run vnc:build` | Build the container image |
-| `mise run vnc:run` | Stop, build, and start in detached mode |
-| `mise run vnc:stop` | Stop and remove the container |
-| `mise run vnc:bench [label]` | Build and benchmark the image with checks, see [vnc/bench/README.md](vnc/bench/README.md) |
-| `mise run release` | Start the release workflow, see [Releases](#releases) |
-
-## Help page
-
-Both images ship a German quick reference for the game at `/hilfe.html`, linked from the
-bottom right of the game page. The WASM variant also answers the shorter `/hilfe`; the VNC
-one does not, because websockify serves files literally, which is why both pages link to
-`hilfe.html`.
-
-The page lives at `web/hilfe.html` since both images serve it; both Docker builds take it
-from there.
+That is fine on a home network. To play from outside, reach the NAS through a VPN such as WireGuard or Tailscale, or put a reverse proxy with its own login in front, for example nginx with basic auth or Authelia. The reverse proxy built into DSM forwards requests but does not ask for a login by itself.
 
 ## Savegames
 
-The game mounts two DOS drives:
+The VNC image mounts two DOS drives:
 
 | Drive | Mount | Purpose |
 |---|---|---|
 | `C:` | `/dos/bmp` | Game files (inside container) |
 | `D:` | `/savegame` | Persistent saves (host directory) |
 
-Save to `D:` in-game. A save placed on `C:` lives inside the container and is gone with the next image, so it does not survive an update. To rescue one from a running container before rebuilding it:
+Save to `D:` in the game. A save placed on `C:` lives inside the container and is gone with the next image, so it does not survive an update. To rescue one from a running container before rebuilding it:
 
 ```bash
 docker exec bmp find /dos -iname '*.MAN' -exec ls -la {} \;
 docker cp bmp:/dos/bmp/YOURSAVE.MAN ./savegame/YOURSAVE.MAN
 ```
 
-`AUTOSAVE.MAN` ships with the image, so go by the modification date rather than the name to tell your own save apart — the game overwrites `AUTOSAVE.MAN` as you play, which makes a recent date on it yours.
+`AUTOSAVE.MAN` ships with the image, so go by the modification date rather than the name to tell your own save apart: the game overwrites `AUTOSAVE.MAN` as you play, which makes a recent date on it yours.
 
 ### The mount has to be writable
 
@@ -211,4 +200,76 @@ docker exec bmp sh -c 'touch /savegame/PROBE && echo writable || echo denied; rm
       - "100"
 ```
 
-Note that on a Synology the POSIX mode can read `drwxrwxrwx` while writing is still refused, because the ACL decides — `chmod` does not help there. On another host, either use the group that owns the directory or `chown -R 1000:1000 ./savegame` instead.
+On a Synology the POSIX mode can read `drwxrwxrwx` while writing is still refused, because the ACL decides; `chmod` does not help there. On another host, either use the group that owns the directory or `chown -R 1000:1000 ./savegame` instead.
+
+## Development
+
+Tasks are defined in `mise.toml` and run with [mise](https://mise.jdx.dev/). `mise tasks` lists them all, including the `wasm:*` tasks for the WASM image. Notes for coding agents are in [AGENTS.md](AGENTS.md), review rules in [CODING_STANDARDS.md](CODING_STANDARDS.md).
+
+| Command | Description |
+|---|---|
+| `mise run check` | All fast checks: golangci-lint, then vet, format and tests of `remake/` and the save server |
+| `mise run hooks` | Enable the pre-commit hook (builds and vets the staged remake) |
+| `mise run vnc:build` | Build the container image |
+| `mise run vnc:run` | Stop, build, and start in detached mode |
+| `mise run vnc:stop` | Stop and remove the container |
+| `mise run vnc:bench [label]` | Build and benchmark the image with checks, see [vnc/bench/README.md](vnc/bench/README.md) |
+| `mise run release` | Start the release workflow, see [Releases](#releases) |
+
+Both Dockerfiles build with the repository root as context, e.g. `docker build -f vnc/Dockerfile .`
+
+The animation at the top is rendered from the remake's demo screens with
+`remake/tools/readme-gif.sh` (needs ImageMagick and an awake display).
+
+### Layout
+
+| Path | Contents |
+|---|---|
+| `bmp/` | Game files, used by both images |
+| `web/` | Help page and favicon, served by both images |
+| `vnc/` | VNC image: `Dockerfile`, start script, DOSBox config, noVNC player page, `docker-compose.yml` |
+| `vnc/bench/` | Benchmark for the VNC image with Playwright, see [vnc/bench/README.md](vnc/bench/README.md) |
+| `wasm/` | WASM image and its save server, see [wasm/README.md](wasm/README.md) |
+| `remake/` | Re-implementation of the game in Go, see [remake/README.md](remake/README.md) |
+| `docs/re/` | Rules and screens of the original, reverse-engineered from `BMMAIN.EXE` |
+| `docs/adr/`, `docs/glossary.md` | Architecture decisions and the terms of the game |
+| `docs/agent-readiness/` | Agent-readiness report of the repository |
+| `AGENTS.md` | Notes for coding agents |
+
+### CI
+
+Every push to `main` and every pull request runs `mise run check`, builds both images and runs the VNC benchmark with `--check` against the VNC image: the picture has to fill the screen, clicks have to arrive, and the container must go idle without a client. The screenshot is attached to the run. See [vnc/bench/README.md](vnc/bench/README.md).
+
+The WASM image gets a smoke test without a browser, `wasm/smoke.sh`: page and bundle are served, a save comes back byte for byte, invalid names and oversized saves are refused, and the server does not run as root. Locally: `mise run wasm:smoke`.
+
+### Help page
+
+Both images ship a German quick reference for the game at `/hilfe.html`, linked from the
+bottom right of the game page. The WASM variant also answers the shorter `/hilfe`; the VNC
+one does not, because websockify serves files literally, which is why both pages link to
+`hilfe.html`.
+
+The page lives at `web/hilfe.html` since both images serve it; both Docker builds take it
+from there.
+
+## Releases
+
+Releases are managed through GitHub Actions, and only there; there is no local push:
+
+1. Go to **Actions** → **Release** → **Run workflow**, or run `mise run release [version]` (needs the `gh` CLI)
+2. Either enter a version number (e.g. `4.1.0`) or leave it empty to increment the patch version (e.g. `4.0.1` → `4.0.2`). The version must be above the latest tag and not taken yet.
+3. The workflow runs CI first, then builds both images for `linux/amd64` and pushes them under the version tag alone
+4. Only once both images are on Docker Hub does it commit `VERSION`, push the git tag, and move `latest` and `wasm` to the new images
+5. Watchtower picks up the new image on connected hosts
+
+A run that fails or is cancelled before step 4 leaves no git tag behind and does not change what Watchtower pulls. Only one release runs at a time.
+
+> [!NOTE]
+> Requires the GitHub secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
+
+## Legal
+
+*Bundesliga Manager Professional* and the original files in `bmp/` belong to
+Software 2000. This project is a fan project, not affiliated with the rights
+holders; it only packages the game to keep it playable and re-implements it
+for study.
