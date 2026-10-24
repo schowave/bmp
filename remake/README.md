@@ -56,8 +56,10 @@ before, for trying out a change. Or run it straight from the sources with `mise 
 The game files are built in, so each is a single file; saves go to the user's
 config directory (`%AppData%\bmp`, `~/Library/Application Support/bmp`). The
 programs have no signature from a developer account: Windows SmartScreen warns
-on the first start, and on another Mac the app opens only with right click →
-*Open*. They carry the original files of Software 2000.
+on the first start, and on another Mac Gatekeeper blocks the app until you
+click *Open Anyway* in *System Settings* → *Privacy & Security* (macOS 15 and
+later) or run `xattr -dr com.apple.quarantine` on it. They carry the original
+files of Software 2000.
 
 The release workflow runs the task on macOS and attaches the programs to the
 GitHub release as `bmp-windows-amd64.zip` and `bmp-macos.zip`.

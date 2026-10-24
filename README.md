@@ -64,8 +64,12 @@ Download the latest [release](https://github.com/schowave/bmp/releases/latest), 
 - [macOS (Apple Silicon and Intel)](https://github.com/schowave/bmp/releases/latest/download/bmp-macos.zip)
 
 The programs have no developer signature: Windows SmartScreen warns on the
-first start (*More info* → *Run anyway*), and on a Mac the app opens the first
-time only with right click → *Open*.
+first start (*More info* → *Run anyway*). On a Mac, Gatekeeper blocks the app
+at the first start ("Apple could not verify …"): click *Done*, then open
+*System Settings* → *Privacy & Security* and click *Open Anyway* at the bottom
+(macOS 15 and later; right click → *Open* no longer works there). Or remove the
+quarantine flag in the Terminal:
+`xattr -dr com.apple.quarantine "Bundesliga Manager Professional.app"`.
 
 Or build it from the sources:
 
