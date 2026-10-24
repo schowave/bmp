@@ -235,7 +235,7 @@ func buildSeason(s *source.Season, cur map[string]curated, images map[string]str
 		default:
 			logos[i] = "crest:" + strings.ToLower(s.Colors[p.article])
 		}
-		players := pickPlayers(s.Squads[p.row.Club], s.TM[p.row.Club])
+		players := pickPlayers(s.Squads[p.row.Club], s.TM[p.row.Club], s.Year >= tmByValue)
 		for _, n := range players {
 			cp, err := assets.ToCP437(n)
 			if err != nil {
@@ -251,15 +251,19 @@ func buildSeason(s *source.Season, cur map[string]curated, images map[string]str
 	return clubs, logos, nil
 }
 
+// tmByValue is the first season whose Transfermarkt squads are sorted by
+// market value.
+const tmByValue = 1995
+
 // pickPlayers chooses the 20 player names of a club in the slots of
 // MANA.DAT (2 goalkeepers, 6 defenders, 7 midfielders, 5 forwards). With a
-// Transfermarkt squad (tm) its players fill the slots of their position,
-// those with the most games of the Wikipedia/Wikidata squad (ps) first,
-// else in the order of Transfermarkt; ps fills a position tm has too few
-// players for. Without tm, ps alone: the most games first, else those who
+// Transfermarkt squad (tm) its players fill the slots of their position:
+// when tm is sorted by market value (byValue) in its order, else those with
+// the most games of the Wikipedia/Wikidata squad (ps) first; ps fills a
+// position tm has too few players for. Without tm, ps alone: the most games first, else those who
 // joined last. Missing ones stay empty; the game gives those slots random
 // names.
-func pickPlayers(ps, tm []source.Player) []string {
+func pickPlayers(ps, tm []source.Player, byValue bool) []string {
 	known := map[string]source.Player{} // by name in the game, the most games
 	for _, p := range ps {
 		k := playerName(p.Surname)
@@ -303,6 +307,8 @@ func pickPlayers(ps, tm []source.Player) []string {
 			switch {
 			case x.tm != y.tm:
 				return x.tm
+			case x.tm && byValue:
+				return x.order < y.order
 			case x.Games != y.Games:
 				return x.Games > y.Games
 			case x.tm:

@@ -128,7 +128,7 @@ func TestPickPlayers(t *testing.T) {
 	add("Thomas Müller", "Müller", source.PosAttack, 30)
 	add("Gerd Müller", "Müller", source.PosAttack, 33)
 	add("Nobody", "Nobody", source.PosNone, 34)
-	got := pickPlayers(ps, nil)
+	got := pickPlayers(ps, nil, false)
 	if len(got) != 20 || got[0] != "KAHN" || got[1] != "DREHER" || got[2] != "" || got[15] != "G.MÜLLER" || got[16] != "T.MÜLLER" {
 		t.Fatalf("got %q", got)
 	}
@@ -147,11 +147,15 @@ func TestPickPlayersPrefersTransfermarkt(t *testing.T) {
 		{Name: "SCHEUER", Surname: "SCHEUER", Pos: source.PosGoal, Games: -1},
 		{Name: "MÜLLER", Surname: "MÜLLER", Pos: source.PosMidfield, Games: -1},
 	}
-	got := pickPlayers(wiki, tm)
+	got := pickPlayers(wiki, tm, false)
 	// Kahn has games, then the order of Transfermarkt; the Wikipedia keeper
 	// Transfermarkt does not list stays out.
 	if got[0] != "KAHN" || got[1] != "TOMIC" {
 		t.Errorf("goalkeepers %q", got[:2])
+	}
+	// Sorted by market value, the order of Transfermarkt alone counts.
+	if v := pickPlayers(wiki, tm, true); v[0] != "TOMIC" || v[1] != "KAHN" {
+		t.Errorf("by value: goalkeepers %q", v[:2])
 	}
 	// Transfermarkt's position wins, Wikipedia fills the forwards.
 	if got[8] != "MÜLLER" || got[15] != "WIKI" {

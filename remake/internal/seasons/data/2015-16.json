@@ -477,32 +477,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"WOLF",
-				"ZETTERER"
+				"WIEDWALD",
+				"WOLF"
 			],
 			"defenders": [
-				"BUSCH",
-				"GUWARA",
-				"ZANDER",
-				"VELJKOVIC",
+				"VESTERGAARD",
+				"DJILOBODJI",
+				"GALVEZ",
 				"U.GARCIA",
+				"SELASSIE",
 				"U.GARCIA"
 			],
 			"midfielders": [
-				"HILSSNER",
-				"AYCICEK",
-				"EGGESTEIN",
-				"GRILLITSCH",
-				"YILDIRIM",
 				"JUNUZOVIC",
-				"YATABARE"
+				"GRILLITSCH",
+				"YATABARE",
+				"BARGFREDE",
+				"KROOS",
+				"KLEINHEISLER",
+				"AYCICEK"
 			],
 			"forwards": [
-				"LORENZEN",
 				"UJAH",
 				"JOHANNSSON",
 				"ÖZTUNALI",
-				"BARTELS"
+				"BARTELS",
+				"HAJROVIC"
 			]
 		}
 	},
@@ -633,32 +633,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"UPHOFF",
+				"TYTON",
 				"LANGERAK"
 			],
 			"defenders": [
-				"ZIMMERMANN",
-				"SAMA",
-				"HEISE",
-				"BAUMGARTL",
 				"KOSTIC",
-				"INSUA"
+				"INSUA",
+				"BAUMGARTL",
+				"SUNJIC",
+				"GROSSKREUTZ",
+				"BARBA"
 			],
 			"midfielders": [
-				"RISTL",
-				"FERATI",
-				"WANITZEK",
 				"DIDAVI",
 				"RUPP",
 				"MAXIM",
-				"GENTNER"
+				"GENTNER",
+				"DIE",
+				"GRUEZO",
+				"STÖGER"
 			],
 			"forwards": [
-				"KLIMENT",
 				"WERNER",
 				"KRAVETS",
 				"GINCZEK",
-				"HARNIK"
+				"HARNIK",
+				"KRUSE"
 			]
 		}
 	},
@@ -715,28 +715,28 @@
 				"KLANDT"
 			],
 			"defenders": [
+				"KEMPF",
 				"GÜNTER",
 				"HÖHN",
 				"TORREJON",
 				"MUJDZA",
-				"STENZEL",
-				"FÖHRENBACH"
+				"HEDENSTAD"
 			],
 			"midfielders": [
 				"ABRASHI",
-				"HÖFLER",
 				"FRANTZ",
-				"HUFNAGEL",
+				"HÖFLER",
+				"DAEHLI",
 				"SCHUSTER",
-				"STANKO",
-				"HINGERL"
+				"HUFNAGEL",
+				"STANKO"
 			],
 			"forwards": [
 				"PETERSEN",
 				"GRIFO",
 				"PHILIPP",
-				"GUEDE",
-				"NIEDERLECHNER"
+				"NIEDERLECHNER",
+				"NIELSEN"
 			]
 		}
 	},
@@ -750,32 +750,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"COLTORTI",
-				"GULACSI"
+				"GULACSI",
+				"COLTORTI"
 			],
 			"defenders": [
 				"ORBAN",
-				"KLOSTERMANN",
+				"NUKAN",
 				"HALSTENBERG",
-				"COMPPER",
+				"KLOSTERMANN",
 				"JUNG",
-				"NUKAN"
+				"TEIGL"
 			],
 			"midfielders": [
 				"SABITZER",
-				"KAISER",
-				"DEMME",
-				"ILSANKER",
 				"BRUNO",
+				"ILSANKER",
+				"KAISER",
 				"KHEDIRA",
+				"DEMME",
 				"KALMAR"
 			],
 			"forwards": [
 				"FORSBERG",
 				"POULSEN",
 				"SELKE",
-				"QUASCHNER",
-				"BOYD"
+				"BOYD",
+				"QUASCHNER"
 			]
 		}
 	},
@@ -790,31 +790,31 @@
 		"players": {
 			"goalkeepers": [
 				"SCHÄFER",
-				"KIRSCHBAUM"
+				"RAKOVSKY"
 			],
 			"defenders": [
-				"BRECKO",
-				"BULTHUIS",
-				"LEIBOLD",
+				"STARK",
 				"SEPSI",
 				"HOVLAND",
-				"MARGREITTER"
+				"ERRAS",
+				"BULTHUIS",
+				"LEIBOLD"
 			],
 			"midfielders": [
-				"BEHRENS",
-				"MÖHWALD",
 				"SCHÖPF",
-				"KERK",
+				"BEHRENS",
+				"MÖSSMER",
+				"GISLASON",
+				"STIEBER",
 				"PETRAK",
-				"POLAK",
-				"GISLASON"
+				"MÖHWALD"
 			],
 			"forwards": [
 				"BURGSTALLER",
 				"FÜLLKRUG",
 				"BLUM",
-				"KUTSCHKE",
-				"TEUCHERT"
+				"SYLVESTR",
+				"KUTSCHKE"
 			]
 		}
 	},
@@ -832,28 +832,28 @@
 				"HEERWAGEN"
 			],
 			"defenders": [
-				"BUBALLA",
+				"HALSTENBERG",
 				"SOBIECH",
 				"ZIEREIS",
+				"BUBALLA",
 				"HORNSCHUH",
-				"KALLA",
 				"GONTHER"
 			],
 			"midfielders": [
-				"BUCHTMANN",
 				"RZATKOWSKI",
+				"DUDZIAK",
+				"BUCHTMANN",
 				"MAIER",
 				"ALUSHI",
 				"NEHRIG",
-				"DUDZIAK",
 				"CHOI"
 			],
 			"forwards": [
-				"SOBOTA",
+				"BUDIMIR",
 				"THY",
-				"VERHOEK",
-				"PICAULT",
-				"MIYAICHI"
+				"SOBOTA",
+				"MIYAICHI",
+				"VERHOEK"
 			]
 		}
 	},
@@ -872,27 +872,27 @@
 			],
 			"defenders": [
 				"CELOZZI",
-				"HOOGLAND",
 				"BASTIANS",
-				"BULUT",
+				"PERTHEL",
 				"FABIAN",
-				"PERTHEL"
+				"BULUT",
+				"HOOGLAND"
 			],
 			"midfielders": [
 				"HABERER",
 				"LOSILLA",
 				"EISFELD",
-				"MARIA",
 				"WEIS",
+				"GÜL",
 				"SAGLAM",
-				"GÜL"
+				"MARIA"
 			],
 			"forwards": [
 				"TERODDE",
 				"TERRAZZINO",
 				"MLAPA",
-				"NOVIKOVAS",
-				"RAFAEL"
+				"GÜNDÜZ",
+				"NOVIKOVAS"
 			]
 		}
 	},
@@ -906,32 +906,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"HAAS",
-				"BUSK"
+				"BUSK",
+				"HAAS"
 			],
 			"defenders": [
 				"KESSEL",
-				"PARENSEN",
 				"LEISTNER",
+				"SCHÖNHEIM",
 				"TRIMMEL",
 				"PUNCEC",
 				"POGATETZ"
 			],
 			"midfielders": [
 				"KREILACH",
+				"KROOS",
+				"FÜRSTNER",
 				"ZEJNULLAHU",
 				"DAUBE",
-				"FÜRSTNER",
-				"KROOS",
 				"KÖHLER",
 				"KOCH"
 			],
 			"forwards": [
 				"WOOD",
-				"BRANDY",
 				"SKRZYBSKI",
-				"QUIRING",
-				"THIEL"
+				"BRANDY",
+				"THIEL",
+				"KORTE"
 			]
 		}
 	},
@@ -949,28 +949,28 @@
 				"ORLISHAUSEN"
 			],
 			"defenders": [
+				"MAX",
 				"GULDE",
 				"VALENTINI",
-				"SALLAHI",
+				"GORDON",
 				"KEMPE",
-				"STOLL",
 				"MAUERSBERGER"
 			],
 			"midfielders": [
+				"MEFFERT",
 				"YAMADA",
+				"PRÖMEL",
 				"NAZAROV",
 				"KREBS",
-				"MEFFERT",
 				"PEITZ",
-				"PRÖMEL",
 				"GOUAIDA"
 			],
 			"forwards": [
+				"HENNINGS",
 				"TORRES",
-				"HOFFER",
 				"DIAMANTAKOS",
 				"BARRY",
-				"KÖPKE"
+				"HOFFER"
 			]
 		}
 	},
@@ -988,28 +988,28 @@
 				"FEJZIC"
 			],
 			"defenders": [
+				"CORREIA",
 				"REICHEL",
 				"DECARLI",
 				"BAFFOE",
-				"ZUCK",
 				"OFOSU-AYEH",
-				"SAUER"
+				"ZUCK"
 			],
 			"midfielders": [
-				"KHELIFI",
 				"BOLAND",
 				"MATUSCHYK",
+				"KHELIFI",
 				"HOCHSCHEIDT",
 				"OMLADIC",
 				"SCHÖNFELD",
 				"PFITZNER"
 			],
 			"forwards": [
-				"HOLTMANN",
-				"ADEMI",
 				"BERGGREEN",
+				"HVILSOM",
+				"HOLTMANN",
 				"KUMBELA",
-				"TIETZ"
+				"OEHRL"
 			]
 		}
 	},
@@ -1024,31 +1024,31 @@
 		"players": {
 			"goalkeepers": [
 				"MIELITZ",
-				"FLEKKEN"
+				"ZINGERLE"
 			],
 			"defenders": [
-				"CALIGIURI",
-				"RÖCKER",
+				"GIESSELMANN",
 				"FRANKE",
-				"THESKER",
+				"RÖCKER",
+				"CALIGIURI",
 				"MARCOS",
-				"SCHAD"
+				"THESKER"
 			],
 			"midfielders": [
 				"STIEPERMANN",
 				"GJASULA",
-				"HOFMANN",
-				"WURTZ",
+				"SCHRÖCK",
 				"WEILANDT",
-				"HEIDINGER",
-				"SCHRÖCK"
+				"HOFMANN",
+				"RODRIGUEZ",
+				"WURTZ"
 			],
 			"forwards": [
-				"BERISHA",
 				"ZULJ",
-				"FREIS",
+				"BERISHA",
 				"VUKUSIC",
-				"TRIPIC"
+				"TRIPIC",
+				"FREIS"
 			]
 		}
 	},
@@ -1066,28 +1066,28 @@
 				"ALOMEROVIC"
 			],
 			"defenders": [
-				"VUCUR",
 				"ZIMMER",
 				"LÖWE",
-				"ZIEGLER",
-				"GAUS",
-				"HEUBACH"
+				"VUCUR",
+				"SCHULZE",
+				"HEUBACH",
+				"ZIEGLER"
 			],
 			"midfielders": [
+				"RING",
 				"JENSSEN",
 				"HALFAR",
 				"KARL",
-				"RING",
-				"GÖRTLER",
 				"KLICH",
-				"PIOSSEK"
+				"PIOSSEK",
+				"GÖRTLER"
 			],
 			"forwards": [
-				"PRZYBYLKO",
-				"COLAK",
-				"DEVILLE",
 				"BÖDVARSSON",
-				"MUGOSA"
+				"PRZYBYLKO",
+				"MUGOSA",
+				"COLAK",
+				"DEVILLE"
 			]
 		}
 	},
@@ -1105,27 +1105,27 @@
 				"MÜLLER"
 			],
 			"defenders": [
-				"FEICK",
-				"KRAUS",
 				"GRIESBECK",
+				"KRAUS",
 				"WITTEK",
-				"BEERMANN",
+				"FEICK",
+				"STRAUSS",
 				"PHILP"
 			],
 			"midfielders": [
 				"LEIPERTZ",
 				"THEUERKAUF",
+				"RIVERO",
 				"THOMALLA",
 				"REINHARDT",
 				"HEIDINGER",
-				"RIVERO",
 				"TITSCH-RIVERO"
 			],
 			"forwards": [
 				"SCHNATTERER",
-				"MORABIT",
-				"HALLORAN",
 				"FINNE",
+				"HALLORAN",
+				"MORABIT",
 				"VOGLSAMMER"
 			]
 		}
@@ -1144,21 +1144,21 @@
 				"DAVARI"
 			],
 			"defenders": [
-				"SCHUPPAN",
-				"DICK",
-				"BÖRNER",
 				"BEHRENDT",
+				"BÖRNER",
+				"DICK",
 				"SALGER",
+				"SCHUPPAN",
 				"BURMEISTER"
 			],
 			"midfielders": [
-				"ULM",
-				"JUNGLAS",
-				"SCHÜTZ",
-				"RYU",
 				"RODRIGUEZ",
+				"SCHÜTZ",
+				"JUNGLAS",
+				"RYU",
+				"JOPEK",
 				"MAST",
-				"MÜLLER"
+				"ULM"
 			],
 			"forwards": [
 				"KLOS",
@@ -1183,28 +1183,28 @@
 				"KÜHN"
 			],
 			"defenders": [
-				"KISTER",
+				"HÜBNER",
 				"PACARADA",
 				"KLINGMANN",
-				"HÜBNER",
+				"KISTER",
 				"THIEDE",
-				"SCHULZ"
+				"STIEFLER"
 			],
 			"midfielders": [
 				"LINSMAYER",
+				"KRATZ",
+				"PLEDL",
+				"VOLLMANN",
 				"KULOVITS",
 				"ZILLNER",
-				"PLEDL",
-				"MÜHLING",
-				"VOLLMANN",
-				"KUHN"
+				"HAMMANN"
 			],
 			"forwards": [
+				"KOSECKI",
 				"WOOTEN",
 				"BOUHADDOUZ",
-				"JOVANOVIC",
-				"KOSECKI",
-				"WULLE"
+				"VUNGUIDICA",
+				"JOVANOVIC"
 			]
 		}
 	},
@@ -1222,28 +1222,28 @@
 				"UNNERSTALL"
 			],
 			"defenders": [
+				"MAVRIAS",
 				"SCHAUERTE",
-				"HAGGUI",
 				"SCHMITZ",
 				"MADLUNG",
 				"STROHDIEK",
-				"AKPOGUMA"
+				"HAGGUI"
 			],
 			"midfielders": [
-				"BELLINGHAUSEN",
 				"DEMIRBAY",
 				"KOCH",
-				"FINK",
+				"LIENDL",
 				"BODZEK",
-				"SOBOTTKA",
-				"LIENDL"
+				"BELLINGHAUSEN",
+				"GARTNER",
+				"HOLTHAUS"
 			],
 			"forwards": [
 				"POHJANPALO",
-				"SARARER",
-				"BEBOU",
-				"BOLLY",
-				"IYOHA"
+				"DJURDJIC",
+				"VAN DUINEN",
+				"KONAN",
+				"SARARER"
 			]
 		}
 	},
@@ -1258,31 +1258,31 @@
 		"players": {
 			"goalkeepers": [
 				"EICHER",
-				"NETOLITZKY"
+				"ORTEGA"
 			],
 			"defenders": [
+				"WOLF",
 				"SCHINDLER",
 				"KAGELMACHER",
 				"WITTEK",
 				"DEGENEK",
-				"WOLF",
 				"MAUERSBERGER"
 			],
 			"midfielders": [
-				"LIENDL",
 				"ADLUNG",
+				"LIENDL",
 				"BÜLOW",
-				"CLAASEN",
-				"VOLLMANN",
 				"AYCICEK",
-				"LACAZETTE"
+				"STAHL",
+				"VOLLMANN",
+				"CLAASEN"
 			],
 			"forwards": [
 				"OKOTIE",
-				"MUGOSA",
-				"RAMA",
+				"BEISTER",
 				"MÖLDERS",
-				"MVIBUDULU"
+				"RAMA",
+				"MUGOSA"
 			]
 		}
 	},
@@ -1301,27 +1301,27 @@
 			],
 			"defenders": [
 				"WOLZE",
-				"BAJIC",
-				"FELTSCHER",
-				"KLOTZ",
+				"DVALI",
+				"MEISSNER",
 				"BOMHEUER",
-				"POGGENBERG"
+				"FELTSCHER",
+				"WIEGEL"
 			],
 			"midfielders": [
 				"HOLLAND",
-				"BOHL",
 				"ALBUTAT",
 				"GROTE",
 				"DAUSCH",
-				"ÖZBEK",
+				"BOHL",
+				"DE WIT",
 				"BEHR"
 			],
 			"forwards": [
-				"ONUEGBU",
-				"BRÖKER",
-				"JANJIC",
+				"TOMANE",
+				"CHANTURIA",
 				"OBINNA",
-				"SCHEIDHAUER"
+				"ONUEGBU",
+				"JANJIC"
 			]
 		}
 	},
@@ -1339,28 +1339,28 @@
 				"PIRSON"
 			],
 			"defenders": [
-				"HUBER",
-				"KONRAD",
 				"HAJSAFI",
-				"BALLAS",
+				"OUMARI",
 				"GUGGANIG",
-				"BARRY"
+				"KONRAD",
+				"BALLAS",
+				"HUBER"
 			],
 			"midfielders": [
-				"PERDEDAJ",
 				"HALIMI",
+				"ZIMLING",
 				"PIRES",
+				"PERDEDAJ",
+				"GEREZGIHER",
 				"KRUSKA",
-				"ROLIM",
-				"KALMAR",
-				"GOLLEY"
+				"KALMAR"
 			],
 			"forwards": [
+				"EPSTEIN",
+				"ENGELS",
 				"DEDIC",
 				"SCHAHIN",
-				"EPSTEIN",
-				"KAPLLANI",
-				"ENGELS"
+				"KAPLLANI"
 			]
 		}
 	},
@@ -1375,31 +1375,31 @@
 		"players": {
 			"goalkeepers": [
 				"KRUSE",
-				"NÜBEL"
+				"FERNANDES"
 			],
 			"defenders": [
+				"HÜNEMEIER",
 				"WAHL",
-				"HARTHERZ",
-				"HOHENEDER",
 				"HEINLOTH",
-				"BERTELS",
-				"SEBASTIAN"
+				"LOPEZ",
+				"HARTHERZ",
+				"HOHENEDER"
 			],
 			"midfielders": [
 				"BAKALORZ",
 				"STÖGER",
 				"WYDRA",
-				"NDJENG",
+				"KIRCH",
 				"BICKEL",
-				"PEPIC",
-				"KIRCH"
+				"KRAUSSE",
+				"NDJENG"
 			],
 			"forwards": [
 				"KOC",
 				"STOPPELKAMP",
-				"PROSCHWITZ",
-				"SAGLIK",
-				"HELENIUS"
+				"HELENIUS",
+				"SYLVESTR",
+				"OUALI"
 			]
 		}
 	},
@@ -1413,29 +1413,29 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"WIEGERS",
-				"KORNETZKY"
+				"BLASWICH",
+				"WIEGERS"
 			],
 			"defenders": [
 				"HEFELE",
+				"F.MÜLLER",
 				"MODICA",
 				"HARTMANN",
 				"KREUZER",
-				"LANDGRAF",
-				"F.MÜLLER"
+				"J.MÜLLER"
 			],
 			"midfielders": [
-				"LAMBERTZ",
 				"AOSMAN",
-				"MOLL",
-				"TEKERCI",
 				"TEIXEIRA",
+				"MOLL",
+				"LAMBERTZ",
 				"HOLTHAUS",
-				"ANDRICH"
+				"TEKERCI",
+				"WACHS"
 			],
 			"forwards": [
-				"EILERS",
 				"STEFANIAK",
+				"EILERS",
 				"TESTROET",
 				"KUTSCHKE",
 				"FETSCH"
@@ -1452,32 +1452,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"JENDRUSCH",
-				"SEIDEL"
+				"MÄNNEL",
+				"JENDRUSCH"
 			],
 			"defenders": [
 				"BREITKREUZ",
-				"RIZZUTO",
-				"SAMSON",
 				"SUSAC",
 				"HERTNER",
-				"RIEDEL"
+				"SAMSON",
+				"RIZZUTO",
+				"BARANOWSKI"
 			],
 			"midfielders": [
 				"RIESE",
-				"SKARLATIDIS",
 				"KVESIC",
-				"TIFFERT",
 				"HANDLE",
-				"YILDIZ",
-				"HAUCK"
+				"SKARLATIDIS",
+				"KÖNNECKE",
+				"HAUCK",
+				"TIFFERT"
 			],
 			"forwards": [
 				"ADLER",
-				"WEGNER",
+				"KÖPKE",
 				"SOUKOU",
-				"KLUFT",
-				"NATTERMANN"
+				"WEGNER",
+				"KLUFT"
 			]
 		}
 	},
@@ -1491,32 +1491,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"WULNIKOWSKI",
-				"BRUNNHÜBNER"
+				"BRUNNHÜBNER",
+				"WULNIKOWSKI"
 			],
 			"defenders": [
 				"SCHOPPENHAUER",
-				"KURZWEG",
 				"NOTHNAGEL",
 				"BILLICK",
-				"RUSS",
-				"THOMIK"
+				"KURZWEG",
+				"HERZIG",
+				"RUSS"
 			],
 			"midfielders": [
-				"FENNELL",
+				"DAGHFOUS",
 				"WEIL",
 				"BENATELLI",
+				"FENNELL",
 				"KARSANIDIS",
-				"DAGHFOUS",
-				"NAGY",
-				"HALLER"
+				"TAFFERTSHOFER",
+				"NAGY"
 			],
 			"forwards": [
+				"SORIANO",
+				"BIEBER",
 				"SHAPOURZADEH",
 				"JABIRI",
-				"BIEBER",
-				"SORIANO",
-				"WEISS"
+				"BRUNO"
 			]
 		}
 	},
@@ -1534,28 +1534,28 @@
 				"TISCHER"
 			],
 			"defenders": [
+				"HAINAULT",
 				"BUTZEN",
 				"CHAHED",
-				"HANDKE",
+				"LÖHMANNSRÖBEN",
 				"PUTTKAMMER",
-				"HAINAULT",
-				"NIEMEYER"
+				"HANDKE"
 			],
 			"midfielders": [
-				"SOWISLO",
-				"BRANDT",
-				"ALTIPARMAK",
 				"ERNST",
 				"HAMMANN",
 				"KINSOMBI",
+				"BRANDT",
+				"ALTIPARMAK",
+				"SOWISLO",
 				"REIMANN"
 			],
 			"forwards": [
 				"BECK",
+				"PULIDO",
 				"RAZEEK",
-				"HEBISCH",
 				"FUCHS",
-				"KRUSCHKE"
+				"HEBISCH"
 			]
 		}
 	},
@@ -1569,29 +1569,29 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"LEHMANN",
-				"SCHWÄBE"
+				"SCHWÄBE",
+				"LEHMANN"
 			],
 			"defenders": [
+				"PISOT",
+				"WULF",
+				"SYHRE",
 				"HOHNSTEDT",
 				"WILLERS",
-				"PISOT",
-				"SYHRE",
-				"FALKENBERG",
-				"GRASSI"
+				"FALKENBERG"
 			],
 			"midfielders": [
 				"GROSS",
-				"ORNATELLI",
+				"FELDHAHN",
 				"KANDZIORA",
+				"TÜTING",
+				"ORNATELLI",
 				"CHAHED",
-				"BLEKER",
-				"ODENTHAL",
 				"THEE"
 			],
 			"forwards": [
-				"SAVRAN",
 				"ALVAREZ",
+				"SAVRAN",
 				"MENGA",
 				"SEMBOLO",
 				"RICHTER"
@@ -1613,27 +1613,27 @@
 			],
 			"defenders": [
 				"ENDRES",
-				"CONRAD",
-				"CINCOTTA",
 				"BITTROFF",
-				"NANDZIK",
-				"UZOMA"
+				"CONRAD",
+				"RÖSELER",
+				"SCHEFFEL",
+				"CINCOTTA"
 			],
 			"midfielders": [
-				"DEM",
-				"DANNEBERG",
 				"STENZEL",
+				"TÜRPITZ",
+				"DEM",
 				"STEINMANN",
+				"DANNEBERG",
 				"KAFFENBERGER",
-				"BAUMGART",
-				"CECEN"
+				"KEHL-GOMEZ"
 			],
 			"forwards": [
 				"FINK",
-				"OFOSU",
 				"FRAHN",
-				"CAPPEK",
-				"DARTSCH"
+				"OFOSU",
+				"KÖNIG",
+				"CAPPEK"
 			]
 		}
 	},
@@ -1647,32 +1647,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"BROLL",
-				"GURSKI"
+				"GÄNG",
+				"BROLL"
 			],
 			"defenders": [
+				"SCHRÖCK",
 				"LEIST",
 				"GEHRING",
+				"HÄGELE",
 				"KIENAST",
-				"LORCH",
-				"LANDEKA",
 				"VECCHIONE"
 			],
 			"midfielders": [
 				"RIZZI",
 				"SCHIEK",
-				"BINAKAJ",
-				"BINDER",
 				"JÜLLICH",
+				"BINAKAJ",
 				"M.SCHUSTER",
+				"BINDER",
 				"ROTTGER"
 			],
 			"forwards": [
 				"DITTGEN",
+				"RÜHLE",
 				"BREIER",
 				"NGANKAM",
-				"SOHM",
-				"RÜHLE"
+				"SOHM"
 			]
 		}
 	},
@@ -1690,28 +1690,28 @@
 				"DOMASCHKE"
 			],
 			"defenders": [
-				"ERB",
-				"MENZ",
-				"LAURITO",
 				"ODAK",
+				"MENZ",
+				"ERB",
 				"HERGESELL",
+				"LAURITO",
 				"BENAMAR"
 			],
 			"midfielders": [
 				"TYRALA",
 				"AYDIN",
-				"NIKOLAOU",
 				"JUDT",
+				"NIKOLAOU",
+				"BURDENSKI",
 				"BERGMANN",
-				"KADRIC",
-				"BURDENSKI"
+				"KADRIC"
 			],
 			"forwards": [
 				"KAMMLOTT",
-				"SZIMAYER",
-				"PIGL",
+				"HÖCHER",
 				"UZAN",
-				"SCHIKOWSKI"
+				"SZIMAYER",
+				"PIGL"
 			]
 		}
 	},
@@ -1726,31 +1726,31 @@
 		"players": {
 			"goalkeepers": [
 				"LOMB",
-				"AULBACH"
+				"NIEHUES"
 			],
 			"defenders": [
-				"KOPPLIN",
-				"PISCHORN",
+				"SCHERDER",
 				"SCHWARZ",
+				"KOPPLIN",
 				"HEITMEIER",
-				"TRITZ",
-				"SCHWEERS"
+				"PISCHORN",
+				"TRITZ"
 			],
 			"midfielders": [
+				"PIOSSEK",
 				"BISCHOFF",
 				"HOFFMANN",
-				"LAPREVOTTE",
 				"PHILIPPS",
-				"WIEBE",
-				"PIOSSEK",
-				"SCHÖNEBERG"
+				"LAPREVOTTE",
+				"SCHÖNEBERG",
+				"WIEBE"
 			],
 			"forwards": [
-				"KARA",
 				"REICHWEIN",
-				"KROHNE",
-				"AMACHAIBOU",
-				"GRIMALDI"
+				"GRIMALDI",
+				"MÜLLER",
+				"ÖZKARA",
+				"KROHNE"
 			]
 		}
 	},
@@ -1769,27 +1769,27 @@
 			],
 			"defenders": [
 				"AHLSCHWEDE",
+				"DORDA",
+				"HOFFMANN",
 				"HENN",
 				"ERDMANN",
-				"KOFLER",
-				"HOFFMANN",
-				"DORDA"
+				"KOFLER"
 			],
 			"midfielders": [
-				"GARDAWSKI",
+				"BICKEL",
+				"WANNENWETSCH",
 				"ANDRIST",
+				"GARDAWSKI",
 				"IKENG",
 				"GARBUSCHEWSKI",
-				"BAUMGARTEN",
-				"WANNENWETSCH",
-				"SCHWERTFEGER"
+				"STEVANOVIC"
 			],
 			"forwards": [
-				"PERSTALLER",
+				"JÄNICKE",
 				"ZIEMER",
+				"PLATJE",
 				"BENYAMINA",
-				"LUKOWICZ",
-				"PLATJE"
+				"PERSTALLER"
 			]
 		}
 	},
@@ -1807,28 +1807,28 @@
 				"BOSS"
 			],
 			"defenders": [
-				"BENDER",
+				"HÖRNIG",
 				"UAFERRO",
-				"FLOTTMANN",
+				"MIMBALA",
 				"ENGELMAN",
-				"FINK",
-				"MIMBALA"
+				"BENDER",
+				"FLOTTMANN"
 			],
 			"midfielders": [
 				"BIADA",
-				"KWAME",
-				"ANDERSEN",
-				"GLOCKNER",
-				"KESSEL",
+				"CAULY",
 				"PAZUREK",
-				"SERDAR"
+				"ANDERSEN",
+				"KWAME",
+				"SCHRÖDER",
+				"GLOCKNER"
 			],
 			"forwards": [
-				"DAHMANI",
+				"KÖNIGS",
 				"RAHN",
+				"DAHMANI",
 				"YILMAZ",
-				"KORUK",
-				"KÖNIGS"
+				"KORUK"
 			]
 		}
 	},
@@ -1846,28 +1846,28 @@
 				"ZEAITER"
 			],
 			"defenders": [
+				"BUNGERT",
+				"HACK",
 				"KALIG",
 				"SCHILK",
 				"IHRIG",
-				"HACK",
-				"MOOS",
 				"SCHORR"
 			],
 			"midfielders": [
-				"BOHL",
-				"SALLER",
-				"WACHS",
+				"MORITZ",
+				"NEDELEV",
 				"KLEMENT",
+				"SALLER",
+				"BOHL",
 				"SERDAR",
-				"WAGENER",
-				"MORITZ"
+				"PFLÜCKE"
 			],
 			"forwards": [
+				"BEISTER",
+				"EDE",
 				"PARKER",
-				"DERSTROFF",
-				"SEYDEL",
-				"COSTLY",
-				"EDE"
+				"HÖLER",
+				"DERSTROFF"
 			]
 		}
 	},
@@ -1885,28 +1885,28 @@
 				"KÖNIGSHOFER"
 			],
 			"defenders": [
-				"KLEINEHEISMANN",
 				"ACQUISTAPACE",
+				"KLEINEHEISMANN",
 				"RAU",
 				"BAUDE",
-				"BARNOFSKY",
-				"WALLENBORN"
+				"URBAN",
+				"BARNOFSKY"
 			],
 			"midfielders": [
-				"ENGELHARDT",
+				"BRÜGMANN",
 				"DIRING",
-				"PFEFFER",
-				"BANOVIC",
-				"KRUSE",
 				"JANSEN",
-				"STAGGE"
+				"PFEFFER",
+				"KRUSE",
+				"T.MÜLLER",
+				"BANOVIC"
 			],
 			"forwards": [
-				"OSAWE",
 				"BERTRAM",
-				"LINDENHAHN",
+				"OSAWE",
+				"FURUHOLM",
 				"AYDEMIR",
-				"FURUHOLM"
+				"LINDENHAHN"
 			]
 		}
 	},
@@ -1920,32 +1920,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"ZENTNER",
-				"JAKUSCH"
+				"KRONHOLM",
+				"ZENTNER"
 			],
 			"defenders": [
-				"HERRMANN",
+				"WAHL",
 				"CZICHOS",
-				"KOHLMANN",
-				"WEIDLICH",
-				"SCHMIDT",
-				"SIGURBJÖRNSSON"
+				"KRAUSE",
+				"HERRMANN",
+				"SIGURBJÖRNSSON",
+				"WEIDLICH"
 			],
 			"midfielders": [
-				"SCHNELLHARDT",
 				"KEGEL",
+				"SCHNELLHARDT",
+				"SALEM",
 				"NYARKO",
-				"WIRLMANN",
 				"EVSEEV",
-				"GUDER",
-				"SALEM"
+				"WIRLMANN",
+				"GUDER"
 			],
 			"forwards": [
-				"HEIDER",
 				"LEWERENZ",
 				"SIEDSCHLAG",
-				"SANE",
-				"FETSCH"
+				"SCHÄFFLER",
+				"HEIDER",
+				"SCHWENK"
 			]
 		}
 	},
@@ -1964,27 +1964,27 @@
 			],
 			"defenders": [
 				"SCHWABL",
-				"MENIG",
-				"BARTH",
 				"NEUMANN",
+				"MENIG",
 				"SCHULZ",
+				"BARTH",
 				"MÜLLER"
 			],
 			"midfielders": [
 				"DREXLER",
-				"KARTALIS",
+				"WELZMÜLLER",
 				"KOTZKE",
-				"VASILIADIS",
+				"KARTALIS",
+				"HOLTER",
 				"ZAHNER",
-				"REISIG",
-				"HODJA"
+				"REISIG"
 			],
 			"forwards": [
-				"MORYS",
+				"OJALA",
 				"KLAUSS",
-				"KIENLE",
-				"WEGKAMP",
-				"OJALA"
+				"CHESSA",
+				"MORYS",
+				"WEGKAMP"
 			]
 		}
 	},
@@ -2002,27 +2002,27 @@
 				"REULE"
 			],
 			"defenders": [
-				"GEYER",
 				"PEZZONI",
+				"GEYER",
+				"ACQUISTAPACE",
 				"DAMS",
 				"RUPRECHT",
-				"VITZTHUM",
 				"FRANKE"
 			],
 			"midfielders": [
-				"BLACHA",
-				"LORENZ",
-				"SCHINDLER",
 				"FUNK",
 				"MROWCA",
-				"MINTZEL",
-				"BOOK"
+				"BLACHA",
+				"LORENZ",
+				"GOLLEY",
+				"BOOK",
+				"WEIN"
 			],
 			"forwards": [
-				"SCHNELLBACHER",
 				"OEHRL",
-				"LINDNER",
+				"SCHNELLBACHER",
 				"SENE",
+				"BENYAMINA",
 				"MAYER"
 			]
 		}
@@ -2076,32 +2076,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"SATTELMAIER",
-				"KLAUS"
+				"KLAUS",
+				"K.MÜLLER"
 			],
 			"defenders": [
-				"LEUTENECKER",
-				"STEIN",
-				"STAROSTZIK",
+				"BRAUN-SCHUMACHER",
 				"JORDANOV",
 				"BIHR",
-				"PACHONIK"
+				"LEUTENECKER",
+				"BAUMGÄRTEL",
+				"STAROSTZIK"
 			],
 			"midfielders": [
+				"IKENG",
+				"GJASULA",
 				"MENDLER",
-				"ABRUSCIA",
 				"BAHN",
 				"MARCHESE",
-				"GJASULA",
-				"GAISER",
-				"LEHMANN"
+				"SIRGEDAS",
+				"G.MÜLLER"
 			],
 			"forwards": [
+				"SORIANO",
 				"BERKO",
 				"BADIANE",
-				"SORIANO",
-				"MVIBUDULU",
-				"FISCHER"
+				"SLISKOVIC",
+				"NEBIHI"
 			]
 		}
 	},
@@ -2115,32 +2115,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"RENNO",
-				"TROCHANOWSKI"
+				"LÜCK",
+				"RENNO"
 			],
 			"defenders": [
-				"SCHORCH",
 				"MIMBALA",
+				"SCHORCH",
+				"MÖHRLE",
 				"CRETU",
 				"BERGER",
-				"DJENGOUE",
-				"KNECHTEL"
+				"DJENGOUE"
 			],
 			"midfielders": [
-				"SZARKA",
 				"KAUKO",
 				"ZEITZ",
+				"LUNGU",
+				"SZARKA",
 				"HOLZ",
-				"MATTUSCHKA",
-				"ZICKERT",
-				"LUNGU"
+				"GARBUSCHEWSKI",
+				"LEDGERWOOD"
 			],
 			"forwards": [
-				"KAUFMANN",
-				"BREITKREUZ",
-				"BOUZIANE",
+				"SUKUTA-PASU",
 				"MICHEL",
-				"ARIMANY"
+				"BREITKREUZ",
+				"KAUFMANN",
+				"BOUZIANE"
 			]
 		}
 	},
