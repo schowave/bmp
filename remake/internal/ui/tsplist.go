@@ -150,12 +150,20 @@ func (l *tsList) draw(g *Gfx, dst *ebiten.Image, s *game.State, cur, hover int) 
 func (l *tsList) rowColor(s *game.State, sl *game.Slot) int {
 	c := tsPosColor[s.Persons[sl.Person].Position()]
 	if l.mode == 3 {
-		if sl.Nego > 0 && sl.Nego < 100 {
-			c = ColGrey3
-		}
-		if sl.Nego&0x80 != 0 {
-			c = ColRedDark
-		}
+		c = contractColor(sl, c)
+	}
+	return c
+}
+
+// contractColor is the colour of a row of a contract list, c otherwise
+// (f_1ecd_06af in mode 3): blue grey for a player not willing to talk for
+// now, dark red for one who retires when his contract ends.
+func contractColor(sl *game.Slot, c int) int {
+	if sl.Nego > 0 && sl.Nego < 100 {
+		c = ColGrey3
+	}
+	if sl.Nego&0x80 != 0 {
+		c = ColRedDark
 	}
 	return c
 }

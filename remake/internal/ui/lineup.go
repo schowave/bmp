@@ -437,6 +437,9 @@ func (q *SquadScreen) drawRow(g *Gfx, dst *ebiten.Image, i, y int, inBar bool, b
 	p := &s.Persons[sl.Person]
 	pc := lnPosColor[p.Position()]
 	contracts := q.view == lineupContracts
+	if contracts {
+		pc = contractColor(sl, pc)
+	}
 	x := lnListX0
 	for c := 0; c < 18; c++ {
 		if q.mask()&(1<<c) == 0 {

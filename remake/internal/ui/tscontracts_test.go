@@ -78,3 +78,15 @@ func TestNegotiationKey(t *testing.T) {
 		t.Fatalf("key o without a sure offer: none %d years %d salary %d", p.none, p.years, p.salary)
 	}
 }
+
+// A row of the contract list is blue grey while the player does not talk
+// and dark red when he retires (f_1ecd_06af, mode 3).
+func TestContractColor(t *testing.T) {
+	for _, c := range []struct{ nego, want int }{
+		{0, 21}, {1, ColGrey3}, {99, ColGrey3}, {102, 21}, {0x80, ColRedDark}, {0x85, ColRedDark},
+	} {
+		if got := contractColor(&game.Slot{Nego: c.nego}, 21); got != c.want {
+			t.Errorf("nego %d: colour %d, want %d", c.nego, got, c.want)
+		}
+	}
+}
