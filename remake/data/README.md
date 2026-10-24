@@ -16,7 +16,7 @@ overwrites the files of the seasons it fetches.
 | `seasons/YYYY-YY/europe.csv` | Foreign clubs of the European cups (0 Champions League/Landesmeister, 1 Pokalsieger, 2 UEFA-Pokal/Europa League, 3 Conference League) and how often the article links them |
 | `seasons/YYYY-YY/articles.txt` | The Wikipedia articles read for the season |
 | `seasons/YYYY-YY/missing.txt` | What the fetch could not find: articles, tables, squads with fewer than 11 players |
-| `transfermarkt/YYYY-YY.csv` | Squads of Transfermarkt (`bmpseasons import-tm -tm DIR`), apart from the openly licensed data: club (its article), the name Transfermarkt gives it, players in its order with their position; the build prefers them to `squads.csv` |
+| `transfermarkt/YYYY-YY.csv` | Squads of Transfermarkt (`bmpseasons import-tm -tm DIR`), apart from the openly licensed data: club (its article), the name Transfermarkt gives it, players in its order (by market value from 1995/96 on) with their position; the build prefers them to `squads.csv` and from 1995/96 on keeps their order |
 | `logos/` | The logos as PNG, 76 pixels wide, and `index.csv` with file, licence, author and description page |
 | `.cache/` | Every response of the fetch (not checked in): a second fetch reads it instead of the network, except for the running season; `-refresh` fetches everything anew |
 
