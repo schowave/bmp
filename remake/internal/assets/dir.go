@@ -25,6 +25,7 @@ const (
 // into the remake, or a directory written by Extract.
 type Dir struct {
 	fsys fs.FS
+	more []fs.FS // further pictures (AddPics), searched after fsys
 
 	mu   sync.Mutex
 	pics map[string]*Pic
@@ -42,6 +43,15 @@ func OpenDir(fsys fs.FS) (*Dir, error) {
 		return nil, fmt.Errorf("%s not found: is this an extract of the game?", need)
 	}
 	return &Dir{fsys: fsys, pics: map[string]*Pic{}}, nil
+}
+
+// AddPics adds the pictures of fsys (pic/N.png) to those of the extract:
+// the logos of the clubs of real seasons. The extract wins where both have
+// a picture.
+func (d *Dir) AddPics(fsys fs.FS) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.more = append(d.more, fsys)
 }
 
 // ReadFile reads a file of the extract, e.g. "clubs.json".
@@ -67,6 +77,12 @@ func (d *Dir) Pic(n int, full bool) (*Pic, error) {
 		return p, nil
 	}
 	data, err := d.ReadFile(name)
+	for _, f := range d.more {
+		if !errors.Is(err, fs.ErrNotExist) {
+			break
+		}
+		data, err = fs.ReadFile(f, name)
+	}
 	if err != nil {
 		return nil, err
 	}

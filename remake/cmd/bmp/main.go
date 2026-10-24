@@ -21,6 +21,7 @@ import (
 	"github.com/schowave/bmp/remake/internal/assets"
 	"github.com/schowave/bmp/remake/internal/embedded"
 	"github.com/schowave/bmp/remake/internal/game"
+	"github.com/schowave/bmp/remake/internal/seasons"
 	"github.com/schowave/bmp/remake/internal/ui"
 )
 
@@ -51,6 +52,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "bmp:", err)
 		os.Exit(1)
 	}
+	dir.AddPics(seasons.Files())
 	gfx, err := ui.NewGfx(dir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "bmp:", err)
@@ -67,7 +69,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "bmp:", err)
 		os.Exit(1)
 	}
-	var first ui.Scene = ui.NewTitle().OnDone(func() ui.Scene { return ui.NewSetup(mana, *saves) })
+	var first ui.Scene = ui.NewTitle().OnDone(func() ui.Scene { return ui.NewSeasonChoice(mana, *saves) })
 	if *demo != "" {
 		first = ui.Demo(*demo, mana, *saves)
 	}
@@ -75,7 +77,7 @@ func main() {
 		data, err := os.ReadFile(*load)
 		var st *game.State
 		if err == nil {
-			st, err = game.Load(data, mana)
+			st, err = ui.LoadGame(data, mana)
 		}
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "bmp:", err)

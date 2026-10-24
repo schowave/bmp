@@ -48,7 +48,7 @@ func (s *State) Score(mi int) int {
 	assets += stadiumAttraction(m)*135000 + m.Money - m.Debts()
 	sc += int(int16(assets / 80000))
 	sc += 40*m.Titles[0] + 20*m.Titles[1] - (500 - 60*(m.Titles[2]+m.Titles[3]+m.Titles[4]))
-	if s.EndYear > 2000 {
+	if s.Endless() {
 		sc += 300
 	}
 	if sc < 1 {

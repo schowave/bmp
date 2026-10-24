@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
-
-	"github.com/schowave/bmp/remake/internal/game"
 )
 
 // FileScreen is the screen to load or save a game (f_322b_2bbe, called by
@@ -234,7 +232,7 @@ func (f *FileScreen) confirm(app *App) {
 		f.fail(app, diskError())
 		return
 	}
-	s, err := game.Load(data, f.ss.Mana)
+	s, err := LoadGame(data, f.ss.Mana)
 	if err != nil {
 		f.fail(app, NewAlert("Kein", "Bundesliga Manager Prof.", "Spielstand.", "!!!"))
 		return

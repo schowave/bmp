@@ -11,8 +11,11 @@ import (
 // (bmp -demo NAME -shot FILE). Most demos start a game with one manager
 // at Borussia Dortmund and play matchdays first.
 func Demo(name string, mana *assets.Mana, saveDir string) Scene {
-	if name == "setup" {
+	switch name {
+	case "setup":
 		return NewSetup(mana, saveDir)
+	case "seasons":
+		return NewSeasonChoice(mana, saveDir)
 	}
 	s, err := game.NewGame(mana, game.Options{Managers: []game.NewManager{{Name: "TEST", Team: 9}}, Level: 2, Seed: 5})
 	if err != nil {
@@ -97,7 +100,7 @@ var playedDemos = map[string]func(ss *Session) Scene{
 
 // DemoNames returns the names Demo knows, sorted.
 func DemoNames() []string {
-	names := []string{"setup", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup"}
+	names := []string{"setup", "seasons", "dfb0", "uefa0", "start", "newspaper", "turn", "match", "matchlineup"}
 	for n := range playedDemos {
 		names = append(names, n)
 	}

@@ -44,9 +44,10 @@ func TestFixtureLogo(t *testing.T) {
 	}
 }
 
-// The DFB groups name the leagues of the season.
+// The DFB groups name the leagues of a real season, and those of the
+// original with its clubs.
 func TestCupGroupTitle(t *testing.T) {
-	s := &game.State{StartYear: 1963}
+	s := &game.State{StartYear: 1963, Season: "1963-64"}
 	if got := cupGroupTitle(s, 4); got != "REGIONALLIGA GEGEN AMATEURLIGA:" {
 		t.Errorf("1963: %q", got)
 	}
@@ -58,6 +59,10 @@ func TestCupGroupTitle(t *testing.T) {
 	if got := cupGroupTitle(s, 5); got != "3. LIGA GEGEN 3. LIGA:" {
 		t.Errorf("2008: %q", got)
 	}
+	s.Season = ""
+	if got := cupGroupTitle(s, 5); got != "AM.-OBERLIGA GEGEN AM.-OBERLIGA:" {
+		t.Errorf("original clubs 2008: %q", got)
+	}
 }
 
 // The league names of every season fit the cup groups and the christmas
@@ -65,7 +70,7 @@ func TestCupGroupTitle(t *testing.T) {
 func TestLeagueNamesFit(t *testing.T) {
 	app, _ := testApp(t)
 	for year := 1963; year <= 2030; year++ {
-		s := &game.State{StartYear: year}
+		s := &game.State{StartYear: year, Season: "real"}
 		for k := range cupGroupLeagues {
 			if w := app.Gfx.TextWidth(FontSmall, cupGroupTitle(s, k)); w > 0x12b {
 				t.Errorf("%d group %d: %d px", year, k, w)

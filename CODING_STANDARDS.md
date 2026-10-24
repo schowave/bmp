@@ -22,6 +22,11 @@ Skip `remake/internal/embedded/data` in a diff: `mise run remake:extract`
 writes it, and `TestEmbeddedFilesMatchTheOriginal` fails when it differs from
 a fresh extract. Review the extractor (`remake/internal/assets`) instead.
 
+Skip `remake/internal/seasons/data` too: `mise run remake:seasons-update`
+writes it, and `TestBuiltInSeasonsLoad` checks every season. Review the
+updater (`remake/internal/seasons/update`, `remake/cmd/bmpseasons`) and look
+at a changed season by samples.
+
 ## A rule of the original is in its spec
 
 A diff whose code relies on a rule of the original (a comment names

@@ -7,6 +7,7 @@ import (
 
 	"github.com/schowave/bmp/remake/internal/assets"
 	"github.com/schowave/bmp/remake/internal/game"
+	"github.com/schowave/bmp/remake/internal/seasons"
 )
 
 // Setup is the start screen of a new game (f_08bc_2184): choose a club
@@ -15,7 +16,8 @@ import (
 // instead. With NEU in the disk menu the same
 // screen adds managers to a running game.
 type Setup struct {
-	mana    *assets.Mana
+	mana    *assets.Mana // the clubs of the game
+	orig    *assets.Mana // the clubs of the original, for the session
 	saveDir string
 	ss      *Session // the running game for NEU, else nil
 
@@ -29,6 +31,9 @@ type Setup struct {
 	stripX int
 	slotsX [4]int
 	held   int // frames the left button has been held on the strip
+	// back is the season choice the setup came from; a right click goes
+	// back to it while nothing is chosen. Nil without one (and for NEU).
+	back func() Scene
 }
 
 type setupClub struct {
@@ -54,12 +59,21 @@ func NewSetup(mana *assets.Mana, saveDir string) *Setup {
 }
 
 func newSetup(mana *assets.Mana, saveDir string) *Setup {
-	s := &Setup{mana: mana, saveDir: saveDir, center: 3, edit: -1, stripX: 5, slotsX: [4]int{12, 92, 172, 252}}
+	s := &Setup{mana: mana, orig: mana, saveDir: saveDir, center: 3, edit: -1, stripX: 5, slotsX: [4]int{12, 92, 172, 252}}
 	s.teams = [4]int{-1, -1, -1, -1}
 	s.opts.Level = 2
 	for i := 0; i < game.NumGerman; i++ {
 		s.clubs = append(s.clubs, setupClub{name: game.FromCP437(mana.Clubs[i].Name), logo: mana.Clubs[i].Logo, id: i})
 	}
+	return s
+}
+
+// NewSeasonSetup creates the setup of a new game of real season id that
+// starts in year; mana holds its clubs, orig those of the original.
+func NewSeasonSetup(orig, mana *assets.Mana, saveDir, id string, year int) *Setup {
+	s := NewSetup(mana, saveDir)
+	s.orig = orig
+	s.opts.Season, s.opts.Year = id, year
 	return s
 }
 
@@ -102,7 +116,7 @@ func (s *Setup) Update(app *App) error {
 	// (f_08bc_2184 calls f_322b_120c for y <= 35); without a loaded game it
 	// comes back here.
 	if s.ss == nil && in.Left && in.Y <= 35 {
-		app.Push(NewFileScreen(&Session{Mana: s.mana, SaveDir: s.saveDir}, false))
+		app.Push(NewFileScreen(&Session{Mana: s.orig, SaveDir: s.saveDir}, false))
 		return nil
 	}
 	// A click left of the middle scrolls the strip back, right of it on;
@@ -148,6 +162,8 @@ func (s *Setup) Update(app *App) error {
 			s.addManagers(app)
 		case s.ready():
 			app.Push(newSetupOptions(s))
+		case in.Right && s.back != nil && s.untouched():
+			app.Replace(s.back())
 		}
 	}
 	return nil
@@ -174,6 +190,16 @@ func (s *Setup) typeName(in *Input) bool {
 		return in.Enter || in.Escape
 	}
 	return len(in.Chars) > 0 || in.Backspace
+}
+
+// untouched reports whether no name and no club is chosen yet.
+func (s *Setup) untouched() bool {
+	for i := range s.names {
+		if s.names[i] != "" || s.teams[i] >= 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *Setup) ready() bool {
@@ -218,7 +244,7 @@ func (s *Setup) start(app *App) {
 		return
 	}
 	st.Start()
-	ss := &Session{S: st, Mana: s.mana, SaveDir: s.saveDir}
+	ss := &Session{S: st, Mana: s.orig, SaveDir: s.saveDir}
 	app.Reset(NewDriver(ss))
 }
 
@@ -294,6 +320,16 @@ func drawOptDigit(g *Gfx, dst *ebiten.Image, x, y, k int, on bool) {
 	g.TextMid(dst, FontNormal, x, x+24, y+11, itoa(k), c, ColBlack)
 }
 
+// seasonLabel is the row that replaces the historic start in a game of a
+// real season ("Saison 1995/96"), empty for the clubs of the original.
+func (o *setupOptions) seasonLabel() string {
+	s, err := seasons.ParseID(o.s.opts.Season)
+	if err != nil {
+		return ""
+	}
+	return "Saison " + s.Label()
+}
+
 var optLengths = []game.GameLength{game.Endless, game.OneYear, game.ThreeYears}
 
 func (o *setupOptions) Update(app *App) error {
@@ -311,11 +347,12 @@ func (o *setupOptions) Update(app *App) error {
 			opt.Length = l
 		}
 	}
+	// A real season has its own year: no historic start.
 	y := optLengthY + 3*18
-	if in.Clicked(optLeftX, y, 24, 17) {
+	if in.Clicked(optLeftX, y, 24, 17) && o.seasonLabel() == "" {
 		opt.Historic = true
 	}
-	if in.Clicked(optRightX, y, 24, 17) {
+	if in.Clicked(optRightX, y, 24, 17) && o.seasonLabel() == "" {
 		opt.Historic = false
 	}
 	if in.Right || in.Enter {
@@ -348,6 +385,10 @@ func (o *setupOptions) Draw(app *App, dst *ebiten.Image) {
 		drawOptSwitch(g, dst, optRightX, y, true, !on)
 	}
 	y := optLengthY + 3*18
+	if sl := o.seasonLabel(); sl != "" {
+		label(y, sl)
+		return
+	}
 	label(y, "Histor. Start")
 	drawOptSwitch(g, dst, optLeftX, y, false, opt.Historic)
 	drawOptSwitch(g, dst, optRightX, y, true, !opt.Historic)

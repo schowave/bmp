@@ -101,7 +101,7 @@ func (r *rosterJSON) blocks() [4]*[]string {
 func EncodeClubs(m *Mana) ([]byte, error) {
 	out := make([]clubJSON, len(m.Clubs))
 	for i, c := range m.Clubs {
-		out[i] = clubJSON{Name: cp437ToUTF8(c.Name), Logo: c.Logo, Strength: c.Strength}
+		out[i] = clubJSON{Name: FromCP437(c.Name), Logo: c.Logo, Strength: c.Strength}
 		if i >= NumGermanClubs {
 			continue
 		}
@@ -111,7 +111,7 @@ func EncodeClubs(m *Mana) ([]byte, error) {
 		r := &rosterJSON{}
 		for k, b := range r.blocks() {
 			for _, name := range c.Players[rosterBlocks[k]:rosterBlocks[k+1]] {
-				*b = append(*b, cp437ToUTF8(name))
+				*b = append(*b, FromCP437(name))
 			}
 		}
 		out[i].Players = r
@@ -149,7 +149,7 @@ func DecodeClubs(data []byte) (*Mana, error) {
 			}
 			continue
 		}
-		if cj.Logo <= 0 || cj.Logo > 255 {
+		if cj.Logo <= 0 || cj.Logo > maxLogo {
 			return nil, fmt.Errorf("club %d (%s): logo %d", i, cj.Name, cj.Logo)
 		}
 		if cj.Players == nil {
@@ -171,10 +171,14 @@ func DecodeClubs(data []byte) (*Mana, error) {
 	return m, nil
 }
 
+// maxLogo is the highest picture number of a logo: the original uses
+// 80..143, the real seasons (internal/seasons) number theirs from 1000.
+const maxLogo = 9999
+
 // manaName converts a name to CP437 and checks that it fits a slot of size
 // bytes of MANA.DAT, with its NUL.
 func manaName(s string, size int) (string, error) {
-	b, err := utf8ToCP437(s)
+	b, err := ToCP437(s)
 	if err != nil {
 		return "", err
 	}

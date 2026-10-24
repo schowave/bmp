@@ -6,8 +6,13 @@ func (s *State) recordHistory(mi int) {
 	m := s.Managers[mi]
 	c := &s.Clubs[m.Team]
 	for h := 0; h < 2; h++ {
-		m.EtPoints[h] += c.Points[h]
-		m.EtMinus[h] += 2*c.Games[h] - c.Points[h]
+		// The balance of the eternal table counts by the 2-point rule, also
+		// in seasons of the 3-point rule, so that a game across 1995/96 adds
+		// up one kind of points. For the original it is its formula
+		// (points, 2*games - points).
+		draws := c.Games[h] - c.Wins[h] - c.Losses[h]
+		m.EtPoints[h] += 2*c.Wins[h] + draws
+		m.EtMinus[h] += 2*c.Losses[h] + draws
 		m.EtGoals[h] += c.Goals[h]
 		m.EtAgainst[h] += c.Against[h]
 		m.EtGames[h] += c.Games[h]
@@ -201,7 +206,54 @@ func LeagueName(l, year int) string {
 }
 
 // LeagueName is the name of league l in the current season.
-func (s *State) LeagueName(l int) string { return LeagueName(l, s.StartYear) }
+func (s *State) LeagueName(l int) string { return LeagueName(l, s.NameYear(s.StartYear)) }
+
+// LeagueNameIn is the name of league l in the season that starts in year.
+func (s *State) LeagueNameIn(l, year int) string { return LeagueName(l, s.NameYear(year)) }
+
+// NameYear is the year whose league names a game shows for a season that
+// starts in year: that year in a real season; with the clubs of the
+// original always 1992, whose names are those of the original (Zweite
+// Liga, Am.-Oberliga).
+func (s *State) NameYear(year int) int {
+	if !s.IsReal() {
+		return modernYear
+	}
+	return year
+}
+
+// announceChanges tells every manager in the messages what the new season
+// changes against the one that started in prev: the points of a win, the
+// names of the leagues. Only real seasons change them.
+func (s *State) announceChanges(prev int) {
+	if !s.IsReal() {
+		return
+	}
+	var texts []string
+	for l := 1; l < NumLeagues; l++ {
+		if old, now := s.LeagueNameIn(l, prev), s.LeagueNameIn(l, s.StartYear); old != now {
+			texts = append(texts, msgLeagueRenamed(old, now))
+		}
+	}
+	if old, now := s.pointsPerWinIn(prev), s.PointsPerWin(); old != now {
+		texts = append(texts, msgPointsPerWin(now))
+	}
+	for mi := range s.Managers {
+		for _, t := range texts {
+			s.notify(mi, t)
+		}
+	}
+}
+
+// HistoryBaseYear is the year the history screen shows for the first
+// record: the original counts from 1963, and in a modern game from 1991,
+// one year before its first season (f_262f_390e).
+func (s *State) HistoryBaseYear() int {
+	if s.Modern {
+		return s.FirstYear - 1
+	}
+	return s.FirstYear
+}
 
 // HistoryYear is the year in which the season of history record r of
 // manager mi started.
@@ -218,7 +270,9 @@ func (s *State) youthPlayer(mi int) {
 	r := &s.Rand
 	m := s.Managers[mi]
 	year := DateOf(s.StartYear, s.Day).Year
-	if !((year > 1966 && !s.Modern) || (year > 1995 && s.Modern)) {
+	// The original: after 1966, or after 1995 in a modern game, i.e. from
+	// the fourth season on.
+	if year <= s.FirstYear+3 {
 		return
 	}
 	y := m.YouthPoints / 12
@@ -415,6 +469,7 @@ func (s *State) seasonEnd2() {
 	s.Event = 0
 	s.Day = 0
 	s.StartYear++
+	s.announceChanges(s.StartYear - 1)
 	s.Results = [NumLeagues][38][10]Score{}
 	s.Events = seasonEvents
 	s.Postponed = [20]PostponedGame{}

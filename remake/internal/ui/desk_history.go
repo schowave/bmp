@@ -75,10 +75,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 		g.TextMid(dst, FontSmall, 0, 0x140, 0x1d, "NOCH HABEN SIE KEINE HISTORISCH SONDERLICH WICHTIGEN ERFOLGE ERZIELT...", ColLight, ColGrey7)
 		return
 	}
-	base := 1963
-	if s.StartYear-s.Seasons > 1970 {
-		base = 1991
-	}
+	base := s.HistoryBaseYear()
 	y := 0x1d
 	for r := h.page * 16; r < n && r < (h.page+1)*16; r++ {
 		e := m.History[r]
@@ -96,7 +93,7 @@ func (h *HistoryScreen) Draw(app *App, dst *ebiten.Image) {
 				c = ColBeige
 			}
 			g.TextAt(dst, FontSmall, 0x2a, y, numText(int64(int(e[0])-game.FirstID[l]), 2, false)+".", c, -1)
-			name := game.LeagueName(l, s.HistoryYear(h.ss.Mgr(), r))
+			name := s.LeagueNameIn(l, s.HistoryYear(h.ss.Mgr(), r))
 			g.TextMid(dst, FontSmall, 0x55, 0x55, y, name, ColLight, -1)
 			// the DFB-Pokal
 			buf, c := name, ColLight

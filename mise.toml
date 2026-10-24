@@ -229,6 +229,11 @@ description = "Extract the files the remake needs from bmp/ into remake/internal
 dir = "{{config_root}}/remake"
 run = "go run ./cmd/bmpextract -data ../bmp -out internal/embedded/data"
 
+[tasks."remake:seasons-update"]
+description = "Fetch seasons from transfermarkt.de and write them into remake/internal/seasons/data (args: [FROM [TO]], default the running season)"
+dir = "{{config_root}}/remake"
+run = "tools/transfermarkt/update.sh"
+
 # --- Checks --------------------------------------------------------------------
 
 [tasks.lint]

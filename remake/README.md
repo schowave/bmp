@@ -90,6 +90,55 @@ directory, for example one with edited clubs or logos (`go run
 ./cmd/bmpextract -out DIR` writes one to start from). An edited picture must
 stay an indexed PNG.
 
+### The real seasons
+
+`internal/seasons/data` holds the clubs of the seasons 1990/91 to 2026/27 as
+club databases in the format of `clubs.json`, with the logos of the clubs the
+original does not have (`pic/`). These files are the data of the seasons; the
+sources of the logos and of the tables of the first versions are in
+`internal/seasons/credits` ([ADR 0009](../docs/adr/0009-real-seasons-from-transfermarkt.md)).
+
+A season is updated or added from transfermarkt.de:
+
+```sh
+mise run remake:seasons-update             # the running season
+mise run remake:seasons-update -- 2027     # one season
+mise run remake:seasons-update -- 2025 2026   # several
+```
+
+The task fetches tables and squads with `tools/transfermarkt` into
+`$BMP_TM_DIR` (default `~/tm-daten`, with its cache), from 2008/09 on also
+the Regionalliga, and the foreign clubs of the European cups
+(`YYYY-YY.europe.json`). `cmd/bmpseasons update` writes the seasons from
+them: the clubs on the places of the game with strengths from their table
+and their most valuable players, the places outside the leagues from the
+Regionalliga, the foreign clubs from the European cups. What the files
+lack comes from the season before: clubs, logos, foreign clubs. It needs
+`uv` for the Python packages `requests` and `beautifulsoup4`.
+
+A new season, step by step:
+
+1. `mise run remake:seasons-update -- 2027` and read its output: a league
+   that could not be fetched leaves the season unwritten; "Regionalliga nicht
+   gefunden" or no foreign clubs mean those come from the season before.
+2. `git diff --stat remake/internal/seasons` shows what changed; "N new
+   logos" in the output are clubs with a plain shield.
+3. Give them their logos: `go run ./cmd/bmpseasons logo -club "NAME" -image
+   FILE -source "…"` (below).
+4. `mise run remake:shot seasons OUT.png` and the setup of the season: the
+   clubs and their logos.
+5. `mise run check`, then commit the season, its logos and credits.
+
+When Transfermarkt changes its pages, `tools/transfermarkt/tm_fetch.py`
+reads nothing or too little; the output of step 1 shows it.
+
+A club with a plain shield gets a logo of an image, drawn in the colours of
+the logos of the original, in every season it plays in:
+
+```sh
+go run ./cmd/bmpseasons logo -club "SPVGG WEIDEN" -image weiden.png -source "where it comes from"   # in remake/
+```
+
 ## Command-line options
 
 | Flag | Default | Purpose |
@@ -111,14 +160,19 @@ The controls follow the original: the left mouse button selects; the right
 mouse button confirms in some places (setup, lineup reserves, sponsors) but
 does not leave screens, which close with the HAUPT MENU or WEITER button.
 
-1. **Setup:** click the name field below a face and type the name. Click
+1. **Season:** when real seasons are built in (`internal/seasons`), the
+   first screen after the title lists them; ORIGINAL (1991/92) plays with
+   the clubs of the original, which are those of 1991/92. In the setup a
+   right click goes back to the seasons as long as no name and no club is
+   chosen, to look at the clubs of another season.
+2. **Setup:** click the name field below a face and type the name. Click
    left or right of the middle of the logo strip to scroll it (hold the
    button to keep it moving), and click the empty field above the face to
    give that manager the club in the middle. Up to four managers. A right
    click opens the options (level, game length, historic start), a second
    right click starts the game. NEU in the disk menu adds managers later.
-2. **Cup draws** ask whether to watch them ("ABER KLAR" shows the draw).
-3. **Main menu:**
+3. **Cup draws** ask whether to watch them ("ABER KLAR" shows the draw).
+4. **Main menu:**
    - The icons on the left open the desk (statistics, eternal table,
      history, stadium, bank, sponsors), the leagues (tables, results,
      strengths) and the team (lineup with the pitch to place the players,
@@ -128,7 +182,7 @@ does not leave screens, which close with the HAUPT MENU or WEITER button.
    - A click on the calendar sheet ends the turn, a click in the middle
      opens the messages, and a right click on the manager tearing his hair quits
      the game.
-4. **Match days** run live with the goal scenes:
+5. **Match days** run live with the goal scenes:
 
    | Input | Effect |
    |---|---|
@@ -254,12 +308,15 @@ the panel with new messages is open, it takes the keys, so close it first.
 | `cmd/bmpextract` | Extracts the original files into open formats in `internal/embedded/data` |
 | `cmd/bmpicon` | Draws the icon `cmd/bmp/icon.png` from the embedded title banner |
 | `cmd/scenepreview` | Plays a single goal scene in a window, for development |
+| `cmd/bmpseasons` | Writes real seasons into `internal/seasons/data` from Transfermarkt season files |
 | `internal/assets` | Readers of the original files (EXEPACK unpacker, picture format, palettes, the bitmap fonts inside `BMMAIN.EXE`, `MANA.DAT`, goal scenes) and of the extract |
 | `internal/game` | The rules: calendar, fixtures, match engine, cups, finances, stadium, players, transfers, season end. Deterministic (the random generator of the MS C runtime), saved as JSON |
 | `internal/ui` | The screens on the 320×240 canvas |
 | `internal/embedded` | The original files built into the binary |
+| `internal/seasons` | The real seasons 1990/91–2026/27 built into the binary, their credits; `update` makes a season from Transfermarkt |
 | `testdata/original` | Reference screenshots of the original (see its README) |
 | `tools/re` | Reverse-engineering tools and the decompilation of `BMMAIN.EXE` (see [`tools/re/README.md`](tools/re/README.md)) |
+| `tools/transfermarkt` | Fetches tables and squads of seasons from transfermarkt.de (`mise run remake:seasons-update`) |
 | `tools/shots.sh` | Renders every demo screen to a PNG |
 | `tools/playtest.sh` | Plays the game through `-control` for playtests (see [`../docs/playtest.md`](../docs/playtest.md)) |
 
@@ -331,10 +388,11 @@ ties). Deliberate differences:
 - When a 1- or 3-year game is over, ENDE under the high scores returns to the
   title screen, where a new game can start; the original quits the program
   (`f_076b_114c` in `f_1a58_3176`).
-- The second and third league are called after the real tiers of the
-  season: Regionalliga until 1973/74, then Zweite Liga; Amateurliga until
-  1977/78, Am.-Oberliga until 1993/94, Regionalliga until 2007/08, then
-  3. Liga. The original always says Zweite Liga and Am.-Oberliga.
+- In a real season the second and third league are called after the real
+  tiers of the year: Regionalliga until 1973/74, then Zweite Liga;
+  Amateurliga until 1977/78, Am.-Oberliga until 1993/94, Regionalliga until
+  2007/08, then 3. Liga. With the clubs of the original they keep the
+  original's names, Zweite Liga and Am.-Oberliga.
 - Bugs of the match engine that the remake leaves out:
   - In cup matches the original checks the minutes of the chances against
     the person table instead of the chances (`f_0310_12fe`) and draws again
@@ -382,8 +440,30 @@ ties). Deliberate differences:
 - The high scores at the game end take a manager once, are sorted stably
   and highlight his row; the original can enter him twice
   (`f_1a58_3176`) and highlights row 18 in the menu.
+- Real seasons (see Playing) fit the places of the original: a league with
+  more clubs than places passes its last ones down, one with fewer takes
+  the best of the tier below; the third league is the Oberliga until
+  1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
+  second teams of professional clubs before 2008 unless the places cannot
+  be filled without them. Strengths come from the
+  goals and points per game of the season ([ADR 0009](../docs/adr/0009-real-seasons-from-transfermarkt.md)).
+- Real seasons: the game starts in the year of the season; a
+  1- or 3-year game ends one or three years later, the youth players come
+  from the fourth season on, as in the original's modern start.
+- In a real season a win counts 3 points from 1995/96 on, as in the real
+  leagues (the original's variable D:0x2271); with the clubs of the
+  original it stays 2. When a new real season changes the points of a win
+  or the name of a league, every manager gets a message about it. The balance of the eternal table (points and minus
+  points) keeps counting by the 2-point rule, so that a game across
+  1995/96 adds up one kind of points.
 
 ## Legal
+
+The real seasons (`internal/seasons`) come from transfermarkt.de, whose data
+is not openly licensed, and in their first versions also from the German
+Wikipedia (CC BY-SA 4.0, the articles in `internal/seasons/credits/articles.txt`)
+and Wikidata (CC0). `internal/seasons/credits/logos.csv` names the licence
+and author of every logo. Club names and logos are trademarks of the clubs.
 
 The original game files are copyrighted by Software 2000.
 `internal/embedded/data` and every binary contain them; converted into PNG

@@ -74,7 +74,7 @@ func NewHighscoreScreen(ss *Session) Scene {
 	hs, err := loadHighscores(ss)
 	hs, row := game.EnterHighscore(hs, ss.S.HighscoreEntry(ss.Mgr()))
 	mark := func(r int, _ game.HighscoreEntry) bool { return r == row }
-	if ss.S.EndYear >= 2000 {
+	if ss.S.Endless() {
 		if err == nil {
 			err = saveHighscores(ss, hs)
 		}
@@ -150,7 +150,7 @@ func (o *GameOver) Update(app *App) error {
 		return nil
 	}
 	if app.Input.Left || app.Input.Right || app.Input.Enter || app.Input.Escape {
-		app.Reset(NewTitle().OnDone(func() Scene { return NewSetup(o.ss.Mana, o.ss.SaveDir) }))
+		app.Reset(NewTitle().OnDone(func() Scene { return NewSeasonChoice(o.ss.Mana, o.ss.SaveDir) }))
 	}
 	return nil
 }

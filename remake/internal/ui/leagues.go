@@ -200,18 +200,19 @@ func (t *TableScreen) Draw(app *App, dst *ebiten.Image) {
 		c := lgColor(s, r.Club)
 		g.lgTextFig(dst, FontSmall, 9, y, lgPad(i+1, 2)+".", ColWhite)
 		g.TextAt(dst, FontSmall, 0x15, y, s.Teams[r.Club].Name, c, NoShadow)
-		g.lgTextFig(dst, FontSmall, 0x67, y, lgTableLine(r), c)
+		g.lgTextFig(dst, FontSmall, 0x67, y, lgTableLine(r, s.PointsPerWin()), c)
 	}
 }
 
 // lgTableLine is the text of a table row from BILANZ on (f_2a41_214c).
-func lgTableLine(r game.TableRow) string {
+// win is the points per win: the 3-point rule shows the points alone.
+func lgTableLine(r game.TableRow, win int) string {
 	var b strings.Builder
 	b.WriteString(r.Form)
 	b.WriteString("   ")
 	b.WriteString(lgPad(r.Games, 2) + "     ")
 	b.WriteString(lgPad(r.Wins, 2) + " " + lgPad(r.Draws(), 2) + " " + lgPad(r.Losses, 2) + "    ")
-	if game.PointsPerWin > 2 {
+	if win > 2 {
 		b.WriteString("     " + lgPad(r.Points, 2) + " ")
 	} else {
 		b.WriteString(lgPad(r.Points, 2) + ":" + lgPad(r.MinusPoints(), 2))
