@@ -88,6 +88,26 @@ class Offline(unittest.TestCase):
             "goalkeepers": ["KAHN", "DREHER", "SCHEUER"], "defenders": ["TARNAT", "SABA"],
             "midfielders": [], "forwards": ["ÉLBER"]}})
 
+    def test_season_ordered_by_games(self):
+        """A season whose squads are already by games finds its squad again,
+        also with players beyond those the game takes by the squad's order."""
+        with tempfile.TemporaryDirectory() as out:
+            cache = os.path.join(out, ".cache", "1997")
+            write(os.path.join(cache, "L1-27.squad.json"),
+                  squad(("Sven Scheuer", "Torwart"), ("Bernd Dreher", "Torwart"), ("Oliver Kahn", "Torwart"),
+                        ("Michael Tarnat", "Linker Verteidiger"), ("Giovane Élber", "Mittelstürmer")))
+            write(os.path.join(cache, "L1-27.games.json"),
+                  games(("Oliver Kahn", "34", "3.060'"), ("Bernd Dreher", "1", "90'")))
+            seasons = os.path.join(out, "seasons")
+            write(os.path.join(seasons, "1997-98.json"), [
+                {"name": "FC BAYERN MÜNCHEN", "players": players(goalkeepers=["KAHN", "DREHER"],
+                                                                 defenders=["TARNAT"], forwards=["ELBER"])},
+            ])
+            j.CACHE, j.OFFLINE = os.path.join(out, ".cache"), True
+            with contextlib.redirect_stdout(io.StringIO()):
+                got, _ = g.season(None, 1997, seasons)
+        self.assertEqual(got["FC BAYERN MÜNCHEN"]["goalkeepers"], ["KAHN", "DREHER", "SCHEUER"])
+
 
 if __name__ == "__main__":
     unittest.main()

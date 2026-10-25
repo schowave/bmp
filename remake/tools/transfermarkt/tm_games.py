@@ -31,9 +31,10 @@ def fold(name):
     return "".join(c for c in name if not unicodedata.combining(c)).upper().strip()[:25]
 
 
-def picked(players):
-    """The names the game takes from a squad (pickPlayers in update.go)."""
-    return {fold(n) for g, size in SIZES.items() for n in players[g][:size]}
+def everyone(players):
+    """The names of a whole squad: a season already ordered by games has
+    players from further down the squad than the game takes by its order."""
+    return {fold(n) for g in SIZES for n in players[g]}
 
 
 def minutes(text):
@@ -59,7 +60,7 @@ def season(session, year, seasons_dir):
         comp, club_id = os.path.basename(path)[:-len(".squad.json")].rsplit("-", 1)
         with open(path, encoding="utf-8") as f:
             squad = json.load(f)
-        squads[(comp, club_id)] = (squad, picked(j.convert(squad)))
+        squads[(comp, club_id)] = (squad, everyone(j.convert(squad)))
     out, failed, unmatched = {}, [], []
     for c in clubs:
         names = {fold(n) for g in SIZES for n in c["players"][g] if n}

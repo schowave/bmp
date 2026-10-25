@@ -21,9 +21,11 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
 	"image"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
@@ -119,6 +121,18 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
+	older, err := olderSeasons(s.Year)
+	if err != nil {
+		return err
+	}
+	// The season as it was keeps the names of its clubs.
+	before, err := readSeason(filepath.Join(seasonsDir, s.ID+".json"))
+	if errors.Is(err, fs.ErrNotExist) {
+		before, err = nil, nil
+	}
+	if err != nil {
+		return err
+	}
 	foreign, err := update.ReadForeign(filepath.Join(dir, s.ID+".europe.json"))
 	if err != nil {
 		return err
@@ -127,7 +141,7 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
-	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Known: known, NextLogo: next, Squads: squads})
+	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Before: before, Earlier: older, Known: known, NextLogo: next, Squads: squads})
 	if err != nil {
 		return err
 	}
@@ -175,13 +189,9 @@ func current() ([]*assets.Mana, int, error) {
 	}
 	var out []*assets.Mana
 	for _, f := range files { // Glob sorts: the oldest first
-		b, err := os.ReadFile(f)
+		m, err := readSeason(f)
 		if err != nil {
 			return nil, 0, err
-		}
-		m, err := assets.DecodeClubs(b)
-		if err != nil {
-			return nil, 0, fmt.Errorf("%s: %w", f, err)
 		}
 		out = append(out, m)
 	}
@@ -201,14 +211,50 @@ func current() ([]*assets.Mana, int, error) {
 // previous is the season before year: from seasonsDir, else the clubs of
 // the original.
 func previous(year int) (*assets.Mana, error) {
-	if b, err := os.ReadFile(filepath.Join(seasonsDir, seasons.ForYear(year-1).ID+".json")); err == nil {
-		return assets.DecodeClubs(b)
+	m, err := readSeason(filepath.Join(seasonsDir, seasons.ForYear(year-1).ID+".json"))
+	if !errors.Is(err, fs.ErrNotExist) {
+		return m, err
 	}
 	dir, err := assets.OpenDir(os.DirFS(origDir))
 	if err != nil {
 		return nil, err
 	}
 	return dir.Mana()
+}
+
+// olderSeasons are the seasons in seasonsDir older than the season before
+// year, the latest first.
+func olderSeasons(year int) ([]*assets.Mana, error) {
+	files, err := filepath.Glob(filepath.Join(seasonsDir, "*.json"))
+	if err != nil {
+		return nil, err
+	}
+	var out []*assets.Mana
+	for _, f := range slices.Backward(files) { // Glob sorts: the latest last
+		s, err := seasons.ParseID(strings.TrimSuffix(filepath.Base(f), ".json"))
+		if err != nil || s.Year >= year-1 {
+			continue
+		}
+		m, err := readSeason(f)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, m)
+	}
+	return out, nil
+}
+
+// readSeason reads a season of seasonsDir.
+func readSeason(file string) (*assets.Mana, error) {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	m, err := assets.DecodeClubs(b)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", file, err)
+	}
+	return m, nil
 }
 
 func squadsMain() {

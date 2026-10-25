@@ -5,7 +5,8 @@
 .DS_Store
 Thumbs.db
 
-# Runtime: the saves of mise run vnc:run and wasm:run-docker
+# Runtime: the saves of mise run vnc:run and wasm:run-docker, the
+# transfermarkt.de data of mise run remake:seasons-update
 .local/
 
 # Generated WASM web root (mise run wasm:build)

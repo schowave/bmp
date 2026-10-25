@@ -73,10 +73,17 @@ def regionalligas(session, year, pause):
     soup = get(session, url, pause)
     codes = []
     for a in soup.select("a[href*='/wettbewerb/']"):
-        m = re.search(r"/(regionalliga[a-z-]*)/startseite/wettbewerb/([A-Z0-9]+)", a.get("href", ""))
-        if m and m.group(2) not in codes:
-            codes.append(m.group(2))
+        code = regionalliga_code(a.get("href", ""))
+        if code and code not in codes:
+            codes.append(code)
     return codes
+
+
+def regionalliga_code(href):
+    """The code of a link to a Regionalliga group, else None; the names of
+    former groups carry their last season ("regionalliga-nord-bis-11-12-")."""
+    m = re.search(r"/regionalliga[a-z0-9-]*/startseite/wettbewerb/([A-Z0-9]+)", href)
+    return m.group(1) if m else None
 
 
 def participants(session, comp, year, pause):

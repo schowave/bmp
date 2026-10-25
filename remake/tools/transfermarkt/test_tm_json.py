@@ -54,6 +54,17 @@ class Conversions(unittest.TestCase):
         self.assertEqual(j.third_tier(2007), ["RN", "RS"])
         self.assertEqual(j.third_tier(2008), ["L3"])
 
+    def test_second_tier(self):
+        self.assertEqual(j.second_tier(1990), ["L2"])
+        self.assertEqual(j.second_tier(1991), ["L2N", "L2S"])
+        self.assertEqual(j.second_tier(1992), ["L2"])
+
+    def test_regionalliga_code(self):
+        self.assertEqual(j.t.regionalliga_code("/regionalliga-bayern/startseite/wettbewerb/RLB3/saison_id/2025"), "RLB3")
+        self.assertEqual(j.t.regionalliga_code("/regionalliga-nord-bis-11-12-/startseite/wettbewerb/RL1/saison_id/2008"), "RL1")
+        self.assertIsNone(j.t.regionalliga_code("/aufstiegsrunde-zur-regionalliga-nord/startseite/wettbewerb/ARRN/saison_id/2008"))
+        self.assertIsNone(j.t.regionalliga_code("/3-liga/startseite/wettbewerb/L3/saison_id/2008"))
+
 
 class Offline(unittest.TestCase):
     def test_season_from_cache(self):
@@ -93,6 +104,22 @@ class Offline(unittest.TestCase):
         self.assertEqual((clubs[2]["games"], clubs[2]["goals"], clubs[2]["points"]), (34, "81:22", 85))
         self.assertEqual(clubs[4]["players"], {g: [] for g in j.GROUP.values()})
         self.assertEqual(foreign, [{"name": "FC BARCELONA", "country": "Spanien", "cup": "CL"}])
+
+    def test_table_of_the_running_season(self):
+        """A past season whose table is that of the running season (9 games
+        of 18 clubs) is not written."""
+        with tempfile.TemporaryDirectory() as out:
+            cache = os.path.join(out, ".cache", "2010")
+            j.write_json(os.path.join(cache, "regionalligas.json"), [])
+            j.write_json(os.path.join(cache, "L1.table.json"), [row("1", "Borussia Dortmund", "16")])
+            j.write_json(os.path.join(cache, "L2.table.json"), [row(str(i), f"Club {i}", str(100 + i), games="9") for i in range(1, 19)])
+            j.write_json(os.path.join(cache, "L3.table.json"), [row("1", "Eintracht Braunschweig", "23")])
+            for name in ("L1-16", "L3-23"):
+                j.write_json(os.path.join(cache, f"{name}.squad.json"), [])
+            j.CACHE, j.OFFLINE = os.path.join(out, ".cache"), True
+            with contextlib.redirect_stdout(io.StringIO()):
+                _, failed = j.season(None, 2010)
+        self.assertEqual(failed, ["L2: not the season 2010"])
 
 
 if __name__ == "__main__":
