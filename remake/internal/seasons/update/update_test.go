@@ -370,7 +370,8 @@ func TestFirstTeam(t *testing.T) {
 }
 
 // A second team does not move up into the 2. Bundesliga, though it wins the
-// 3. Liga: the next clubs of the 3. Liga take the two places.
+// 3. Liga, nor one whose name the game cuts: the next clubs of the 3. Liga
+// take the two places.
 func TestSecondTeamStaysDown(t *testing.T) {
 	var clubs []Club
 	for i := 1; i <= 18; i++ {
@@ -379,13 +380,14 @@ func TestSecondTeamStaysDown(t *testing.T) {
 	for i := 1; i <= 20; i++ {
 		clubs = append(clubs, club(fmt.Sprintf("THIRD %d", i), "L3", i))
 	}
-	clubs[36].Name = "FC BAYERN II" // THIRD 1
+	clubs[36].Name = "FC BAYERN II"              // THIRD 1
+	clubs[37].Name = "RASENBALLSPORT LEIPZIG II" // THIRD 2, a name cut to "…LEIPZIG"
 	out, err := Season(Input{Year: 2019, Clubs: clubs, Previous: previousSeason(), Known: []*assets.Mana{previousSeason()}, NextLogo: 2000})
 	if err != nil {
 		t.Fatal(err)
 	}
 	c := out.Mana.Clubs
-	if c[36].Name != "THIRD 2" || c[37].Name != "THIRD 3" || c[38].Name != "FC BAYERN II" {
+	if c[36].Name != "THIRD 3" || c[37].Name != "THIRD 4" || c[38].Name != "FC BAYERN II" {
 		t.Errorf("places 36..38: %q %q %q", c[36].Name, c[37].Name, c[38].Name)
 	}
 }

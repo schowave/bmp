@@ -204,7 +204,8 @@ func Season(in Input) (*Output, error) {
 		tm[name], inFile[prevName] = c, true
 		gf, ga := goals(c.Goals)
 		r := row{name: name, tier: tier(c), group: c.League, rank: c.Rank,
-			games: c.Games, goalsFor: gf, goalsAgainst: ga, points: c.Points, prevLeague: newLeague}
+			games: c.Games, goalsFor: gf, goalsAgainst: ga, points: c.Points, prevLeague: newLeague,
+			second: isSecond(c.Name) || isSecond(name)}
 		if p, ok := prev[prevName]; ok {
 			r.prevLeague, r.prevStrength = prevLeague[prevName], p.Strength
 		}
@@ -215,7 +216,7 @@ func Season(in Input) (*Output, error) {
 	for i, c := range in.Previous.Clubs[:numGerman] {
 		name := assets.FromCP437(c.Name)
 		if _, ok := tm[name]; !ok && !inFile[name] {
-			rows = append(rows, row{name: name, tier: fillTier, rank: i, prevLeague: leagueOf(i), prevStrength: c.Strength})
+			rows = append(rows, row{name: name, tier: fillTier, rank: i, prevLeague: leagueOf(i), prevStrength: c.Strength, second: isSecond(name)})
 		}
 	}
 	places, err := placeClubs(rows, in.Year)
@@ -437,6 +438,7 @@ type row struct {
 	points                 int
 	prevLeague             int    // its league in the season before, newLeague if none
 	prevStrength           [3]int // its strengths there
+	second                 bool   // a second team, also when its name is cut ("…FÜRTH I")
 }
 
 // unplayed compares two clubs without games by the season before, the
@@ -527,7 +529,7 @@ func placeClubs(rows []row, year int) ([]placed, error) {
 	if year < secondTeamsFrom {
 		var firsts, seconds []row
 		for _, r := range lower {
-			if isSecond(r.name) {
+			if r.second {
 				seconds = append(seconds, r)
 			} else {
 				firsts = append(firsts, r)
@@ -562,7 +564,7 @@ func placeClubs(rows []row, year int) ([]placed, error) {
 				if len(mine) == sizes[l] {
 					break
 				}
-				if !used[r.name] && !isSecond(r.name) {
+				if !used[r.name] && !r.second {
 					mine = append(mine, r)
 					used[r.name] = true
 				}
