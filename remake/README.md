@@ -113,13 +113,19 @@ mise run remake:seasons-update -- 2025 2026   # several
 ```
 
 The task fetches tables and squads with `tools/transfermarkt` into
-`$BMP_TM_DIR` (default `~/tm-daten`, with its cache), from 2008/09 on also
+`$BMP_TM_DIR` (default `.local/transfermarkt` in the repository, which git
+ignores, with its cache), from 2008/09 on also
 the Regionalliga, and the foreign clubs of the European cups
 (`YYYY-YY.europe.json`). `cmd/bmpseasons update` writes the seasons from
 them: the clubs on the places of the game with strengths from their table
 and their most valuable players, the places outside the leagues from the
 Regionalliga, the foreign clubs from the European cups. What the files
-lack comes from the season before: clubs, logos, foreign clubs. Before the
+lack comes from the season before: clubs, logos, foreign clubs. A club
+keeps the name it has in the season, else in the season before, else in
+the latest earlier season that has it, so that names and logos do not
+change with the spelling of Transfermarkt ("SG DYNAMO DRESDEN", "SV 07
+ELVERSBERG"); before 2008 second teams only take places no other club
+fills. Before the
 first game of a season its tables say nothing, so clubs without games rank
 by the season before, the league they played in first, then their strength
 there; fetch the season again later in the season for strengths from its
@@ -132,8 +138,9 @@ with `uv` (pinned in `../mise.toml`), which takes the Python packages
 A new season, step by step:
 
 1. `mise run remake:seasons-update -- 2027` and read its output: a league
-   that could not be fetched leaves the season unwritten; "Regionalliga nicht
-   gefunden" or no foreign clubs mean those come from the season before.
+   that could not be fetched, or that shows the running season instead of
+   the one asked for, leaves the season unwritten; "Regionalliga not found"
+   or no foreign clubs mean those come from the season before.
 2. `git diff --stat remake/internal/seasons` shows what changed; "N new
    logos" in the output are clubs with a plain shield.
 3. Give them their logos: `go run ./cmd/bmpseasons logo -club "NAME" -image

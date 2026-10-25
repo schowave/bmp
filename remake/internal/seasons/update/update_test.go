@@ -125,7 +125,7 @@ func TestSeasonBeforeFirstGame(t *testing.T) {
 func TestMatchNames(t *testing.T) {
 	known := []string{"WERDER BREMEN", "1.FC HEIDENHEIM", "PREUßEN MÜNSTER", "VFB STUTTGART", "VFB STUTTGART II", "FSV FRANKFURT"}
 	got := matchNames([]string{"SV WERDER BREMEN", "1.FC HEIDENHEIM 1846", "PREUSSEN MÜNSTER", "VFB STUTTGART II",
-		"VFB STUTTGART", "FC VORWÄRTS FRANKFURT/ODER"}, known)
+		"VFB STUTTGART", "FC VORWÄRTS FRANKFURT/ODER"}, known, false)
 	want := map[string]string{"SV WERDER BREMEN": "WERDER BREMEN", "1.FC HEIDENHEIM 1846": "1.FC HEIDENHEIM",
 		"PREUSSEN MÜNSTER": "PREUßEN MÜNSTER", "VFB STUTTGART II": "VFB STUTTGART II", "VFB STUTTGART": "VFB STUTTGART"}
 	if len(got) != len(want) {
@@ -135,6 +135,16 @@ func TestMatchNames(t *testing.T) {
 		if got[k] != v {
 			t.Errorf("%q: %q, want %q", k, got[k], v)
 		}
+	}
+}
+
+// In another season a name only matches the same club: "RB LEIPZIG" is not
+// the "VFB LEIPZIG" of earlier seasons.
+func TestMatchNamesStrict(t *testing.T) {
+	got := matchNames([]string{"RB LEIPZIG", "SG DYNAMO DRESDEN", "SV 07 ELVERSBERG"},
+		[]string{"VFB LEIPZIG", "DYNAMO DRESDEN", "SV ELVERSBERG"}, true)
+	if len(got) != 2 || got["SG DYNAMO DRESDEN"] != "DYNAMO DRESDEN" || got["SV 07 ELVERSBERG"] != "SV ELVERSBERG" {
+		t.Errorf("got %v", got)
 	}
 }
 
@@ -274,5 +284,66 @@ func TestSeasonWithSquads(t *testing.T) {
 	}
 	if c[1].Name != "FIRST 2" || c[1].Players[0] != "KEEPERF" {
 		t.Errorf("club 1: %+v", c[1])
+	}
+}
+
+// A club missing in the season before keeps the name it had in the season
+// as it was, else in the latest season that has it, though another season
+// has it under the name of Transfermarkt.
+func TestSeasonKeepsEarlierName(t *testing.T) {
+	clubs := []Club{club("SG DYNAMO DRESDEN", "L1", 1), club("FC VIKTORIA KÖLN", "L1", 2)}
+	prev, before, older, newest := previousSeason(), previousSeason(), previousSeason(), previousSeason()
+	cp := func(s string) string {
+		b, err := assets.ToCP437(s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return b
+	}
+	before.Clubs[6].Name = cp("VIKTORIA KÖLN")
+	older.Clubs[5].Name = "DYNAMO DRESDEN"
+	newest.Clubs[5].Name, newest.Clubs[6].Name = "SG DYNAMO DRESDEN", cp("FC VIKTORIA KÖLN")
+	out, err := Season(Input{Year: 2000, Clubs: clubs, Previous: prev, Before: before, Earlier: []*assets.Mana{older},
+		Known: []*assets.Mana{older, prev, before, newest}, NextLogo: 2000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := out.Mana.Clubs
+	if c[0].Name != "DYNAMO DRESDEN" || c[0].Logo != 1005 || assets.FromCP437(c[1].Name) != "VIKTORIA KÖLN" {
+		t.Errorf("clubs %s (logo %d), %s", c[0].Name, c[0].Logo, assets.FromCP437(c[1].Name))
+	}
+}
+
+// Before 2008 the second teams of the third tier come after every other
+// club, also after those of the season before; from 2008 on they rank by
+// their table like any club.
+func TestSecondTeamsBefore2008(t *testing.T) {
+	var clubs []Club
+	for i := 1; i <= 18; i++ {
+		clubs = append(clubs, club(fmt.Sprintf("FIRST %d", i), "L1", i), club(fmt.Sprintf("SECOND %d", i), "L2", i))
+	}
+	for i := 1; i <= 18; i++ {
+		north, south := club(fmt.Sprintf("NORTH %d", i), "RN", i), club(fmt.Sprintf("SOUTH %d", i), "RS", i)
+		clubs = append(clubs, north, south)
+	}
+	clubs[36].Name = "WERDER BREMEN II" // NORTH 1
+	clubs[37].Name = "BAYERN AMATEURE"  // SOUTH 1
+	for _, year := range []int{2000, 2008} {
+		out, err := Season(Input{Year: year, Clubs: clubs, Previous: previousSeason(), Known: []*assets.Mana{previousSeason()}, NextLogo: 2000})
+		if err != nil {
+			t.Fatal(err)
+		}
+		in := map[string]int{}
+		for i, c := range out.Mana.Clubs[:numGerman] {
+			in[assets.FromCP437(c.Name)] = i
+		}
+		_, bremen := in["WERDER BREMEN II"]
+		_, bayern := in["BAYERN AMATEURE"]
+		if year < secondTeamsFrom && (bremen || bayern) {
+			t.Errorf("%d: second teams on places %v", year, in)
+		}
+		if year >= secondTeamsFrom && (!bremen || !bayern) {
+			t.Errorf("%d: second teams missing", year)
+		}
 	}
 }

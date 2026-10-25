@@ -88,6 +88,13 @@ def running_season():
     return today.year if today.month >= 7 else today.year - 1
 
 
+def second_tier(year):
+    """The second tier: one 2. Bundesliga, in 1991/92 a north and a south
+    group. For a code it lacks in a season Transfermarkt shows the running
+    season instead."""
+    return ["L2N", "L2S"] if year == 1991 else ["L2"]
+
+
 def third_tier(year):
     """The third tier: Oberligen (to 1993), Regionalligen (1994-2007), 3. Liga (from 2008).
     Codes of Transfermarkt; they hold only for the seasons named."""
@@ -152,7 +159,7 @@ def season(session, year):
     Regionalliga from 2008 (tier 4) is optional: it fills the places outside
     the leagues; without it the game takes the clubs of the season before."""
     clubs, failed = [], []
-    comps = [("L1", 1), ("L2", 2)] + [(c, 3) for c in third_tier(year)]
+    comps = [("L1", 1)] + [(c, 2) for c in second_tier(year)] + [(c, 3) for c in third_tier(year)]
     if year >= 2008:
         codes = cached(os.path.join(CACHE, str(year), "regionalligas.json"), t.regionalligas, session, year)
         if codes:
@@ -166,6 +173,11 @@ def season(session, year):
                 failed.append(comp)
             if rows is not None:
                 os.remove(os.path.join(CACHE, str(year), f"{comp}.table.json"))
+            continue
+        # A finished season where a club played fewer games than it has
+        # opponents: the table of the running season (a wrong code).
+        if tier < 4 and year < running_season() and max(number(r["spiele"]) for r in rows) < len(rows) - 1:
+            failed.append(f"{comp}: not the season {year}")
             continue
         ok = 0
         for r in rows:

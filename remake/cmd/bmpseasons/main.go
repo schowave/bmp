@@ -119,6 +119,17 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
+	earlier, err := earlier(s.Year)
+	if err != nil {
+		return err
+	}
+	// The season as it was keeps the names of its clubs.
+	var before *assets.Mana
+	if b, err := os.ReadFile(filepath.Join(seasonsDir, s.ID+".json")); err == nil {
+		if before, err = assets.DecodeClubs(b); err != nil {
+			return fmt.Errorf("%s: %w", s.ID, err)
+		}
+	}
 	foreign, err := update.ReadForeign(filepath.Join(dir, s.ID+".europe.json"))
 	if err != nil {
 		return err
@@ -127,7 +138,7 @@ func write(dir string, s seasons.Season) error {
 	if err != nil {
 		return err
 	}
-	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Known: known, NextLogo: next, Squads: squads})
+	out, err := update.Season(update.Input{Year: s.Year, Clubs: clubs, Foreign: foreign, Previous: prev, Before: before, Earlier: earlier, Known: known, NextLogo: next, Squads: squads})
 	if err != nil {
 		return err
 	}
@@ -209,6 +220,32 @@ func previous(year int) (*assets.Mana, error) {
 		return nil, err
 	}
 	return dir.Mana()
+}
+
+// earlier are the seasons in seasonsDir before the season before year, the
+// latest first.
+func earlier(year int) ([]*assets.Mana, error) {
+	files, err := filepath.Glob(filepath.Join(seasonsDir, "*.json"))
+	if err != nil {
+		return nil, err
+	}
+	var out []*assets.Mana
+	for _, f := range slices.Backward(files) { // Glob sorts: the latest last
+		s, err := seasons.ParseID(strings.TrimSuffix(filepath.Base(f), ".json"))
+		if err != nil || s.Year >= year-1 {
+			continue
+		}
+		b, err := os.ReadFile(f)
+		if err != nil {
+			return nil, err
+		}
+		m, err := assets.DecodeClubs(b)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", f, err)
+		}
+		out = append(out, m)
+	}
+	return out, nil
 }
 
 func squadsMain() {
