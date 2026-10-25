@@ -2145,7 +2145,7 @@
 		}
 	},
 	{
-		"name": "FC ROT-WEIß ERFURT",
+		"name": "ROT-WEIß ERFURT",
 		"logo": 140,
 		"strength": [
 			28,
@@ -2457,8 +2457,8 @@
 		}
 	},
 	{
-		"name": "ROT-WEIß ERFURT",
-		"logo": 140,
+		"name": "KFC UERDINGEN 05",
+		"logo": 81,
 		"strength": [
 			26,
 			26,
@@ -2466,32 +2466,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"TWARDZIK",
-				"KRONENBERG"
+				"SOKOLOV",
+				"TAPALOVIC"
 			],
 			"defenders": [
-				"KELLER",
-				"AKOTO",
-				"TRAUB",
-				"FALL",
-				"KRESIN",
-				"RICHTER"
+				"EVERS",
+				"PASSLACK",
+				"EHRHARD",
+				"KNIAT",
+				"WERSCHING",
+				"YESIL"
 			],
 			"midfielders": [
-				"KREUZ",
-				"PAVLOVIC",
-				"GLÖDEN",
-				"HEBESTREIT",
-				"ZEDI",
-				"DAVID",
-				"SCHNETZLER"
+				"BALTES",
+				"HOPP",
+				"ERASLAN",
+				"SCHERBE",
+				"ANAGNOSTOU",
+				"LUIS",
+				"GRUEV"
 			],
 			"forwards": [
-				"DWORRAK",
-				"BRAHAM",
-				"TIGANJ",
-				"NEITZEL",
-				"VAN BUSKIRK"
+				"HEUN",
+				"THÖNES",
+				"CANNIZZARO",
+				"SIEAH",
+				""
 			]
 		}
 	},

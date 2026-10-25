@@ -88,6 +88,13 @@ def running_season():
     return today.year if today.month >= 7 else today.year - 1
 
 
+def unfinished(rows):
+    """A table where no club played each other club once yet: for a past
+    season the running one, which Transfermarkt shows for a code the season
+    lacks. Not for the Regionalliga, whose groups stopped early in 2020/21."""
+    return max(number(r["spiele"]) for r in rows) < len(rows) - 1
+
+
 def second_tier(year):
     """The second tier: one 2. Bundesliga, in 1991/92 a north and a south
     group. For a code it lacks in a season Transfermarkt shows the running
@@ -174,9 +181,7 @@ def season(session, year):
             if rows is not None:
                 os.remove(os.path.join(CACHE, str(year), f"{comp}.table.json"))
             continue
-        # A finished season where a club played fewer games than it has
-        # opponents: the table of the running season (a wrong code).
-        if tier < 4 and year < running_season() and max(number(r["spiele"]) for r in rows) < len(rows) - 1:
+        if tier < 4 and year < running_season() and unfinished(rows):
             failed.append(f"{comp}: not the season {year}")
             continue
         ok = 0

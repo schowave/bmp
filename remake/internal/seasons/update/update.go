@@ -144,23 +144,24 @@ func Season(in Input) (*Output, error) {
 	for _, c := range in.Clubs {
 		tmNames = append(tmNames, clubName(c.Name))
 	}
-	byPrev := map[string]string{}
+	bySeasons := map[string]string{} // name of the file -> name in the seasons
 	taken := map[string]bool{}
-	others := tmNames
+	others := slices.Clone(tmNames)
 	for i, m := range append([]*assets.Mana{in.Before, in.Previous}, in.Earlier...) {
 		if m == nil {
 			continue
 		}
+		strict := i > 1 // an earlier season: only the same club
 		var names []string
 		for _, c := range m.Clubs[:numGerman] {
 			if n := assets.FromCP437(c.Name); !taken[n] {
 				names = append(names, n)
 			}
 		}
-		for n, k := range matchNames(others, names, i > 1) {
-			byPrev[n], taken[k] = k, true
+		for n, k := range matchNames(others, names, strict) {
+			bySeasons[n], taken[k] = k, true
 		}
-		others = slices.DeleteFunc(others, func(n string) bool { return byPrev[n] != "" })
+		others = slices.DeleteFunc(others, func(n string) bool { return bySeasons[n] != "" })
 	}
 	var knownNames []string
 	for n := range logos {
@@ -174,15 +175,25 @@ func Season(in Input) (*Output, error) {
 	// for clubs that have not played yet.
 	prev := map[string]assets.ClubRecord{}
 	prevLeague := map[string]int{}
+	var prevNames []string
 	for i, c := range in.Previous.Clubs[:numGerman] {
 		name := assets.FromCP437(c.Name)
 		prev[name], prevLeague[name] = c, leagueOf(i)
+		prevNames = append(prevNames, name)
 	}
+	// The club of the season before that a club of the file is, also when
+	// the season has kept another name of it.
+	asPrev := matchNames(tmNames, prevNames, false)
+	inFile := map[string]bool{} // clubs of the season before
 	var rows []row
 	tm := map[string]Club{}
 	for _, c := range in.Clubs {
 		name := clubName(c.Name)
-		if m, ok := byPrev[name]; ok {
+		prevName, ok := asPrev[name]
+		if !ok {
+			prevName = name
+		}
+		if m, ok := bySeasons[name]; ok {
 			name = m
 		} else if m, ok := byKnown[name]; ok {
 			name = m
@@ -190,12 +201,12 @@ func Season(in Input) (*Output, error) {
 		if _, ok := tm[name]; ok || name == "" {
 			continue // the same club twice
 		}
-		tm[name] = c
+		tm[name], inFile[prevName] = c, true
 		gf, ga := goals(c.Goals)
 		r := row{name: name, tier: tier(c), group: c.League, rank: c.Rank,
 			games: c.Games, goalsFor: gf, goalsAgainst: ga, points: c.Points, prevLeague: newLeague}
-		if p, ok := prev[name]; ok {
-			r.prevLeague, r.prevStrength = prevLeague[name], p.Strength
+		if p, ok := prev[prevName]; ok {
+			r.prevLeague, r.prevStrength = prevLeague[prevName], p.Strength
 		}
 		rows = append(rows, r)
 	}
@@ -203,7 +214,7 @@ func Season(in Input) (*Output, error) {
 	// is left, in their order there.
 	for i, c := range in.Previous.Clubs[:numGerman] {
 		name := assets.FromCP437(c.Name)
-		if _, ok := tm[name]; !ok {
+		if _, ok := tm[name]; !ok && !inFile[name] {
 			rows = append(rows, row{name: name, tier: fillTier, rank: i, prevLeague: leagueOf(i), prevStrength: c.Strength})
 		}
 	}
@@ -391,12 +402,13 @@ const (
 	outside   = 6
 	numGerman = league1 + league2 + league3 + outside
 	fillTier  = 5 // a club of the season before that the file lacks
-	// secondTeamsFrom is the first year whose seasons take the second
-	// teams of professional clubs like any club; before, they only fill
-	// places that stay empty without them (README: Deviations).
-	secondTeamsFrom = 2008
-	newLeague       = 4 // the league of a club that was not in the season before
+	newLeague = 4 // the league of a club that was not in the season before
 )
+
+// secondTeamsFrom is the first year whose seasons take the second teams of
+// professional clubs like any club; before, they only fill places that stay
+// empty without them (README: Deviations).
+const secondTeamsFrom = 2008
 
 // leagueOf is the league of place i of a season: 0..2, 3 = outside.
 func leagueOf(i int) int {
@@ -543,13 +555,14 @@ func placeClubs(rows []row, year int) ([]placed, error) {
 				down = append(down, r)
 			}
 		}
-		// Too few: the best of the tiers below move up.
+		// Too few: the best of the tiers below move up, but no second
+		// team, which may not play in the league of its first team's.
 		for k := l + 1; len(mine) < sizes[l] && k < 3; k++ {
 			for _, r := range cands[k] {
 				if len(mine) == sizes[l] {
 					break
 				}
-				if !used[r.name] {
+				if !used[r.name] && !isSecond(r.name) {
 					mine = append(mine, r)
 					used[r.name] = true
 				}

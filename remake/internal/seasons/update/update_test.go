@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/schowave/bmp/remake/internal/assets"
@@ -365,5 +366,48 @@ func TestFirstTeam(t *testing.T) {
 	}
 	if c := out.Mana.Clubs[0]; c.Logo != 1003 || len(out.Logos) != 0 {
 		t.Errorf("CLUB 3 II: logo %d, %d new logos", c.Logo, len(out.Logos))
+	}
+}
+
+// A second team does not move up into the 2. Bundesliga, though it wins the
+// 3. Liga: the next clubs of the 3. Liga take the two places.
+func TestSecondTeamStaysDown(t *testing.T) {
+	var clubs []Club
+	for i := 1; i <= 18; i++ {
+		clubs = append(clubs, club(fmt.Sprintf("FIRST %d", i), "L1", i), club(fmt.Sprintf("SECOND %d", i), "L2", i))
+	}
+	for i := 1; i <= 20; i++ {
+		clubs = append(clubs, club(fmt.Sprintf("THIRD %d", i), "L3", i))
+	}
+	clubs[36].Name = "FC BAYERN II" // THIRD 1
+	out, err := Season(Input{Year: 2019, Clubs: clubs, Previous: previousSeason(), Known: []*assets.Mana{previousSeason()}, NextLogo: 2000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := out.Mana.Clubs
+	if c[36].Name != "THIRD 2" || c[37].Name != "THIRD 3" || c[38].Name != "FC BAYERN II" {
+		t.Errorf("places 36..38: %q %q %q", c[36].Name, c[37].Name, c[38].Name)
+	}
+}
+
+// A club the season keeps under another name than the season before is
+// still the club of the season before, and does not fill a place twice.
+func TestSeasonNoClubTwice(t *testing.T) {
+	clubs := []Club{club("ROT-WEISS ERFURT", "L1", 1)}
+	prev, before := previousSeason(), previousSeason()
+	prev.Clubs[5].Name = "FC ROT-WEISS ERFURT"
+	before.Clubs[9].Name = "ROT-WEISS ERFURT"
+	out, err := Season(Input{Year: 2004, Clubs: clubs, Previous: prev, Before: before, Known: []*assets.Mana{prev, before}, NextLogo: 2000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := 0
+	for _, c := range out.Mana.Clubs[:numGerman] {
+		if strings.Contains(c.Name, "ERFURT") {
+			n++
+		}
+	}
+	if n != 1 || out.Mana.Clubs[0].Name != "ROT-WEISS ERFURT" {
+		t.Errorf("%d clubs of Erfurt, club 0 %q", n, out.Mana.Clubs[0].Name)
 	}
 }

@@ -2418,80 +2418,80 @@
 		}
 	},
 	{
-		"name": "FC ROT-WEIß ERFURT",
-		"logo": 140,
+		"name": "1.FC SCHWEINFURT 05",
+		"logo": 115,
 		"strength": [
-			26,
-			26,
+			30,
+			30,
 			30
 		],
 		"players": {
 			"goalkeepers": [
-				"TWARDZIK",
-				"ROTHE"
+				"SCHERBAUM",
+				"SCHOPPEL"
 			],
 			"defenders": [
-				"TRAUB",
-				"RICHTER",
-				"KRESIN",
-				"FALL",
-				"LAARS",
-				"KAISER"
+				"BEER",
+				"GORGIEV",
+				"BODEN",
+				"LÖHNER",
+				"TREHKOPF",
+				"RADOVIC"
 			],
 			"midfielders": [
-				"ZEDI",
-				"OKIC",
-				"HEBESTREIT",
-				"HOPP",
-				"KLINGMANN",
-				"GLÖDEN",
-				"MEES"
+				"KOLINGER",
+				"NÄGELEIN",
+				"WINTER",
+				"SHIMAMURA",
+				"KANYUK",
+				"KROLL",
+				"GERBER"
 			],
 			"forwards": [
-				"NEITZEL",
-				"MÜLLER",
-				"FUCHS",
-				"SZEWCZUK",
-				"LEOPOLD"
+				"POPOVIC",
+				"LÜTZLER",
+				"GALUSCHKA",
+				"MIEDL",
+				"JAKIC"
 			]
 		}
 	},
 	{
-		"name": "WUPPERTALER SV",
-		"logo": 139,
+		"name": "SG WATTENSCHEID 09",
+		"logo": 113,
 		"strength": [
-			30,
-			30,
+			26,
+			26,
 			26
 		],
 		"players": {
 			"goalkeepers": [
-				"MALY",
-				"SCHELL"
+				"JOSWIG",
+				"SCHUBERT"
 			],
 			"defenders": [
-				"BAUMANN",
-				"MEHNERT",
-				"STARK",
-				"HYZA",
-				"KLEMMER",
-				"MATLIK"
+				"PINSKE",
+				"STUCKMANN",
+				"GRAUER",
+				"EHRHARD",
+				"(DRAGOWICH)",
+				"KLIMEK"
 			],
 			"midfielders": [
-				"BAYERTZ",
-				"NAREWSKY",
-				"GENSLER",
-				"BACH",
-				"WALBRÖHL",
-				"STEUP",
-				"RIETZ"
+				"HOMOLA",
+				"TOKU",
+				"PUSCHMANN",
+				"JERAT",
+				"TEICHMANN",
+				"RATKOWSKI",
+				"MAIZI"
 			],
 			"forwards": [
-				"TAVAREZ",
-				"KOHOUT",
-				"EBERSBACH",
-				"TERRANOVA",
-				"GAISSMAYER"
+				"LÖBE",
+				"KATRINIOK",
+				"WITECZEK",
+				"KUNTZ",
+				"KOITKA"
 			]
 		}
 	},

@@ -1404,51 +1404,12 @@
 		}
 	},
 	{
-		"name": "FC BAYERN MÜNCHEN II",
-		"logo": 1022,
-		"strength": [
-			47,
-			47,
-			47
-		],
-		"players": {
-			"goalkeepers": [
-				"FRÜCHTL",
-				"HOFFMANN"
-			],
-			"defenders": [
-				"DAVIES",
-				"MAI",
-				"RICHARDS",
-				"KÖHN",
-				"YILMAZ",
-				"STANISIC"
-			],
-			"midfielders": [
-				"CUISANCE",
-				"ARP",
-				"JEONG",
-				"SINGH",
-				"STILLER",
-				"SHABANI",
-				"ZYLLA"
-			],
-			"forwards": [
-				"ZIRKZEE",
-				"DAJAKU",
-				"MEIER",
-				"KÜHN",
-				"WRIEDT"
-			]
-		}
-	},
-	{
 		"name": "WÜRZBURGER KICKERS",
 		"logo": 1109,
 		"strength": [
 			46,
-			46,
-			46
+			47,
+			47
 		],
 		"players": {
 			"goalkeepers": [
@@ -1485,9 +1446,9 @@
 		"name": "EINTRACHT BRAUNSCHWEIG",
 		"logo": 110,
 		"strength": [
-			41,
-			49,
-			44
+			47,
+			46,
+			46
 		],
 		"players": {
 			"goalkeepers": [
@@ -1517,6 +1478,45 @@
 				"BÄR",
 				"GODEN",
 				"ADEMI"
+			]
+		}
+	},
+	{
+		"name": "FC BAYERN MÜNCHEN II",
+		"logo": 1022,
+		"strength": [
+			34,
+			49,
+			49
+		],
+		"players": {
+			"goalkeepers": [
+				"FRÜCHTL",
+				"HOFFMANN"
+			],
+			"defenders": [
+				"DAVIES",
+				"MAI",
+				"RICHARDS",
+				"KÖHN",
+				"YILMAZ",
+				"STANISIC"
+			],
+			"midfielders": [
+				"CUISANCE",
+				"ARP",
+				"JEONG",
+				"SINGH",
+				"STILLER",
+				"SHABANI",
+				"ZYLLA"
+			],
+			"forwards": [
+				"ZIRKZEE",
+				"DAJAKU",
+				"MEIER",
+				"KÜHN",
+				"WRIEDT"
 			]
 		}
 	},
@@ -1565,7 +1565,7 @@
 		"strength": [
 			43,
 			46,
-			47
+			46
 		],
 		"players": {
 			"goalkeepers": [
@@ -1641,9 +1641,9 @@
 		"name": "SV MEPPEN",
 		"logo": 108,
 		"strength": [
-			34,
+			35,
 			43,
-			49
+			47
 		],
 		"players": {
 			"goalkeepers": [
@@ -1680,7 +1680,7 @@
 		"name": "TSV 1860 MÜNCHEN",
 		"logo": 120,
 		"strength": [
-			38,
+			40,
 			41,
 			41
 		],
@@ -1758,7 +1758,7 @@
 		"name": "1.FC KAISERSLAUTERN",
 		"logo": 88,
 		"strength": [
-			37,
+			38,
 			38,
 			38
 		],
@@ -1797,7 +1797,7 @@
 		"name": "SPVGG UNTERHACHING",
 		"logo": 1073,
 		"strength": [
-			40,
+			41,
 			37,
 			31
 		],
@@ -1838,7 +1838,7 @@
 		"strength": [
 			25,
 			35,
-			46
+			44
 		],
 		"players": {
 			"goalkeepers": [
@@ -1875,7 +1875,7 @@
 		"name": "KFC UERDINGEN 05",
 		"logo": 81,
 		"strength": [
-			35,
+			37,
 			34,
 			26
 		],

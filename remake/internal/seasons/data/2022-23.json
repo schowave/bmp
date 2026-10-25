@@ -1407,7 +1407,7 @@
 		"name": "SV ELVERSBERG",
 		"logo": 1082,
 		"strength": [
-			46,
+			47,
 			47,
 			47
 		],
@@ -1443,51 +1443,12 @@
 		}
 	},
 	{
-		"name": "SC FREIBURG II",
-		"logo": 1061,
-		"strength": [
-			47,
-			46,
-			46
-		],
-		"players": {
-			"goalkeepers": [
-				"ATUBOLU",
-				"UPHOFF"
-			],
-			"defenders": [
-				"SALLAI",
-				"SIQUET",
-				"SCHMIDT",
-				"KÜBLER",
-				"HOTI",
-				"ROSENFELDER"
-			],
-			"midfielders": [
-				"KYEREH",
-				"RÖHL",
-				"R.WAGNER",
-				"ENGELHARDT",
-				"SCHMID",
-				"BAUR",
-				"KEHL"
-			],
-			"forwards": [
-				"HÖLER",
-				"WEISSHAUPT",
-				"VERMEIJ",
-				"BURKART",
-				"BREUNIG"
-			]
-		}
-	},
-	{
 		"name": "VFL OSNABRÜCK",
 		"logo": 109,
 		"strength": [
 			46,
-			49,
-			47
+			46,
+			46
 		],
 		"players": {
 			"goalkeepers": [
@@ -1517,6 +1478,45 @@
 				"PUTARO",
 				"HIGL",
 				"HEIDER"
+			]
+		}
+	},
+	{
+		"name": "SC FREIBURG II",
+		"logo": 1061,
+		"strength": [
+			49,
+			49,
+			38
+		],
+		"players": {
+			"goalkeepers": [
+				"ATUBOLU",
+				"UPHOFF"
+			],
+			"defenders": [
+				"SALLAI",
+				"SIQUET",
+				"SCHMIDT",
+				"KÜBLER",
+				"HOTI",
+				"ROSENFELDER"
+			],
+			"midfielders": [
+				"KYEREH",
+				"RÖHL",
+				"R.WAGNER",
+				"ENGELHARDT",
+				"SCHMID",
+				"BAUR",
+				"KEHL"
+			],
+			"forwards": [
+				"HÖLER",
+				"WEISSHAUPT",
+				"VERMEIJ",
+				"BURKART",
+				"BREUNIG"
 			]
 		}
 	},
@@ -1563,9 +1563,9 @@
 		"name": "1.FC SAARBRÜCKEN",
 		"logo": 99,
 		"strength": [
-			49,
+			47,
 			46,
-			44
+			46
 		],
 		"players": {
 			"goalkeepers": [
@@ -1602,9 +1602,9 @@
 		"name": "DYNAMO DRESDEN",
 		"logo": 118,
 		"strength": [
-			47,
+			46,
 			44,
-			46
+			47
 		],
 		"players": {
 			"goalkeepers": [
@@ -1643,7 +1643,7 @@
 		"strength": [
 			28,
 			43,
-			43
+			44
 		],
 		"players": {
 			"goalkeepers": [
@@ -1682,7 +1682,7 @@
 		"strength": [
 			41,
 			41,
-			41
+			43
 		],
 		"players": {
 			"goalkeepers": [
@@ -1721,7 +1721,7 @@
 		"strength": [
 			40,
 			40,
-			38
+			40
 		],
 		"players": {
 			"goalkeepers": [
@@ -1760,7 +1760,7 @@
 		"strength": [
 			35,
 			38,
-			40
+			41
 		],
 		"players": {
 			"goalkeepers": [
