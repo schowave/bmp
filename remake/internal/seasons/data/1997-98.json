@@ -859,7 +859,7 @@
 	},
 	{
 		"name": "FC GÜTERSLOH",
-		"logo": 1116,
+		"logo": 1027,
 		"strength": [
 			74,
 			68,
@@ -867,32 +867,32 @@
 		],
 		"players": {
 			"goalkeepers": [
-				"KRAFT",
+				"MATYSEK",
 				"LANGERBEIN"
 			],
 			"defenders": [
-				"LANDGRAF",
+				"KONERDING",
+				"RASIC",
 				"REEKERS",
+				"TSCHIEDEL",
 				"DZIWIOR",
-				"KOS",
-				"",
-				""
+				"MÖLLER"
 			],
 			"midfielders": [
-				"FLOCK",
-				"WEIDEMANN",
+				"ELLGUTH",
 				"BREMER",
-				"REICHERT",
-				"",
-				"",
-				""
+				"MEYER",
+				"CHOROBA",
+				"SCHARPENBERG",
+				"LEWE",
+				"SCHÜRMANN"
 			],
 			"forwards": [
+				"PAPIC",
 				"WAGNER",
+				"UYSAL",
 				"VIER",
-				"ELBERFELD",
-				"LÖBE",
-				"UYSAL"
+				"LÖBE"
 			]
 		}
 	},
@@ -2302,7 +2302,7 @@
 	},
 	{
 		"name": "FC ERZGEBIRGE AUE",
-		"logo": 1026,
+		"logo": 1025,
 		"strength": [
 			37,
 			40,
@@ -2496,7 +2496,7 @@
 		}
 	},
 	{
-		"name": "DYNAMO KIEW",
+		"name": "REAL MADRID",
 		"strength": [
 			99,
 			99,
@@ -2504,7 +2504,7 @@
 		]
 	},
 	{
-		"name": "JUVENTUS TURIN",
+		"name": "PARIS SAINT-GERMAIN",
 		"strength": [
 			98,
 			98,
@@ -2512,119 +2512,55 @@
 		]
 	},
 	{
-		"name": "REAL MADRID",
-		"strength": [
-			98,
-			98,
-			98
-		]
-	},
-	{
-		"name": "AS MONACO",
+		"name": "FC BARCELONA",
 		"strength": [
 			97,
 			97,
 			97
-		]
-	},
-	{
-		"name": "1.FC KOSICE",
-		"strength": [
-			97,
-			97,
-			97
-		]
-	},
-	{
-		"name": "ANORTHOSIS FAMAGUSTA",
-		"strength": [
-			96,
-			96,
-			96
-		]
-	},
-	{
-		"name": "BEITAR JERUSALEM",
-		"strength": [
-			96,
-			96,
-			96
-		]
-	},
-	{
-		"name": "BESIKTAS ISTANBUL",
-		"strength": [
-			95,
-			95,
-			95
-		]
-	},
-	{
-		"name": "CROATIA ZAGREB",
-		"strength": [
-			95,
-			95,
-			95
-		]
-	},
-	{
-		"name": "DINAMO TIFLIS",
-		"strength": [
-			94,
-			94,
-			94
-		]
-	},
-	{
-		"name": "FC JAZZ PORI",
-		"strength": [
-			93,
-			93,
-			93
-		]
-	},
-	{
-		"name": "FC SION",
-		"strength": [
-			93,
-			93,
-			93
-		]
-	},
-	{
-		"name": "STEAUA BUKAREST",
-		"strength": [
-			92,
-			92,
-			92
-		]
-	},
-	{
-		"name": "MPKZ MASYR",
-		"strength": [
-			92,
-			92,
-			92
-		]
-	},
-	{
-		"name": "GLASGOW RANGERS",
-		"strength": [
-			91,
-			91,
-			91
-		]
-	},
-	{
-		"name": "MTK HUNGARIA FC",
-		"strength": [
-			91,
-			91,
-			91
 		]
 	},
 	{
 		"name": "MANCHESTER UNITED",
+		"strength": [
+			96,
+			96,
+			96
+		]
+	},
+	{
+		"name": "NEWCASTLE UNITED",
+		"strength": [
+			95,
+			95,
+			95
+		]
+	},
+	{
+		"name": "JUVENTUS TURIN",
+		"strength": [
+			93,
+			93,
+			93
+		]
+	},
+	{
+		"name": "FC PORTO",
+		"strength": [
+			92,
+			92,
+			92
+		]
+	},
+	{
+		"name": "SPORTING LISSABON",
+		"strength": [
+			91,
+			91,
+			91
+		]
+	},
+	{
+		"name": "GALATASARAY",
 		"strength": [
 			90,
 			90,
@@ -2632,7 +2568,7 @@
 		]
 	},
 	{
-		"name": "NK MARIBOR",
+		"name": "AS MONACO",
 		"strength": [
 			89,
 			89,
@@ -2640,15 +2576,7 @@
 		]
 	},
 	{
-		"name": "ROSENBORG TRONDHEIM",
-		"strength": [
-			89,
-			89,
-			89
-		]
-	},
-	{
-		"name": "SKONTO RIGA",
+		"name": "PSV EINDHOVEN",
 		"strength": [
 			88,
 			88,
@@ -2656,15 +2584,7 @@
 		]
 	},
 	{
-		"name": "WIDZEW LODZ",
-		"strength": [
-			88,
-			88,
-			88
-		]
-	},
-	{
-		"name": "BARRY TOWN UNITED",
+		"name": "BESIKTAS JK",
 		"strength": [
 			87,
 			87,
@@ -2672,15 +2592,7 @@
 		]
 	},
 	{
-		"name": "BRONDBY IF",
-		"strength": [
-			87,
-			87,
-			87
-		]
-	},
-	{
-		"name": "CRUSADERS FC",
+		"name": "FEYENOORD ROTTERDAM",
 		"strength": [
 			86,
 			86,
@@ -2688,23 +2600,7 @@
 		]
 	},
 	{
-		"name": "DERRY CITY",
-		"strength": [
-			86,
-			86,
-			86
-		]
-	},
-	{
-		"name": "FC BARCELONA",
-		"strength": [
-			85,
-			85,
-			85
-		]
-	},
-	{
-		"name": "FC PJUNIK JEREWAN",
+		"name": "OLYMPIAKOS PIRÄUS",
 		"strength": [
 			84,
 			84,
@@ -2712,15 +2608,7 @@
 		]
 	},
 	{
-		"name": "FC LANTANA TALLINN",
-		"strength": [
-			84,
-			84,
-			84
-		]
-	},
-	{
-		"name": "SV AUSTRIA SALZBURG",
+		"name": "PARMA CALCIO 1913",
 		"strength": [
 			83,
 			83,
@@ -2728,15 +2616,7 @@
 		]
 	},
 	{
-		"name": "CONSTRUCTORUL CHISINAU",
-		"strength": [
-			83,
-			83,
-			83
-		]
-	},
-	{
-		"name": "FC VALLETTA",
+		"name": "DYNAMO KYIV",
 		"strength": [
 			82,
 			82,
@@ -2744,15 +2624,7 @@
 		]
 	},
 	{
-		"name": "KAREDA SIAULIAI",
-		"strength": [
-			82,
-			82,
-			82
-		]
-	},
-	{
-		"name": "FK PARTIZAN BELGRAD",
+		"name": "AC SPARTA PRAG",
 		"strength": [
 			81,
 			81,
@@ -2760,15 +2632,7 @@
 		]
 	},
 	{
-		"name": "GALATASARAY ISTANBUL",
-		"strength": [
-			80,
-			80,
-			80
-		]
-	},
-	{
-		"name": "GI GOTA",
+		"name": "ROSENBORG BK",
 		"strength": [
 			80,
 			80,
@@ -2784,14 +2648,6 @@
 		]
 	},
 	{
-		"name": "JEUNESSE ESCH",
-		"strength": [
-			79,
-			79,
-			79
-		]
-	},
-	{
 		"name": "LIERSE SK",
 		"strength": [
 			78,
@@ -2800,23 +2656,7 @@
 		]
 	},
 	{
-		"name": "NEFTCI BAKU",
-		"strength": [
-			78,
-			78,
-			78
-		]
-	},
-	{
-		"name": "NEWCASTLE UNITED",
-		"strength": [
-			77,
-			77,
-			77
-		]
-	},
-	{
-		"name": "OLYMPIAKOS PIRÄUS",
+		"name": "FC VSS KOSICE",
 		"strength": [
 			76,
 			76,
@@ -2824,215 +2664,31 @@
 		]
 	},
 	{
-		"name": "PARIS SAINT-GERMAIN",
+		"name": "1.FC KOSICE",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "GLASGOW RANGERS",
 		"strength": [
 			76,
 			76,
 			76
-		]
-	},
-	{
-		"name": "AC PARMA",
-		"strength": [
-			75,
-			75,
-			75
-		]
-	},
-	{
-		"name": "SILEKS KRATOVO",
-		"strength": [
-			75,
-			75,
-			75
-		]
-	},
-	{
-		"name": "SPARTA PRAG",
-		"strength": [
-			74,
-			74,
-			74
 		]
 	},
 	{
 		"name": "SPARTAK MOSKAU",
 		"strength": [
-			74,
-			74,
-			74
-		]
-	},
-	{
-		"name": "SPORTING LISSABON",
-		"strength": [
-			73,
-			73,
-			73
-		]
-	},
-	{
-		"name": "ZSKA SOFIA",
-		"strength": [
-			73,
-			73,
-			73
-		]
-	},
-	{
-		"name": "IA AKRANES",
-		"strength": [
-			72,
-			72,
-			72
-		]
-	},
-	{
-		"name": "FC CHELSEA",
-		"strength": [
-			86,
-			86,
-			86
-		]
-	},
-	{
-		"name": "VICENZA CALCIO",
-		"strength": [
-			85,
-			85,
-			85
-		]
-	},
-	{
-		"name": "BETIS SEVILLA",
-		"strength": [
-			85,
-			85,
-			85
-		]
-	},
-	{
-		"name": "LOKOMOTIVE MOSKAU",
-		"strength": [
-			84,
-			84,
-			84
-		]
-	},
-	{
-		"name": "SCHACHTAR DONEZK",
-		"strength": [
-			83,
-			83,
-			83
-		]
-	},
-	{
-		"name": "NK PRIMORJE",
-		"strength": [
-			83,
-			83,
-			83
-		]
-	},
-	{
-		"name": "SK STURM GRAZ",
-		"strength": [
-			82,
-			82,
-			82
-		]
-	},
-	{
-		"name": "SLAVIA PRAG",
-		"strength": [
-			81,
-			81,
-			81
-		]
-	},
-	{
-		"name": "APOEL NIKOSIA",
-		"strength": [
-			81,
-			81,
-			81
-		]
-	},
-	{
-		"name": "GERMINAL EKEREN",
-		"strength": [
-			80,
-			80,
-			80
-		]
-	},
-	{
-		"name": "BELSCHYNA BABRUJSK",
-		"strength": [
-			79,
-			79,
-			79
-		]
-	},
-	{
-		"name": "BUDAPESTI VSC",
-		"strength": [
-			79,
-			79,
-			79
-		]
-	},
-	{
-		"name": "FC ARARAT JEREWAN",
-		"strength": [
-			78,
-			78,
-			78
-		]
-	},
-	{
-		"name": "FC BALZERS",
-		"strength": [
-			77,
-			77,
-			77
-		]
-	},
-	{
-		"name": "FC DINABURG",
-		"strength": [
-			77,
-			77,
-			77
-		]
-	},
-	{
-		"name": "FC KILMARNOCK",
-		"strength": [
-			76,
-			76,
-			76
-		]
-	},
-	{
-		"name": "FC KOPENHAGEN",
-		"strength": [
 			75,
 			75,
 			75
 		]
 	},
 	{
-		"name": "FC LUZERN",
-		"strength": [
-			75,
-			75,
-			75
-		]
-	},
-	{
-		"name": "FC NATIONAL BUKAREST",
+		"name": "FC RED BULL SALZBURG",
 		"strength": [
 			74,
 			74,
@@ -3040,7 +2696,7 @@
 		]
 	},
 	{
-		"name": "ROTER STERN BELGRAD",
+		"name": "GNK DINAMO ZAGREB",
 		"strength": [
 			73,
 			73,
@@ -3048,7 +2704,7 @@
 		]
 	},
 	{
-		"name": "HAPOEL BE'ER SCHEVA",
+		"name": "BRÖNDBY IF",
 		"strength": [
 			73,
 			73,
@@ -3056,7 +2712,7 @@
 		]
 	},
 	{
-		"name": "KOCAELISPOR",
+		"name": "FC SION",
 		"strength": [
 			72,
 			72,
@@ -3064,7 +2720,7 @@
 		]
 	},
 	{
-		"name": "LEGIA WARSCHAU",
+		"name": "WIDZEW LODZ",
 		"strength": [
 			71,
 			71,
@@ -3072,15 +2728,7 @@
 		]
 	},
 	{
-		"name": "NK ZAGREB",
-		"strength": [
-			71,
-			71,
-			71
-		]
-	},
-	{
-		"name": "OGC NIZZA",
+		"name": "FK PARTIZAN BELGRAD",
 		"strength": [
 			70,
 			70,
@@ -3088,7 +2736,7 @@
 		]
 	},
 	{
-		"name": "TROMSO IL",
+		"name": "ZSKA SOFIA",
 		"strength": [
 			69,
 			69,
@@ -3096,15 +2744,7 @@
 		]
 	},
 	{
-		"name": "IBV VESTMANNAEYJA",
-		"strength": [
-			69,
-			69,
-			69
-		]
-	},
-	{
-		"name": "SK SLOVAN BRATISLAVA",
+		"name": "FCSB",
 		"strength": [
 			68,
 			68,
@@ -3112,7 +2752,7 @@
 		]
 	},
 	{
-		"name": "BOAVISTA PORTO",
+		"name": "BEITAR JERUSALEM",
 		"strength": [
 			67,
 			67,
@@ -3120,15 +2760,7 @@
 		]
 	},
 	{
-		"name": "CWMBRAN TOWN",
-		"strength": [
-			67,
-			67,
-			67
-		]
-	},
-	{
-		"name": "FC DINAMO BATUMI",
+		"name": "NEFTCHI PFK",
 		"strength": [
 			66,
 			66,
@@ -3136,7 +2768,15 @@
 		]
 	},
 	{
-		"name": "SLOGA JUGOMAGNAT SKOPJ",
+		"name": "MTK BUDAPEST",
+		"strength": [
+			66,
+			66,
+			66
+		]
+	},
+	{
+		"name": "NK MARIBOR",
 		"strength": [
 			65,
 			65,
@@ -3144,15 +2784,7 @@
 		]
 	},
 	{
-		"name": "FK ZALGIRIS VILNIUS",
-		"strength": [
-			65,
-			65,
-			65
-		]
-	},
-	{
-		"name": "GLENAVON FC",
+		"name": "DINAMO TIFLIS",
 		"strength": [
 			64,
 			64,
@@ -3160,7 +2792,7 @@
 		]
 	},
 	{
-		"name": "HB TORSHAVN",
+		"name": "ANORTHOSIS FAMAGUSTA",
 		"strength": [
 			63,
 			63,
@@ -3168,15 +2800,7 @@
 		]
 	},
 	{
-		"name": "HJK HELSINKI",
-		"strength": [
-			63,
-			63,
-			63
-		]
-	},
-	{
-		"name": "HIBERNIANS F. CLUB",
+		"name": "FC PYUNIK EREWAN",
 		"strength": [
 			62,
 			62,
@@ -3184,7 +2808,7 @@
 		]
 	},
 	{
-		"name": "JK TALLINNA SADAM",
+		"name": "VALLETTA FC",
 		"strength": [
 			61,
 			61,
@@ -3192,15 +2816,7 @@
 		]
 	},
 	{
-		"name": "LEWSKI-1913 SOFIA",
-		"strength": [
-			61,
-			61,
-			61
-		]
-	},
-	{
-		"name": "PFK KPZ",
+		"name": "SILEKS KRATOVO",
 		"strength": [
 			60,
 			60,
@@ -3208,7 +2824,15 @@
 		]
 	},
 	{
-		"name": "US LUXEMBURG",
+		"name": "DERRY CITY",
+		"strength": [
+			60,
+			60,
+			60
+		]
+	},
+	{
+		"name": "SLAVIA MOZYR",
 		"strength": [
 			59,
 			59,
@@ -3216,15 +2840,7 @@
 		]
 	},
 	{
-		"name": "SHELBOURNE FC",
-		"strength": [
-			59,
-			59,
-			59
-		]
-	},
-	{
-		"name": "ZIMBRU CHISINAU",
+		"name": "IA AKRANES",
 		"strength": [
 			58,
 			58,
@@ -3232,159 +2848,423 @@
 		]
 	},
 	{
-		"name": "INTER MAILAND",
+		"name": "JEUNESSE ESCH",
 		"strength": [
-			84,
-			84,
-			84
+			57,
+			57,
+			57
 		]
 	},
 	{
-		"name": "LAZIO ROM",
+		"name": "CRUSADERS FC",
 		"strength": [
-			84,
-			84,
-			84
+			56,
+			56,
+			56
 		]
 	},
 	{
-		"name": "AJ AUXERRE",
+		"name": "BARRY TOWN UNITED",
 		"strength": [
-			83,
-			83,
-			83
+			55,
+			55,
+			55
+		]
+	},
+	{
+		"name": "FC JAZZ PORI",
+		"strength": [
+			54,
+			54,
+			54
+		]
+	},
+	{
+		"name": "SKONTO RIGA",
+		"strength": [
+			53,
+			53,
+			53
+		]
+	},
+	{
+		"name": "GI GÖTA",
+		"strength": [
+			53,
+			53,
+			53
+		]
+	},
+	{
+		"name": "FC TIRASPOL",
+		"strength": [
+			52,
+			52,
+			52
+		]
+	},
+	{
+		"name": "LANTANA TALLINN",
+		"strength": [
+			51,
+			51,
+			51
+		]
+	},
+	{
+		"name": "FK KAREDA KAUNAS",
+		"strength": [
+			50,
+			50,
+			50
 		]
 	},
 	{
 		"name": "ATLETICO MADRID",
 		"strength": [
+			97,
+			97,
+			97
+		]
+	},
+	{
+		"name": "AC MAILAND",
+		"strength": [
+			94,
+			94,
+			94
+		]
+	},
+	{
+		"name": "FENERBAHCE",
+		"strength": [
+			90,
+			90,
+			90
+		]
+	},
+	{
+		"name": "AJAX AMSTERDAM",
+		"strength": [
+			88,
+			88,
+			88
+		]
+	},
+	{
+		"name": "AJ AUXERRE",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "SK RAPID WIEN",
+		"strength": [
 			83,
 			83,
 			83
 		]
 	},
 	{
-		"name": "ASTON VILLA",
-		"strength": [
-			82,
-			82,
-			82
-		]
-	},
-	{
-		"name": "FC BRÜGGE",
-		"strength": [
-			82,
-			82,
-			82
-		]
-	},
-	{
-		"name": "RACING STRAßBURG",
-		"strength": [
-			81,
-			81,
-			81
-		]
-	},
-	{
-		"name": "SK RAPID WIEN",
-		"strength": [
-			81,
-			81,
-			81
-		]
-	},
-	{
-		"name": "AARHUS GF",
-		"strength": [
-			80,
-			80,
-			80
-		]
-	},
-	{
-		"name": "CELTIC GLASGOW",
-		"strength": [
-			80,
-			80,
-			80
-		]
-	},
-	{
-		"name": "FERENCVAROS BUDAPEST",
-		"strength": [
-			79,
-			79,
-			79
-		]
-	},
-	{
 		"name": "GRASSHOPPER ZÜRICH",
-		"strength": [
-			79,
-			79,
-			79
-		]
-	},
-	{
-		"name": "HAJDUK SPLIT",
-		"strength": [
-			78,
-			78,
-			78
-		]
-	},
-	{
-		"name": "HAPOEL PETACH TIKWA",
-		"strength": [
-			78,
-			78,
-			78
-		]
-	},
-	{
-		"name": "NEUCHATEL XAMAX",
-		"strength": [
-			77,
-			77,
-			77
-		]
-	},
-	{
-		"name": "OFI KRETA",
-		"strength": [
-			77,
-			77,
-			77
-		]
-	},
-	{
-		"name": "OLYMPIQUE LYON",
-		"strength": [
-			77,
-			77,
-			77
-		]
-	},
-	{
-		"name": "PAOK THESSALONIKI",
 		"strength": [
 			76,
 			76,
 			76
+		]
+	},
+	{
+		"name": "CLUB BRÜGGE",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "PANATHINAIKOS ATHEN",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "SK SLAVIA PRAG",
+		"strength": [
+			69,
+			69,
+			69
+		]
+	},
+	{
+		"name": "FERENCVAROSI TC",
+		"strength": [
+			57,
+			57,
+			57
+		]
+	},
+	{
+		"name": "MACCABI TEL AVIV",
+		"strength": [
+			54,
+			54,
+			54
+		]
+	},
+	{
+		"name": "SPARTAK VLADIKAVKAZ",
+		"strength": [
+			50,
+			50,
+			50
+		]
+	},
+	{
+		"name": "FC NANTES",
+		"strength": [
+			86,
+			86,
+			86
+		]
+	},
+	{
+		"name": "BLACKBURN ROVERS",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "LEGIA WARSCHAU",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "AALBORG BK",
+		"strength": [
+			74,
+			74,
+			74
 		]
 	},
 	{
 		"name": "RSC ANDERLECHT",
 		"strength": [
+			69,
+			69,
+			69
+		]
+	},
+	{
+		"name": "HNK HAJDUK SPLIT",
+		"strength": [
+			61,
+			61,
+			61
+		]
+	},
+	{
+		"name": "BENFICA LISSABON",
+		"strength": [
+			94,
+			94,
+			94
+		]
+	},
+	{
+		"name": "DYNAMO KIEW",
+		"strength": [
+			93,
+			93,
+			93
+		]
+	},
+	{
+		"name": "HAJDUK SPLIT",
+		"strength": [
+			89,
+			89,
+			89
+		]
+	},
+	{
+		"name": "VACI FC",
+		"strength": [
+			88,
+			88,
+			88
+		]
+	},
+	{
+		"name": "FC AVENIR BEGGEN",
+		"strength": [
+			86,
+			86,
+			86
+		]
+	},
+	{
+		"name": "SV AUSTRIA SALZBURG",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "STEAUA BUKAREST",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "GALATASARAY ISTANBUL",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "MACCABI HAIFA",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "SERVETTE GENF",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "SILKEBORG IF",
+		"strength": [
+			74,
+			74,
+			74
+		]
+	},
+	{
+		"name": "SPARTA PRAG",
+		"strength": [
+			72,
+			72,
+			72
+		]
+	},
+	{
+		"name": "FC ARSENAL",
+		"strength": [
+			86,
+			86,
+			86
+		]
+	},
+	{
+		"name": "REAL SARAGOSSA",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "FC TATRAN PRESOV",
+		"strength": [
+			85,
+			85,
+			85
+		]
+	},
+	{
+		"name": "FC CHELSEA",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "FERENCVAROS BUDAPEST",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "SAMPDORIA GENUA",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "FC BRÜGGE",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "FK AUSTRIA WIEN",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "FK BODO/GLIMT",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "BESIKTAS ISTANBUL",
+		"strength": [
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "BRONDBY IF",
+		"strength": [
 			76,
 			76,
 			76
 		]
 	},
 	{
-		"name": "ROTOR WOLGOGRAD",
+		"name": "FC SCHAAN",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "FK VIKTORIA ZIZKOV",
 		"strength": [
 			75,
 			75,
@@ -3392,15 +3272,7 @@
 		]
 	},
 	{
-		"name": "SC BASTIA",
-		"strength": [
-			75,
-			75,
-			75
-		]
-	},
-	{
-		"name": "SPORTING BRAGA",
+		"name": "VILNIUS FK ZALGIRIS-EB",
 		"strength": [
 			74,
 			74,
@@ -3408,7 +3280,7 @@
 		]
 	},
 	{
-		"name": "ALANIJA WLADIKAWKAS",
+		"name": "HJK HELSINKI",
 		"strength": [
 			74,
 			74,
@@ -3416,7 +3288,7 @@
 		]
 	},
 	{
-		"name": "APOLLON LIMASSOL",
+		"name": "SK TIRANA",
 		"strength": [
 			73,
 			73,
@@ -3424,163 +3296,291 @@
 		]
 	},
 	{
-		"name": "ATHLETIC BILBAO",
-		"strength": [
-			73,
-			73,
-			73
-		]
-	},
-	{
-		"name": "BRANN BERGEN",
+		"name": "OMONIA NIKOSIA",
 		"strength": [
 			72,
 			72,
 			72
+		]
+	},
+	{
+		"name": "PIRIN BLAGOEWGRAD",
+		"strength": [
+			70,
+			70,
+			70
+		]
+	},
+	{
+		"name": "SLIGO ROVERS",
+		"strength": [
+			70,
+			70,
+			70
+		]
+	},
+	{
+		"name": "B71 SANDUR",
+		"strength": [
+			69,
+			69,
+			69
+		]
+	},
+	{
+		"name": "BANGOR FC",
+		"strength": [
+			68,
+			68,
+			68
+		]
+	},
+	{
+		"name": "TILIGUL TIRASPOL",
+		"strength": [
+			67,
+			67,
+			67
+		]
+	},
+	{
+		"name": "CROATIA ZAGREB",
+		"strength": [
+			66,
+			66,
+			66
 		]
 	},
 	{
 		"name": "DUNDEE UNITED",
 		"strength": [
-			72,
-			72,
-			72
-		]
-	},
-	{
-		"name": "EXCELSIOR MOUSCRON",
-		"strength": [
-			71,
-			71,
-			71
-		]
-	},
-	{
-		"name": "FC LIVERPOOL",
-		"strength": [
-			71,
-			71,
-			71
-		]
-	},
-	{
-		"name": "FC METZ",
-		"strength": [
-			70,
-			70,
-			70
-		]
-	},
-	{
-		"name": "FC BOBY BRÜNN",
-		"strength": [
-			70,
-			70,
-			70
-		]
-	},
-	{
-		"name": "FK DINAMO MINSK",
-		"strength": [
-			70,
-			70,
-			70
-		]
-	},
-	{
-		"name": "FK DNIPRO",
-		"strength": [
-			69,
-			69,
-			69
-		]
-	},
-	{
-		"name": "FK JABLONEC",
-		"strength": [
-			69,
-			69,
-			69
-		]
-	},
-	{
-		"name": "KR REYKJAVIK",
-		"strength": [
-			68,
-			68,
-			68
-		]
-	},
-	{
-		"name": "LILLESTROM SK",
-		"strength": [
-			68,
-			68,
-			68
-		]
-	},
-	{
-		"name": "ND GORICA",
-		"strength": [
-			67,
-			67,
-			67
-		]
-	},
-	{
-		"name": "ODRA WODZISLAW SLASKI",
-		"strength": [
-			67,
-			67,
-			67
-		]
-	},
-	{
-		"name": "REAL VALLADOLID",
-		"strength": [
 			66,
 			66,
 			66
 		]
 	},
 	{
-		"name": "SPARTAK TRNAVA",
+		"name": "F91 DÜDELINGEN",
 		"strength": [
-			66,
-			66,
-			66
+			65,
+			65,
+			65
+		]
+	},
+	{
+		"name": "FC NORMA TALLINN",
+		"strength": [
+			64,
+			64,
+			64
+		]
+	},
+	{
+		"name": "FANDOK BABRUJSK",
+		"strength": [
+			63,
+			63,
+			63
+		]
+	},
+	{
+		"name": "FLORIANA FC",
+		"strength": [
+			63,
+			63,
+			63
+		]
+	},
+	{
+		"name": "GLORIA BISTRITA",
+		"strength": [
+			62,
+			62,
+			62
+		]
+	},
+	{
+		"name": "IFK NORRKÖPING",
+		"strength": [
+			61,
+			61,
+			61
+		]
+	},
+	{
+		"name": "KEFLAVIK IF",
+		"strength": [
+			61,
+			61,
+			61
+		]
+	},
+	{
+		"name": "OLIMPIJA RIGA",
+		"strength": [
+			60,
+			60,
+			60
+		]
+	},
+	{
+		"name": "ZSKA MOSKAU",
+		"strength": [
+			59,
+			59,
+			59
+		]
+	},
+	{
+		"name": "TSCHORNOMOREZ ODESSA",
+		"strength": [
+			59,
+			59,
+			59
+		]
+	},
+	{
+		"name": "LKS LODZ",
+		"strength": [
+			58,
+			58,
+			58
+		]
+	},
+	{
+		"name": "AC PARMA",
+		"strength": [
+			84,
+			84,
+			84
+		]
+	},
+	{
+		"name": "ODENSE BK",
+		"strength": [
+			83,
+			83,
+			83
+		]
+	},
+	{
+		"name": "GKS KATOWICE",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "LAZIO ROM",
+		"strength": [
+			82,
+			82,
+			82
+		]
+	},
+	{
+		"name": "ADMIRA WACKER",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "ATHLETIC BILBAO",
+		"strength": [
+			81,
+			81,
+			81
+		]
+	},
+	{
+		"name": "DEPORTIVO LA CORUNA",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "KISPEST HONVED FC",
+		"strength": [
+			80,
+			80,
+			80
+		]
+	},
+	{
+		"name": "RAPID BUKAREST",
+		"strength": [
+			79,
+			79,
+			79
+		]
+	},
+	{
+		"name": "SSC NEAPEL",
+		"strength": [
+			78,
+			78,
+			78
 		]
 	},
 	{
 		"name": "TRABZONSPOR",
 		"strength": [
-			65,
-			65,
-			65
+			78,
+			78,
+			78
 		]
 	},
 	{
-		"name": "UDINESE CALCIO",
+		"name": "TRELLEBORGS FF",
 		"strength": [
-			65,
-			65,
-			65
+			77,
+			77,
+			77
 		]
 	},
 	{
-		"name": "VIKING STAVANGER",
+		"name": "SK SLOVAN BRATISLAVA",
 		"strength": [
-			64,
-			64,
-			64
+			77,
+			77,
+			77
 		]
 	},
 	{
-		"name": "WORSKLA POLTAWA",
+		"name": "AS CANNES",
 		"strength": [
-			64,
-			64,
-			64
+			77,
+			77,
+			77
+		]
+	},
+	{
+		"name": "APOLLON LIMASSOL",
+		"strength": [
+			76,
+			76,
+			76
+		]
+	},
+	{
+		"name": "ARIS SALONIKI",
+		"strength": [
+			75,
+			75,
+			75
+		]
+	},
+	{
+		"name": "ASTON VILLA",
+		"strength": [
+			75,
+			75,
+			75
 		]
 	}
 ]
