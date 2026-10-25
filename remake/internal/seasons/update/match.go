@@ -130,3 +130,20 @@ func matchNames(names, known []string, strict bool) map[string]string {
 	}
 	return out
 }
+
+// firstTeam is the name of known that is the first team of the second team
+// name ("HAMBURGER SV" for "HAMBURGER SV II"); "" when name is no second
+// team or none or several match.
+func firstTeam(name string, known []string) string {
+	if !isSecond(name) {
+		return ""
+	}
+	base := strings.TrimSpace(secondTeam.ReplaceAllString(strings.Join(clubWords(name), " "), ""))
+	var firsts []string
+	for _, k := range known {
+		if !isSecond(k) {
+			firsts = append(firsts, k)
+		}
+	}
+	return matchNames([]string{base}, firsts, false)[base]
+}

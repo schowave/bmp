@@ -129,7 +129,8 @@ fills. Before the
 first game of a season its tables say nothing, so clubs without games rank
 by the season before, the league they played in first, then their strength
 there; fetch the season again later in the season for strengths from its
-table. A new club gets a plain shield, noted as such in
+table. A new second team gets the logo of its first team, any other new
+club a plain shield, noted as such in
 `internal/seasons/credits/logos.csv` for `bmpseasons logo`. It runs
 with `uv` (pinned in `../mise.toml`), which takes the Python packages
 `requests` and `beautifulsoup4` from the group `transfermarkt` of

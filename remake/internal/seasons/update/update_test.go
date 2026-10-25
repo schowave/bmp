@@ -347,3 +347,23 @@ func TestSecondTeamsBefore2008(t *testing.T) {
 		}
 	}
 }
+
+// A second team without a logo of its own wears the logo of its first team.
+func TestFirstTeam(t *testing.T) {
+	known := []string{"HAMBURGER SV", "FC BAYERN MÜNCHEN", "TSV 1860 MÜNCHEN", "VFB STUTTGART II"}
+	for name, want := range map[string]string{"HAMBURGER SV II": "HAMBURGER SV", "BAYERN MÜNCHEN AMATEURE": "FC BAYERN MÜNCHEN",
+		"TSV 1860 MÜNCHEN II": "TSV 1860 MÜNCHEN", "VFB STUTTGART II": "", "HAMBURGER SV": "", "FC AUGSBURG II": ""} {
+		if got := firstTeam(name, known); got != want {
+			t.Errorf("%q: %q, want %q", name, got, want)
+		}
+	}
+	clubs := []Club{club("CLUB 3 II", "L1", 1)}
+	prev := previousSeason()
+	out, err := Season(Input{Year: 2010, Clubs: clubs, Previous: prev, Known: []*assets.Mana{prev}, NextLogo: 2000})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c := out.Mana.Clubs[0]; c.Logo != 1003 || len(out.Logos) != 0 {
+		t.Errorf("CLUB 3 II: logo %d, %d new logos", c.Logo, len(out.Logos))
+	}
+}

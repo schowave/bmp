@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"math"
 	"os"
 	"slices"
@@ -227,15 +228,19 @@ func Season(in Input) (*Output, error) {
 		} else {
 			c.Players = prev[p.row.name].Players
 		}
-		switch logo, ok := logos[p.row.name]; {
-		case ok:
-			c.Logo = logo
-		default:
-			c.Logo = next
+		logo, ok := logos[p.row.name]
+		if !ok {
+			// A second team without a logo of its own wears its first team's.
+			if f := firstTeam(p.row.name, slices.Sorted(maps.Keys(logos))); f != "" {
+				logo, ok = logos[f], true
+			}
+		}
+		if !ok {
+			logo = next
 			out.Logos[next] = crest("")
-			logos[p.row.name] = next
 			next++
 		}
+		c.Logo, logos[p.row.name] = logo, logo
 	}
 	// Seasons without market values: the squads by games instead.
 	if _, err := SetSquads(out.Mana, in.Squads); err != nil {
