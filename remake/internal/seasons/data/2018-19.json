@@ -2187,7 +2187,7 @@
 		"name": "SV WALDHOF MANNHEIM",
 		"logo": 111,
 		"strength": [
-			20,
+			22,
 			22,
 			22
 		],
@@ -2223,51 +2223,12 @@
 		}
 	},
 	{
-		"name": "VFL WOLFSBURG II",
-		"logo": 143,
-		"strength": [
-			22,
-			20,
-			20
-		],
-		"players": {
-			"goalkeepers": [
-				"MENZEL",
-				"KLINGER"
-			],
-			"defenders": [
-				"TISSERAND",
-				"L.ITTER",
-				"JAECKEL",
-				"JUNG",
-				"FRANKE",
-				"KLAMT"
-			],
-			"midfielders": [
-				"REXHBECAJ",
-				"KLAUS",
-				"SEGUIN",
-				"RIZZI",
-				"MAY",
-				"SAGLAM",
-				"JUSTVAN"
-			],
-			"forwards": [
-				"YEBOAH",
-				"HANSLIK",
-				"KRAMER",
-				"TACHIE",
-				"BADU"
-			]
-		}
-	},
-	{
 		"name": "CHEMNITZER FC",
 		"logo": 123,
 		"strength": [
-			30,
-			44,
-			44
+			20,
+			20,
+			20
 		],
 		"players": {
 			"goalkeepers": [
@@ -2301,51 +2262,12 @@
 		}
 	},
 	{
-		"name": "FC BAYERN MÜNCHEN II",
-		"logo": 1022,
-		"strength": [
-			40,
-			37,
-			37
-		],
-		"players": {
-			"goalkeepers": [
-				"FRÜCHTL",
-				"HOFFMANN"
-			],
-			"defenders": [
-				"DAVIES",
-				"MAI",
-				"KÖHN",
-				"AWOUDJA",
-				"YILMAZ",
-				"NOLLENBERGER"
-			],
-			"midfielders": [
-				"JEONG",
-				"FEIN",
-				"TILLMAN",
-				"EVINA",
-				"SHABANI",
-				"WELZMÜLLER",
-				"FELDHAHN"
-			],
-			"forwards": [
-				"WRIEDT",
-				"LANGE",
-				"ZIRKZEE",
-				"ROCHELT",
-				"FRANZKE"
-			]
-		}
-	},
-	{
 		"name": "VIKTORIA KÖLN",
 		"logo": 1033,
 		"strength": [
+			40,
 			37,
-			30,
-			26
+			30
 		],
 		"players": {
 			"goalkeepers": [
@@ -2383,8 +2305,8 @@
 		"logo": 1098,
 		"strength": [
 			44,
-			40,
-			33
+			44,
+			40
 		],
 		"players": {
 			"goalkeepers": [
@@ -2421,9 +2343,9 @@
 		"name": "BERLINER AK 07",
 		"logo": 1049,
 		"strength": [
-			26,
 			33,
-			30
+			40,
+			33
 		],
 		"players": {
 			"goalkeepers": [
@@ -2460,9 +2382,9 @@
 		"name": "1.FC SAARBRÜCKEN",
 		"logo": 99,
 		"strength": [
+			37,
 			33,
-			26,
-			40
+			44
 		],
 		"players": {
 			"goalkeepers": [
@@ -2492,6 +2414,84 @@
 				"VUNGUIDICA",
 				"CARL",
 				"JURCHER"
+			]
+		}
+	},
+	{
+		"name": "VFB EICHSTÄTT",
+		"logo": 1097,
+		"strength": [
+			26,
+			30,
+			37
+		],
+		"players": {
+			"goalkeepers": [
+				"BAUER",
+				"PATSIOURAS"
+			],
+			"defenders": [
+				"STEINHÖFER",
+				"SCHMIDRAMSL",
+				"WAFFLER",
+				"ZANT",
+				"WOLFSTEINER",
+				"EBERWEIN"
+			],
+			"midfielders": [
+				"GRASSL",
+				"SCHRAUFSTETTER",
+				"SCHÄLL",
+				"FRIES",
+				"SCHELLE",
+				"FEDERL",
+				"HAAS"
+			],
+			"forwards": [
+				"EBERLE",
+				"LUSHI",
+				"SCINTU",
+				"KÜGEL",
+				"CALDERON"
+			]
+		}
+	},
+	{
+		"name": "ROT-WEIß OBERHAUSEN",
+		"logo": 1059,
+		"strength": [
+			30,
+			26,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"DAVARI",
+				"UDEGBE"
+			],
+			"defenders": [
+				"LÖHDEN",
+				"NAKOWITSCH",
+				"HERMES",
+				"EGGERSGLÜSS",
+				"JORDAN",
+				"STOJAN"
+			],
+			"midfielders": [
+				"BALLA",
+				"SCHUMACHER",
+				"BAUDER",
+				"REINERT",
+				"ODENTHAL",
+				"MÄRZ",
+				"SCHEELEN"
+			],
+			"forwards": [
+				"GÖDDE",
+				"OUBEYAPWA",
+				"KURT",
+				"ÖZKARA",
+				"STEINMETZ"
 			]
 		}
 	},

@@ -219,7 +219,7 @@ func Season(in Input) (*Output, error) {
 			rows = append(rows, row{name: name, tier: fillTier, rank: i, prevLeague: leagueOf(i), prevStrength: c.Strength, second: isSecond(name)})
 		}
 	}
-	places, err := placeClubs(rows, in.Year)
+	places, err := placeClubs(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -406,11 +406,6 @@ const (
 	newLeague = 4 // the league of a club that was not in the season before
 )
 
-// secondTeamsFrom is the first year whose seasons take the second teams of
-// professional clubs like any club; before, they only fill places that stay
-// empty without them (README: Deviations).
-const secondTeamsFrom = 2008
-
 // leagueOf is the league of place i of a season: 0..2, 3 = outside.
 func leagueOf(i int) int {
 	switch {
@@ -517,26 +512,25 @@ type placed struct {
 // placeClubs puts the clubs onto the 64 German places: 18 in the first
 // league, 20 in the second and third, 6 outside. A league with more clubs
 // than places passes its last ones down, one with fewer takes the best of
-// the tier below; the clubs of the season before come last, before
-// secondTeamsFrom only the second teams after them.
-func placeClubs(rows []row, year int) ([]placed, error) {
+// the tier below; the clubs of the season before come last, and after them
+// the second teams of professional clubs, which only fill places no other
+// club fills (README: Deviations).
+func placeClubs(rows []row) ([]placed, error) {
 	tiers := map[int][]row{}
 	for _, r := range rows {
 		tiers[r.tier] = append(tiers[r.tier], r)
 	}
 	lower := append(ordered(tiers[3]), ordered(tiers[4])...)
 	lower = append(lower, ordered(tiers[fillTier])...)
-	if year < secondTeamsFrom {
-		var firsts, seconds []row
-		for _, r := range lower {
-			if r.second {
-				seconds = append(seconds, r)
-			} else {
-				firsts = append(firsts, r)
-			}
+	var firsts, seconds []row
+	for _, r := range lower {
+		if r.second {
+			seconds = append(seconds, r)
+		} else {
+			firsts = append(firsts, r)
 		}
-		lower = append(firsts, seconds...)
 	}
+	lower = append(firsts, seconds...)
 	cands := [][]row{ordered(tiers[1]), ordered(tiers[2]), lower}
 	sizes := []int{league1, league2, league3 + outside}
 	var out []placed

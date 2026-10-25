@@ -1482,51 +1482,12 @@
 		}
 	},
 	{
-		"name": "FC BAYERN MÜNCHEN II",
-		"logo": 1022,
-		"strength": [
-			34,
-			49,
-			49
-		],
-		"players": {
-			"goalkeepers": [
-				"FRÜCHTL",
-				"HOFFMANN"
-			],
-			"defenders": [
-				"DAVIES",
-				"MAI",
-				"RICHARDS",
-				"KÖHN",
-				"YILMAZ",
-				"STANISIC"
-			],
-			"midfielders": [
-				"CUISANCE",
-				"ARP",
-				"JEONG",
-				"SINGH",
-				"STILLER",
-				"SHABANI",
-				"ZYLLA"
-			],
-			"forwards": [
-				"ZIRKZEE",
-				"DAJAKU",
-				"MEIER",
-				"KÜHN",
-				"WRIEDT"
-			]
-		}
-	},
-	{
 		"name": "FC INGOLSTADT 04",
 		"logo": 1021,
 		"strength": [
 			49,
-			47,
-			40
+			49,
+			41
 		],
 		"players": {
 			"goalkeepers": [
@@ -1564,8 +1525,8 @@
 		"logo": 114,
 		"strength": [
 			43,
-			46,
-			46
+			47,
+			47
 		],
 		"players": {
 			"goalkeepers": [
@@ -1603,8 +1564,8 @@
 		"logo": 119,
 		"strength": [
 			46,
-			44,
-			35
+			46,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -1642,8 +1603,8 @@
 		"logo": 108,
 		"strength": [
 			35,
-			43,
-			47
+			44,
+			49
 		],
 		"players": {
 			"goalkeepers": [
@@ -1681,8 +1642,8 @@
 		"logo": 120,
 		"strength": [
 			40,
-			41,
-			41
+			43,
+			43
 		],
 		"players": {
 			"goalkeepers": [
@@ -1720,8 +1681,8 @@
 		"logo": 111,
 		"strength": [
 			44,
-			40,
-			32
+			41,
+			34
 		],
 		"players": {
 			"goalkeepers": [
@@ -1759,8 +1720,8 @@
 		"logo": 88,
 		"strength": [
 			38,
-			38,
-			38
+			40,
+			40
 		],
 		"players": {
 			"goalkeepers": [
@@ -1798,8 +1759,8 @@
 		"logo": 1073,
 		"strength": [
 			41,
-			37,
-			31
+			38,
+			32
 		],
 		"players": {
 			"goalkeepers": [
@@ -1836,9 +1797,9 @@
 		"name": "FC VIKTORIA KÖLN",
 		"logo": 1033,
 		"strength": [
-			25,
-			35,
-			44
+			26,
+			37,
+			46
 		],
 		"players": {
 			"goalkeepers": [
@@ -1876,8 +1837,8 @@
 		"logo": 81,
 		"strength": [
 			37,
-			34,
-			26
+			35,
+			28
 		],
 		"players": {
 			"goalkeepers": [
@@ -1915,8 +1876,8 @@
 		"logo": 1004,
 		"strength": [
 			47,
-			32,
-			29
+			34,
+			31
 		],
 		"players": {
 			"goalkeepers": [
@@ -1953,9 +1914,9 @@
 		"name": "HALLESCHER FC",
 		"logo": 129,
 		"strength": [
-			28,
-			31,
-			43
+			29,
+			32,
+			44
 		],
 		"players": {
 			"goalkeepers": [
@@ -1992,9 +1953,9 @@
 		"name": "FSV ZWICKAU",
 		"logo": 1039,
 		"strength": [
+			32,
 			31,
-			29,
-			37
+			38
 		],
 		"players": {
 			"goalkeepers": [
@@ -2031,9 +1992,9 @@
 		"name": "CHEMNITZER FC",
 		"logo": 123,
 		"strength": [
-			32,
-			28,
-			34
+			34,
+			29,
+			35
 		],
 		"players": {
 			"goalkeepers": [
@@ -2070,9 +2031,9 @@
 		"name": "PREUßEN MÜNSTER",
 		"logo": 107,
 		"strength": [
-			29,
-			26,
-			28
+			31,
+			28,
+			29
 		],
 		"players": {
 			"goalkeepers": [
@@ -2109,9 +2070,9 @@
 		"name": "SONNENHOF GROßASPACH",
 		"logo": 1066,
 		"strength": [
+			28,
 			26,
-			25,
-			23
+			25
 		],
 		"players": {
 			"goalkeepers": [
@@ -2148,9 +2109,9 @@
 		"name": "FC CARL ZEISS JENA",
 		"logo": 132,
 		"strength": [
-			23,
-			23,
-			25
+			25,
+			25,
+			26
 		],
 		"players": {
 			"goalkeepers": [
@@ -2188,8 +2149,8 @@
 		"logo": 1098,
 		"strength": [
 			20,
-			22,
-			22
+			23,
+			23
 		],
 		"players": {
 			"goalkeepers": [
@@ -2227,7 +2188,7 @@
 		"logo": 99,
 		"strength": [
 			22,
-			20,
+			22,
 			20
 		],
 		"players": {
@@ -2265,9 +2226,9 @@
 		"name": "SV RÖDINGHAUSEN",
 		"logo": 1054,
 		"strength": [
-			44,
-			44,
-			44
+			23,
+			20,
+			22
 		],
 		"players": {
 			"goalkeepers": [
@@ -2304,9 +2265,9 @@
 		"name": "1.FC LOK LEIPZIG",
 		"logo": 124,
 		"strength": [
-			40,
-			40,
-			40
+			44,
+			44,
+			44
 		],
 		"players": {
 			"goalkeepers": [
@@ -2340,41 +2301,41 @@
 		}
 	},
 	{
-		"name": "1.FC NÜRNBERG II",
-		"logo": 95,
+		"name": "VFB EICHSTÄTT",
+		"logo": 1097,
 		"strength": [
-			37,
-			37,
-			37
+			40,
+			40,
+			40
 		],
 		"players": {
 			"goalkeepers": [
-				"KLANDT",
-				"WILLERT"
+				"JUNGHAN",
+				"RAUH"
 			],
 			"defenders": [
-				"NÜRNBERGER",
-				"FUCHS",
-				"KRAULICH",
-				"KNOTHE",
-				"LIPPERT",
-				"SUVER"
+				"LAMPRECHT",
+				"SCHMIDRAMSL",
+				"WAFFLER",
+				"ZITZELSBERGER",
+				"WOLFSTEINER",
+				"GÖTTLICHER"
 			],
 			"midfielders": [
-				"RHEIN",
-				"PALACIOS",
-				"SCHLEIMER",
-				"ASLAN",
-				"HEUSSER",
-				"HARLASS",
-				"PIWERNETZ"
+				"FRIES",
+				"SCHRAUFSTETTER",
+				"FEDERL",
+				"SCHELLE",
+				"GRASSL",
+				"HEINLOTH",
+				"REUTELHUBER"
 			],
 			"forwards": [
-				"SCHLEUSENER",
-				"ZRELAK",
-				"KNÖLL",
-				"GODEN",
-				"BESONG"
+				"EBERLE",
+				"LUSHI",
+				"KÜGEL",
+				"NEUMAYER",
+				"JASMANN"
 			]
 		}
 	},
@@ -2382,9 +2343,9 @@
 		"name": "1.FC SCHWEINFURT 05",
 		"logo": 115,
 		"strength": [
-			33,
-			33,
-			33
+			37,
+			37,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -2418,51 +2379,12 @@
 		}
 	},
 	{
-		"name": "FC AUGSBURG II",
-		"logo": 122,
-		"strength": [
-			30,
-			30,
-			30
-		],
-		"players": {
-			"goalkeepers": [
-				"LENEIS",
-				"WITETSCHEK"
-			],
-			"defenders": [
-				"ASTA",
-				"STANIC",
-				"JAKOB",
-				"JÜRGENSEN",
-				"LANNERT",
-				"DELLA SCHIAVA"
-			],
-			"midfielders": [
-				"RUSSO",
-				"HOFGÄRTNER",
-				"PÖLLNER",
-				"SCHWARZHOLZ",
-				"NAPPO",
-				"MBILA",
-				"DEGER"
-			],
-			"forwards": [
-				"BAZEE",
-				"RÖSCH",
-				"MALONE",
-				"GANDA",
-				"CHEON"
-			]
-		}
-	},
-	{
 		"name": "FC MEMMINGEN",
 		"logo": 1052,
 		"strength": [
-			26,
-			26,
-			26
+			33,
+			33,
+			33
 		],
 		"players": {
 			"goalkeepers": [
@@ -2492,6 +2414,84 @@
 				"KARATAS",
 				"SKRIJELJ",
 				"KOLLMANN"
+			]
+		}
+	},
+	{
+		"name": "FV ILLERTISSEN",
+		"logo": 1006,
+		"strength": [
+			30,
+			30,
+			30
+		],
+		"players": {
+			"goalkeepers": [
+				"SCHMIDT",
+				"NAGEL"
+			],
+			"defenders": [
+				"WEGMANN",
+				"STRAHLER",
+				"KRUG",
+				"HERZEL",
+				"ENDERLE",
+				"ZELLER"
+			],
+			"midfielders": [
+				"HAHN",
+				"NEBEL",
+				"M.STROBEL",
+				"MAIOLO",
+				"WUJEWITSCH",
+				"DEWEIN",
+				"P.STROBEL"
+			],
+			"forwards": [
+				"LUIBRAND",
+				"AYYILDIZ",
+				"BERGMILLER",
+				"GLESSING",
+				"CARAVETTA"
+			]
+		}
+	},
+	{
+		"name": "SPVGG BAYREUTH",
+		"logo": 1069,
+		"strength": [
+			26,
+			26,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"KOLBE",
+				"SKOWRONEK"
+			],
+			"defenders": [
+				"WEBER",
+				"WOLF",
+				"MESSINGSCHLAGER",
+				"SCHWARZ",
+				"EDER",
+				"GOLLA"
+			],
+			"midfielders": [
+				"KNEZEVIC",
+				"MAKARENKO",
+				"KRACUN",
+				"PILLER",
+				"WEIMAR",
+				"GÖTZ",
+				"SCHÄTZLE"
+			],
+			"forwards": [
+				"MARINKOVIC",
+				"SULMER",
+				"KOUSSOU",
+				"FENNINGER",
+				"EINSIEDLER"
 			]
 		}
 	},

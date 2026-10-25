@@ -1955,7 +1955,7 @@
 		"strength": [
 			35,
 			31,
-			25
+			26
 		],
 		"players": {
 			"goalkeepers": [
@@ -2031,7 +2031,7 @@
 		"name": "VFL OSNABRÜCK",
 		"logo": 109,
 		"strength": [
-			26,
+			28,
 			28,
 			29
 		],
@@ -2067,50 +2067,11 @@
 		}
 	},
 	{
-		"name": "WERDER BREMEN II",
-		"logo": 1076,
-		"strength": [
-			28,
-			26,
-			26
-		],
-		"players": {
-			"goalkeepers": [
-				"OELSCHLÄGEL",
-				"THÜRKAUF"
-			],
-			"defenders": [
-				"FRIEDL",
-				"CALDIROLA",
-				"GARCIA",
-				"VERLAAT",
-				"VOLKMER",
-				"VOLLERT"
-			],
-			"midfielders": [
-				"AYCICEK",
-				"KÄUPER",
-				"JACOBSEN",
-				"TOURE",
-				"WAGNER",
-				"SCHMIDT",
-				"JENSEN"
-			],
-			"forwards": [
-				"JOHANNSSON",
-				"EGGESTEIN",
-				"MANNEH",
-				"EILERS",
-				"BARRY"
-			]
-		}
-	},
-	{
 		"name": "CHEMNITZER FC",
 		"logo": 123,
 		"strength": [
-			25,
-			25,
+			26,
+			26,
 			31
 		],
 		"players": {
@@ -2148,9 +2109,9 @@
 		"name": "FC ROT-WEIß ERFURT",
 		"logo": 140,
 		"strength": [
-			23,
-			23,
-			23
+			25,
+			25,
+			25
 		],
 		"players": {
 			"goalkeepers": [
@@ -2187,8 +2148,8 @@
 		"name": "ENERGIE COTTBUS",
 		"logo": 1050,
 		"strength": [
-			22,
-			22,
+			23,
+			23,
 			20
 		],
 		"players": {
@@ -2226,8 +2187,8 @@
 		"name": "TSV 1860 MÜNCHEN",
 		"logo": 120,
 		"strength": [
-			20,
-			20,
+			22,
+			22,
 			22
 		],
 		"players": {
@@ -2265,9 +2226,9 @@
 		"name": "1.FC SAARBRÜCKEN",
 		"logo": 99,
 		"strength": [
-			37,
-			44,
-			44
+			20,
+			20,
+			23
 		],
 		"players": {
 			"goalkeepers": [
@@ -2305,8 +2266,8 @@
 		"logo": 81,
 		"strength": [
 			44,
-			40,
-			33
+			44,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -2344,8 +2305,8 @@
 		"logo": 1064,
 		"strength": [
 			40,
-			37,
-			26
+			40,
+			33
 		],
 		"players": {
 			"goalkeepers": [
@@ -2383,8 +2344,8 @@
 		"logo": 1033,
 		"strength": [
 			30,
-			33,
-			40
+			37,
+			44
 		],
 		"players": {
 			"goalkeepers": [
@@ -2418,80 +2379,119 @@
 		}
 	},
 	{
-		"name": "HAMBURGER SV II",
-		"logo": 87,
+		"name": "SV WALDHOF MANNHEIM",
+		"logo": 111,
 		"strength": [
 			33,
-			30,
+			33,
 			30
 		],
 		"players": {
 			"goalkeepers": [
-				"POLLERSBECK",
-				"MICKEL"
+				"SCHOLZ",
+				"GÄNG"
 			],
 			"defenders": [
-				"THOELKE",
-				"AMBROSIUS",
-				"HAUT",
-				"GIESE",
-				"SEO",
-				"KÖHLERT"
+				"CONRAD",
+				"AMIN",
+				"NENNHUBER",
+				"MEYERHÖFER",
+				"SCHULTZ",
+				"CELIK"
 			],
 			"midfielders": [
-				"STEINMANN",
-				"JANJICIC",
-				"JATTA",
-				"PORATH",
-				"GOUAIDA",
-				"FERATI",
-				"BEHOUNEK"
+				"DIRING",
+				"G.KORTE",
+				"M.SCHUSTER",
+				"DI GREGORIO",
+				"SOMMER",
+				"M.SCHUSTER",
+				"KIEFER"
 			],
 			"forwards": [
-				"WALDSCHMIDT",
-				"ITO",
-				"KNÖLL",
-				"JURCHER",
-				"STARK"
+				"HEBISCH",
+				"IVAN",
+				"KOEP",
+				"R.KORTE",
+				"MAYER"
 			]
 		}
 	},
 	{
-		"name": "FC BAYERN MÜNCHEN II",
-		"logo": 1022,
+		"name": "WACKER 90 NORDHAUSEN",
+		"logo": 1038,
 		"strength": [
+			37,
 			26,
-			26,
-			37
+			26
 		],
 		"players": {
 			"goalkeepers": [
-				"FRÜCHTL",
-				"WEINKAUF"
+				"RAUHUT",
+				"BERBIG"
 			],
 			"defenders": [
-				"FRIEDL",
-				"MAI",
-				"KÖHN",
-				"GÖTZE",
-				"AWOUDJA",
-				"NOLLENBERGER"
+				"PROPHETER",
+				"ESDORF",
+				"HÄUSSLER",
+				"KOVAC",
+				"GÜNZEL",
+				"LELA"
 			],
 			"midfielders": [
-				"DORSCH",
-				"FELDHAHN",
-				"FEIN",
-				"HINGERL",
-				"OBERMAIR",
-				"PANTOVIC",
-				"TILLMAN"
+				"MEDJEDOVIC",
+				"BECKER",
+				"SCHOLL",
+				"PESSOLAT",
+				"UCAR",
+				"SCHULZE",
+				"KAUFFMANN"
 			],
 			"forwards": [
-				"WRIEDT",
-				"BENKO",
-				"WINTZHEIMER",
-				"STREIN",
-				"FRANZKE"
+				"AZEMI",
+				"PICHINOT",
+				"MICKELS",
+				"SAILER",
+				"BUVAL"
+			]
+		}
+	},
+	{
+		"name": "1.FC SCHWEINFURT 05",
+		"logo": 115,
+		"strength": [
+			26,
+			30,
+			40
+		],
+		"players": {
+			"goalkeepers": [
+				"EIBAN",
+				"PAULUS"
+			],
+			"defenders": [
+				"WILLSCH",
+				"STROHMAIER",
+				"PAUL",
+				"WOLF",
+				"JANZ",
+				"BILLICK"
+			],
+			"midfielders": [
+				"KRACUN",
+				"KLING",
+				"FERY",
+				"SCHLICHT",
+				"KRAUTSCHNEIDER",
+				"JELISIC",
+				"WEISS"
+			],
+			"forwards": [
+				"GÖRTLER",
+				"JABIRI",
+				"PIEPER",
+				"FLEISCHER",
+				""
 			]
 		}
 	},

@@ -1565,7 +1565,7 @@
 		"strength": [
 			44,
 			46,
-			41
+			43
 		],
 		"players": {
 			"goalkeepers": [
@@ -1602,7 +1602,7 @@
 		"name": "1.FC HEIDENHEIM",
 		"logo": 1003,
 		"strength": [
-			34,
+			37,
 			44,
 			47
 		],
@@ -1677,51 +1677,12 @@
 		}
 	},
 	{
-		"name": "FC BAYERN MÜNCHEN II",
-		"logo": 1022,
-		"strength": [
-			23,
-			41,
-			43
-		],
-		"players": {
-			"goalkeepers": [
-				"RENSING",
-				"GRÜN"
-			],
-			"defenders": [
-				"CONTENTO",
-				"ALABA",
-				"GÖRLITZ",
-				"LELL",
-				"KOPPLIN",
-				"HAAS"
-			],
-			"midfielders": [
-				"BAUMJOHANN",
-				"EKICI",
-				"SCHWARZ",
-				"KNASMÜLLNER",
-				"SCHÜTZ",
-				"RIESS",
-				"DUHNKE"
-			],
-			"forwards": [
-				"TONI",
-				"YILMAZ",
-				"SIKORSKI",
-				"SENE",
-				"HAJDAROVIC"
-			]
-		}
-	},
-	{
 		"name": "FC ROT-WEIß ERFURT",
 		"logo": 140,
 		"strength": [
 			46,
-			40,
-			26
+			41,
+			32
 		],
 		"players": {
 			"goalkeepers": [
@@ -1755,51 +1716,12 @@
 		}
 	},
 	{
-		"name": "VFB STUTTGART II",
-		"logo": 1100,
-		"strength": [
-			38,
-			38,
-			38
-		],
-		"players": {
-			"goalkeepers": [
-				"ULREICH",
-				"STOLZ"
-			],
-			"defenders": [
-				"FEISTHAMMEL",
-				"PISCHORN",
-				"VIER",
-				"WOLF",
-				"ENDERLE",
-				"HERTNER"
-			],
-			"midfielders": [
-				"LANIG",
-				"RUDY",
-				"SCHWARZ",
-				"DIDAVI",
-				"RATHGEB",
-				"FUNK",
-				"RIEDLE"
-			],
-			"forwards": [
-				"SCHIEBER",
-				"SCHIPPLOCK",
-				"FISCHER",
-				"KLAUSS",
-				"HOFMANN"
-			]
-		}
-	},
-	{
 		"name": "SPVGG UNTERHACHING",
 		"logo": 1073,
 		"strength": [
-			37,
-			37,
-			37
+			38,
+			40,
+			40
 		],
 		"players": {
 			"goalkeepers": [
@@ -1837,8 +1759,8 @@
 		"logo": 118,
 		"strength": [
 			41,
-			35,
-			23
+			38,
+			29
 		],
 		"players": {
 			"goalkeepers": [
@@ -1872,51 +1794,12 @@
 		}
 	},
 	{
-		"name": "WERDER BREMEN II",
-		"logo": 1076,
-		"strength": [
-			35,
-			34,
-			34
-		],
-		"players": {
-			"goalkeepers": [
-				"MIELITZ",
-				"WIEDWALD"
-			],
-			"defenders": [
-				"PRÖDL",
-				"ANDERSEN",
-				"PERTHEL",
-				"MAEK",
-				"HESSEL",
-				"SCHMIDT"
-			],
-			"midfielders": [
-				"FELDHAHN",
-				"KEMPE",
-				"ARTMANN",
-				"STALLBAUM",
-				"IKENG",
-				"GERDES",
-				"ZENGIN"
-			],
-			"forwards": [
-				"WAGNER",
-				"OEHRL",
-				"TESTROET",
-				"AYIK",
-				"MENGA"
-			]
-		}
-	},
-	{
 		"name": "SV SANDHAUSEN",
 		"logo": 1083,
 		"strength": [
-			28,
 			32,
-			40
+			37,
+			41
 		],
 		"players": {
 			"goalkeepers": [
@@ -1953,9 +1836,9 @@
 		"name": "SV WEHEN WIESBADEN",
 		"logo": 1056,
 		"strength": [
-			26,
 			31,
-			35
+			35,
+			38
 		],
 		"players": {
 			"goalkeepers": [
@@ -1993,8 +1876,8 @@
 		"logo": 1046,
 		"strength": [
 			40,
-			29,
-			31
+			34,
+			35
 		],
 		"players": {
 			"goalkeepers": [
@@ -2031,9 +1914,9 @@
 		"name": "WACKER BURGHAUSEN",
 		"logo": 1110,
 		"strength": [
-			25,
-			28,
-			32
+			29,
+			32,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -2067,51 +1950,12 @@
 		}
 	},
 	{
-		"name": "BORUSSIA DORTMUND II",
-		"logo": 1014,
-		"strength": [
-			32,
-			26,
-			29
-		],
-		"players": {
-			"goalkeepers": [
-				"HÖTTECKE",
-				"FOCHER"
-			],
-			"defenders": [
-				"SCHMELZER",
-				"HÜNEMEIER",
-				"SOBIECH",
-				"GÖTZE",
-				"HORNSCHUH",
-				"VRZOGIC"
-			],
-			"midfielders": [
-				"KEHL",
-				"BENDER",
-				"HAJNAL",
-				"FEULNER",
-				"LE TALLEC",
-				"KOCH",
-				"TYRALA"
-			],
-			"forwards": [
-				"RANGELOV",
-				"GINCZEK",
-				"ÖZTEKIN",
-				"KULLMANN",
-				"BOZTEPE"
-			]
-		}
-	},
-	{
 		"name": "HOLSTEIN KIEL",
 		"logo": 1045,
 		"strength": [
+			35,
 			31,
-			25,
-			28
+			34
 		],
 		"players": {
 			"goalkeepers": [
@@ -2148,9 +1992,9 @@
 		"name": "WUPPERTALER SV",
 		"logo": 139,
 		"strength": [
+			34,
 			29,
-			23,
-			25
+			31
 		],
 		"players": {
 			"goalkeepers": [
@@ -2187,9 +2031,9 @@
 		"name": "SV BABELSBERG 03",
 		"logo": 1077,
 		"strength": [
-			22,
-			22,
-			22
+			28,
+			28,
+			25
 		],
 		"players": {
 			"goalkeepers": [
@@ -2226,9 +2070,9 @@
 		"name": "VFR AALEN",
 		"logo": 1103,
 		"strength": [
-			20,
-			20,
-			20
+			26,
+			26,
+			22
 		],
 		"players": {
 			"goalkeepers": [
@@ -2265,9 +2109,9 @@
 		"name": "1.FC SAARBRÜCKEN",
 		"logo": 99,
 		"strength": [
-			33,
-			40,
-			30
+			23,
+			25,
+			23
 		],
 		"players": {
 			"goalkeepers": [
@@ -2301,90 +2145,12 @@
 		}
 	},
 	{
-		"name": "VFL WOLFSBURG II",
-		"logo": 143,
-		"strength": [
-			44,
-			44,
-			40
-		],
-		"players": {
-			"goalkeepers": [
-				"HITZ",
-				"DEUMELAND"
-			],
-			"defenders": [
-				"SIMUNEK",
-				"WOLZE",
-				"REICHE",
-				"KLAMT",
-				"KARIMOV",
-				"SCHULZE"
-			],
-			"midfielders": [
-				"MUNTEANU",
-				"SCHINDZIELORZ",
-				"LAAS",
-				"KÖNNECKE",
-				"ZIEHL",
-				"KREUELS",
-				"EVLYUSHKIN"
-			],
-			"forwards": [
-				"ESSWEIN",
-				"YILMAZ",
-				"KLOS",
-				"POLTER",
-				"GOGIA"
-			]
-		}
-	},
-	{
-		"name": "1.FC NÜRNBERG II",
-		"logo": 95,
-		"strength": [
-			40,
-			37,
-			33
-		],
-		"players": {
-			"goalkeepers": [
-				"STEPHAN",
-				"SCHARRER"
-			],
-			"defenders": [
-				"SPIRANOVIC",
-				"BIELER",
-				"WOLLSCHEID",
-				"THIES",
-				"WELNICKI",
-				"STIEFLER"
-			],
-			"midfielders": [
-				"KOTZKE",
-				"HECKENBERGER",
-				"MATARAZZO",
-				"KLING",
-				"MÖNIUS",
-				"GRUNDEI",
-				""
-			],
-			"forwards": [
-				"KULABAS",
-				"FUCHS",
-				"G.KAYA",
-				"EKINCI",
-				"HÖRBER"
-			]
-		}
-	},
-	{
 		"name": "SPORTFREUNDE LOTTE",
 		"logo": 1055,
 		"strength": [
-			37,
-			33,
-			26
+			25,
+			23,
+			20
 		],
 		"players": {
 			"goalkeepers": [
@@ -2418,51 +2184,12 @@
 		}
 	},
 	{
-		"name": "SC FREIBURG II",
-		"logo": 1061,
-		"strength": [
-			30,
-			30,
-			44
-		],
-		"players": {
-			"goalkeepers": [
-				"BAUMANN",
-				"LANGER"
-			],
-			"defenders": [
-				"MENDY",
-				"SEREINIG",
-				"SIRIGU",
-				"SCHUSTER",
-				"A.BOUZIANE",
-				"HÖHN"
-			],
-			"midfielders": [
-				"FLUM",
-				"GLOCKNER",
-				"WILLIAMS",
-				"HÖFLER",
-				"ROTH",
-				"BETTMER",
-				"GALLUS"
-			],
-			"forwards": [
-				"CALIGIURI",
-				"SOYUDOGRU",
-				"BEKTASI",
-				"BRANDSTETTER",
-				"SANGARE"
-			]
-		}
-	},
-	{
 		"name": "CHEMNITZER FC",
 		"logo": 123,
 		"strength": [
-			26,
-			26,
-			37
+			22,
+			22,
+			26
 		],
 		"players": {
 			"goalkeepers": [
@@ -2492,6 +2219,279 @@
 				"KELLIG",
 				"SCHLOSSER",
 				"FÖRSTER"
+			]
+		}
+	},
+	{
+		"name": "KSV HESSEN KASSEL",
+		"logo": 1048,
+		"strength": [
+			20,
+			20,
+			28
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "HALLESCHER FC",
+		"logo": 129,
+		"strength": [
+			44,
+			44,
+			33
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "ROT-WEISS ESSEN",
+		"logo": 103,
+		"strength": [
+			40,
+			40,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "1.FC MAGDEBURG",
+		"logo": 1004,
+		"strength": [
+			33,
+			37,
+			44
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "PREUßEN MÜNSTER",
+		"logo": 107,
+		"strength": [
+			37,
+			33,
+			30
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "SSV ULM 1846",
+		"logo": 126,
+		"strength": [
+			26,
+			30,
+			40
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
+			]
+		}
+	},
+	{
+		"name": "VFC PLAUEN",
+		"logo": 1102,
+		"strength": [
+			30,
+			26,
+			37
+		],
+		"players": {
+			"goalkeepers": [
+				"",
+				""
+			],
+			"defenders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"midfielders": [
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+			],
+			"forwards": [
+				"",
+				"",
+				"",
+				"",
+				""
 			]
 		}
 	},

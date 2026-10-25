@@ -315,22 +315,21 @@ func TestSeasonKeepsEarlierName(t *testing.T) {
 	}
 }
 
-// Before 2008 the second teams of the third tier come after every other
-// club, also after those of the season before; from 2008 on they rank by
-// their table like any club.
-func TestSecondTeamsBefore2008(t *testing.T) {
+// The second teams of the third tier come after every other club, also
+// after those of the season before, and only fill places no other club
+// fills.
+func TestSecondTeamsLast(t *testing.T) {
 	var clubs []Club
 	for i := 1; i <= 18; i++ {
 		clubs = append(clubs, club(fmt.Sprintf("FIRST %d", i), "L1", i), club(fmt.Sprintf("SECOND %d", i), "L2", i))
 	}
-	for i := 1; i <= 18; i++ {
-		north, south := club(fmt.Sprintf("NORTH %d", i), "RN", i), club(fmt.Sprintf("SOUTH %d", i), "RS", i)
-		clubs = append(clubs, north, south)
+	for i := 1; i <= 14; i++ {
+		clubs = append(clubs, club(fmt.Sprintf("NORTH %d", i), "RN", i), club(fmt.Sprintf("SOUTH %d", i), "RS", i))
 	}
 	clubs[36].Name = "WERDER BREMEN II" // NORTH 1
 	clubs[37].Name = "BAYERN AMATEURE"  // SOUTH 1
-	for _, year := range []int{2000, 2008} {
-		out, err := Season(Input{Year: year, Clubs: clubs, Previous: previousSeason(), Known: []*assets.Mana{previousSeason()}, NextLogo: 2000})
+	places := func(prev *assets.Mana) map[string]int {
+		out, err := Season(Input{Year: 2010, Clubs: clubs, Previous: prev, Known: []*assets.Mana{prev}, NextLogo: 2000})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -338,14 +337,21 @@ func TestSecondTeamsBefore2008(t *testing.T) {
 		for i, c := range out.Mana.Clubs[:numGerman] {
 			in[assets.FromCP437(c.Name)] = i
 		}
-		_, bremen := in["WERDER BREMEN II"]
-		_, bayern := in["BAYERN AMATEURE"]
-		if year < secondTeamsFrom && (bremen || bayern) {
-			t.Errorf("%d: second teams on places %v", year, in)
-		}
-		if year >= secondTeamsFrom && (!bremen || !bayern) {
-			t.Errorf("%d: second teams missing", year)
-		}
+		return in
+	}
+	// The 62 first teams and the clubs of the season before fill the places.
+	in := places(previousSeason())
+	if _, ok := in["WERDER BREMEN II"]; ok {
+		t.Errorf("second team on place %d", in["WERDER BREMEN II"])
+	}
+	// Without other clubs the second teams take the last places.
+	prev := previousSeason()
+	for i, c := range clubs {
+		prev.Clubs[i].Name = c.Name
+	}
+	in = places(prev)
+	if in["BAYERN AMATEURE"] != 62 || in["WERDER BREMEN II"] != 63 {
+		t.Errorf("second teams on %d and %d, want 62 and 63", in["BAYERN AMATEURE"], in["WERDER BREMEN II"])
 	}
 }
 
@@ -387,8 +393,8 @@ func TestSecondTeamStaysDown(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := out.Mana.Clubs
-	if c[36].Name != "THIRD 3" || c[37].Name != "THIRD 4" || c[38].Name != "FC BAYERN II" {
-		t.Errorf("places 36..38: %q %q %q", c[36].Name, c[37].Name, c[38].Name)
+	if c[36].Name != "THIRD 3" || c[37].Name != "THIRD 4" {
+		t.Errorf("places 36, 37: %q %q", c[36].Name, c[37].Name)
 	}
 }
 

@@ -1487,7 +1487,7 @@
 		"strength": [
 			47,
 			49,
-			37
+			38
 		],
 		"players": {
 			"goalkeepers": [
@@ -1604,7 +1604,7 @@
 		"strength": [
 			43,
 			44,
-			35
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -1680,7 +1680,7 @@
 		"name": "SV SANDHAUSEN",
 		"logo": 1083,
 		"strength": [
-			32,
+			34,
 			41,
 			40
 		],
@@ -1721,7 +1721,7 @@
 		"strength": [
 			40,
 			40,
-			32
+			34
 		],
 		"players": {
 			"goalkeepers": [
@@ -1794,50 +1794,11 @@
 		}
 	},
 	{
-		"name": "BORUSSIA DORTMUND II",
-		"logo": 1014,
-		"strength": [
-			35,
-			37,
-			38
-		],
-		"players": {
-			"goalkeepers": [
-				"LOTKA",
-				"OSTRZINSKI"
-			],
-			"defenders": [
-				"BLANK",
-				"MEUNIER",
-				"KAMARA",
-				"PAPADOPOULOS",
-				"MOREY",
-				"BUENO"
-			],
-			"midfielders": [
-				"POHLMANN",
-				"HETTWER",
-				"AZHIL",
-				"ROGGOW",
-				"ANING",
-				"MICHEL",
-				"EBERWEIN"
-			],
-			"forwards": [
-				"RIJKHOFF",
-				"BAMBA",
-				"ELONGO-YOMBO",
-				"BESONG",
-				"NISCHALKE"
-			]
-		}
-	},
-	{
 		"name": "SC VERL",
 		"logo": 137,
 		"strength": [
-			34,
 			35,
+			37,
 			44
 		],
 		"players": {
@@ -1875,8 +1836,8 @@
 		"name": "FC VIKTORIA KÖLN",
 		"logo": 1033,
 		"strength": [
-			28,
-			34,
+			31,
+			35,
 			43
 		],
 		"players": {
@@ -1915,8 +1876,8 @@
 		"logo": 125,
 		"strength": [
 			41,
-			32,
-			29
+			34,
+			31
 		],
 		"players": {
 			"goalkeepers": [
@@ -1954,8 +1915,8 @@
 		"logo": 120,
 		"strength": [
 			46,
-			31,
-			26
+			32,
+			28
 		],
 		"players": {
 			"goalkeepers": [
@@ -1992,9 +1953,9 @@
 		"name": "SV WALDHOF MANNHEIM",
 		"logo": 111,
 		"strength": [
+			32,
 			31,
-			29,
-			34
+			35
 		],
 		"players": {
 			"goalkeepers": [
@@ -2031,9 +1992,9 @@
 		"name": "HALLESCHER FC",
 		"logo": 129,
 		"strength": [
-			25,
 			28,
-			31
+			29,
+			32
 		],
 		"players": {
 			"goalkeepers": [
@@ -2070,9 +2031,9 @@
 		"name": "MSV DUISBURG",
 		"logo": 114,
 		"strength": [
-			26,
-			26,
-			28
+			29,
+			28,
+			29
 		],
 		"players": {
 			"goalkeepers": [
@@ -2109,9 +2070,9 @@
 		"name": "VFB LÜBECK",
 		"logo": 1098,
 		"strength": [
-			23,
-			25,
-			25
+			26,
+			26,
+			26
 		],
 		"players": {
 			"goalkeepers": [
@@ -2145,51 +2106,12 @@
 		}
 	},
 	{
-		"name": "SC FREIBURG II",
-		"logo": 1061,
-		"strength": [
-			29,
-			23,
-			23
-		],
-		"players": {
-			"goalkeepers": [
-				"JANTUNEN",
-				"UPHOFF"
-			],
-			"defenders": [
-				"GÜNTER",
-				"MAKENGO",
-				"ROSENFELDER",
-				"YILMAZ",
-				"MÜLLER",
-				"LANG"
-			],
-			"midfielders": [
-				"BAUR",
-				"MARINO",
-				"RÜDLIN",
-				"WIKLÖF",
-				"STARK",
-				"AMBROS",
-				"MANZAMBI"
-			],
-			"forwards": [
-				"ADAMU",
-				"BREUNIG",
-				"BESIO",
-				"STURM",
-				"JOHANSSON"
-			]
-		}
-	},
-	{
 		"name": "WÜRZBURGER KICKERS",
 		"logo": 1109,
 		"strength": [
-			22,
-			22,
-			20
+			25,
+			25,
+			25
 		],
 		"players": {
 			"goalkeepers": [
@@ -2223,51 +2145,12 @@
 		}
 	},
 	{
-		"name": "HANNOVER 96 II",
-		"logo": 1042,
-		"strength": [
-			20,
-			20,
-			22
-		],
-		"players": {
-			"goalkeepers": [
-				"WEINKAUF",
-				"WECHSEL"
-			],
-			"defenders": [
-				"EZEH",
-				"LÜHRS",
-				"BÖRNER",
-				"WALBRECHT",
-				"DOMINKE",
-				"BABITSCH"
-			],
-			"midfielders": [
-				"BESUSCHKOW",
-				"SCOTT",
-				"OUDENNE",
-				"DAMAR",
-				"GINDORF",
-				"MOUSTIER",
-				"UHLMANN"
-			],
-			"forwards": [
-				"FOTI",
-				"MOMULUH",
-				"CHAKROUN",
-				"NDIKOM",
-				"STEPANTSEV"
-			]
-		}
-	},
-	{
 		"name": "ALEMANNIA AACHEN",
 		"logo": 1010,
 		"strength": [
-			40,
-			44,
-			26
+			23,
+			23,
+			20
 		],
 		"players": {
 			"goalkeepers": [
@@ -2304,9 +2187,9 @@
 		"name": "ENERGIE COTTBUS",
 		"logo": 1050,
 		"strength": [
-			37,
-			40,
-			33
+			22,
+			22,
+			22
 		],
 		"players": {
 			"goalkeepers": [
@@ -2340,51 +2223,12 @@
 		}
 	},
 	{
-		"name": "VFB STUTTGART II",
-		"logo": 1100,
-		"strength": [
-			26,
-			26,
-			44
-		],
-		"players": {
-			"goalkeepers": [
-				"SEIMEN",
-				"SCHOCK"
-			],
-			"defenders": [
-				"CHASE",
-				"WEIK",
-				"HOPPE",
-				"REICHARDT",
-				"NOTHNAGEL",
-				"M.CISSE"
-			],
-			"midfielders": [
-				"EGLOFF",
-				"ULRICH",
-				"DI BENEDETTO",
-				"MÜNST",
-				"LAUPHEIMER",
-				"MEYER",
-				"GELLER"
-			],
-			"forwards": [
-				"MASSIMO",
-				"RAIMUND",
-				"KASTANARAS",
-				"PAULA",
-				"GALJEN"
-			]
-		}
-	},
-	{
 		"name": "SV MEPPEN",
 		"logo": 108,
 		"strength": [
-			33,
-			37,
-			37
+			20,
+			20,
+			23
 		],
 		"players": {
 			"goalkeepers": [
@@ -2421,8 +2265,8 @@
 		"name": "DJK VILZING",
 		"logo": 1018,
 		"strength": [
-			30,
-			33,
+			26,
+			44,
 			40
 		],
 		"players": {
@@ -2460,9 +2304,9 @@
 		"name": "GREIFSWALDER FC",
 		"logo": 1040,
 		"strength": [
-			44,
-			30,
-			30
+			40,
+			40,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -2492,6 +2336,162 @@
 				"KOCER",
 				"ESHELE",
 				"MANSKE"
+			]
+		}
+	},
+	{
+		"name": "STUTTGARTER KICKERS",
+		"logo": 106,
+		"strength": [
+			37,
+			33,
+			33
+		],
+		"players": {
+			"goalkeepers": [
+				"DORNEBUSCH",
+				"OTTO"
+			],
+			"defenders": [
+				"KOLBE",
+				"KAMMERBAUER",
+				"BLANK",
+				"POLAUKE",
+				"SCHMIDTS",
+				"BORAC"
+			],
+			"midfielders": [
+				"TEKERCI",
+				"KIEFER",
+				"DICKLHUBER",
+				"RAMUSOVIC",
+				"KOHLER",
+				"PILIC",
+				"CAMPAGNA"
+			],
+			"forwards": [
+				"MAUERSBERGER",
+				"KALAJDZIC",
+				"EROGLU",
+				"OELSNER",
+				"BERISHA"
+			]
+		}
+	},
+	{
+		"name": "1.FC BOCHOLT",
+		"logo": 1002,
+		"strength": [
+			44,
+			30,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"FOX",
+				"PATZLER"
+			],
+			"defenders": [
+				"FRENKERT",
+				"JANSSEN",
+				"MAYER",
+				"SALAU",
+				"BARAK",
+				"WINDMÜLLER"
+			],
+			"midfielders": [
+				"HOLLDACK",
+				"WELLERS",
+				"SHUBIN",
+				"HIRSCHBERGER",
+				"STOJANOVIC",
+				"REINCKE",
+				"KLANN"
+			],
+			"forwards": [
+				"FAKHRO",
+				"LORCH",
+				"KÖNIG",
+				"ASSIBEY-MENSAH",
+				"ADEMI"
+			]
+		}
+	},
+	{
+		"name": "1.FC PHÖNIX LÜBECK",
+		"logo": 1127,
+		"strength": [
+			30,
+			37,
+			44
+		],
+		"players": {
+			"goalkeepers": [
+				"LEONHARD",
+				"SPRANG"
+			],
+			"defenders": [
+				"BOCK",
+				"NTIKA",
+				"ILOKA",
+				"FARAHNAK",
+				"LIPPEGAUS",
+				"VAN DIJCK"
+			],
+			"midfielders": [
+				"BERGER",
+				"SADRIFAR",
+				"TARITAS",
+				"BOCCACCIO",
+				"KNUDSEN",
+				"KRAYEV",
+				"OBUSHNYI"
+			],
+			"forwards": [
+				"HYSENI",
+				"FRITZSCHE",
+				"STÖVER",
+				"KOBERT",
+				"IHDE"
+			]
+		}
+	},
+	{
+		"name": "FC VIKT. 1889 BERLIN",
+		"logo": 1032,
+		"strength": [
+			33,
+			26,
+			30
+		],
+		"players": {
+			"goalkeepers": [
+				"KINZIG",
+				"HORENBURG"
+			],
+			"defenders": [
+				"DEHL",
+				"BACA",
+				"LIU",
+				"KÜHN",
+				"TOUGLO",
+				"POHL"
+			],
+			"midfielders": [
+				"FALCAO",
+				"INALER",
+				"MAY",
+				"YILDIRIM",
+				"GÜNAY",
+				"BERG",
+				""
+			],
+			"forwards": [
+				"DAMELANG",
+				"SKAKUN",
+				"MENSAH",
+				"HEBISCH",
+				"GRIESSIG"
 			]
 		}
 	},

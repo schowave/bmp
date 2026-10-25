@@ -1719,7 +1719,7 @@
 		"name": "SV WEHEN WIESBADEN",
 		"logo": 1056,
 		"strength": [
-			34,
+			35,
 			40,
 			41
 		],
@@ -1758,7 +1758,7 @@
 		"name": "FC INGOLSTADT 04",
 		"logo": 1021,
 		"strength": [
-			29,
+			32,
 			38,
 			49
 		],
@@ -1797,7 +1797,7 @@
 		"name": "TSV 1860 MÜNCHEN",
 		"logo": 120,
 		"strength": [
-			31,
+			34,
 			37,
 			40
 		],
@@ -1838,7 +1838,7 @@
 		"strength": [
 			49,
 			35,
-			26
+			31
 		],
 		"players": {
 			"goalkeepers": [
@@ -1875,9 +1875,9 @@
 		"name": "FC ERZGEBIRGE AUE",
 		"logo": 1025,
 		"strength": [
-			28,
+			31,
 			34,
-			34
+			35
 		],
 		"players": {
 			"goalkeepers": [
@@ -1916,7 +1916,7 @@
 		"strength": [
 			37,
 			32,
-			28
+			32
 		],
 		"players": {
 			"goalkeepers": [
@@ -1950,51 +1950,12 @@
 		}
 	},
 	{
-		"name": "VFB STUTTGART II",
-		"logo": 1100,
-		"strength": [
-			35,
-			31,
-			31
-		],
-		"players": {
-			"goalkeepers": [
-				"SEIMEN",
-				"DRLJACA"
-			],
-			"defenders": [
-				"AL-DAKHIL",
-				"HENDRIKS",
-				"STERGIOU",
-				"KRÄTZIG",
-				"CHASE",
-				"OLIVIER"
-			],
-			"midfielders": [
-				"ULRICH",
-				"MALANGA",
-				"CATOVIC",
-				"DI BENEDETTO",
-				"NARTEY",
-				"MÜNST",
-				"SESSA"
-			],
-			"forwards": [
-				"DIEHL",
-				"FAGHIR",
-				"SANKOH",
-				"B.BOAKYE",
-				"BUJUPI"
-			]
-		}
-	},
-	{
 		"name": "SV WALDHOF MANNHEIM",
 		"logo": 111,
 		"strength": [
 			47,
-			29,
-			25
+			31,
+			29
 		],
 		"players": {
 			"goalkeepers": [
@@ -2028,90 +1989,12 @@
 		}
 	},
 	{
-		"name": "BORUSSIA DORTMUND II",
-		"logo": 1014,
-		"strength": [
-			32,
-			28,
-			35
-		],
-		"players": {
-			"goalkeepers": [
-				"LOTKA",
-				"OSTRZINSKI"
-			],
-			"defenders": [
-				"KABAR",
-				"BUENO",
-				"KAMARA",
-				"MANE",
-				"LÜHRS",
-				"HÜNING"
-			],
-			"midfielders": [
-				"WÄTJEN",
-				"HETTWER",
-				"AZHIL",
-				"ROGGOW",
-				"ANING",
-				"EBERWEIN",
-				"REITZ"
-			],
-			"forwards": [
-				"DURANVILLE",
-				"DIALLO",
-				"CAMPBELL",
-				"FOTI",
-				"ELONGO-YOMBO"
-			]
-		}
-	},
-	{
-		"name": "HANNOVER 96 II",
-		"logo": 1042,
-		"strength": [
-			25,
-			26,
-			32
-		],
-		"players": {
-			"goalkeepers": [
-				"WECHSEL",
-				"WEINKAUF"
-			],
-			"defenders": [
-				"SCHMIDT",
-				"EZEH",
-				"WALLNER",
-				"ARKENBERG",
-				"NIKLAUS",
-				"GÖTTLICHER"
-			],
-			"midfielders": [
-				"ASEKO",
-				"BESUSCHKOW",
-				"GINDORF",
-				"OUDENNE",
-				"UHLMANN",
-				"WESTERMEIER",
-				"MATSUDA"
-			],
-			"forwards": [
-				"MOMULUH",
-				"CHAKROUN",
-				"KALEM",
-				"ABDULLATIF",
-				"SANNE"
-			]
-		}
-	},
-	{
 		"name": "SV SANDHAUSEN",
 		"logo": 1083,
 		"strength": [
-			26,
-			25,
-			29
+			29,
+			29,
+			34
 		],
 		"players": {
 			"goalkeepers": [
@@ -2148,9 +2031,9 @@
 		"name": "SPVGG UNTERHACHING",
 		"logo": 1073,
 		"strength": [
-			23,
-			23,
-			23
+			28,
+			28,
+			28
 		],
 		"players": {
 			"goalkeepers": [
@@ -2187,9 +2070,9 @@
 		"name": "1.FC LOK LEIPZIG",
 		"logo": 124,
 		"strength": [
-			22,
-			22,
-			20
+			25,
+			26,
+			23
 		],
 		"players": {
 			"goalkeepers": [
@@ -2223,51 +2106,12 @@
 		}
 	},
 	{
-		"name": "TSG 1899 HOFFENHEIM II",
-		"logo": 1057,
-		"strength": [
-			20,
-			20,
-			22
-		],
-		"players": {
-			"goalkeepers": [
-				"PETERSSON",
-				"VERSTAPPEN"
-			],
-			"defenders": [
-				"CHAVES",
-				"JURASEK",
-				"DREXLER",
-				"LENZ",
-				"BEHRENS",
-				"HAGMANN"
-			],
-			"midfielders": [
-				"TOHUMCU",
-				"BECKER",
-				"JOHN",
-				"MICHELER",
-				"DURIC",
-				"POLLER",
-				"REISIG"
-			],
-			"forwards": [
-				"MOERSTEDT",
-				"YARDIMCI",
-				"MOKWA",
-				"HENNRICH",
-				"OBIOGUMU"
-			]
-		}
-	},
-	{
 		"name": "TSV HAVELSE",
 		"logo": 104,
 		"strength": [
-			37,
-			44,
-			37
+			22,
+			25,
+			25
 		],
 		"players": {
 			"goalkeepers": [
@@ -2304,9 +2148,9 @@
 		"name": "MSV DUISBURG",
 		"logo": 114,
 		"strength": [
-			44,
-			40,
-			30
+			26,
+			23,
+			22
 		],
 		"players": {
 			"goalkeepers": [
@@ -2343,9 +2187,9 @@
 		"name": "1.FC SCHWEINFURT 05",
 		"logo": 115,
 		"strength": [
-			33,
-			33,
-			40
+			20,
+			20,
+			26
 		],
 		"players": {
 			"goalkeepers": [
@@ -2382,9 +2226,9 @@
 		"name": "HALLESCHER FC",
 		"logo": 129,
 		"strength": [
-			40,
-			37,
-			26
+			23,
+			22,
+			20
 		],
 		"players": {
 			"goalkeepers": [
@@ -2421,8 +2265,8 @@
 		"name": "KICKERS OFFENBACH",
 		"logo": 1053,
 		"strength": [
-			30,
-			30,
+			37,
+			44,
 			44
 		],
 		"players": {
@@ -2460,9 +2304,9 @@
 		"name": "KICKERS EMDEN",
 		"logo": 1017,
 		"strength": [
-			26,
-			26,
-			33
+			30,
+			37,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -2492,6 +2336,162 @@
 				"SCHILLER",
 				"EICKHOFF",
 				"STEFFEN"
+			]
+		}
+	},
+	{
+		"name": "TSV BUCHBACH",
+		"logo": 1092,
+		"strength": [
+			26,
+			30,
+			33
+		],
+		"players": {
+			"goalkeepers": [
+				"ZECH",
+				"BRINKMANN"
+			],
+			"defenders": [
+				"WALTER",
+				"K.HINGERL",
+				"TAVRA",
+				"MACKIC",
+				"MANGHOFER",
+				"MÜLLER"
+			],
+			"midfielders": [
+				"BAHAR",
+				"S.HINGERL",
+				"HEILAND",
+				"GASHI",
+				"ORTH",
+				"MUTEBA",
+				"MATTERA"
+			],
+			"forwards": [
+				"SZTAF",
+				"STOSSBERGER",
+				"AMMARI",
+				"HIRTLREITER",
+				"CELANI"
+			]
+		}
+	},
+	{
+		"name": "FC GÜTERSLOH",
+		"logo": 1027,
+		"strength": [
+			40,
+			26,
+			40
+		],
+		"players": {
+			"goalkeepers": [
+				"PETERS",
+				"MATUSCHEWSKY"
+			],
+			"defenders": [
+				"WINKE",
+				"HENKE",
+				"LANFER",
+				"BORGMANN",
+				"SCHAUERTE",
+				"BEUCKMANN"
+			],
+			"midfielders": [
+				"ROTHER",
+				"DANTAS",
+				"REYES",
+				"KANDIC",
+				"ILLIG",
+				"KORDING",
+				"ROLF"
+			],
+			"forwards": [
+				"BECKHOFF",
+				"TWARDZIK",
+				"FRIELING",
+				"FREIBERGER",
+				"TOURATZIDIS"
+			]
+		}
+	},
+	{
+		"name": "SGV FREIBERG",
+		"logo": 1067,
+		"strength": [
+			44,
+			40,
+			26
+		],
+		"players": {
+			"goalkeepers": [
+				"GELT",
+				"BROMMA"
+			],
+			"defenders": [
+				"STELLWAGEN",
+				"WEIK",
+				"OSEE",
+				"BRADARA",
+				"UHL",
+				"PISOT"
+			],
+			"midfielders": [
+				"OWUSU",
+				"BERISHA",
+				"TARNAT",
+				"KEHL-GOMEZ",
+				"MAROUDIS",
+				"QENAJ",
+				"PETÖ"
+			],
+			"forwards": [
+				"EL-HELWE",
+				"GROBELNIK",
+				"ALBERICO",
+				"LEE",
+				"VUC"
+			]
+		}
+	},
+	{
+		"name": "FC ROT-WEIß ERFURT",
+		"logo": 140,
+		"strength": [
+			33,
+			33,
+			30
+		],
+		"players": {
+			"goalkeepers": [
+				"OTTO",
+				"MANITZ"
+			],
+			"defenders": [
+				"AWOUDJA",
+				"DEHL",
+				"MALUZE",
+				"FABINSKI",
+				"ZELLER",
+				"MORITZ"
+			],
+			"midfielders": [
+				"FEHLER",
+				"CACIEL",
+				"SCHWARZ",
+				"SOARES",
+				"MUTEBA",
+				"DUNCAN",
+				"BOBOY"
+			],
+			"forwards": [
+				"UGONDU",
+				"WOLF",
+				"ASSIBEY-MENSAH",
+				"ABOAGYE",
+				"HAJRULLA"
 			]
 		}
 	},

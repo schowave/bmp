@@ -124,8 +124,8 @@ lack comes from the season before: clubs, logos, foreign clubs. A club
 keeps the name it has in the season, else in the season before, else in
 the latest earlier season that has it, so that names and logos do not
 change with the spelling of Transfermarkt ("SG DYNAMO DRESDEN", "SV 07
-ELVERSBERG"); before 2008 second teams only take places no other club
-fills. Before the
+ELVERSBERG"); second teams only take places no other club fills. Before
+the
 first game of a season its tables say nothing, so clubs without games rank
 by the season before, the league they played in first, then their strength
 there; fetch the season again later in the season for strengths from its
@@ -553,8 +553,9 @@ ties). Deliberate differences:
   more clubs than places passes its last ones down, one with fewer takes
   the best of the tier below; the third league is the Oberliga until
   1993/94, the Regionalliga until 2007/08, then the 3. Liga, without the
-  second teams of professional clubs before 2008 unless the places cannot
-  be filled without them. Strengths come from the
+  second teams of professional clubs (Bayern II, Dortmund II, …), also
+  where they played in the 3. Liga, unless the places cannot be filled
+  without them. Strengths come from the
   goals and points per game of the season ([ADR 0009](../docs/adr/0009-real-seasons-from-transfermarkt.md)).
 - Real seasons: the game starts in the year of the season; a
   1- or 3-year game ends one or three years later, the youth players come

@@ -1524,7 +1524,7 @@
 		"name": "TSV 1860 MÜNCHEN",
 		"logo": 120,
 		"strength": [
-			35,
+			38,
 			47,
 			49
 		],
@@ -1602,7 +1602,7 @@
 		"name": "VFL OSNABRÜCK",
 		"logo": 109,
 		"strength": [
-			40,
+			41,
 			44,
 			44
 		],
@@ -1641,9 +1641,9 @@
 		"name": "1.FC SAARBRÜCKEN",
 		"logo": 99,
 		"strength": [
-			44,
+			46,
 			43,
-			40
+			41
 		],
 		"players": {
 			"goalkeepers": [
@@ -1680,9 +1680,9 @@
 		"name": "SV WEHEN WIESBADEN",
 		"logo": 1056,
 		"strength": [
-			43,
+			44,
 			41,
-			38
+			40
 		],
 		"players": {
 			"goalkeepers": [
@@ -1716,51 +1716,12 @@
 		}
 	},
 	{
-		"name": "BORUSSIA DORTMUND II",
-		"logo": 1014,
-		"strength": [
-			38,
-			40,
-			41
-		],
-		"players": {
-			"goalkeepers": [
-				"UNBEHAUN",
-				"DRLJACA"
-			],
-			"defenders": [
-				"ZAGADOU",
-				"PASSLACK",
-				"KAMARA",
-				"COULIBALY",
-				"PAPADOPOULOS",
-				"PFANNE"
-			],
-			"midfielders": [
-				"RASCHL",
-				"PHERAI",
-				"TAZ",
-				"MALONEY",
-				"VIET",
-				"GÜRPÜZ",
-				"POHLMANN"
-			],
-			"forwards": [
-				"MOUKOKO",
-				"KNAUFF",
-				"TIGGES",
-				"FINK",
-				"NJINMAH"
-			]
-		}
-	},
-	{
 		"name": "FSV ZWICKAU",
 		"logo": 1039,
 		"strength": [
-			41,
-			38,
-			35
+			43,
+			40,
+			37
 		],
 		"players": {
 			"goalkeepers": [
@@ -1794,51 +1755,12 @@
 		}
 	},
 	{
-		"name": "SC FREIBURG II",
-		"logo": 1061,
-		"strength": [
-			46,
-			37,
-			28
-		],
-		"players": {
-			"goalkeepers": [
-				"ATUBOLU",
-				"UPHOFF"
-			],
-			"defenders": [
-				"SIQUET",
-				"SCHLOTTERBECK",
-				"SILDILLIA",
-				"SCHMIDT",
-				"ROSENFELDER",
-				"KAMMERKNECHT"
-			],
-			"midfielders": [
-				"SCHMID",
-				"WAGNER",
-				"ENGELHARDT",
-				"LEOPOLD",
-				"BAUR",
-				"KAMMERBAUER",
-				"KEHL"
-			],
-			"forwards": [
-				"SCHADE",
-				"WEISSHAUPT",
-				"PETERSEN",
-				"KEHRER",
-				"VERMEIJ"
-			]
-		}
-	},
-	{
 		"name": "SV MEPPEN",
 		"logo": 108,
 		"strength": [
-			31,
-			35,
-			37
+			34,
+			38,
+			38
 		],
 		"players": {
 			"goalkeepers": [
@@ -1875,9 +1797,9 @@
 		"name": "FC VIKTORIA KÖLN",
 		"logo": 1033,
 		"strength": [
-			34,
-			34,
-			29
+			37,
+			37,
+			31
 		],
 		"players": {
 			"goalkeepers": [
@@ -1914,9 +1836,9 @@
 		"name": "HALLESCHER FC",
 		"logo": 129,
 		"strength": [
-			37,
-			32,
-			34
+			40,
+			35,
+			35
 		],
 		"players": {
 			"goalkeepers": [
@@ -1953,9 +1875,9 @@
 		"name": "MSV DUISBURG",
 		"logo": 114,
 		"strength": [
-			26,
-			31,
-			32
+			29,
+			34,
+			34
 		],
 		"players": {
 			"goalkeepers": [
@@ -1992,8 +1914,8 @@
 		"name": "SC VERL",
 		"logo": 137,
 		"strength": [
-			28,
-			29,
+			31,
+			32,
 			43
 		],
 		"players": {
@@ -2031,9 +1953,9 @@
 		"name": "FC VIKT. 1889 BERLIN",
 		"logo": 1032,
 		"strength": [
-			29,
-			28,
-			31
+			32,
+			31,
+			32
 		],
 		"players": {
 			"goalkeepers": [
@@ -2070,9 +1992,9 @@
 		"name": "WÜRZBURGER KICKERS",
 		"logo": 1109,
 		"strength": [
-			32,
-			26,
-			26
+			35,
+			29,
+			29
 		],
 		"players": {
 			"goalkeepers": [
@@ -2109,9 +2031,9 @@
 		"name": "TSV HAVELSE",
 		"logo": 104,
 		"strength": [
-			25,
-			25,
-			25
+			28,
+			28,
+			28
 		],
 		"players": {
 			"goalkeepers": [
@@ -2148,9 +2070,9 @@
 		"name": "TÜRKGÜCÜ MÜNCHEN",
 		"logo": 1087,
 		"strength": [
-			23,
-			23,
-			23
+			26,
+			26,
+			26
 		],
 		"players": {
 			"goalkeepers": [
@@ -2188,8 +2110,8 @@
 		"logo": 1128,
 		"strength": [
 			22,
-			22,
-			20
+			25,
+			23
 		],
 		"players": {
 			"goalkeepers": [
@@ -2227,8 +2149,8 @@
 		"logo": 1129,
 		"strength": [
 			20,
-			20,
-			22
+			23,
+			25
 		],
 		"players": {
 			"goalkeepers": [
@@ -2265,9 +2187,9 @@
 		"name": "SPVGG BAYREUTH",
 		"logo": 1069,
 		"strength": [
-			26,
-			44,
-			44
+			23,
+			22,
+			22
 		],
 		"players": {
 			"goalkeepers": [
@@ -2304,9 +2226,9 @@
 		"name": "VFB OLDENBURG",
 		"logo": 117,
 		"strength": [
-			44,
-			40,
-			40
+			25,
+			20,
+			20
 		],
 		"players": {
 			"goalkeepers": [
@@ -2383,7 +2305,7 @@
 		"logo": 1082,
 		"strength": [
 			40,
-			33,
+			30,
 			30
 		],
 		"players": {
@@ -2422,7 +2344,7 @@
 		"logo": 1012,
 		"strength": [
 			33,
-			30,
+			26,
 			33
 		],
 		"players": {
@@ -2457,41 +2379,119 @@
 		}
 	},
 	{
-		"name": "HOLSTEIN KIEL II",
-		"logo": 1045,
+		"name": "ROTENBURGER SV",
+		"logo": 1126,
 		"strength": [
 			30,
+			44,
+			44
+		],
+		"players": {
+			"goalkeepers": [
+				"GIES",
+				"NEUGEBAUER"
+			],
+			"defenders": [
+				"FUNCK",
+				"M.FRIESEN",
+				"ZEIGLER",
+				"DREWES",
+				"ALTHAUSEN",
+				"HAKANSSON"
+			],
+			"midfielders": [
+				"EBERSBACH",
+				"MICKELAT",
+				"SCHALLSCHMIDT",
+				"Y.CHWOLKA",
+				"BEZEK",
+				"DENKER",
+				"KIRMEIER"
+			],
+			"forwards": [
+				"MARQUARDT",
+				"ISCAN",
+				"BOLM",
+				"J.FRIESEN",
+				""
+			]
+		}
+	},
+	{
+		"name": "KICKERS EMDEN",
+		"logo": 1017,
+		"strength": [
 			26,
+			40,
+			40
+		],
+		"players": {
+			"goalkeepers": [
+				"WETZEL",
+				"DE BUHR"
+			],
+			"defenders": [
+				"BOHLEN",
+				"FAQIRYAR",
+				"EL MANSOURI",
+				"EILERTS",
+				"DASSEL",
+				"JABBIE"
+			],
+			"midfielders": [
+				"K",
+				"BRAUN",
+				"GOOSMANN",
+				"SILLAH",
+				"HATOU",
+				"VISSER",
+				"BLOEM"
+			],
+			"forwards": [
+				"BOMBACH",
+				"VAN DER WERFF",
+				"N.GOGUADZE",
+				"ADENIRAN",
+				"G.GOGUADZE"
+			]
+		}
+	},
+	{
+		"name": "PREUßEN MÜNSTER",
+		"logo": 107,
+		"strength": [
+			44,
+			33,
 			26
 		],
 		"players": {
 			"goalkeepers": [
-				"WEINER",
-				"OBERBECK"
+				"NIEHUES",
+				"DEDOVIC"
 			],
 			"defenders": [
-				"STERNER",
-				"CARRERA",
-				"NDURE",
-				"STÖCKER",
-				"KOULIS",
-				"FRAHM"
+				"HOFFMEIER",
+				"ZIEGELE",
+				"KOK",
+				"SCHERDER",
+				"HEMMERICH",
+				"FRENKERT"
 			],
 			"midfielders": [
-				"SANDER",
-				"BENGER",
-				"ARSLAN",
-				"WOLF",
-				"VOSS",
-				"GUEYE",
-				"GHAWILU"
+				"REMBERG",
+				"DETERS",
+				"GHINDOVEAN",
+				"KLANN",
+				"DAUBE",
+				"HOLTBY",
+				"SCHWADORF"
 			],
 			"forwards": [
-				"LAUBERBACH",
-				"KÖNIG",
-				"SCHWENK",
-				"AWUKU",
-				"SIEDSCHLAG"
+				"TEKLAB",
+				"PULIDO",
+				"WEGKAMP",
+				"KWADWO",
+				"BINDEMANN"
 			]
 		}
 	},
