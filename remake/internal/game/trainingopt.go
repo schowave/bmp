@@ -221,8 +221,11 @@ func playerStrength(sl *Slot) float64 {
 
 // restStrength is what a tired player (Erschöpfung tiredFatigue or more)
 // counts less when the eleven of a match are picked, as the optimal lineup
-// rests him unless he is worth it.
-const restStrength = 5
+// rests him unless he is worth his load (loadCosts).
+const (
+	restStrength = 5
+	tiredFatigue = 130
+)
 
 // bestEleven returns the slots of the best goalkeeper and the ten best field
 // players who can play. With rest a tired player counts restStrength lower.

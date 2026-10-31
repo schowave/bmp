@@ -25,12 +25,120 @@ func optimizeKey(in *Input) bool {
 	return false
 }
 
-// lineupNote is the note of the lineup key: the rating, the automatic
-// lineups of the three formations and the opponent.
-func lineupNote(s *game.State, res game.OptimalLineup) []string {
-	note := []string{"OPTIMAL " + pointsText(res.After),
-		"STAND. " + pointsText(res.Auto[0]) + "/" + pointsText(res.Auto[1]) + "/" + pointsText(res.Auto[2])}
-	return append(note, opponentNote(s, res.Opponent, res.Home)...)
+// lineupNote is the note of the lineup key: the rating and its gain, the two
+// changes worth most, the opponent and the automatic lineups of the three
+// formations.
+func lineupNote(s *game.State, mi int, res game.OptimalLineup) []string {
+	note := []string{"OPTIMAL " + pointsText(res.After) + " " + signedDecimal(res.After-res.Before, 2)}
+	if len(res.Changes) == 0 {
+		note = append(note, "AUFSTELLUNG BLEIBT")
+	}
+	for k, ch := range res.Changes {
+		if k == 2 {
+			break
+		}
+		note = append(note, changeNote(s, mi, ch))
+	}
+	note = append(note, opponentNote(s, res.Opponent, res.Home)...)
+	return append(note,
+		"STAND. "+pointsText(res.Auto[0])+"/"+pointsText(res.Auto[1])+"/"+pointsText(res.Auto[2]))
+}
+
+// gainText is the value of a change with a blank before it, "" if it is not
+// rated.
+func gainText(ch game.LineupChange) string {
+	if !ch.Rated {
+		return ""
+	}
+	return " " + signedDecimal(ch.Gain, 2)
+}
+
+// changeNote names a change of the optimal lineup: "MÜLLER FÜR MEIER +0,06",
+// "HOFF TAUSCHT MIT KRAUS +0,05", "HOFF UMGESTELLT +0,03" or "MEIER RAUS".
+func changeNote(s *game.State, mi int, ch game.LineupChange) string {
+	name := func(i int) string { return s.Persons[s.Squads[mi][i].Person].Name }
+	switch {
+	case ch.In < 0:
+		return name(ch.Out) + " RAUS"
+	case ch.With >= 0:
+		return name(ch.In) + " TAUSCHT MIT " + name(ch.With) + gainText(ch)
+	case ch.Out < 0:
+		return name(ch.In) + " UMGESTELLT" + gainText(ch)
+	}
+	return name(ch.In) + " FÜR " + name(ch.Out) + gainText(ch)
+}
+
+// changeHint is the footer for slot i after the lineup key: why the player
+// came in, went out or moved, "FÜR MEIER +0,06 (ERSCH. 138)", or for one it
+// left alone why he plays or not (reasonHint). A move worth +0,00 helps only with the others; a
+// change that cannot be undone alone has no value.
+func changeHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
+	sq := &s.Squads[mi]
+	name := func(j int) string { return s.Persons[sq[j].Person].Name }
+	// why is the value of the change and what speaks against the player of
+	// slot j.
+	why := func(j int, ch game.LineupChange) string {
+		switch {
+		case sq[j].Status&3 == 2:
+			return " (VERLETZT)"
+		case sq[j].Status&3 == 1 && !s.CupDay:
+			return " (GESPERRT)"
+		case res.Load[j] > 0:
+			return gainText(ch) + " (ERSCH. " + itoa(sq[j].Fatigue) + ")"
+		}
+		return gainText(ch)
+	}
+	for _, ch := range res.Changes {
+		switch {
+		case ch.In == i && ch.Out >= 0:
+			return "FÜR " + name(ch.Out) + why(ch.Out, ch)
+		case ch.In == i && ch.With >= 0:
+			return "TAUSCHT MIT " + name(ch.With) + gainText(ch)
+		case ch.With == i:
+			return "TAUSCHT MIT " + name(ch.In) + gainText(ch)
+		case ch.In == i:
+			return "UMGESTELLT" + gainText(ch)
+		case ch.Out == i && ch.In >= 0:
+			return "RAUS, " + name(ch.In) + " SPIELT" + why(i, ch)
+		case ch.Out == i:
+			return "RAUS" + why(i, ch)
+		}
+	}
+	return reasonHint(s, mi, res, i)
+}
+
+// reasonHint says why the lineup key let the player of slot i play or not:
+// "SPIELT, +0,05 VOR POVLSEN" against the best one who could come in for
+// him, "BANK, -0,04 STATT ZORC (ERSCH. 140)" against the one he would best
+// replace, "FEHLT: VERLETZT" for one who cannot play. A difference below
+// game.LineupMinGain, for which the key changes nothing, is "GLEICH GUT".
+func reasonHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
+	sl := &s.Squads[mi][i]
+	r := res.Reasons[i]
+	tired := ""
+	if res.Load[i] > 0 {
+		tired = " (ERSCH. " + itoa(sl.Fatigue) + ")"
+	}
+	switch {
+	case sl.Status&3 == 2:
+		return "FEHLT: VERLETZT"
+	case sl.Status&3 == 1 && !s.CupDay:
+		return "FEHLT: GESPERRT"
+	case sl.InTeam() && r.Alt < 0:
+		return "SPIELT, KEIN ERSATZ" + tired
+	case r.Alt < 0:
+		return "BANK, KEIN PLATZ FÜR IHN"
+	}
+	alt := s.Persons[s.Squads[mi][r.Alt].Person].Name
+	switch {
+	case r.Margin > -game.LineupMinGain && r.Margin < game.LineupMinGain && sl.InTeam():
+		return "SPIELT, " + alt + " GLEICH GUT" + tired
+	case r.Margin > -game.LineupMinGain && r.Margin < game.LineupMinGain:
+		return "BANK, GLEICH GUT WIE " + alt + tired
+	case sl.InTeam():
+		return "SPIELT, " + signedDecimal(r.Margin, 2) + " VOR " + alt + tired
+	}
+	return "BANK, " + signedDecimal(r.Margin, 2) + " STATT " + alt + tired
 }
 
 // trainingNote is the note of the training key: the strength with the new
@@ -142,19 +250,25 @@ func drawNote(g *Gfx, dst *ebiten.Image, font Font, x0, x1, y int, lines []strin
 	}
 }
 
-// fitParts joins as many of the parts as fit into the width, two blanks
-// between them: a part that does not fit is left out, not cut.
-func fitParts(g *Gfx, font Font, w int, parts ...string) string {
-	out := ""
+// notePages splits the parts into pages that fit into the width, as many
+// parts on a page as fit, two blanks between them; a part wider than the
+// width alone is cut.
+func notePages(g *Gfx, font Font, w int, parts ...string) []string {
+	var pages []string
+	page := ""
 	for _, p := range parts {
-		next := p
-		if out != "" {
-			next = out + "  " + p
+		switch next := page + "  " + p; {
+		case page == "":
+			page = g.Fit(font, p, w)
+		case g.TextWidth(font, next) <= w:
+			page = next
+		default:
+			pages = append(pages, page)
+			page = g.Fit(font, p, w)
 		}
-		if g.TextWidth(font, next) > w {
-			break
-		}
-		out = next
 	}
-	return out
+	if page != "" {
+		pages = append(pages, page)
+	}
+	return pages
 }

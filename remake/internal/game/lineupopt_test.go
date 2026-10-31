@@ -439,10 +439,128 @@ func TestOptimizeLineupRestsTiredPlayers(t *testing.T) {
 		if star {
 			a.Skill = [3]int{99, 99, 55}
 		}
-		s.OptimizeLineup(0)
+		res := s.OptimizeLineup(0)
 		plays := a.Lineup >= 1 && a.Lineup <= 11
 		if plays != star {
 			t.Errorf("star %v: the tired player plays %v", star, plays)
 		}
+		if res.Load[tired] <= 0 || res.Load[fresh] != 0 {
+			t.Errorf("load: tired %d, fresh %d", res.Load[tired], res.Load[fresh])
+		}
+		// The rest is a change of its own, worth what it gains.
+		found := false
+		for _, ch := range res.Changes {
+			if ch.Out == tired {
+				found = true
+				if ch.In < 0 || !ch.Rated || ch.Gain < lineupMinGain {
+					t.Errorf("rest of the tired player: %+v", ch)
+				}
+			}
+		}
+		if found == star {
+			t.Errorf("star %v: changes %+v", star, res.Changes)
+		}
+	}
+}
+
+// Each change undone costs what it says it gains, and the changes add up to
+// the lineup chosen.
+func TestOptimizeLineupChanges(t *testing.T) {
+	s := lineupState(t)
+	orig := s.Squads[0]
+	res := s.OptimizeLineup(0)
+	if len(res.Changes) == 0 {
+		t.Fatal("no changes")
+	}
+	ins := map[int]bool{}
+	for k, ch := range res.Changes {
+		if k > 0 && ch.Gain > res.Changes[k-1].Gain {
+			t.Errorf("changes not sorted: %+v", res.Changes)
+		}
+		if ch.In < 0 {
+			continue
+		}
+		ins[ch.In] = true
+		if ch.With >= 0 {
+			ins[ch.With] = true
+		}
+		sl := &s.Squads[0][ch.In]
+		if !sl.InTeam() {
+			t.Errorf("slot %d of a change is not in the team", ch.In)
+		}
+		if ch.Out >= 0 && (!orig[ch.Out].InTeam() || s.Squads[0][ch.Out].InTeam()) {
+			t.Errorf("slot %d did not leave the team", ch.Out)
+		}
+	}
+	for i := 0; i < SquadMax; i++ {
+		sl, o := &s.Squads[0][i], &orig[i]
+		if sl.InTeam() && (!o.InTeam() || o.Col != sl.Col || o.Row != sl.Row) && !ins[i] {
+			t.Errorf("slot %d changed without a change", i)
+		}
+	}
+}
+
+// A tired player costs more in a week with two matches than in one with a
+// match, less before a break, and nothing when he is fresh or the season
+// ends.
+func TestLoadCosts(t *testing.T) {
+	s := lineupState(t)
+	l := s.Managers[0].League
+	i := findLineup(s, 0, func(sl *Slot) bool { return sl.InTeam() })
+	sl := &s.Squads[0][i]
+	load := func(events ...byte) int {
+		s.Events = [len(s.Events)]byte{}
+		copy(s.Events[:], events)
+		s.Event, s.Day = 0, 0
+		return s.loadCosts(0)[i]
+	}
+	m := byte(1 << l)
+	sl.Fatigue = 80
+	if c := load(m, 0, m, 0, m, 0, m, 0); c != 0 {
+		t.Errorf("fresh player costs %d", c)
+	}
+	sl.Fatigue = 132
+	weekly := load(m, 0, m, 0, m, 0, m, 0)
+	short := load(m, m, m, m, m, m, m, m)
+	last := load(m, 0, 0, 0, 0, 0, 0, 0)
+	if weekly <= 0 || short <= weekly || last >= weekly {
+		t.Errorf("weekly %d, short week %d, before a break %d", weekly, short, last)
+	}
+	s.Day = LastSeasonDay
+	if c := s.loadCosts(0)[i]; c != 0 {
+		t.Errorf("at the season end he costs %d", c)
+	}
+	t.Logf("weekly %d, short week %d, before a break %d", weekly, short, last)
+}
+
+// Every player of the team who has a substitute is worth more than him (the
+// search stops where no swap helps), and every player outside the team who
+// could play names the one he would replace.
+func TestOptimizeLineupReasons(t *testing.T) {
+	s := lineupState(t)
+	res := s.OptimizeLineup(0)
+	n := 0
+	for i := 0; i < SquadMax; i++ {
+		sl, r := &s.Squads[0][i], res.Reasons[i]
+		switch {
+		case sl.Empty():
+			continue
+		case !s.available(sl):
+			if r.Alt >= 0 {
+				t.Errorf("slot %d cannot play but has %+v", i, r)
+			}
+		case sl.InTeam():
+			if r.Alt >= 0 && (s.Squads[0][r.Alt].InTeam() || r.Margin <= -lineupMinGain) {
+				t.Errorf("slot %d in the team: %+v", i, r)
+			}
+			n++
+		default:
+			if r.Alt < 0 || !s.Squads[0][r.Alt].InTeam() || r.Margin >= lineupMinGain {
+				t.Errorf("slot %d outside the team: %+v", i, r)
+			}
+		}
+	}
+	if n != 11 {
+		t.Errorf("%d players in the team", n)
 	}
 }

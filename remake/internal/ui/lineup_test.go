@@ -511,20 +511,51 @@ func TestLineupOptimalKey(t *testing.T) {
 	if s.LineupRating(0) < rating {
 		t.Errorf("rating fell from %d to %d", rating, s.LineupRating(0))
 	}
-	if len(q.note) < 2 || q.note[0] != "OPTIMAL "+pointsText(s.LineupRating(0)) || !strings.HasPrefix(q.note[1], "STAND. ") {
-		t.Errorf("note %q", q.note)
+	// OPTIMAL with the gain, the changes worth most, the opponent and the
+	// automatic lineups.
+	n := len(q.note)
+	if n < 3 || q.note[0] != "OPTIMAL "+pointsText(s.LineupRating(0))+" "+signedDecimal(s.LineupRating(0)-rating, 2) ||
+		!strings.HasPrefix(q.note[n-1], "STAND. ") || q.opt == nil {
+		t.Fatalf("note %q", q.note)
+	}
+	if len(q.opt.Changes) == 0 || q.note[1] != changeNote(s, 0, q.opt.Changes[0]) {
+		t.Errorf("note %q does not name the change worth most", q.note)
 	}
 	want := "GEGEN "
 	if !home {
 		want = "BEI "
 	}
-	if ok && (len(q.note) != 3 || q.note[2] != want+s.Teams[opp].Name) {
+	if ok && q.note[n-2] != want+s.Teams[opp].Name {
 		t.Errorf("note %q does not name the opponent %s", q.note, s.Teams[opp].Name)
 	}
-	// The footer shows the parts that fit beside the board, whole.
-	if f := fitParts(app.Gfx, FontSmall, lnPitchX1-lnListX0, q.note...); !strings.HasPrefix(f, q.note[0]) ||
-		app.Gfx.TextWidth(FontSmall, f) > lnPitchX1-lnListX0 {
-		t.Errorf("footer %q", f)
+	// The name of the player of that change says why.
+	ch := q.opt.Changes[0]
+	if !ch.Rated || !strings.Contains(q.hint(ch.In, 2), gainText(ch)) {
+		t.Errorf("hint of slot %d: %q", ch.In, q.hint(ch.In, 2))
+	}
+	// A player the key left alone says why he plays or sits on the bench.
+	for i := 0; i < game.SquadMax; i++ {
+		sl := &s.Squads[0][i]
+		if sl.Empty() || changedSlot(q.opt, i) || sl.Status&3 != 0 {
+			continue
+		}
+		want := "BANK, "
+		if sl.InTeam() {
+			want = "SPIELT, "
+		}
+		if h := q.hint(i, 2); !strings.HasPrefix(h, want) {
+			t.Errorf("hint of slot %d: %q, want %s…", i, h, want)
+		}
+	}
+	// Beside the board the note shows its parts on pages that fit.
+	pages := notePages(app.Gfx, FontSmall, lnPitchX1-lnListX0, q.note...)
+	if len(pages) < 2 || !strings.HasPrefix(pages[0], q.note[0]) || strings.Join(pages, "  ") != strings.Join(q.note, "  ") {
+		t.Errorf("pages %q of note %q", pages, q.note)
+	}
+	for _, p := range pages {
+		if app.Gfx.TextWidth(FontSmall, p) > lnPitchX1-lnListX0 {
+			t.Errorf("page %q too wide", p)
+		}
 	}
 	// Pressing it again changes nothing.
 	first := strings.Join(q.note, "|")
@@ -571,11 +602,10 @@ func TestNoteCuts(t *testing.T) {
 			t.Errorf("%q is wider than 60", l)
 		}
 	}
-	if got := fitParts(g, FontSmall, g.TextWidth(FontSmall, "A  B"), "A", "B", long); got != "A  B" {
-		t.Errorf("fitParts %q", got)
-	}
-	if got := fitParts(g, FontSmall, 1, "AAAA"); got != "" {
-		t.Errorf("a part wider than the footer: %q", got)
+	w := g.TextWidth(FontSmall, "A  B")
+	if got := notePages(g, FontSmall, w, "A", "B", "C", long); len(got) != 3 || got[0] != "A  B" || got[1] != "C" ||
+		g.TextWidth(FontSmall, got[2]) > w {
+		t.Errorf("notePages %q", got)
 	}
 }
 
@@ -587,4 +617,15 @@ func TestPriceLine(t *testing.T) {
 	if got := priceLine(game.OptimalPrice{After: 10, BeforeGate: 5000, AfterGate: 5000}); got != "EINTRITT 10 +0" {
 		t.Errorf("no gain %q", got)
 	}
+}
+
+// changedSlot tells whether the lineup key brought slot i in, took him out
+// or moved him.
+func changedSlot(res *game.OptimalLineup, i int) bool {
+	for _, ch := range res.Changes {
+		if ch.In == i || ch.Out == i || ch.With == i {
+			return true
+		}
+	}
+	return false
 }

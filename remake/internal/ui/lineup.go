@@ -104,8 +104,14 @@ type SquadScreen struct {
 	out     int
 
 	// note is what the key o did, in the footer while nothing else is
-	// shown there: as many of its parts as fit.
+	// shown there: on pages of as many of its parts as fit (notePages).
 	note []string
+	// ticks counts the updates, to turn the pages of the note.
+	ticks int
+	// opt is the result of the key o until the lineup is changed by hand:
+	// the footer of a player's number, position and name says why he
+	// plays or not (changeHint).
+	opt *game.OptimalLineup
 }
 
 // NewSquadScreen creates the lineup screen (team group, first item).
@@ -191,6 +197,7 @@ func (q *SquadScreen) boardCell(in *Input) (col, row int) {
 func lnIconHit(in *Input, x, y int) bool { return in.Clicked(x, y, ButtonW, ButtonH) }
 
 func (q *SquadScreen) Update(app *App) error {
+	q.ticks++
 	s := q.ss.S
 	mi := q.mi()
 	m := s.Managers[mi]
@@ -230,7 +237,11 @@ func (q *SquadScreen) Update(app *App) error {
 		}
 		// A hidden key of the remake, not of the original.
 		if q.md == nil && optimizeKey(in) {
-			q.note = lineupNote(q.ss.S, q.ss.S.OptimizeLineup(q.mi()))
+			// A second press finds nothing to change: what the first did
+			// stays explained.
+			if res := q.ss.S.OptimizeLineup(q.mi()); q.opt == nil || len(res.Changes) > 0 {
+				q.note, q.opt = lineupNote(q.ss.S, q.mi(), res), &res
+			}
 			q.picked = -1
 			q.vac = game.BoardCell{}
 			return nil
@@ -267,6 +278,8 @@ func (q *SquadScreen) Update(app *App) error {
 	}
 	if le, ok := err.(game.LineupError); ok {
 		app.Push(newLineupToast(le))
+	} else {
+		q.opt = nil
 	}
 	return nil
 }
@@ -283,7 +296,7 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 	for f := 0; f < 3 && q.formationButtons(); f++ {
 		if lnIconHit(in, f*60+4, lnFormY) {
 			s.SetFormation(mi, f)
-			q.picked = -1
+			q.picked, q.opt = -1, nil
 			q.vac = game.BoardCell{}
 			return true
 		}
@@ -303,7 +316,7 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 		q.picked = at
 	default:
 		s.MoveOnBoard(mi, q.picked, q.cursorCol, q.cursorRow)
-		q.picked = -1
+		q.picked, q.opt = -1, nil
 	}
 	return true
 }
@@ -403,8 +416,9 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 		}
 		q.drawRow(g, dst, i, y, i == bar, barX0, barX1)
 	}
-	if footer == "" {
-		footer = fitParts(g, FontSmall, q.x1()-lnListX0, q.note...)
+	if pages := notePages(g, FontSmall, q.x1()-lnListX0, q.note...); footer == "" && len(pages) > 0 {
+		// Beside the board the note turns its pages every 2.5 seconds.
+		footer = pages[q.ticks/(TPS*5/2)%len(pages)]
 	}
 	g.TextMid(dst, FontSmall, lnListX0, q.x1(), lnFooterY, footer, ColLight, NoShadow)
 
@@ -521,9 +535,15 @@ func (q *SquadScreen) statusCell(sl *game.Slot, col int) (string, int) {
 	return "VERL.", ColRed
 }
 
-// hint is the footer for the column c of slot i (f_1ecd_000e).
+// hint is the footer for the column c of slot i (f_1ecd_000e); after the
+// key o, number, position and name say why it changed the player.
 func (q *SquadScreen) hint(i, c int) string {
 	s := q.ss.S
+	if q.opt != nil && c <= 2 && q.view != lineupContracts {
+		if h := changeHint(s, q.mi(), q.opt, i); h != "" {
+			return h
+		}
+	}
 	sl := &s.Squads[q.mi()][i]
 	p := &s.Persons[sl.Person]
 	switch c {

@@ -40,6 +40,12 @@ type lineupRater struct {
 	opp    int    // the club id of the opponent, or -1 for the league
 	// samples is the number of series of dice, 0 for the mean.
 	samples int
+	// load is what playing today costs each player (loadCosts); score
+	// counts it, rate does not.
+	load [SquadMax]int
+	// memo holds the points of the strength values already rated: many
+	// lineups of a search give the same.
+	memo map[[9]int]float64
 }
 
 // ratingSamples is the number of series of dice that rate a lineup against
@@ -70,7 +76,8 @@ func (s *State) humanTeam(t int) bool {
 // newLeagueRater returns the rater of manager m against the clubs of his
 // league.
 func (s *State) newLeagueRater(m int) *lineupRater {
-	lr := &lineupRater{s: s, m: m, mood: s.Teams[s.Managers[m].Team].Mood, venues: []bool{true, false}, opp: -1}
+	lr := &lineupRater{s: s, m: m, mood: s.Teams[s.Managers[m].Team].Mood, venues: []bool{true, false}, opp: -1,
+		load: s.loadCosts(m)}
 	l := LeagueOf(s.Managers[m].Team)
 	first, end := FirstID[l], firstReserveClub
 	if l < NumLeagues-1 {
@@ -120,6 +127,28 @@ func (lr *lineupRater) ofValuesAgainst(v lineupValues, refs []Team) int {
 // points is the expected points per match of the lineup with the strength
 // values v against the clubs refs.
 func (lr *lineupRater) points(v lineupValues, refs []Team) float64 {
+	var key [9]int
+	copy(key[0:3], v.strength[:])
+	copy(key[3:6], v.base[:])
+	copy(key[6:9], v.extra[:])
+	memo := len(refs) == len(lr.refs) && (len(refs) == 0 || &refs[0] == &lr.refs[0])
+	if memo {
+		if x, ok := lr.memo[key]; ok {
+			return x
+		}
+	}
+	x := lr.pointsOf(v, refs)
+	if memo {
+		if lr.memo == nil {
+			lr.memo = map[[9]int]float64{}
+		}
+		lr.memo[key] = x
+	}
+	return x
+}
+
+// pointsOf is points without the memo.
+func (lr *lineupRater) pointsOf(v lineupValues, refs []Team) float64 {
 	us := Team{Mood: lr.mood, Strength: v.strength, Base: v.base, Extra: v.extra}
 	sum := 0.0
 	for i := range refs {

@@ -1,5 +1,7 @@
 package game
 
+import "sort"
+
 // The optimal lineup is not a rule of the original: it rates lineups with
 // the calculation of the original (lineupValues, teamStrengthAt, see
 // lineupmodel.go) and looks for the best one. It changes nothing but the
@@ -22,51 +24,99 @@ type OptimalLineup struct {
 	// the league, and Home tells whether the match is a home match.
 	Opponent int
 	Home     bool
-	// Formation is the formation the lineup started from; Manual tells that
-	// the lineup differs from the automatic one of it and so stays manual.
+	// Formation is the formation of the automatic lineup the lineup equals,
+	// or the one it started from; Manual tells that the lineup differs from
+	// the automatic one of every formation and so stays manual.
 	Formation int
 	Manual    bool
+	// Changes are the changes against the lineup before, the most worth
+	// first; none when the lineup before stays.
+	Changes []LineupChange
+	// Load is what playing today costs every player of the squad (loadCosts).
+	Load [SquadMax]int
+	// Reasons say for every player of the squad why he plays or not.
+	Reasons [SquadMax]PlayerReason
 }
 
-// OptimizeLineup sets the best lineup it finds for manager m: it starts with
-// the automatic lineup of every formation, improves each by swapping two
-// players (their numbers and cells) as long as that raises the rating by
-// LineupRating, and takes the best. A swap may bring in a rested player from the
-// bench or put a player on his side or into his row; a tired player rests
-// unless he is worth it (tiredFatigue). Players who are
-// injured or suspended stay out. The lineup stays automatic if the
-// automatic lineup of the formation could not be improved, else it becomes
-// manual; if the lineup the manager had is better than all of them, it is
-// kept.
+// PlayerReason is why a player plays in the lineup chosen or not: Alt is the
+// best other player for his place, Margin the score (lineupRater.score) of
+// the lineup with him less the score with Alt instead, in hundredths of a
+// point. For a player of the team Alt is the best one who could come in for
+// him, for one outside the team the player of the team he would best
+// replace. Alt is -1 when there is none: nobody fits his place, or he cannot
+// play.
+type PlayerReason struct {
+	Alt, Margin int
+}
+
+// LineupChange is one change of the optimal lineup against the lineup
+// before: In plays for Out on a cell of the board, or In (Out -1) moved to
+// another cell, With the player of the team he swapped cells with (else -1).
+// Out without In (In -1) left a team that had no 11 players who could play.
+type LineupChange struct {
+	In, Out, With int
+	// Gain is what the change is worth: the score of the lineup
+	// (lineupRater.score) less the score with the change undone, in
+	// hundredths of a point. Rated is false, and Gain 0, when the change
+	// cannot be undone alone: Out cannot play, or not on the cell of In
+	// (a forward for a defender when the formation changed).
+	Gain  int
+	Rated bool
+}
+
+// OptimizeLineup sets the best lineup it finds for manager m. The search
+// starts from the automatic lineup of every formation and from the lineup
+// the manager has, improves each (improveLineup) and takes the best. A swap
+// may bring in a rested player from the bench or put a player on his side
+// or into his row; a tired player rests unless he is worth what his load
+// costs (loadCosts). Players who are injured or suspended stay out. The
+// lineup stays automatic if it equals the automatic lineup of a formation,
+// else it becomes manual; if the lineup the manager had is not beaten by
+// lineupMinGain, it is kept.
 func (s *State) OptimizeLineup(m int) OptimalLineup {
 	mg := s.Managers[m]
 	lr := s.newRater(m)
-	res := OptimalLineup{Before: lr.rate(), Opponent: lr.opp, Home: len(lr.venues) == 1 && lr.venues[0]}
+	res := OptimalLineup{Before: lr.rate(), Opponent: lr.opp, Home: len(lr.venues) == 1 && lr.venues[0], Load: lr.load}
 	before := lr.score()
 	mode := mg.AutoLineup
 	sq := &s.Squads[m]
 	orig := *sq
 
-	// Every formation is improved; the best score wins, the earlier
-	// formation on a tie.
-	var autos, tuned [3][SquadSlots]Slot
-	var after [3]int
+	// Every start is improved; the best score wins, the earlier start on a
+	// tie. The starts are the formations, then the lineup of the manager.
+	var autos [3][SquadSlots]Slot
+	var tuned [4][SquadSlots]Slot
+	after := [4]int{}
 	best := -1
-	for f := range Formations {
+	for f := 0; f < 4; f++ {
 		*sq = orig
-		mg.AutoLineup = f + 2
-		s.AutoLineup(m)
-		autos[f] = *sq
-		res.Auto[f] = lr.rate()
+		if f < 3 {
+			mg.AutoLineup = f + 2
+			s.AutoLineup(m)
+			autos[f] = *sq
+			res.Auto[f] = lr.rate()
+		} else if !s.playable(orig[:]) {
+			break
+		}
 		after[f] = s.improveLineup(lr, lr.score())
 		tuned[f] = *sq
 		if best < 0 || after[f] > after[best] {
 			best = f
 		}
 	}
-	res.Formation = best
 	*sq = tuned[best]
-	res.Manual = tuned[best] != autos[best]
+	after[best] = s.kickLineup(lr, after[best])
+	tuned[best] = *sq
+	res.Formation, res.Manual = best, true
+	if best == 3 {
+		res.Formation = max(mode-2, 0)
+	}
+	for f := range autos {
+		if tuned[best] == autos[f] {
+			res.Formation, res.Manual = f, false
+			break
+		}
+	}
 
 	if after[best] < before+lineupMinGain && s.playable(orig[:]) {
 		// What the manager had stays unless the new lineup gains
@@ -74,37 +124,27 @@ func (s *State) OptimizeLineup(m int) OptimalLineup {
 		*sq = orig
 		mg.AutoLineup = mode
 		res.After, res.Manual = res.Before, false
+		res.Reasons = s.lineupReasons(lr)
 		return res
 	}
 	res.After = lr.rate()
+	res.Changes = s.lineupChanges(lr, &orig)
+	res.Reasons = s.lineupReasons(lr)
 	if res.Manual {
 		mg.AutoLineup = 1
 	} else {
-		mg.AutoLineup = best + 2
+		mg.AutoLineup = res.Formation + 2
 	}
 	return res
 }
 
-// tiredFatigue and tiredCost are the rule of the load: a player with an
-// Erschöpfung of tiredFatigue or more plays only if he is worth tiredCost
-// hundredths of a point more than who would play for him. A match adds 7 to
-// 10 to the Erschöpfung of a player in the team, and above 135 his training
-// does little (develop) and an injury in training gets likelier, so a tired
-// player rests unless he makes a difference. The rule is the remake's, not
-// the engine's: the rating of a lineup does not count it.
-const (
-	tiredFatigue = 130
-	tiredCost    = 5
-)
-
-// score is what the search maximizes: the rating less tiredCost for every
-// tired player in the team.
+// score is what the search maximizes: the rating less the load of every
+// player in the team (loadCosts).
 func (lr *lineupRater) score() int {
 	x := lr.rate()
 	for i := 0; i < SquadMax; i++ {
-		sl := &lr.s.Squads[lr.m][i]
-		if sl.InTeam() && sl.Fatigue >= tiredFatigue {
-			x -= tiredCost
+		if lr.s.Squads[lr.m][i].InTeam() {
+			x -= lr.load[i]
 		}
 	}
 	return x
@@ -116,26 +156,27 @@ func (lr *lineupRater) score() int {
 // swapped the goalkeepers for 1).
 const lineupMinGain = 3
 
+// LineupMinGain is lineupMinGain for the screens: a difference below it
+// counts as none.
+const LineupMinGain = lineupMinGain
+
 // improveLineup changes the lineup while its score (lineupRater.score) rises
-// and returns the score reached: it swaps two available players, of the team or of the
-// bench (their numbers and cells), and moves a player of the team to a free
-// cell of the board within his line (defence, midfield, attack). A move to
-// another line would also be rated by the calculation of the original, but
-// it rewards what no manager would field: the bonus of the balance of the
-// lines (lineupValues, bal) grows with the players in the midfield rows, and
-// the search piled up the team there. The first change that helps is taken, so the result
-// depends on nothing but the squad. It stops at a lineup where no single
-// swap or move helps.
+// and returns the score reached. Each step looks at every swap of two
+// available players, of the team or of the bench (their numbers and cells),
+// and at every move of a player of the team to a free cell of the board
+// within his line (defence, midfield, attack), and makes the one that helps
+// most (steepest ascent: the first that helps would decide by the order of
+// the squad and stop sooner). A move to another line would also be rated by
+// the calculation of the original, but it rewards what no manager would
+// field: the bonus of the balance of the lines (lineupValues, bal) grows with
+// the players in the midfield rows, and the search piled up the team there.
+// It stops at a lineup where no single swap or move helps.
 func (s *State) improveLineup(lr *lineupRater, rating int) int {
 	sq := &s.Squads[lr.m]
-	swap := func(a, b *Slot) {
-		a.Lineup, b.Lineup = b.Lineup, a.Lineup
-		a.Row, b.Row = b.Row, a.Row
-		a.Col, b.Col = b.Col, a.Col
-	}
-	var taken [BoardCols][BoardRows]bool
-	for improved := true; improved; {
-		improved = false
+	for {
+		// kind 1 swaps the slots a and b, kind 2 moves a to the cell c, r.
+		floor := rating + lineupMinGain - 1
+		best, kind, ba, bb, bc, br, bestDist := floor, 0, 0, 0, 0, 0, 0
 		for a := 0; a < SquadMax; a++ {
 			sa := &sq[a]
 			if !sa.InTeam() {
@@ -143,26 +184,19 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 			}
 			for b := 0; b < SquadMax; b++ {
 				sb := &sq[b]
-				if b == a || sb.Empty() || !s.available(sb) {
+				if b == a || sb.Empty() || !s.available(sb) || (sb.InTeam() && b < a) {
 					continue
 				}
-				inTeam := sb.InTeam()
-				if inTeam && b < a {
-					continue
+				swapPlaces(sa, sb)
+				if s.fitsCell(sa) && s.fitsCell(sb) {
+					if x := lr.score(); x > best {
+						best, kind, ba, bb = x, 1, a, b
+					}
 				}
-				swap(sa, sb)
-				if !s.fitsCell(sa) || !s.fitsCell(sb) {
-					swap(sa, sb)
-					continue
-				}
-				if r := lr.score(); r >= rating+lineupMinGain {
-					rating, improved = r, true
-					break
-				}
-				swap(sa, sb)
+				swapPlaces(sa, sb)
 			}
 		}
-		taken = [BoardCols][BoardRows]bool{}
+		var taken [BoardCols][BoardRows]bool
 		for i := 0; i < SquadMax; i++ {
 			if sl := &sq[i]; sl.InTeam() {
 				taken[sl.Col][sl.Row] = true
@@ -174,10 +208,6 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 				continue
 			}
 			col, row := sa.Col, sa.Row
-			// The best cell wins, of equal ones the nearest, so that a
-			// player is moved only as far as it helps.
-			floor := rating + lineupMinGain - 1
-			bestC, bestR, best, bestDist := col, row, floor, 0
 			for c := 0; c < BoardCols; c++ {
 				for r := 0; r < BoardRows; r++ {
 					if taken[c][r] || lineOfRow[7-r] != lineOfRow[7-row] {
@@ -187,20 +217,215 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 					if !s.fitsCell(sa) {
 						continue
 					}
+					// Of equal cells of a player the nearest, so that he is
+					// moved only as far as it helps.
 					x, dist := lr.score(), abs(c-col)+abs(r-row)
-					if x > best || (x == best && x > floor && dist < bestDist) {
-						bestC, bestR, best, bestDist = c, r, x, dist
+					if x > best || (x == best && kind == 2 && ba == a && dist < bestDist) {
+						best, kind, ba, bc, br, bestDist = x, 2, a, c, r, dist
 					}
 				}
 			}
-			sa.Col, sa.Row = bestC, bestR
-			if best > floor {
-				rating, improved = best, true
-				taken[col][row], taken[bestC][bestR] = false, true
+			sa.Col, sa.Row = col, row
+		}
+		switch kind {
+		case 0:
+			return rating
+		case 1:
+			swapPlaces(&sq[ba], &sq[bb])
+		case 2:
+			sq[ba].Col, sq[ba].Row = bc, br
+		}
+		rating = best
+	}
+}
+
+// kickLineup gets the lineup out of the local optimum improveLineup stops
+// at and returns the score reached: it makes every swap of two players that
+// improveLineup could make, even one that lowers the score, improves the
+// lineup from there and keeps the best lineup found; the next kicks start
+// from that one. A single swap or move
+// often cannot leave the optimum where two together would, as when a player
+// goes to the bench and another one takes his cell. A second round of kicks
+// from the lineup found gained a tenth of what the first did and doubled the
+// time.
+func (s *State) kickLineup(lr *lineupRater, rating int) int {
+	sq := &s.Squads[lr.m]
+	best := *sq
+	for a := 0; a < SquadMax; a++ {
+		for b := 0; b < SquadMax; b++ {
+			*sq = best
+			sa, sb := &sq[a], &sq[b]
+			if b == a || !sa.InTeam() || sb.Empty() || !s.available(sb) || (sb.InTeam() && b < a) {
+				continue
+			}
+			swapPlaces(sa, sb)
+			if !s.fitsCell(sa) || !s.fitsCell(sb) {
+				continue
+			}
+			if x := s.improveLineup(lr, lr.score()); x >= rating+lineupMinGain {
+				rating, best = x, *sq
 			}
 		}
 	}
+	*sq = best
 	return rating
+}
+
+// swapPlaces swaps the numbers and the cells of two players.
+func swapPlaces(a, b *Slot) {
+	a.Lineup, b.Lineup = b.Lineup, a.Lineup
+	a.Row, b.Row = b.Row, a.Row
+	a.Col, b.Col = b.Col, a.Col
+}
+
+// lineupChanges returns the changes of the lineup against orig, the most
+// worth first. A player who came into the team plays for one who left it,
+// preferably the one who stood on his cell, else one of his line; a player
+// of both moved if his cell differs. What a change is worth is the score of
+// the lineup less the score with that change alone undone.
+func (s *State) lineupChanges(lr *lineupRater, orig *[SquadSlots]Slot) []LineupChange {
+	sq := &s.Squads[lr.m]
+	var outs []int
+	for i := 0; i < SquadMax; i++ {
+		if orig[i].InTeam() && !sq[i].InTeam() {
+			outs = append(outs, i)
+		}
+	}
+	var changes []LineupChange
+	for i := 0; i < SquadMax; i++ {
+		sl := &sq[i]
+		if !sl.InTeam() {
+			continue
+		}
+		if o := &orig[i]; o.InTeam() {
+			if o.Col != sl.Col || o.Row != sl.Row {
+				if ch, ok := s.moveChange(lr.m, orig, i, changes); ok {
+					changes = append(changes, ch)
+				}
+			}
+			continue
+		}
+		pick := -1
+		for k, o := range outs {
+			oc := &orig[o]
+			switch {
+			case oc.Col == sl.Col && oc.Row == sl.Row:
+				pick = k
+			case pick < 0 && lineOfRow[7-oc.Row] == lineOfRow[7-sl.Row]:
+				pick = k
+			}
+		}
+		if pick < 0 && len(outs) > 0 {
+			pick = 0
+		}
+		ch := LineupChange{In: i, Out: -1, With: -1}
+		if pick >= 0 {
+			ch.Out = outs[pick]
+			outs = append(outs[:pick], outs[pick+1:]...)
+		}
+		changes = append(changes, ch)
+	}
+	for _, o := range outs {
+		changes = append(changes, LineupChange{In: -1, Out: o, With: -1})
+	}
+
+	base := lr.score()
+	for k := range changes {
+		ch := &changes[k]
+		switch {
+		case ch.In >= 0 && ch.Out >= 0:
+			a, b := &sq[ch.In], &sq[ch.Out]
+			if !s.available(b) {
+				continue
+			}
+			swapPlaces(a, b)
+			if s.fitsCell(b) {
+				ch.Gain, ch.Rated = base-lr.score(), true
+			}
+			swapPlaces(a, b)
+		case ch.In >= 0:
+			a, o := &sq[ch.In], &orig[ch.In]
+			if at := s.PlayerAt(lr.m, o.Col, o.Row); at >= 0 {
+				b := &sq[at]
+				a.Col, a.Row, b.Col, b.Row = b.Col, b.Row, a.Col, a.Row
+				if s.fitsCell(a) && s.fitsCell(b) {
+					ch.Gain, ch.Rated = base-lr.score(), true
+				}
+				a.Col, a.Row, b.Col, b.Row = b.Col, b.Row, a.Col, a.Row
+			} else {
+				col, row := a.Col, a.Row
+				a.Col, a.Row = o.Col, o.Row
+				ch.Gain, ch.Rated = base-lr.score(), true
+				a.Col, a.Row = col, row
+			}
+		}
+	}
+	sort.SliceStable(changes, func(i, j int) bool { return changes[i].Gain > changes[j].Gain })
+	return changes
+}
+
+// lineupReasons returns why every player plays in the lineup or not: the
+// best swap with a player on the other side of the team, as improveLineup
+// would make it (numbers and cells, both on cells that fit).
+func (s *State) lineupReasons(lr *lineupRater) (rs [SquadMax]PlayerReason) {
+	sq := &s.Squads[lr.m]
+	base := lr.score()
+	best := [SquadMax]int{}
+	for i := range rs {
+		rs[i].Alt = -1
+	}
+	for a := 0; a < SquadMax; a++ {
+		sa := &sq[a]
+		if !sa.InTeam() {
+			continue
+		}
+		for b := 0; b < SquadMax; b++ {
+			sb := &sq[b]
+			if sb.Empty() || sb.InTeam() || !s.available(sb) {
+				continue
+			}
+			swapPlaces(sa, sb)
+			if s.fitsCell(sa) && s.fitsCell(sb) {
+				x := lr.score()
+				if rs[a].Alt < 0 || x > best[a] {
+					rs[a].Alt, best[a] = b, x
+				}
+				if rs[b].Alt < 0 || x > best[b] {
+					rs[b].Alt, best[b] = a, x
+				}
+			}
+			swapPlaces(sa, sb)
+		}
+	}
+	for i := range rs {
+		if rs[i].Alt < 0 {
+			continue
+		}
+		if sq[i].InTeam() {
+			rs[i].Margin = base - best[i]
+		} else {
+			rs[i].Margin = best[i] - base
+		}
+	}
+	return rs
+}
+
+// moveChange is the change of slot i, who stays in the team on another
+// cell: one of its own, or a swap with the player of his old cell if that
+// one stood on the new cell. If the swap is among the changes already, it
+// reports false.
+func (s *State) moveChange(m int, orig *[SquadSlots]Slot, i int, changes []LineupChange) (LineupChange, bool) {
+	sl, o := &s.Squads[m][i], &orig[i]
+	j := s.PlayerAt(m, o.Col, o.Row)
+	if j < 0 || !orig[j].InTeam() || orig[j].Col != sl.Col || orig[j].Row != sl.Row {
+		return LineupChange{In: i, Out: -1, With: -1}, true
+	}
+	for _, ch := range changes {
+		if ch.In == j && ch.With == i {
+			return LineupChange{}, false
+		}
+	}
+	return LineupChange{In: i, Out: -1, With: j}, true
 }
 
 // playable tells whether the team of the squad has 11 players who can play.
