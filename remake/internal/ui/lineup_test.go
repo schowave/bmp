@@ -90,10 +90,15 @@ func TestLineupListClicks(t *testing.T) {
 		}
 	}
 	rowY := func(i int) int { return lnRow0Y + 6*i - 2 }
-	// A click on the name does nothing, one on the number takes him out.
+	// A click on the name takes him out, as one on the number does; the next
+	// one brings him back on his cell.
 	step(t, app, click(60, rowY(in)))
-	if s.Squads[0][in].Lineup == 0 {
-		t.Fatal("click on the name changed the lineup")
+	if s.Squads[0][in].Lineup != 0 || !q.vac.Set {
+		t.Fatal("click on the name did not take the player out")
+	}
+	step(t, app, click(60, rowY(in)))
+	if s.Squads[0][in].Lineup == 0 || q.vac.Set {
+		t.Fatal("click on the name did not bring the player back")
 	}
 	step(t, app, click(10, rowY(in)))
 	if s.Squads[0][in].Lineup != 0 || !q.vac.Set {

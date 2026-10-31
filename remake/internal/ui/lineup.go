@@ -239,7 +239,11 @@ func (q *SquadScreen) Update(app *App) error {
 	if !in.Left && !in.Right {
 		return nil
 	}
-	slot, col := q.hover(in)
+	// The whole row takes the clicks, also the name: f_1ecd_1560 seems to
+	// make one click region of the list (6..0xec wide, 0x18 rows, in a
+	// helper the decompiler mangles) and asks only for the row; not checked
+	// against the running original.
+	slot, _ := q.hover(in)
 	if slot < 0 {
 		return nil
 	}
@@ -247,11 +251,6 @@ func (q *SquadScreen) Update(app *App) error {
 		if in.Left && q.md == nil {
 			(&ContractScreen{ss: q.ss}).negotiate(app, slot)
 		}
-		return nil
-	}
-	// The number and the position take the clicks; during a match the whole
-	// row does, so that a click on the name substitutes too (the remake's).
-	if col > 1 && q.md == nil {
 		return nil
 	}
 	if q.md != nil {

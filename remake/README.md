@@ -512,10 +512,13 @@ ties). Deliberate differences:
   draws are not shown, and the results of a cup round only in the last rounds
   of the season (after day 315). All stay changeable in the options screen.
 - During a match the lineup screen leaves out the formation buttons below the
-  tactics board, which do nothing there; the original draws them. A click
-  anywhere in a row of the list substitutes, also on the name; the original
-  takes it only on the number and the position. The player taken out leaves
-  the board at once (not checked against the original).
+  tactics board, which do nothing there; the original draws them. The player
+  taken out leaves the board at once (not checked against the original).
+- A click anywhere in a row of the lineup list takes the player out or puts
+  him in (or substitutes during a match), also on the name. The
+  decompilation of `f_1ecd_1560` seems to make one click region of the whole
+  list; whether the original also takes the name is not checked against the
+  running original.
 - WINTERPAUSE is shown once for each run of days of the winter break between
   two turns. The original also reads a pixel of the screen before it shows
   the flag (`f_3930_043a`), so it may show it less often; this is not
