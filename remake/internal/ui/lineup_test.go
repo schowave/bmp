@@ -566,6 +566,16 @@ func TestLineupOptimalKey(t *testing.T) {
 	if q.picked != -1 {
 		t.Error("a picked player stays picked")
 	}
+	// Update picks the page of the note; any change of the squad, also one
+	// made outside the screen, ends the explanation.
+	if q.notePage == "" || !strings.HasPrefix(q.notePage, q.note[0]) {
+		t.Errorf("page %q of note %q", q.notePage, q.note)
+	}
+	s.Squads[0][0].Fatigue++
+	step(t, app, Input{})
+	if q.opt != nil {
+		t.Error("the explanation outlives a change of the squad")
+	}
 }
 
 // The original's messages keep their band and box.

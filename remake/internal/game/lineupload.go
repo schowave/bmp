@@ -21,8 +21,9 @@ const (
 	loadTurns = 8
 	// loadCost is what a point of Erschöpfung above loadLimit on a turn
 	// day costs, in hundredths of a point of a match: with a match a week
-	// and the intensity of the start, a player at 130 who plays costs 3,
-	// one at 135 costs 10, and in a week with two matches 11 and 12.
+	// and the intensity of the start, a player at 130 who plays costs 7,
+	// one at 135 costs 12, and in a week with two matches 12 and 14 (a
+	// player whose Kondition beats his Technik 3, 10, 11 and 12).
 	loadCost = 0.2
 )
 
@@ -30,7 +31,7 @@ const (
 // hundredths of a point: 0 for one who is not tired.
 func (s *State) loadCosts(m int) (costs [SquadMax]int) {
 	mg := s.Managers[m]
-	matches := s.loadMatches(m)
+	turns := s.loadTurns(m)
 	for i := 0; i < SquadMax; i++ {
 		sl := &s.Squads[m][i]
 		if sl.Empty() {
@@ -39,16 +40,17 @@ func (s *State) loadCosts(m int) (costs [SquadMax]int) {
 		p := &s.Persons[sl.Person]
 		add := float64(9 - boolInt(p.Skill[0] > p.Skill[1]))
 		play, rest := float64(sl.Fatigue), float64(sl.Fatigue)
-		excess := 0.0
-		for k, t := range matches {
+		excess, first := 0.0, true
+		for _, t := range turns {
 			if t.match {
 				play += add
-				if k > 0 {
+				if !first {
 					rest += add
 				}
+				first = false
 			}
-			play = trainingLoad(play, mg.Intensity, t.day)
-			rest = trainingLoad(rest, mg.Intensity, t.day)
+			play = s.trainingLoad(play, mg.Intensity, t.day)
+			rest = s.trainingLoad(rest, mg.Intensity, t.day)
 			excess += max(play-loadLimit, 0) - max(rest-loadLimit, 0)
 		}
 		costs[i] = int(math.Round(excess * loadCost))
@@ -63,24 +65,22 @@ type loadTurn struct {
 	day   int
 }
 
-// loadMatches returns the next turn days of manager m, from the one of the
-// next match on: the event of today if it brings him a match, else the next
-// with a match of his league (the cups to come are not known). It walks the
-// days as trainingValue does.
-func (s *State) loadMatches(m int) []loadTurn {
+// loadTurns returns the next turn days of manager m up to loadTurns from the
+// one of the next match on: the event of today if it brings him a match,
+// else the next with a match of his league (the cups to come are not known).
+// The turn days before that match count too, for the training they bring.
+func (s *State) loadTurns(m int) []loadTurn {
 	l := s.Managers[m].League
 	_, _, today := s.NextOpponent(m)
 	var turns []loadTurn
-	day := s.Day
-	for e := s.Event; e < len(s.Events) && len(turns) < loadTurns; e++ {
+	day, n := s.Day, 0
+	for e := s.Event; e < len(s.Events) && n < loadTurns; e++ {
 		match := s.Events[e]&(1<<l) != 0 || (e == s.Event && today)
-		for day++; day%7 != 0 && (day-4)%7 != 0; day++ {
-		}
-		if day > LastSeasonDay {
+		if day = nextTurnDay(day); day > LastSeasonDay {
 			break
 		}
-		if len(turns) == 0 && !match {
-			continue
+		if match || n > 0 {
+			n++
 		}
 		turns = append(turns, loadTurn{match: match, day: day})
 	}
@@ -89,10 +89,12 @@ func (s *State) loadMatches(m int) []loadTurn {
 
 // trainingLoad is the Erschöpfung f after the training of a turn day on
 // day with intensity in (develop), with the means of the dice and without
-// the upper bound.
-func trainingLoad(f float64, in, day int) float64 {
-	if day > 130 && day < 207 && in < 6 {
-		in = 6 // the winter break (winterBreak)
+// the upper bound: in the winter break the intensity is at least 6 and, but
+// on level 2, the training of each of the three skills adds 0 to 2.
+func (s *State) trainingLoad(f float64, in, day int) float64 {
+	winter := winterDay(day)
+	if winter && in < 6 {
+		in = 6
 	}
 	if f > 50 {
 		f -= 5
@@ -100,6 +102,9 @@ func trainingLoad(f float64, in, day int) float64 {
 	f += float64(in-5) * 2
 	if f > 130 && in < 6 {
 		f -= 2
+	}
+	if winter && s.Level != 2 {
+		f += 3
 	}
 	return math.Max(60, f)
 }

@@ -54,7 +54,8 @@ func gainText(ch game.LineupChange) string {
 }
 
 // changeNote names a change of the optimal lineup: "MÜLLER FÜR MEIER +0,06",
-// "HOFF TAUSCHT MIT KRAUS +0,05", "HOFF UMGESTELLT +0,03" or "MEIER RAUS".
+// "HOFF TAUSCHT MIT KRAUS +0,05", "HOFF UMGESTELLT +0,03", "KRAUS NEU" (into
+// a team that had no 11 players) or "MEIER RAUS".
 func changeNote(s *game.State, mi int, ch game.LineupChange) string {
 	name := func(i int) string { return s.Persons[s.Squads[mi][i].Person].Name }
 	switch {
@@ -62,27 +63,39 @@ func changeNote(s *game.State, mi int, ch game.LineupChange) string {
 		return name(ch.Out) + " RAUS"
 	case ch.With >= 0:
 		return name(ch.In) + " TAUSCHT MIT " + name(ch.With) + gainText(ch)
-	case ch.Out < 0:
+	case ch.Moved:
 		return name(ch.In) + " UMGESTELLT" + gainText(ch)
+	case ch.Out < 0:
+		return name(ch.In) + " NEU"
 	}
 	return name(ch.In) + " FÜR " + name(ch.Out) + gainText(ch)
 }
 
+// absence is why the player of sl cannot play today, VERLETZT or GESPERRT,
+// or "".
+func absence(s *game.State, sl *game.Slot) string {
+	switch {
+	case sl.Status&3 == 2:
+		return "VERLETZT"
+	case sl.Status&3 == 1 && !s.CupDay:
+		return "GESPERRT"
+	}
+	return ""
+}
+
 // changeHint is the footer for slot i after the lineup key: why the player
 // came in, went out or moved, "FÜR MEIER +0,06 (ERSCH. 138)", or for one it
-// left alone why he plays or not (reasonHint). A move worth +0,00 helps only with the others; a
-// change that cannot be undone alone has no value.
+// left alone why he plays or not (reasonHint). A move worth +0,00 helps only
+// with the others; a change that cannot be undone alone has no value.
 func changeHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
 	sq := &s.Squads[mi]
 	name := func(j int) string { return s.Persons[sq[j].Person].Name }
 	// why is the value of the change and what speaks against the player of
 	// slot j.
 	why := func(j int, ch game.LineupChange) string {
-		switch {
-		case sq[j].Status&3 == 2:
-			return " (VERLETZT)"
-		case sq[j].Status&3 == 1 && !s.CupDay:
-			return " (GESPERRT)"
+		switch a := absence(s, &sq[j]); {
+		case a != "":
+			return " (" + a + ")"
 		case res.Load[j] > 0:
 			return gainText(ch) + " (ERSCH. " + itoa(sq[j].Fatigue) + ")"
 		}
@@ -96,8 +109,10 @@ func changeHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
 			return "TAUSCHT MIT " + name(ch.With) + gainText(ch)
 		case ch.With == i:
 			return "TAUSCHT MIT " + name(ch.In) + gainText(ch)
-		case ch.In == i:
+		case ch.In == i && ch.Moved:
 			return "UMGESTELLT" + gainText(ch)
+		case ch.In == i:
+			return "NEU IM TEAM"
 		case ch.Out == i && ch.In >= 0:
 			return "RAUS, " + name(ch.In) + " SPIELT" + why(i, ch)
 		case ch.Out == i:
@@ -119,11 +134,9 @@ func reasonHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
 	if res.Load[i] > 0 {
 		tired = " (ERSCH. " + itoa(sl.Fatigue) + ")"
 	}
-	switch {
-	case sl.Status&3 == 2:
-		return "FEHLT: VERLETZT"
-	case sl.Status&3 == 1 && !s.CupDay:
-		return "FEHLT: GESPERRT"
+	switch a := absence(s, sl); {
+	case a != "":
+		return "FEHLT: " + a
 	case sl.InTeam() && r.Alt < 0:
 		return "SPIELT, KEIN ERSATZ" + tired
 	case r.Alt < 0:

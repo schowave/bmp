@@ -297,9 +297,12 @@ his training does little and an injury in training gets likelier. The load
 plays the next eight turn days of the calendar with the means of the dice,
 once with the player in today's match and once without, and counts how far
 the first runs above 135 more than the second, at 0,002 points a point and
-day: at Erschöpfung 130 a player costs 0,03 points with a match a week and
-0,11 in a week with two, and less before the winter break or at the end of
-the season. The rating in the note does not count the load, so it can be
+day: at Erschöpfung 130 a player costs 0,07 points with a match a week and
+0,12 in a week with two (0,03 and 0,11 if his Kondition beats his Technik),
+and less before the winter break or at the end of the season. The turn days
+before a match that is not today count with their training, and in the
+winter break the training adds about 3 a turn day to the Erschöpfung, but on
+level 2. The rating in the note does not count the load, so it can be
 lower than before when a tired player rests.
 
 - With a match today the rating is against the next opponent in his venue:
@@ -324,14 +327,19 @@ of the training screen, below the table of the stadium screen, and in the
 middle of the main menu until the turn ends. The lineup note gives the points
 with a decimal comma (`OPTIMAL 1,13 +0,08`): the rating of the new lineup and
 its gain, the two changes worth most (`MÜLLER FÜR MEIER +0,06`, `HOFF TAUSCHT
-MIT KRAUS +0,04`, `KRAUS UMGESTELLT +0,03`, or `AUFSTELLUNG BLEIBT`), the
+MIT KRAUS +0,04`, `KRAUS UMGESTELLT +0,03`, `KRAUS NEU` into a team that
+had no 11 players, or `AUFSTELLUNG BLEIBT`), the
 opponent and the ratings of the automatic lineups of the three formations
 (`STAND.`: 4-4-2, 3-5-2, 3-4-3), against the same opponent or clubs. What a
 change is worth is the score of the new lineup less the score with that change
 alone undone, the load counted; a change that cannot be undone alone (a
-forward who plays for a defender in a new formation) has no value. Until the lineup is changed by hand, the footer of
-the number, position or name of a player the key changed says why (`FÜR MEIER +0,06 (ERSCH. 138)`; a move worth
-`+0,00` helps only together with the others). Every other player says why
+forward who plays for a defender in a new formation, or a player new in a
+team that had no 11 players) has no value. Until the squad changes by hand
+(also by a sale or a contract in the contract talk), the footer of the
+number, position or name of a player the key changed says why (`FÜR MEIER
++0,06 (ERSCH. 138)`; a move worth `+0,00` helps only together with the
+others). A second press that finds nothing to change keeps the note and the
+explanation of the first. Every other player says why
 he plays or not, against the best swap with the other side of the team:
 `SPIELT, +0,05 VOR POVLSEN` (the lineup with him is worth 0,05 points more
 than with the best one who could come in for him), `BANK, -0,04 STATT ZORC

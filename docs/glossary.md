@@ -71,6 +71,12 @@ Whether a player's form is falling, constant or rising (value 30..68).
 **Erschöpfung**:
 Fatigue of a player, 50..150, normally 60..100.
 
+**Load**:
+What the remake's optimal lineup counts against letting a tired player play
+today: how far his Erschöpfung runs above 135 over the next turn days if he
+plays, more than if he rests (`remake/internal/game/lineupload.go`). Not a
+rule of the original.
+
 **Loan** (Leihe):
 A player borrowed from another club; the slot records the club he came from.
 

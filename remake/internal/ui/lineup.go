@@ -106,12 +106,15 @@ type SquadScreen struct {
 	// note is what the key o did, in the footer while nothing else is
 	// shown there: on pages of as many of its parts as fit (notePages).
 	note []string
-	// ticks counts the updates, to turn the pages of the note.
-	ticks int
-	// opt is the result of the key o until the lineup is changed by hand:
-	// the footer of a player's number, position and name says why he
-	// plays or not (changeHint).
-	opt *game.OptimalLineup
+	// ticks counts the updates, to turn the pages of the note, and
+	// notePage is the page of the note shown now (notePages).
+	ticks    int
+	notePage string
+	// opt is the result of the key o until the squad differs from optSquad,
+	// the one the key left: the footer of a player's number, position and
+	// name says why he plays or not (changeHint).
+	opt      *game.OptimalLineup
+	optSquad [game.SquadSlots]game.Slot
 }
 
 // NewSquadScreen creates the lineup screen (team group, first item).
@@ -197,7 +200,22 @@ func (q *SquadScreen) boardCell(in *Input) (col, row int) {
 func lnIconHit(in *Input, x, y int) bool { return in.Clicked(x, y, ButtonW, ButtonH) }
 
 func (q *SquadScreen) Update(app *App) error {
+	err := q.update(app)
+	// Any change of the squad by hand, here or in a screen opened from here
+	// (a sale in the contract talk), ends the explanation of the key o.
+	if q.opt != nil && q.ss.S.Squads[q.mi()] != q.optSquad {
+		q.opt = nil
+	}
+	// Beside the board the note turns its pages every 2.5 seconds.
 	q.ticks++
+	q.notePage = ""
+	if pages := notePages(app.Gfx, FontSmall, q.x1()-lnListX0, q.note...); len(pages) > 0 {
+		q.notePage = pages[q.ticks/(TPS*5/2)%len(pages)]
+	}
+	return err
+}
+
+func (q *SquadScreen) update(app *App) error {
 	s := q.ss.S
 	mi := q.mi()
 	m := s.Managers[mi]
@@ -242,6 +260,7 @@ func (q *SquadScreen) Update(app *App) error {
 			if res := q.ss.S.OptimizeLineup(q.mi()); q.opt == nil || len(res.Changes) > 0 {
 				q.note, q.opt = lineupNote(q.ss.S, q.mi(), res), &res
 			}
+			q.optSquad = q.ss.S.Squads[q.mi()]
 			q.picked = -1
 			q.vac = game.BoardCell{}
 			return nil
@@ -250,10 +269,8 @@ func (q *SquadScreen) Update(app *App) error {
 	if !in.Left && !in.Right {
 		return nil
 	}
-	// The whole row takes the clicks, also the name: f_1ecd_1560 seems to
-	// make one click region of the list (6..0xec wide, 0x18 rows, in a
-	// helper the decompiler mangles) and asks only for the row; not checked
-	// against the running original.
+	// The whole row takes the clicks, also the name (spec_players.md §4.2,
+	// not checked against the running original).
 	slot, _ := q.hover(in)
 	if slot < 0 {
 		return nil
@@ -278,8 +295,6 @@ func (q *SquadScreen) Update(app *App) error {
 	}
 	if le, ok := err.(game.LineupError); ok {
 		app.Push(newLineupToast(le))
-	} else {
-		q.opt = nil
 	}
 	return nil
 }
@@ -296,7 +311,7 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 	for f := 0; f < 3 && q.formationButtons(); f++ {
 		if lnIconHit(in, f*60+4, lnFormY) {
 			s.SetFormation(mi, f)
-			q.picked, q.opt = -1, nil
+			q.picked = -1
 			q.vac = game.BoardCell{}
 			return true
 		}
@@ -316,7 +331,7 @@ func (q *SquadScreen) updateBoard(app *App) bool {
 		q.picked = at
 	default:
 		s.MoveOnBoard(mi, q.picked, q.cursorCol, q.cursorRow)
-		q.picked, q.opt = -1, nil
+		q.picked = -1
 	}
 	return true
 }
@@ -416,9 +431,8 @@ func (q *SquadScreen) Draw(app *App, dst *ebiten.Image) {
 		}
 		q.drawRow(g, dst, i, y, i == bar, barX0, barX1)
 	}
-	if pages := notePages(g, FontSmall, q.x1()-lnListX0, q.note...); footer == "" && len(pages) > 0 {
-		// Beside the board the note turns its pages every 2.5 seconds.
-		footer = pages[q.ticks/(TPS*5/2)%len(pages)]
+	if footer == "" {
+		footer = q.notePage
 	}
 	g.TextMid(dst, FontSmall, lnListX0, q.x1(), lnFooterY, footer, ColLight, NoShadow)
 

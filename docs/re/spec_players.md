@@ -468,6 +468,11 @@ players 1..n in slot order (reserves keep their numbers).
   (0x56ee-11) Reservespieler!".
 - During a match: substitution only if `F:0x5396[m*2 + (GK?0:1)] != 0` else "Keine
   Auswechslung mehr möglich"; "Spieler ist nicht aufgestellt" for players not on the pitch.
+- Clicks in the list: the whole row takes them, not only the number and the
+  position. f_1ecd_1560 seems to make one click region of the list (x 6..0xec,
+  0x18 rows, `FUN_3e3a_0fdf(6, 0x12, …, 0x18, 0xec, 0xb0)`, a helper the
+  decompiler mangles) and asks the hit test only for the row. UNCERTAIN: not
+  checked against the running original.
 - Any manual change while auto lineup is on (D:0x79e[2m] > 1) → message
   "Auto-Aufstellung ist deaktiviert !" and D:0x79e[2m] = 1 (f_1ecd_14c7).
 

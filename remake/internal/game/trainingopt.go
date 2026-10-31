@@ -177,8 +177,7 @@ func (s *State) trainingValue(m int, p TrainingPlan, runs, steps int) int {
 					c.playFatigue(&c.Squads[m][i])
 				}
 			}
-			for c.Day++; c.Day%7 != 0 && (c.Day-4)%7 != 0; c.Day++ {
-			}
+			c.Day = nextTurnDay(c.Day)
 			if c.Day > LastSeasonDay {
 				break
 			}

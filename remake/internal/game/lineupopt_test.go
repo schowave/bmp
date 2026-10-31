@@ -78,8 +78,8 @@ func TestOptimizeLineupNotWorse(t *testing.T) {
 		if res.After < res.Before {
 			t.Errorf("team %d: %d after, %d before", team, res.After, res.Before)
 		}
-		// A new lineup must gain lineupMinGain against the old one too.
-		if res.After != res.Before && res.After < res.Before+lineupMinGain {
+		// A new lineup must gain LineupMinGain against the old one too.
+		if res.After != res.Before && res.After < res.Before+LineupMinGain {
 			t.Errorf("team %d: %d after, %d before: less than the minimum gain", team, res.After, res.Before)
 		}
 		for f, a := range res.Auto {
@@ -226,7 +226,7 @@ func TestOptimizeLineupMovesToFreeCells(t *testing.T) {
 				if !s.fitsCell(sl) {
 					continue
 				}
-				if x := s.LineupRating(0); x >= res.After+lineupMinGain {
+				if x := s.LineupRating(0); x >= res.After+LineupMinGain {
 					t.Errorf("slot %d to %d,%d: rating %d > %d", i, c, r, x, res.After)
 				}
 			}
@@ -452,7 +452,7 @@ func TestOptimizeLineupRestsTiredPlayers(t *testing.T) {
 		for _, ch := range res.Changes {
 			if ch.Out == tired {
 				found = true
-				if ch.In < 0 || !ch.Rated || ch.Gain < lineupMinGain {
+				if ch.In < 0 || !ch.Rated || ch.Gain < LineupMinGain {
 					t.Errorf("rest of the tired player: %+v", ch)
 				}
 			}
@@ -531,6 +531,46 @@ func TestLoadCosts(t *testing.T) {
 		t.Errorf("at the season end he costs %d", c)
 	}
 	t.Logf("weekly %d, short week %d, before a break %d", weekly, short, last)
+
+	// The training before a match that is not today lets him recover.
+	if later := load(0, m, 0, m, 0, m, 0, m, 0); later >= weekly {
+		t.Errorf("match a turn later costs %d, today %d", later, weekly)
+	}
+	// In the winter break the training adds to the Erschöpfung, but on
+	// level 2.
+	winter := func(level int) int {
+		s.Level = level
+		s.Events = [len(s.Events)]byte{}
+		copy(s.Events[:], []byte{m, 0, m, 0, m, 0, m, 0})
+		s.Event, s.Day = 0, 140
+		return s.loadCosts(0)[i]
+	}
+	if w2, w3 := winter(2), winter(3); w3 <= w2 {
+		t.Errorf("winter break: level 3 costs %d, level 2 %d", w3, w2)
+	}
+}
+
+// A player who comes into a team that had no 11 players is new, not moved,
+// and has no value.
+func TestOptimizeLineupNewcomer(t *testing.T) {
+	s := lineupState(t)
+	out := findLineup(s, 0, func(sl *Slot) bool { return sl.InTeam() && s.Persons[sl.Person].Position() != PosKeeper })
+	s.Squads[0][out].Lineup = 0
+	s.renumber(0)
+	res := s.OptimizeLineup(0)
+	checkLineup(t, s)
+	found := false
+	for _, ch := range res.Changes {
+		if ch.In >= 0 && ch.Out < 0 && !ch.Moved {
+			found = true
+			if ch.Rated || ch.With >= 0 {
+				t.Errorf("newcomer %+v", ch)
+			}
+		}
+	}
+	if !found {
+		t.Errorf("no newcomer in %+v", res.Changes)
+	}
 }
 
 // Every player of the team who has a substitute is worth more than him (the
@@ -550,12 +590,12 @@ func TestOptimizeLineupReasons(t *testing.T) {
 				t.Errorf("slot %d cannot play but has %+v", i, r)
 			}
 		case sl.InTeam():
-			if r.Alt >= 0 && (s.Squads[0][r.Alt].InTeam() || r.Margin <= -lineupMinGain) {
+			if r.Alt >= 0 && (s.Squads[0][r.Alt].InTeam() || r.Margin <= -LineupMinGain) {
 				t.Errorf("slot %d in the team: %+v", i, r)
 			}
 			n++
 		default:
-			if r.Alt < 0 || !s.Squads[0][r.Alt].InTeam() || r.Margin >= lineupMinGain {
+			if r.Alt < 0 || !s.Squads[0][r.Alt].InTeam() || r.Margin >= LineupMinGain {
 				t.Errorf("slot %d outside the team: %+v", i, r)
 			}
 		}

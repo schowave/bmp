@@ -5,7 +5,17 @@ package game
 var trainingMatrix = [4][3]int{{80, 5, 15}, {30, 40, 30}, {20, 25, 55}, {5, 65, 30}}
 
 // winterBreak reports the days of the winter break (window of the spec).
-func (s *State) winterBreak() bool { return s.Day > 130 && s.Day < 207 }
+func (s *State) winterBreak() bool { return winterDay(s.Day) }
+
+// winterDay tells whether day lies in the winter break.
+func winterDay(day int) bool { return day > 130 && day < 207 }
+
+// nextTurnDay is the next day after day with a turn (twice a week).
+func nextTurnDay(day int) int {
+	for day++; day%7 != 0 && (day-4)%7 != 0; day++ {
+	}
+	return day
+}
 
 // injuryCountdown counts down injuries once a week and clears the status
 // when a player is fit again (f_0cb5_2b88).

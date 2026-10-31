@@ -43,8 +43,8 @@ type lineupRater struct {
 	// load is what playing today costs each player (loadCosts); score
 	// counts it, rate does not.
 	load [SquadMax]int
-	// memo holds the points of the strength values already rated: many
-	// lineups of a search give the same.
+	// memo holds the points of the strength values already rated
+	// (refPoints).
 	memo map[[9]int]float64
 }
 
@@ -103,7 +103,7 @@ func (lr *lineupRater) rate() int {
 	sum := 0.0
 	for k := 0; k < lr.samples; k++ {
 		r := Rand{Seed: ratingSeed + uint32(k)}
-		sum += lr.points(lr.s.lineupValues(lr.m, true, &r), lr.refs)
+		sum += lr.refPoints(lr.s.lineupValues(lr.m, true, &r))
 	}
 	return int(math.Round(sum / float64(lr.samples) * 100))
 }
@@ -115,7 +115,7 @@ const ratingSeed = 20240301
 // points per match in hundredths (2 for a win, 1 for a draw), the mean over
 // the clubs and venues of the rater.
 func (lr *lineupRater) ofValues(v lineupValues) int {
-	return lr.ofValuesAgainst(v, lr.refs)
+	return int(math.Round(lr.refPoints(v) * 100))
 }
 
 // ofValuesAgainst is ofValues against the clubs refs instead of those of
@@ -124,31 +124,27 @@ func (lr *lineupRater) ofValuesAgainst(v lineupValues, refs []Team) int {
 	return int(math.Round(lr.points(v, refs) * 100))
 }
 
-// points is the expected points per match of the lineup with the strength
-// values v against the clubs refs.
-func (lr *lineupRater) points(v lineupValues, refs []Team) float64 {
+// refPoints is points against the clubs of the rater, kept in the memo by
+// the strength values: many lineups of a search give the same.
+func (lr *lineupRater) refPoints(v lineupValues) float64 {
 	var key [9]int
 	copy(key[0:3], v.strength[:])
 	copy(key[3:6], v.base[:])
 	copy(key[6:9], v.extra[:])
-	memo := len(refs) == len(lr.refs) && (len(refs) == 0 || &refs[0] == &lr.refs[0])
-	if memo {
-		if x, ok := lr.memo[key]; ok {
-			return x
-		}
+	if x, ok := lr.memo[key]; ok {
+		return x
 	}
-	x := lr.pointsOf(v, refs)
-	if memo {
-		if lr.memo == nil {
-			lr.memo = map[[9]int]float64{}
-		}
-		lr.memo[key] = x
+	if lr.memo == nil {
+		lr.memo = map[[9]int]float64{}
 	}
+	x := lr.points(v, lr.refs)
+	lr.memo[key] = x
 	return x
 }
 
-// pointsOf is points without the memo.
-func (lr *lineupRater) pointsOf(v lineupValues, refs []Team) float64 {
+// points is the expected points per match of the lineup with the strength
+// values v against the clubs refs.
+func (lr *lineupRater) points(v lineupValues, refs []Team) float64 {
 	us := Team{Mood: lr.mood, Strength: v.strength, Base: v.base, Extra: v.extra}
 	sum := 0.0
 	for i := range refs {
