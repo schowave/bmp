@@ -639,3 +639,36 @@ func changedSlot(res *game.OptimalLineup, i int) bool {
 	}
 	return false
 }
+
+// A player as good for the match as another but not as strong says so with
+// both strengths and the opponent: "GLEICH GUT (84/65, EGAL GEGEN X)".
+func TestReasonHintSameOutcomeShowsStrengths(t *testing.T) {
+	_, s, _ := lineupApp(t)
+	var a, b = -1, -1
+	for i := range s.Squads[0] {
+		if sl := &s.Squads[0][i]; !sl.Empty() && sl.InTeam() && a < 0 {
+			a = i
+		} else if !sl.Empty() && !sl.InTeam() && b < 0 {
+			b = i
+		}
+	}
+	s.Squads[0][a].Skill = [3]int{99, 99, 54}
+	s.Squads[0][b].Skill = [3]int{70, 77, 50}
+	res := &game.OptimalLineup{Opponent: 3}
+	res.Reasons[a] = game.PlayerReason{Alt: b, Margin: 1}
+	res.Reasons[b] = game.PlayerReason{Alt: a, Margin: -2}
+	name := func(i int) string { return s.Persons[s.Squads[0][i].Person].Name }
+	opp := " (84/65, EGAL GEGEN " + s.Teams[3].Name + ")"
+	if got, want := reasonHint(s, 0, res, a), "SPIELT, "+name(b)+" GLEICH GUT"+opp; got != want {
+		t.Errorf("player of the team: %q, want %q", got, want)
+	}
+	opp = " (65/84, EGAL GEGEN " + s.Teams[3].Name + ")"
+	if got, want := reasonHint(s, 0, res, b), "BANK, GLEICH GUT WIE "+name(a)+opp; got != want {
+		t.Errorf("player on the bench: %q, want %q", got, want)
+	}
+	res.Opponent = -1
+	s.Squads[0][b].Skill = s.Squads[0][a].Skill
+	if got, want := reasonHint(s, 0, res, a), "SPIELT, "+name(b)+" GLEICH GUT"; got != want {
+		t.Errorf("equally strong: %q, want %q", got, want)
+	}
+}

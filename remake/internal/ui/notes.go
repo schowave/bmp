@@ -130,7 +130,8 @@ func changeHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
 // "SPIELT, +0,05 VOR POVLSEN" against the best one who could come in for
 // him, "BANK, -0,04 STATT ZORC (ERSCH. 140)" against the one he would best
 // replace, "FEHLT: VERLETZT" for one who cannot play. A difference below
-// game.LineupMinGain, for which the key changes nothing, is "GLEICH GUT".
+// game.LineupMinGain, for which the key changes nothing, is "GLEICH GUT",
+// with the strengths if they differ (sameOutcome).
 func reasonHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
 	sl := &s.Squads[mi][i]
 	r := res.Reasons[i]
@@ -146,16 +147,34 @@ func reasonHint(s *game.State, mi int, res *game.OptimalLineup, i int) string {
 	case r.Alt < 0:
 		return "BANK, KEIN PLATZ FÜR IHN"
 	}
-	alt := s.Persons[s.Squads[mi][r.Alt].Person].Name
+	altSlot := &s.Squads[mi][r.Alt]
+	alt := s.Persons[altSlot.Person].Name
 	switch {
 	case r.Margin > -game.LineupMinGain && r.Margin < game.LineupMinGain && sl.InTeam():
-		return "SPIELT, " + alt + " GLEICH GUT" + tired
+		return "SPIELT, " + alt + " GLEICH GUT" + sameOutcome(s, res, sl, altSlot) + tired
 	case r.Margin > -game.LineupMinGain && r.Margin < game.LineupMinGain:
-		return "BANK, GLEICH GUT WIE " + alt + tired
+		return "BANK, GLEICH GUT WIE " + alt + sameOutcome(s, res, sl, altSlot) + tired
 	case sl.InTeam():
 		return "SPIELT, " + signedDecimal(r.Margin, 2) + " VOR " + alt + tired
 	}
 	return "BANK, " + signedDecimal(r.Margin, 2) + " STATT " + alt + tired
+}
+
+// sameOutcome says for two players who are as good for the match that they
+// are not equally strong, " (84/65, EGAL GEGEN X)": the strengths of the
+// first and the second and the opponent against whom it makes no difference
+// (the clubs of the league when the lineup was rated against them). A club
+// far ahead of its opponent wins as often with either. "" if they are as
+// strong.
+func sameOutcome(s *game.State, res *game.OptimalLineup, a, b *game.Slot) string {
+	if a.Strength() == b.Strength() {
+		return ""
+	}
+	vs := "IN DER LIGA"
+	if res.Opponent >= 0 {
+		vs = "GEGEN " + s.Teams[res.Opponent].Name
+	}
+	return " (" + itoa(a.Strength()) + "/" + itoa(b.Strength()) + ", EGAL " + vs + ")"
 }
 
 // trainingNote is the note of the training key: the strength with the new
