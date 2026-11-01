@@ -699,3 +699,48 @@ func TestPreferStronger(t *testing.T) {
 		t.Error("a second round changed the lineup")
 	}
 }
+
+// A player out of his line gives his place to one of the bench whose position
+// the line is, if that costs the score less than LineupMinGain, and keeps it
+// if the other is much weaker.
+func TestPreferNatural(t *testing.T) {
+	s := lineupState(t)
+	a, b := -1, -1
+	for i := 0; i < SquadMax; i++ {
+		sl := &s.Squads[0][i]
+		if sl.Empty() || s.Persons[sl.Person].Position() != PosMidfield {
+			continue
+		}
+		switch {
+		case sl.Lineup >= 1 && sl.Lineup <= 11 && a < 0:
+			a = i
+		case (sl.Lineup == 0 || sl.Lineup > 11) && s.available(sl) && b < 0:
+			b = i
+		}
+	}
+	if a < 0 || b < 0 {
+		t.Fatal("no midfielder in the team or on the bench")
+	}
+	sa, sb := &s.Squads[0][a], &s.Squads[0][b]
+	sb.Tendency, sb.Fatigue, sa.Fatigue = sa.Tendency, 80, 80
+	s.Persons[sb.Person].Side, s.Persons[sb.Person].Pos = s.Persons[sa.Person].Side, s.Persons[sa.Person].Pos
+	// a is a defender in a cell of the midfield.
+	s.Persons[sa.Person].Pos = 30
+	plays := func(sl *Slot) bool { return sl.Lineup >= 1 && sl.Lineup <= 11 }
+	if s.natural(sa) {
+		t.Fatal("the defender in the midfield is natural")
+	}
+
+	sa.Skill, sb.Skill = [3]int{99, 99, 99}, [3]int{1, 1, 1}
+	s.preferNatural(s.newRater(0))
+	if !plays(sa) || plays(sb) {
+		t.Errorf("a much weaker player took the place: %v %v", plays(sa), plays(sb))
+	}
+	sa.Skill, sb.Skill = [3]int{60, 60, 60}, [3]int{60, 60, 60}
+	if !s.preferNatural(s.newRater(0)) || plays(sa) || !plays(sb) {
+		t.Errorf("the natural player did not take the place: %v %v", plays(sa), plays(sb))
+	}
+	if s.preferNatural(s.newRater(0)) {
+		t.Error("a second round changed the lineup")
+	}
+}

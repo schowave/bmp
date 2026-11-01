@@ -130,7 +130,7 @@ func (s *State) OptimizeLineup(m int) OptimalLineup {
 		*sq = orig
 		mg.AutoLineup = mode
 		res.After, res.Manual = res.Before, false
-		if s.preferStronger(lr) {
+		if s.breakTies(lr) {
 			res.After, res.Manual = lr.rate(), true
 			mg.AutoLineup = 1
 			res.Changes = s.lineupChanges(lr, &orig)
@@ -138,7 +138,7 @@ func (s *State) OptimizeLineup(m int) OptimalLineup {
 		res.Reasons = s.lineupReasons(lr)
 		return res
 	}
-	if s.preferStronger(lr) {
+	if s.breakTies(lr) {
 		res.Manual = true
 	}
 	res.After = lr.rate()
@@ -242,6 +242,61 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 			swapPlaces(&sq[step.a], &sq[step.b])
 		}
 		rating = best
+	}
+}
+
+// breakTies decides what the rating leaves open: first the players of their
+// own line (preferNatural), then the stronger (preferStronger). It reports
+// whether it changed the lineup.
+func (s *State) breakTies(lr *lineupRater) bool {
+	natural := s.preferNatural(lr)
+	return s.preferStronger(lr) || natural
+}
+
+// natural tells whether the player of sl stands in the line of his
+// position: the goalkeeper in goal, a field player on a cell of the line
+// that is his.
+func (s *State) natural(sl *Slot) bool {
+	pos := s.Persons[sl.Person].Position()
+	if pos == PosKeeper || sl.Row == 7 {
+		return pos == PosKeeper && sl.Row == 7
+	}
+	return pos == lineOfRow[7-sl.Row]+1
+}
+
+// preferNatural puts a player of the bench whose position is the line in the
+// place of a field player who stands out of his line, as long as the score
+// falls by less than LineupMinGain in all: the rating does not know who
+// scores and who gets the cards, which the engine picks by the position.
+// Every swap leaves one player less out of his line, so it stops. It reports
+// whether it changed the lineup.
+func (s *State) preferNatural(lr *lineupRater) (changed bool) {
+	sq := &s.Squads[lr.m]
+	floor := lr.score() - LineupMinGain + 1
+	for {
+		a, b, best := -1, -1, floor-1
+		for i := 0; i < SquadMax; i++ {
+			if !sq[i].InTeam() || s.natural(&sq[i]) {
+				continue
+			}
+			for j := 0; j < SquadMax; j++ {
+				if !s.swappable(sq, i, j) || sq[j].InTeam() {
+					continue
+				}
+				swapPlaces(&sq[i], &sq[j])
+				if s.natural(&sq[j]) && s.fitsCell(&sq[i]) && s.fitsCell(&sq[j]) {
+					if x := lr.score(); x > best {
+						a, b, best = i, j, x
+					}
+				}
+				swapPlaces(&sq[i], &sq[j])
+			}
+		}
+		if a < 0 {
+			return changed
+		}
+		swapPlaces(&sq[a], &sq[b])
+		changed = true
 	}
 }
 
