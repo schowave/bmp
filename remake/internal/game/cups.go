@@ -76,9 +76,13 @@ func (c *Cups) isUsed(id int) bool {
 }
 
 // qualifyEurope fills the European qualifiers from the final Bundesliga
-// table and the cup holders (f_17c2_0ef2).
-func (s *State) qualifyEurope() {
+// table and the cup holders (f_17c2_0ef2); table lists the clubs of that
+// table best first, nil for the table of the league.
+func (s *State) qualifyEurope(table []int) {
 	c := &s.Cups
+	if len(table) < 2 {
+		table = s.Tables[0][:TeamsPerLeague[0]]
+	}
 	c.Used = nil
 	for k := CupLandesmeister; k < NumCups; k++ {
 		c.Qualified[k] = nil
@@ -87,12 +91,12 @@ func (s *State) qualifyEurope() {
 		c.Qualified[cup] = append(c.Qualified[cup], id)
 		c.Used = append(c.Used, id)
 	}
-	add(CupLandesmeister, s.Tables[0][0])
+	add(CupLandesmeister, table[0])
 	if c.Holder[CupLandesmeister] != 0 {
 		if h := c.Holder[CupLandesmeister] - 1; !c.isUsed(h) {
 			add(CupLandesmeister, h)
 		} else {
-			add(CupLandesmeister, s.Tables[0][1])
+			add(CupLandesmeister, table[1])
 		}
 	}
 	if w := c.Holder[CupDFB] - 1; c.Holder[CupDFB] != 0 && !c.isUsed(w) {
@@ -116,8 +120,8 @@ func (s *State) qualifyEurope() {
 		}
 	}
 	added := 0
-	for i := 1; i < TeamsPerLeague[0] && added < places; i++ {
-		id := s.Tables[0][i]
+	for i := 1; i < len(table) && added < places; i++ {
+		id := table[i]
 		if c.isUsed(id) {
 			continue
 		}

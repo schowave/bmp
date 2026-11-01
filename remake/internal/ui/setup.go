@@ -84,6 +84,11 @@ func NewSeasonSetup(orig, mana *assets.Mana, saveDir string, sn seasons.Season) 
 	s := NewSetup(mana, saveDir)
 	s.orig = orig
 	s.opts.Season, s.opts.Year = sn.ID, sn.Year
+	if prev, err := seasons.Mana(seasons.ForYear(sn.Year - 1).ID); err == nil {
+		for _, c := range prev.Clubs[:game.TeamsPerLeague[0]] {
+			s.opts.PreviousTable = append(s.opts.PreviousTable, game.FromCP437(c.Name))
+		}
+	}
 	return s
 }
 

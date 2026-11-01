@@ -107,7 +107,7 @@ func (s *State) seasonEnd1() {
 		s.sponsorOffers(mi)
 	}
 	s.shuffleIDs()
-	s.qualifyEurope()
+	s.qualifyEurope(nil)
 	s.seasonReport()
 	s.Loop.Phase = PhaseContracts
 	s.Loop.Current = 0

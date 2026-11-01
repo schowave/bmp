@@ -27,7 +27,11 @@ type Options struct {
 	// for the clubs of the original; Year is its first year.
 	Season string
 	Year   int
-	Seed   uint32
+	// PreviousTable names the 1. Liga clubs of the season before a real
+	// season in the order of its final table; they qualify for Europe
+	// (the shuffle of the ids would make the qualifiers random).
+	PreviousTable []string
+	Seed          uint32
 }
 
 // NewManager is a human manager of a new game.
@@ -113,7 +117,7 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	for i := range s.Managers {
 		s.Managers[i].Team = s.teamByName(chosen[i])
 	}
-	s.qualifyEurope()
+	s.qualifyEurope(s.previousTable(opt.PreviousTable))
 	s.clearCupResults()
 	for c := CupLandesmeister; c < NumCups; c++ {
 		s.drawCup(c)
@@ -148,8 +152,22 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 	}
 	s.FirstYear = s.StartYear
 	s.initPersons()
+	var before [NumGerman]string
+	for i := range before {
+		before[i] = s.Teams[i].Name
+	}
 	for mi := range s.Managers {
 		s.initManager(mi, opt.Length, false)
+	}
+	if opt.Season != "" {
+		s.followIdentities(before)
+		s.clearCupResults()
+		for c := CupLandesmeister; c < NumCups; c++ {
+			s.drawCup(c)
+		}
+		for _, m := range s.Managers {
+			m.CupStatus = [4]int{NotInCup, NotInCup, NotInCup, NotInCup}
+		}
 	}
 	s.driftBankRates()
 	s.driftStrengths(10)
@@ -172,6 +190,46 @@ func NewGame(mana *assets.Mana, opt Options) (*State, error) {
 		s.LineupStrength(mi, false)
 	}
 	return s, nil
+}
+
+// previousTable maps the club names of a previous final table to ids; nil
+// without names, so that the table of the league counts.
+func (s *State) previousTable(names []string) []int {
+	var ids []int
+	for _, n := range names {
+		if id := s.teamByName(n); id >= 0 {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
+// followIdentities moves the European qualifiers to the new ids of the clubs
+// that placing the managers moved, so that the European qualifiers of a real season stay
+// the clubs the table of the season before named.
+func (s *State) followIdentities(before [NumGerman]string) {
+	var moved [NumGerman]int
+	for i := range moved {
+		moved[i] = i
+		if s.Teams[i].Name != before[i] {
+			moved[i] = s.teamByName(before[i])
+		}
+	}
+	fix := func(x int) int {
+		if x >= 0 && x < NumGerman && moved[x] >= 0 {
+			return moved[x]
+		}
+		return x
+	}
+	c := &s.Cups
+	for k := range c.Qualified {
+		for i, x := range c.Qualified[k] {
+			c.Qualified[k][i] = fix(x)
+		}
+	}
+	for i, x := range c.Used {
+		c.Used[i] = fix(x)
+	}
 }
 
 func (s *State) teamByName(name string) int {

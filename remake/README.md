@@ -538,6 +538,11 @@ ties). Deliberate differences:
   Amateurliga until 1977/78, Am.-Oberliga until 1993/94, Regionalliga until
   2007/08, then 3. Liga. With the clubs of the original they keep the
   original's names, Zweite Liga and Am.-Oberliga.
+- A real season starts with the European cups of its year: the clubs of the
+  final 1. Liga table of the season before qualify (first the Landesmeister,
+  then the UEFA-Pokal places), not the clubs the shuffle of the ids puts on
+  the first places as in the original. The cup holders stay those of the
+  original's start.
 - Bugs of the match engine that the remake leaves out:
   - In cup matches the original checks the minutes of the chances against
     the person table instead of the chances (`f_0310_12fe`) and draws again
