@@ -744,3 +744,23 @@ func TestPreferNatural(t *testing.T) {
 		t.Error("a second round changed the lineup")
 	}
 }
+
+func TestStrongerStartReplacesKeptLineup(t *testing.T) {
+	var orig [SquadSlots]Slot
+	var tuned [4][SquadSlots]Slot
+	team := func(sq *[SquadSlots]Slot, skill int) {
+		sq[0] = Slot{Person: 1, Lineup: 1, Skill: [3]int{skill, skill, skill}}
+	}
+	team(&orig, 62)
+	team(&tuned[1], 86)
+	team(&tuned[2], 70)
+	if got := stronger(&orig, &tuned, [4]int{0, 100, 100, 0}, 100); got != 1 {
+		t.Errorf("stronger = %d, want 1", got)
+	}
+	if got := stronger(&orig, &tuned, [4]int{0, 99, 100, 0}, 100); got != 2 {
+		t.Errorf("a start that rates worse: stronger = %d, want 2", got)
+	}
+	if got := stronger(&orig, &tuned, [4]int{}, 100); got != -1 {
+		t.Errorf("no start: stronger = %d, want -1", got)
+	}
+}

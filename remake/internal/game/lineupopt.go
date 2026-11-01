@@ -113,18 +113,32 @@ func (s *State) OptimizeLineup(m int) OptimalLineup {
 	*sq = tuned[best]
 	after[best] = s.kickLineup(lr, after[best])
 	tuned[best] = *sq
-	res.Formation, res.Manual = best, true
-	if best == 3 {
-		res.Formation = max(mode-2, 0)
-	}
-	for f := range autos {
-		if tuned[best] == autos[f] {
-			res.Formation, res.Manual = f, false
-			break
+	classify := func(start int) {
+		res.Formation, res.Manual = start, true
+		if start == 3 {
+			res.Formation = max(mode-2, 0)
+		}
+		for f := range autos {
+			if *sq == autos[f] {
+				res.Formation, res.Manual = f, false
+				break
+			}
 		}
 	}
+	classify(best)
 
-	if after[best] < before+LineupMinGain && s.playable(orig[:]) {
+	keep := after[best] < before+LineupMinGain && s.playable(orig[:])
+	if keep {
+		// A start that rates no worse but fields the stronger team is no
+		// change for the sake of a gain: it takes the place of the
+		// manager's lineup.
+		if c := stronger(&orig, &tuned, after, before); c >= 0 {
+			*sq = tuned[c]
+			classify(c)
+			after[best], keep = after[c], false
+		}
+	}
+	if keep {
 		// What the manager had stays unless the new lineup gains
 		// LineupMinGain, as every single change must, if it can be played.
 		*sq = orig
@@ -340,6 +354,30 @@ func (s *State) preferStronger(lr *lineupRater) (changed bool) {
 		swapPlaces(&sq[a], &sq[b])
 		changed = true
 	}
+}
+
+// stronger returns the start whose tuned lineup rates at least as well as
+// the manager's (before) and fields a team of more strength, less fatigue
+// counted, than orig, the most so; -1 if none does.
+func stronger(orig *[SquadSlots]Slot, tuned *[4][SquadSlots]Slot, after [4]int, before int) int {
+	weight := func(sq *[SquadSlots]Slot) (w int) {
+		for i := range sq {
+			if sq[i].InTeam() {
+				w += sq[i].Strength()*60 - sq[i].Fatigue
+			}
+		}
+		return w
+	}
+	best, top := -1, weight(orig)
+	for f := range tuned {
+		if after[f] == 0 || after[f] < before {
+			continue
+		}
+		if w := weight(&tuned[f]); w > top {
+			best, top = f, w
+		}
+	}
+	return best
 }
 
 // lineupStep is a change improveLineup can make: a swap of the slots a and b,
