@@ -463,6 +463,59 @@ func TestOptimizeLineupRestsTiredPlayers(t *testing.T) {
 	}
 }
 
+// In a cup match nobody rests for his load: the tired star of
+// TestOptimizeLineupRestsTiredPlayers plays when the club has a DFB-Pokal
+// match, and a draw counts half a win there whatever a win gives.
+func TestOptimizeLineupCupIgnoresLoad(t *testing.T) {
+	s := lineupState(t)
+	tired, fresh := -1, -1
+	for i := 0; i < SquadMax; i++ {
+		sl := &s.Squads[0][i]
+		if sl.Empty() || s.Persons[sl.Person].Position() != PosMidfield {
+			continue
+		}
+		switch {
+		case sl.Lineup >= 1 && sl.Lineup <= 11 && tired < 0:
+			tired = i
+		case (sl.Lineup == 0 || sl.Lineup > 11) && s.available(sl) && fresh < 0:
+			fresh = i
+		}
+	}
+	if tired < 0 || fresh < 0 {
+		t.Fatal("no midfielder in the team or on the bench")
+	}
+	a, b := &s.Squads[0][tired], &s.Squads[0][fresh]
+	b.Skill, b.Fatigue, b.Tendency = a.Skill, 80, a.Tendency
+	s.Persons[b.Person].Side, s.Persons[b.Person].Pos = s.Persons[a.Person].Side, s.Persons[a.Person].Pos
+	// A little better than the fresh one, not worth his load, and in the team.
+	a.Fatigue = 140
+	a.Skill[0], a.Skill[1] = min(b.Skill[0]+2, 99), min(b.Skill[1]+2, 99)
+	orig := s.Squads[0]
+	if res := s.OptimizeLineup(0); res.Cup || a.Lineup >= 1 && a.Lineup <= 11 {
+		t.Fatalf("league: cup %v, the tired player plays %v", res.Cup, a.Lineup)
+	}
+	s.Squads[0] = orig
+
+	// The same club in a round of the DFB-Pokal.
+	opp := 0
+	if s.Managers[0].Team == 0 {
+		opp = 1
+	}
+	s.Events[s.Event] = EvDFB
+	s.Cups.Round[CupDFB] = 1
+	s.Cups.Slots[CupDFB][0], s.Cups.Slots[CupDFB][1] = s.Managers[0].Team, opp
+	res := s.OptimizeLineup(0)
+	if !res.Cup || res.Opponent != opp || !res.Home {
+		t.Fatalf("cup match: %+v", res)
+	}
+	if res.Load != [SquadMax]int{} {
+		t.Errorf("load in a cup match: %v", res.Load)
+	}
+	if a.Lineup < 1 || a.Lineup > 11 {
+		t.Errorf("the better player rests in a cup match (lineup %d)", a.Lineup)
+	}
+}
+
 // Each change undone costs what it says it gains, and the changes add up to
 // the lineup chosen.
 func TestOptimizeLineupChanges(t *testing.T) {

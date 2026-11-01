@@ -303,7 +303,13 @@ and less before the winter break or at the end of the season. The turn days
 before a match that is not today count with their training, and in the
 winter break the training adds about 3 a turn day to the Erschöpfung, but on
 level 2. The rating in the note does not count the load, so it can be
-lower than before when a tired player rests.
+lower than before when a tired player rests. In a match of a cup (DFB-Pokal,
+Europapokal) nobody rests for his load: the lineup is the best for the match,
+whatever it costs later, and the note says `(POKAL)` after the opponent. A
+cup match is rated by the chance to go through, a draw counting half a win
+(extra time and the shoot-out are taken as a toss), where a league match
+counts the points of the league. The second leg of a European tie is not
+known to the rating.
 
 - With a match today the rating is against the next opponent in his venue:
   the strengths of the clubs change before the turn and not again before the

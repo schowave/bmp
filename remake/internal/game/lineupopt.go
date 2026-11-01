@@ -24,6 +24,9 @@ type OptimalLineup struct {
 	// the league, and Home tells whether the match is a home match.
 	Opponent int
 	Home     bool
+	// Cup tells that the match is one of a cup: the lineup is rated by the
+	// chance to go through, and nobody rests for his load.
+	Cup bool
 	// Formation is the formation of the automatic lineup the lineup equals,
 	// or the one it started from; Manual tells that the lineup differs from
 	// the automatic one of every formation and so stays manual.
@@ -79,7 +82,7 @@ type LineupChange struct {
 func (s *State) OptimizeLineup(m int) OptimalLineup {
 	mg := s.Managers[m]
 	lr := s.newRater(m)
-	res := OptimalLineup{Before: lr.rate(), Opponent: lr.opp, Home: len(lr.venues) == 1 && lr.venues[0], Load: lr.load}
+	res := OptimalLineup{Before: lr.rate(), Opponent: lr.opp, Home: len(lr.venues) == 1 && lr.venues[0], Cup: lr.cup, Load: lr.load}
 	before := lr.score()
 	mode := mg.AutoLineup
 	sq := &s.Squads[m]

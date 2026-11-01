@@ -41,8 +41,12 @@ type lineupRater struct {
 	// samples is the number of series of dice, 0 for the mean.
 	samples int
 	// load is what playing today costs each player (loadCosts); score
-	// counts it, rate does not.
+	// counts it, rate does not. It is 0 in a cup match.
 	load [SquadMax]int
+	// cup tells that the match is one of a cup, which a draw does not end:
+	// extra time and the shoot-out decide it, taken as a toss, so that a
+	// draw counts half a win whatever a win gives in the league.
+	cup bool
 	// memo holds the points of the strength values already rated
 	// (refPoints).
 	memo map[[9]int]float64
@@ -53,15 +57,19 @@ type lineupRater struct {
 const ratingSamples = 8
 
 // newRater returns the rater of manager m: against his next opponent if he
-// has one, else against the league.
+// has one, else against the league. A match of a cup is rated by the chance
+// to go through and costs no load: the lineup is the best for the match.
 func (s *State) newRater(m int) *lineupRater {
-	if opp, home, ok := s.NextOpponent(m); ok && !s.humanTeam(opp) {
-		// An opponent with a human manager plays with a lineup not known yet.
-		lr := s.newLeagueRater(m)
-		lr.refs, lr.venues, lr.opp, lr.samples = []Team{s.Teams[opp]}, []bool{home}, opp, ratingSamples
-		return lr
+	opp, home, cup, ok := s.nextMatch(m)
+	lr := s.newLeagueRater(m)
+	if cup {
+		lr.cup, lr.load = true, [SquadMax]int{}
 	}
-	return s.newLeagueRater(m)
+	if ok && !s.humanTeam(opp) {
+		// An opponent with a human manager plays with a lineup not known yet.
+		lr.refs, lr.venues, lr.opp, lr.samples = []Team{s.Teams[opp]}, []bool{home}, opp, ratingSamples
+	}
+	return lr
 }
 
 func (s *State) humanTeam(t int) bool {
@@ -156,6 +164,10 @@ func (lr *lineupRater) points(v lineupValues, refs []Team) float64 {
 			win, draw, loss := matchOdds(h, a)
 			if !home {
 				win = loss
+			}
+			if lr.cup {
+				sum += 2*win + draw
+				continue
 			}
 			sum += float64(lr.s.PointsPerWin())*win + draw
 		}

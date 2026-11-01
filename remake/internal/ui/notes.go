@@ -39,7 +39,11 @@ func lineupNote(s *game.State, mi int, res game.OptimalLineup) []string {
 		}
 		note = append(note, changeNote(s, mi, ch))
 	}
-	note = append(note, opponentNote(s, res.Opponent, res.Home)...)
+	opp := opponentNote(s, res.Opponent, res.Home)
+	if res.Cup && len(opp) > 0 {
+		opp[0] += " (POKAL)"
+	}
+	note = append(note, opp...)
 	return append(note,
 		"STAND. "+pointsText(res.Auto[0])+"/"+pointsText(res.Auto[1])+"/"+pointsText(res.Auto[2]))
 }

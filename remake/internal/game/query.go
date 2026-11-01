@@ -45,15 +45,22 @@ func (s *State) hasReplayOf(l, team int) bool {
 
 // NextOpponent returns the opponent of manager mi in today's event.
 func (s *State) NextOpponent(mi int) (opp int, home bool, ok bool) {
+	opp, home, _, ok = s.nextMatch(mi)
+	return opp, home, ok
+}
+
+// nextMatch is NextOpponent that also tells whether the match is one of a
+// cup.
+func (s *State) nextMatch(mi int) (opp int, home, cup, ok bool) {
 	ev := s.eventValue()
 	m := s.Managers[mi]
 	if l := m.League; ev&(1<<l) != 0 && s.Matchday[l] <= MatchdaysPerLeague[l] {
 		for _, p := range Fixtures(l, s.Matchday[l]) {
 			if p.Home == m.Team {
-				return p.Away, true, true
+				return p.Away, true, false, true
 			}
 			if p.Away == m.Team {
-				return p.Home, false, true
+				return p.Home, false, false, true
 			}
 		}
 	}
@@ -67,12 +74,12 @@ func (s *State) NextOpponent(mi int) (opp int, home bool, ok bool) {
 	for _, c := range cups {
 		for _, p := range s.CupPairs(c) {
 			if p.Home == m.Team {
-				return p.Away, true, true
+				return p.Away, true, true, true
 			}
 			if p.Away == m.Team {
-				return p.Home, false, true
+				return p.Home, false, true, true
 			}
 		}
 	}
-	return 0, false, false
+	return 0, false, false, false
 }
