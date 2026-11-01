@@ -1051,6 +1051,9 @@ flag; the value 0x10 on its own means Relegation.
 | Relegation, legs 1/2 | 91 (13.06.) / 92 (16.06.) |
 
 All cup ties are single games except Europe and Relegation, which are two-legged. The European final is also two-legged.
+After the DFB final and after the second leg of a European final (not the relegation games) f_17c2_16dc looks
+for a human manager of the winner (f_0310_32b1) and shows him the title screen f_17c2_274d(manager, cup + 1),
+"<club> gewinnt den <cup>", as the championship does at the season end.
 
 ### 6.3 Qualification for Europe — f_17c2_0ef2 (season end, after the league reshuffle, and once at new game)
 

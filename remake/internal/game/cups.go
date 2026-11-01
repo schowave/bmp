@@ -309,6 +309,7 @@ func (s *State) advanceCup(cup Cup) {
 		if n == 2 {
 			c.Holder[CupDFB] = sl[0] + 1
 			c.DFBRunnerUp = sl[1] + 1
+			s.cupTrophy(CupDFB, sl[0])
 		}
 		if round <= 4 {
 			s.clearCupResults()
@@ -341,6 +342,19 @@ func (s *State) advanceCup(cup Cup) {
 			c.Holder[cup] = sl[0] + 1
 		} else {
 			c.Holder[cup] = 0
+		}
+		s.cupTrophy(cup, sl[0])
+	}
+}
+
+// cupTrophy queues the title screen for the manager whose club team won the
+// final of cup, the call of f_17c2_16dc to f_17c2_274d with the cup + 1
+// after f_0310_32b1 found the manager.
+func (s *State) cupTrophy(cup Cup, team int) {
+	for mi, m := range s.Managers {
+		if m.Team == team {
+			s.trophy(mi, int(cup)+1)
+			return
 		}
 	}
 }
