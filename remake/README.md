@@ -311,6 +311,13 @@ cup match is rated by the chance to go through, a draw counting half a win
 counts the points of the league. The second leg of a European tie is not
 known to the rating.
 
+Where the rating is no better for it, the stronger player plays: a player of
+the bench who is a point of Strength (less a sixtieth of his Erschöpfung per
+point) stronger than a player of his position takes his place if the rating
+less the load does not fall, as the match leaves out what a stronger player
+helps with (cards, injuries, substitutions, the clubs after the next). A
+lineup that changes this way is manual.
+
 - With a match today the rating is against the next opponent in his venue:
   the strengths of the clubs change before the turn and not again before the
   match, so he plays as the strengths screen shows him. The lineup values

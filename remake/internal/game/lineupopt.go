@@ -130,8 +130,16 @@ func (s *State) OptimizeLineup(m int) OptimalLineup {
 		*sq = orig
 		mg.AutoLineup = mode
 		res.After, res.Manual = res.Before, false
+		if s.preferStronger(lr) {
+			res.After, res.Manual = lr.rate(), true
+			mg.AutoLineup = 1
+			res.Changes = s.lineupChanges(lr, &orig)
+		}
 		res.Reasons = s.lineupReasons(lr)
 		return res
+	}
+	if s.preferStronger(lr) {
+		res.Manual = true
 	}
 	res.After = lr.rate()
 	res.Changes = s.lineupChanges(lr, &orig)
@@ -234,6 +242,48 @@ func (s *State) improveLineup(lr *lineupRater, rating int) int {
 			swapPlaces(&sq[step.a], &sq[step.b])
 		}
 		rating = best
+	}
+}
+
+// strongerGap is how much stronger a player of the bench must be, in
+// sixtieths of a point of Strength (playerStrength counts the Erschöpfung
+// as a sixtieth), to take the place of a player the rating counts as good.
+const strongerGap = 60
+
+// preferStronger lets a player of the bench who is stronger and less tired
+// take the place of a player of his position, when the score (the rating
+// less the load) does not fall: the rating is no better than that for what
+// it leaves out of the match (cards, injuries, substitutions) and for the
+// clubs after the next, and a player who is as good for the match but
+// stronger is never worse. Every swap raises the sum of the strengths of
+// the team, so it stops. It reports whether it changed the lineup.
+func (s *State) preferStronger(lr *lineupRater) (changed bool) {
+	sq := &s.Squads[lr.m]
+	for {
+		base := lr.score()
+		a, b, gap := -1, -1, strongerGap-1
+		for i := 0; i < SquadMax; i++ {
+			for j := 0; j < SquadMax; j++ {
+				if !s.swappable(sq, i, j) || sq[j].InTeam() {
+					continue
+				}
+				pi, pj := s.Persons[sq[i].Person], s.Persons[sq[j].Person]
+				g := sq[j].Strength()*60 - sq[j].Fatigue - (sq[i].Strength()*60 - sq[i].Fatigue)
+				if g <= gap || pi.Position() != pj.Position() {
+					continue
+				}
+				swapPlaces(&sq[i], &sq[j])
+				if s.fitsCell(&sq[i]) && s.fitsCell(&sq[j]) && lr.score() >= base {
+					a, b, gap = i, j, g
+				}
+				swapPlaces(&sq[i], &sq[j])
+			}
+		}
+		if a < 0 {
+			return changed
+		}
+		swapPlaces(&sq[a], &sq[b])
+		changed = true
 	}
 }
 

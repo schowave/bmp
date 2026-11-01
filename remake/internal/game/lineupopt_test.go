@@ -657,3 +657,45 @@ func TestOptimizeLineupReasons(t *testing.T) {
 		t.Errorf("%d players in the team", n)
 	}
 }
+
+// A stronger player of the bench takes the place of a weaker one of his
+// position when the score does not fall, and a weaker or hardly stronger one
+// does not.
+func TestPreferStronger(t *testing.T) {
+	s := lineupState(t)
+	a, b := -1, -1
+	for i := 0; i < SquadMax; i++ {
+		sl := &s.Squads[0][i]
+		if sl.Empty() || s.Persons[sl.Person].Position() != PosMidfield {
+			continue
+		}
+		switch {
+		case sl.Lineup >= 1 && sl.Lineup <= 11 && a < 0:
+			a = i
+		case (sl.Lineup == 0 || sl.Lineup > 11) && s.available(sl) && b < 0:
+			b = i
+		}
+	}
+	if a < 0 || b < 0 {
+		t.Fatal("no midfielder in the team or on the bench")
+	}
+	sa, sb := &s.Squads[0][a], &s.Squads[0][b]
+	sb.Tendency, sb.Fatigue, sa.Fatigue = sa.Tendency, 80, 80
+	s.Persons[sb.Person].Side, s.Persons[sb.Person].Pos = s.Persons[sa.Person].Side, s.Persons[sa.Person].Pos
+	plays := func(sl *Slot) bool { return sl.Lineup >= 1 && sl.Lineup <= 11 }
+
+	// The weakest player of the squad stays on the bench.
+	sa.Skill, sb.Skill = [3]int{99, 99, 99}, [3]int{1, 1, 1}
+	s.preferStronger(s.newRater(0))
+	if !plays(sa) || plays(sb) {
+		t.Errorf("a weaker player took a place: %v %v", plays(sa), plays(sb))
+	}
+	// The strongest takes the place of the weakest of his position.
+	sa.Skill, sb.Skill = [3]int{1, 1, 1}, [3]int{99, 99, 99}
+	if !s.preferStronger(s.newRater(0)) || plays(sa) || !plays(sb) {
+		t.Errorf("the stronger player did not take the place: %v %v", plays(sa), plays(sb))
+	}
+	if s.preferStronger(s.newRater(0)) {
+		t.Error("a second round changed the lineup")
+	}
+}
