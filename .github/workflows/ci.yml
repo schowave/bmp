@@ -45,7 +45,7 @@ jobs:
         version: 1
 
     # Installs the tools pinned in mise.toml (golangci-lint); Go comes from go.mod above.
-    - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5.2.2
+    - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
 
     # The same command as locally: lint, then vet, format and tests of remake/ and
     # images/wasm/. The remake tests compare the files built into the remake and the
